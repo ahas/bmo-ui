@@ -9,10 +9,10 @@
 </template>
 
 <script setup lang="ts">
-import { paletteTokens } from "#shared/palettes";
+import { paletteTokens } from "../../shared/palettes";
 
-import type { Palette } from "#shared/palettes";
-import type { Scheme } from "#shared/themes";
+import type { Palette } from "../../shared/palettes";
+import type { Scheme } from "../../shared/themes";
 
 interface Props {
   palette: Palette;

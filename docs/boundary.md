@@ -15,6 +15,10 @@ wording keys listed here are the ones the layer's list holds.
 - **Components are registered by name** through the layer, and a host uses them as its own.
 - **Domain modules and shared modules are imported by path** from the package: the domain modules
   under its `app/domain/`, the shared modules under its `shared/`.
+- **The layer reaches its own files by relative path.** In a host, Nuxt binds `#shared` to the
+  host's `shared/` folder and `~` to the host's source folder, so a layer file that loads one of
+  the layer's own modules at run time names it by a path relative to itself; through an alias it
+  would resolve into the host and fail the host's build.
 
 ## Components
 

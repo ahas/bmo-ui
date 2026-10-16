@@ -9,9 +9,9 @@
 </template>
 
 <script setup lang="ts">
-import { themeTokens } from "#shared/themes";
+import { themeTokens } from "../../shared/themes";
 
-import type { Scheme, Theme } from "#shared/themes";
+import type { Scheme, Theme } from "../../shared/themes";
 
 interface Props {
   theme: Theme;
