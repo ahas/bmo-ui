@@ -275,6 +275,10 @@ Every token is a custom property stated by the layer's stylesheet on the root un
 
 - **The language pack.** `@nuxtjs/i18n` installed in the host, with a pack answering every key under
   Wording keys, and the component library's own locale for its own words.
+- **The i18n engine.** `vue-i18n` reachable from the layer, the copy the host's i18n module runs:
+  the layer's components import `useI18n` from it by name. `@nuxtjs/i18n` depends on it, so a host
+  installing the module brings it; the layer names it as a peer so a package manager that does not
+  hoist still resolves it to that copy.
 - **The locale and the time zone.** The host states them in its app configuration, under `bmoUi`:
   - `zone`, an IANA zone name every time is shown in; by default the runtime's own zone;
   - `locale`, a BCP 47 tag figures are written in and letter case is folded in; by default the
@@ -296,8 +300,9 @@ Every token is a custom property stated by the layer's stylesheet on the root un
 
 ## Versions
 
-- **The layer requires** Nuxt 4.5 or later within 4 and `@nuxtjs/i18n` 10.6 or later within 10 as
-  peers, and brings Nuxt UI 4.11 or later within 4.
+- **The layer requires** Nuxt 4.5 or later within 4, `@nuxtjs/i18n` 10.6 or later within 10 and
+  `vue-i18n` 11.4.8 or later within 11, the engine that module requires, as peers, and brings Nuxt
+  UI 4.11 or later within 4.
 - **It stands on registry packages alone;** no other repository is a dependency.
 - **One version for the whole repository,** the manifest's; the README states what may change at
   which release.

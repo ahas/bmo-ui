@@ -34,8 +34,9 @@ list; `docs/boundary.md` names every one of them.
 ## Who asks, and how
 
 - **A component asks with `$t` in its template and with the `t` of `useI18n()` in its script.**
-  - The script imports `useI18n` from `vue-i18n` by name. The layer installs no i18n module to
-    import it for it, and the host's module points that name at its own engine.
+  - The script imports `useI18n` from `vue-i18n` by name, a peer the layer declares. The layer
+    installs no i18n module to import it for it, and the host's module points that name at its own
+    engine, so layer and host share one.
   - A prop whose default would be words has no default, since prop defaults are evaluated where no
     translator stands yet: the prop is left unset and the component falls back to its key where the
     words are shown.

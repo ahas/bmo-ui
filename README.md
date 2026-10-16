@@ -16,12 +16,15 @@ components and behaviours every screen is built from. It is a Nuxt layer, built 
 
 - Add the package and extend it from the host's Nuxt configuration.
 - Install `@nuxtjs/i18n` in the host and give it a pack answering every key the boundary document
-  lists.
+  lists. The layer names it and its engine, `vue-i18n`, as peers.
 - Apply the patch in `patches/` to the same dependency in the host's own install.
 
 ## Working on it
 
 - `bun install` installs the dependencies and prepares Nuxt's types.
+- `bun pm pack` packs the layer as a host installs it, preparing Nuxt's types first; the prepare
+  step reaches the local Nuxt command line through `bun x`, since the package manager's lifecycle
+  runs without the local binaries on its path.
 - `bun run typecheck` checks the layer and its tests.
 - `bun test <file>` runs one test file; the browser files under `tests/browser/` are run one at a time.
 - `testbed.toml` declares how the testbed runs the suite and the quick checks.
