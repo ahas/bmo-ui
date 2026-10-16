@@ -15,10 +15,13 @@ wording keys listed here are the ones the layer's list holds.
 - **Components are registered by name** through the layer, and a host uses them as its own.
 - **Domain modules and shared modules are imported by path** from the package: the domain modules
   under its `app/domain/`, the shared modules under its `shared/`.
-- **The layer reaches its own files by relative path.** In a host, Nuxt binds `#shared` to the
-  host's `shared/` folder and `~` to the host's source folder, so a layer file that loads one of
-  the layer's own modules at run time names it by a path relative to itself; through an alias it
-  would resolve into the host and fail the host's build.
+- **The layer reaches its own files by relative path.** In a host, Nuxt binds the aliases of a
+  project's own folders (`~`, `~~`, `@`, `@@`, `#shared`, `#server`) to the host's folders, and both
+  the host's build and the host's typecheck read the layer's files under those bindings. So every
+  import a layer file makes of the layer's own modules, a type-only one as much as one loaded at run
+  time, names it by a path relative to itself; through an alias it would resolve into the host,
+  failing the host's build where it is loaded and the host's typecheck where it only names a type.
+  The guard test holds every file under `app/` and `shared/` to this.
 
 ## Components
 

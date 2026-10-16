@@ -6,8 +6,8 @@ import { onScopeDispose, ref } from "vue";
 
 import { countText } from "./numbers";
 
-import type { Translate } from "#shared/wording";
 import type { Ref } from "vue";
+import type { Translate } from "../../shared/wording";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);

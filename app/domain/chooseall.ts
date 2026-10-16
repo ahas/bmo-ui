@@ -3,7 +3,7 @@
 // rows, some of them, all of them — and what a press means follows from the state rather than from
 // the list, so the same press means the same thing wherever it is made.
 
-import type { Translate } from "#shared/wording";
+import type { Translate } from "../../shared/wording";
 
 // What the control stands at. The middle state is the word a checkbox understands for it.
 export type ChooseAllState = boolean | "indeterminate";

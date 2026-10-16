@@ -3,9 +3,9 @@ import { onBeforeRouteLeave, onBeforeRouteUpdate } from "vue-router";
 
 import { useIsland } from "./island";
 
-import type { Translate } from "#shared/wording";
 import type { ComputedRef, InjectionKey, Ref } from "vue";
 import type { RouteLocationNormalized } from "vue-router";
+import type { Translate } from "../../shared/wording";
 
 // A form saves once, from its foot (`docs/components.md`, "Forms"). A form made of several blocks —
 // each holding its own fields and knowing its own way of saving them — is one form all the same:

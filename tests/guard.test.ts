@@ -89,12 +89,19 @@ function* nodesOf(file: CodeFile): Generator<Record<string, unknown>> {
   for (const one of file.programs) yield* expressionNodes(one);
 }
 
-// What a module names to import: its imports, its re-exports and its dynamic imports.
+// What a module names to import: its imports, its re-exports, its dynamic imports and the modules a
+// type is taken from in place.
 function importsOf(file: CodeFile): string[] {
   return [...nodesOf(file)].flatMap((node) => {
     const from = node.source as { type: string; value: string } | null | undefined;
 
     if (/^(Import|ExportNamed|ExportAll)Declaration$/.test(node.type as string) && from?.type === "StringLiteral") return [from.value];
+
+    if (node.type === "TSImportType") {
+      const argument = node.argument as { type: string; value: string };
+
+      return argument.type === "StringLiteral" ? [argument.value] : [];
+    }
 
     if (node.type === "ImportExpression" || (node.type === "CallExpression" && (node.callee as { type: string }).type === "Import")) {
       const [first] = ((node.arguments as unknown[] | undefined) ?? [node.source]) as { type: string; value: string }[];
@@ -125,6 +132,21 @@ describe("what the layer stands on", () => {
     const imported = [...layerCode, ...testCode].flatMap((file) => importsOf(file).filter((one) => OTHER_REPOSITORY.test(one)).map((one) => `${file.path}: ${one}`));
 
     expect(imported).toEqual([]);
+  });
+});
+
+// The aliases Nuxt binds to a project's own folders. In a host they name the host's folders, and the
+// host's build and typecheck read the layer's files under them (`docs/boundary.md`, "How a host takes
+// it").
+const PROJECT_ALIAS = /^(~~?|@@?|#shared|#server)(\/|$)/;
+
+describe("how the layer reaches its own files", () => {
+  test("is by relative path, never through an alias a host binds to its own folders", () => {
+    const aliased = layerCode
+      .filter((file) => file.path !== "nuxt.config.ts")
+      .flatMap((file) => importsOf(file).filter((one) => PROJECT_ALIAS.test(one)).map((one) => `${file.path}: ${one}`));
+
+    expect(aliased).toEqual([]);
   });
 });
 

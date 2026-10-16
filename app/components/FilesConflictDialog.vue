@@ -20,7 +20,7 @@
 </template>
 
 <script setup lang="ts">
-import type { FileConflict } from "#shared/files";
+import type { FileConflict } from "../../shared/files";
 
 interface Props {
   names: readonly string[];

@@ -1,7 +1,7 @@
 import { failureText } from "./errors";
 
-import type { Translate } from "#shared/wording";
 import type { Ref } from "vue";
+import type { Translate } from "../../shared/wording";
 
 // The one place a screen says anything to whoever is reading it (`docs/components.md`,
 // "Messages"). A notice of something that arrived, the word that an action went through or did
