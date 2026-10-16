@@ -1,0 +1,274 @@
+# The boundary
+
+Everything the layer exposes and everything a host owes it. A change to anything listed here follows
+the version rules in the README, and this document changes in the same commit. What each piece does
+is stated in `docs/design.md`, `docs/wording.md` and `docs/components.md`.
+
+## How a host takes it
+
+- **The host extends the layer** from its Nuxt configuration. The layer brings Nuxt UI as its module,
+  its stylesheet, fonts and overrides, its components, its page plugins and its head.
+- **Components are registered by name** through the layer, and a host uses them as its own.
+- **Domain modules and shared modules are imported by path** from the package: the domain modules
+  under its `app/domain/`, the shared modules under its `shared/`.
+
+## Components
+
+| Component | What it is |
+| --- | --- |
+| `ActionGroup` | The one group of actions on what a tab or a toolbar stands for, folding to a menu; the properties action last. |
+| `AudioPlayer` | A kept sound: a play and pause button, its waveform as its progress, and a download. |
+| `ChooseAll` | The three-state checkbox that takes every row shown or gives the choice up. |
+| `ColumnResizeHandle` | The right edge of a column's name, dragged or moved with the arrow keys. |
+| `ContentSkeleton` | The placeholder region: busy status, a surface nothing presses through, the caller's piece repeated. |
+| `CutLineTip` | The one layer that shows any line cut with an ellipsis whole, in the shared tooltip. |
+| `DataTable` | The shared table: sideways scroll, stuck names, movable widths, labelled parts, three layouts. |
+| `DataTableSkeleton` | The shared table's placeholder, its head drawn from the same column names. |
+| `FilesConflictDialog` | The one question when a change would land on names already taken. |
+| `FilesNameField` | A name renamed in place, chosen up to its ending. |
+| `FilesProgress` | An upload's progress, by files and by bytes, with a bar. |
+| `FilesText` | A text file in the read-only code viewer, coloured by its name's language. |
+| `GrowingTextarea` | A form's text box that grows with its text and never scrolls inside. |
+| `HintTip` | The shared tooltip for words that say more than what they stand on. |
+| `ImageViewer` | A picture opened whole, zoomed and moved by wheel, drag, pinch, double press and buttons. |
+| `LoadingImage` | A picture that keeps its place while it loads and says when it failed. |
+| `LoadingVideo` | A video that keeps its place while it loads and says when it failed. |
+| `MarqueeLine` | A line that slides when it is longer than its box. |
+| `MessageIsland` | The one pill every notice and question stands on. |
+| `MovingList` | A list whose items come, go and change places by position alone. |
+| `NumberInput` | The number box, as wide as its values, with its two step buttons. |
+| `PaletteSwatch` | A palette's two grounds as dots, in one mode. |
+| `PropertyList` | A file's or a document's details as a name and value list. |
+| `RollingNumber` | A number that turns only its changed characters. |
+| `RollingSentence` | A sentence of the pack with turning figures in its placeholders. |
+| `ScreenFrame` | The frame of a screen that stands on no shell, pinned to the visible screen. |
+| `SearchHit` | The line under a row that matched only in hidden data. |
+| `SearchText` | A shown text with the search's hits marked. |
+| `SettingsDialog` | A setting's own form as a dialog, asking before it closes on changes. |
+| `SettingsGroup` | A group of settings rows under a small heading. |
+| `SettingsRow` | One setting: its name, a muted line, its control. |
+| `SettingsSegment` | A choice of two or three as one segmented control. |
+| `ShellClose` | The close of a modal or a side sheet. |
+| `SkeletonBar` | The one shimmering bar. |
+| `SkeletonLine` | One line of text not yet arrived. |
+| `SkeletonStatus` | The busy status alone, for a place kept inline. |
+| `SkeletonText` | A passage of placeholder lines. |
+| `SteadyFigure` | A figure that keeps the width of the widest it reaches. |
+| `TabBar` | The open-and-close tab bar, with pinning, its menu and dragging. |
+| `TabSlide` | A tabbed panel that slides sideways as its tab changes. |
+| `TabSwitch` | A view switch whose choices share its width. |
+| `ThemePreview` | A small piece of a screen in one theme and one mode. |
+| `ThemeSwatch` | A theme's accent and raised grey as dots, in one mode. |
+| `ToolBar` | The toolbar flush against one target, cells parted by dividers. |
+
+## Domain modules
+
+Each is named with everything it exports.
+
+| Module | Exports |
+| --- | --- |
+| `actionbar` | `BAR_GATHERS_UNDER_PX`, `GATHERED_ACTIONS`, `STANDING_ACTIONS`, `barGathers`, `actionsOutside`, `useBarRoom`, `useBarGathers` |
+| `bars` | `BarColor`, `BAR_SIZE`, `STACKED_LEGEND`, `INLINE_LEGEND`, `FOLDED_LEGEND` |
+| `chooseall` | `ChooseAllState`, `chooseAllState`, `chosenRuns`, `chooseAllPress`, `chooseAllLabel`, `CHOOSE_CELL`, `CHOOSE_GUTTER` |
+| `closing` | `OVERLAY_CLOSE_MS`, `useHeldWhileClosing` |
+| `code-colour` | `colouredRuns`, `colourCode`, `forgetCode` |
+| `code-copy` | `blockText`, `copyFromPress` |
+| `code-themes` | `CODE_THEMES` |
+| `column-widths` | `MIN_COLUMN_PX`, `RESIZE_STEP_PX`, `ColumnWidths`, `tableHeaders`, `setColumnWidth`, `useColumnWidths` |
+| `cut-lines` | `LineBox`, `boxCuts`, `cutLineAt`, `cutLineIn`, `lineWords` |
+| `diagram` | `isDiagram`, `drawDiagrams` |
+| `dialog-origin` | `Press`, `originOf`, `watchDialogOrigins` |
+| `dragselect` | `draggedSelection`, `edgeScroll`, `PressKind`, `DragSelectList`, `useDragSelect` |
+| `errors` | `failureText`, `answeredLate` |
+| `file-icons` | `fileIcon`, `folderIcon`, `iconNames` |
+| `foot` | `FootOptions`, `useFootInView` |
+| `form-save` | `FormPart`, `FormSave`, `askDiscard`, `useCloseGuard`, `useFormSave`, `useFormPart`, `useLeaveGuard` |
+| `fullscreen` | `PutBack`, `TakePlace`, `keepPlace`, `holdThroughFullscreen` |
+| `holdmenu` | `HoldMenu`, `useHoldMenu` |
+| `icon-styles` | `IconStyleOptions`, `isIconStyle` |
+| `island` | `IslandTone`, `IslandAction`, `IslandMessage`, `IslandSaid`, `IslandAsked`, `IslandState`, `TONE_ICONS`, `TONE_MS`, `WAITING_MAX`, `emptyIsland`, `messageOf`, `questionOf`, `expands`, `pressable`, `endsItself`, `raise`, `settle`, `Island`, `ISLAND_STATE`, `islandState`, `useIsland` |
+| `layers` | `stepsLanded`, `layerCount`, `LayerHistory`, `holdHistory`, `openLayer`, `closeLayer`, `handlePop`, `listenForBack`, `useBackClose` |
+| `list-place` | `scrollable`, `reached`, `useListPlace` |
+| `list-preview` | `PREVIEW_ITEM`, `ListPreview`, `useListPreview` |
+| `loading` | `useInitialRead`, `useLastRead`, `markPainted`, `usePainted` |
+| `longpress` | `HOLD_MS`, `TouchPoint`, `pressTravelled`, `stillGliding`, `LongPress`, `useLongPress`, `followSurface` |
+| `marquee` | `MARQUEE_SLACK_PX`, `MARQUEE_SPEED_PX_PER_SECOND`, `MARQUEE_TRAVEL_SHARE`, `MARQUEE_MIN_SECONDS`, `MarqueeVars`, `MarqueeMotion`, `marqueeDistance`, `marqueeSeconds`, `marqueeVars`, `useMarquee` |
+| `modality` | `InputModality`, `MODALITY_ATTRIBUTE`, `modalityOfKey`, `watchInputModality` |
+| `monaco` | `languageOf`, `fenceLanguage`, `colourised`, `CodeView`, `openCodeView`, `SourceSelection`, `SourceView`, `openSourceView` |
+| `moving-list` | `unfoldItem`, `settleItem`, `foldItem` |
+| `numbers` | `COUNT_LOCALE`, `countText`, `FigureLine`, `COUNT_BADGE`, `figurePlaces`, `turnOf`, `progressText` |
+| `openings` | `useOpenings` |
+| `overlays` | `OVER_LAYERS`, `isBackEscape`, `refuseStalePresses`, `refuseHandedBackFocus`, `watchOverlays` |
+| `player` | `Playing`, `playAlone`, `playClock`, `knownLength`, `loudnessOf`, `easedLoudness`, `AURA_STILL`, `auraOf`, `PlayerButton`, `PlayerSignal`, `buttonAfter` |
+| `prompt` | `TOUCH_QUERY`, `EnterKeys`, `enterKeys`, `PromptEnter`, `usePromptEnter`, `PROMPT_MAX_ROWS`, `PROMPT_TEXTAREA_UI`, `PROMPT_WORDS_WRAP` |
+| `scheme` | `provideBoxScheme`, `useDarkScheme`, `usePageScheme`, `usePreviewScheme` |
+| `screen` | `NARROW_MAX_PX`, `NARROW_QUERY`, `useNarrow`, `VisibleReading`, `VisibleFrame`, `visibleFrame`, `SCREEN_HEIGHT_PROPERTY`, `SCREEN_TOP_PROPERTY`, `SCREEN_FRAME`, `useVisibleScreen`, `STABLE_GUTTER`, `useWidth`, `useScrollGutter` |
+| `scroll-within` | `offsetFor`, `scrollWithin` |
+| `side-parts` | `SPLIT_HANDLE`, `FULL_SHEET` |
+| `sound-tap` | `TAP_FFT`, `Tap`, `tapOf` |
+| `tab-slide` | `SlideDirection`, `slideDirection`, `useSlideDirection` |
+| `table-sections` | `TableSection`, `SectionHeading`, `sectionHeading`, `headingOf`, `sectionedRows`, `sectionedRowId` |
+| `tabs` | `TAB_ROW_UI`, `TAB_ROW_LINE`, `BarTab`, `BarMenuItem`, `BarAction`, `BarProperty`, `SwitchItem`, `SeenTab`, `openInTabs`, `mergeTabs`, `pinTab`, `pinnedFirst`, `lastSeen`, `moveTab`, `othersOf`, `rightOf`, `allOf`, `fileTabLabel`, `baseName` |
+| `time` | `FOREVER_LABEL`, `formatClock`, `formatDay`, `formatDayClock`, `clockUnder`, `formatDateClock`, `formatStamp`, `formatTime`, `dayKey`, `spanClock`, `elapsedText`, `timerClock`, `remainingText`, `shareLeftText`, `useNowSeconds`, `toUnixSeconds` |
+| `tooltip` | `TOOLTIP_UI` |
+| `waveform` | `WAVE_DETAIL`, `WAVE_FETCH_LIMIT`, `WAVE_FLOOR`, `Waveform`, `peaksOf`, `waveBars`, `barCount`, `loudnessAt`, `waveformOf` |
+| `zoom` | `ZoomView`, `Point`, `Size`, `FIT`, `MIN_SCALE`, `MAX_SCALE`, `DOUBLE_SCALE`, `bounded`, `zoomedTo`, `wheeled`, `moved`, `pinched`, `toggled`, `fittedSize`, `swipeStep` |
+
+- **`player` takes a sound's address as given.** Where a sound is fetched from is the host's.
+- **`monaco` opens code and source views only.** Any other view over the editor is the host's.
+- **`numbers` and `time` read the host's locale and zone** (see What the host owes); `COUNT_LOCALE` is
+  the locale figures are written in, the host's tag or the runtime's own.
+
+## Shared modules
+
+| Module | Exports |
+| --- | --- |
+| `themes` | `Scheme`, `ScaleName`, `Theme`, `THEMES`, `DEFAULT_THEME`, `isThemeId`, `themeOf`, `themeTokens`, `themeDeclarations`, `declarations` |
+| `palettes` | `Palette`, `PALETTES`, `DEFAULT_PALETTE`, `isPaletteId`, `paletteOf`, `paletteTokens`, `paletteDeclarations` |
+| `search` | `SearchField`, `SearchMatch`, `SearchPart`, `searchPhrase`, `searchHits`, `highlightParts`, `hitSnippet`, `matchFields`, `filterRecords` |
+| `wording` | `Translate`, `WordingParams`, `Pack` |
+| `files` | `FileConflict` |
+| `code-language` | `codeLanguage` |
+| `screen-mode` | `DocumentScheme`, `DEFAULT_SCHEME`, `SCHEME_COOKIE`, `isDocumentScheme` |
+
+## Page plugins
+
+Each runs in the browser alone, on every screen, from the moment the page is up.
+
+| Plugin | What it sets up |
+| --- | --- |
+| `dialog-origin` | Every dialog the library draws grows out of the control pressed to open it. |
+| `fullscreen` | A video let go of full screen finds the parts around it where they were left. |
+| `icon-styles` | The icon library's styles are put in behind the page's other stylesheets, so a first-drawn icon never redraws the letters. |
+| `input-modality` | Which hand last moved the focus is marked on the page's root for the stylesheet. |
+| `overlays` | What the library floats closes to the back gesture and to a finger's tap away from it. |
+| `painted` | The flag the skeletons wait for is raised once hydration ends. |
+
+## Wording keys
+
+The layer reads these 76 keys and no others. Placeholders are named after each key.
+
+- **`common.action`:** `cancel`, `choose_all`, `choose_none`, `close`, `close_all_tabs`,
+  `close_other_tabs`, `close_right_tabs`, `copy`, `discard`, `fit_screen`, `more`, `next_picture`,
+  `pause`, `pin`, `play`, `previous_picture`, `save`, `unpin`, `zoom_in`, `zoom_out`.
+- **`common.aria`:** `close_named` `{name}`, `column_width` `{name}`, `decrease`, `download_named`
+  `{name}`, `image_zoom` `{title}`, `increase`, `more_notices` `{n}`, `pinned_named` `{name}`.
+- **`common.error`:** `editor_failed`, `picture_failed`, `video_failed`.
+- **`common.label`:** `day_format` (a date format the time module's day is written in), `days`
+  `{d}`, `days_hours` `{d}` `{h}`, `expired`, `forever`, `hours` `{h}`, `hours_minutes` `{h}` `{m}`,
+  `left_days` `{n}`, `left_hours` `{n}`, `left_minutes` `{n}`, `left_under_minute`, `minutes` `{m}`,
+  `minutes_seconds` `{m}` `{s}`, `palette_forest`, `palette_lemon`, `palette_sea`, `palette_sunset`,
+  `palette_teal`, `palette_violet`, `play_position`, `properties`, `seconds` `{n}`, `theme_forest`,
+  `theme_sea`, `theme_sunset`, `theme_teal`, `theme_violet`, `unplayable`.
+- **`common.message`:** `discard_confirm`, and the theme preview's words: `preview_badge`,
+  `preview_field`, `preview_link`, `preview_meta`, `preview_note`.
+- **`common.status`:** `copied`, `loading`, `picture_loading`, `video_loading`.
+- **`files.action`:** `keep_both`, `replace`, `skip`.
+- **`files.aria`:** `name_field`.
+- **`files.label`:** `progress` `{done}` `{all}` `{percent}`.
+- **`files.message`:** `conflict`.
+- **`files.status`:** `uploading`.
+
+That is 20 actions, 8 accessible names, 3 errors, 28 labels, 6 messages and 4 statuses under
+`common`, and 7 keys under `files`.
+
+## Tokens
+
+Every token is a custom property stated by the layer's stylesheet on the root unless said otherwise.
+
+- **Theme:** `--ui-color-primary-*` and `--ui-color-neutral-*`, every shade from 50 to 950, stated by
+  the themes module's declarations for one theme; the library's own defaults stand where none is
+  stated. The library's semantic colours are primary, secondary, success, info, warning, error and
+  neutral.
+- **Palette:** `--bmo-palette-own-light`, `--bmo-palette-own-dark`, `--bmo-palette-other-light` and
+  `--bmo-palette-other-dark`, stated by the palettes module's declarations for one palette; and the
+  mode's pair, `--bmo-palette-own` and `--bmo-palette-other`, resolved by the stylesheet on the root
+  and `.light` to the light values and on `.dark` to the dark ones.
+- **Width:** `--ui-container`, 48rem, the reading width; `--bmo-inset`, a container's own side room,
+  added outside the reading width.
+- **Screen:** `--bmo-screen`, the visible height, `100dvh` while nothing overlays; `--bmo-screen-top`,
+  where the visible screen starts, `0px` while nothing overlays.
+- **Safe area:** `--bmo-safe-top` and `--bmo-safe-bottom`, the device's insets, nought where it
+  reports none.
+- **Motion:** `--bmo-motion-quick` 150ms, `--bmo-motion-pop` 200ms, `--bmo-motion-unfold` 320ms;
+  `--bmo-ease-enter` `cubic-bezier(0.2, 0.8, 0.2, 1)`, `--bmo-ease-exit` `cubic-bezier(0.4, 0, 1, 1)`,
+  `--bmo-ease-move` `cubic-bezier(0.4, 0, 0.2, 1)`. Tailwind's default transition is `quick` and
+  `move`.
+- **Focus:** `--bmo-focus`, primary's 600 in the light mode and its 400 in the dark; `--bmo-focus-width`
+  2px; `--bmo-focus-gap` 2px.
+- **Type:** `--text-xs` is 0.875rem. `--font-sans` is Apple SD Gothic Neo, Pretendard, then the
+  system's sans serif; `--font-mono` is CaskaydiaCove NFM, Apple SD Gothic Neo, Pretendard, then the
+  system's monospace.
+- **Radius:** the library's `--ui-radius`, 4px, the base of the four corner tiers.
+
+## Classes and keyframes
+
+- **Utilities:** `rounded-inherit`, `focus-inset`, `pair-list`.
+- **Classes:** `tabular-nums` at geometric precision; `badge-ink`; `focus-bar`; `marquee`,
+  `marquee-line` and `marquee-line--moving`; the moving list's and the tab slide's transition
+  classes under `bmo-list-*` and `bmo-slide-*`.
+- **Rendered text:** inside a host's container carrying `markdown`, the layer styles a fenced block,
+  its box with the copy button, its language head and a diagram's figure, under the classes
+  `markdown-code`, `markdown-code-head`, `markdown-code-language`, `markdown-copy`,
+  `markdown-diagram` and `markdown-diagram-figure`.
+- **The work-in-progress mark** — an icon of the progress-activity kind — always turns, and stands
+  still where less movement was asked for.
+- **Keyframes:** `bmo-dialog-in`, `bmo-dialog-out`, `marquee-slide`.
+- **Scrollbars** are thin, in the border colour, on no track.
+
+## Fonts
+
+- **Carried:** Pretendard in 400, 500, 600 and 700, each cut to the letters Apple SD Gothic Neo
+  lacks; CaskaydiaCove NFM in one weight, cut to letters, digits, punctuation, arrows and
+  box-drawing; and each face's licence beside it.
+- **Not carried:** Apple SD Gothic Neo. The stacks name it first, so a host that carries the face
+  declares it under that family name.
+
+## The library's overrides
+
+- **Components:** the layer's app configuration overrides the library's `icons`, `colors`, `avatar`,
+  `badge`, `tooltip`, `tabs`, `collapsible`, `navigationMenu`, `kbd`, `checkbox`, `switch`,
+  `dashboardSidebar`, `container`, `select`, `selectMenu`, `inputMenu`, `dropdownMenu`,
+  `contextMenu`, `modal`, `drawer`, `slideover`, `dashboardPanel`, `popover`, `chatPrompt` and
+  `textarea`. A host's own app configuration merges over them.
+- **What they hold, in short:** icons from Material Symbols; motion retimed onto the motion tokens by
+  kind — growing, growing after a delay, unfolding, shading; badges and the small avatars on the
+  14-pixel floor with `badge-ink`; the tooltip at caption size; focus inside clipping rows; the
+  reading width on the dashboard panel and the container's inset outside it; no floor on the panel
+  or the sidebar; dropdowns as wide as their longest item and no wider than the screen; dialogs
+  growing out of their control and standing at once when they fill the screen; sheets clear of the
+  safe area; popovers held to their room; the message bar's focus on its bar; text areas at full
+  width.
+- **The layer's Nuxt configuration** brings the library as its module with its semantic colours, the
+  viewport meta (`viewport-fit=cover`, the keyboard resizing the content), and the screen mode's
+  ground painted from the first frame.
+
+## What the host owes
+
+- **The language pack.** `@nuxtjs/i18n` installed in the host, with a pack answering every key under
+  Wording keys, and the component library's own locale for its own words.
+- **The locale and the time zone.** The host states them in its app configuration, under `bmoUi`:
+  - `zone`, an IANA zone name every time is shown in; by default the runtime's own zone;
+  - `locale`, a BCP 47 tag figures are written in and letter case is folded in; by default the
+    runtime's own;
+  - `dateLocale`, the name of a dayjs locale the host has loaded, dates' words are written in; by
+    default dayjs's built-in one.
+  A host that renders on the server states all three, since the server's runtime and the browser's
+  need not agree.
+- **The patch.** The patch under `patches/` is applied to the same `reka-ui` version in the host's own
+  install. It makes a collapsible region's id with the region's root, so a button drawn before its
+  region already names it and no id stands twice.
+- **The choice of theme and palette.** Where a reader's choice is kept, and stating its declarations
+  in the page's head from the first frame, are the host's. Without a theme's declarations the
+  library's own colours stand; the palette tokens stand only once a palette's declarations are
+  stated.
+- **Its own grounds.** A host that draws on the palette's grounds reads the palette tokens; every ink
+  and surface it computes on them is its own.
+
+## Versions
+
+- **The layer requires** Nuxt 4.5 or later within 4 and `@nuxtjs/i18n` 10.6 or later within 10 as
+  peers, and brings Nuxt UI 4.11 or later within 4.
+- **It stands on registry packages alone;** no other repository is a dependency.
+- **One version for the whole repository,** the manifest's; the README states what may change at
+  which release.

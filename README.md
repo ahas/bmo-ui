@@ -30,6 +30,7 @@ components and behaviours every screen is built from. It is a Nuxt layer, built 
 
 | Folder | What it holds |
 |---|---|
+| `docs/` | The canonical documents: the design foundations, the wording contract, the components and the boundary |
 | `patches/` | The patch applied to a dependency on install |
 | `tests/` | The tests, with the browser lane's files and their support under `tests/browser/` |
 
