@@ -1,0 +1,92 @@
+import { describe, expect, test } from "bun:test";
+
+import { CHOOSE_CELL, CHOOSE_GUTTER, chooseAllLabel, chooseAllPress, chooseAllState, chosenRuns } from "~/domain/chooseall";
+
+import type { Translate } from "#shared/wording";
+
+const wording: Translate = (key) => key;
+
+describe("where the choice stands against the rows shown", () => {
+  const keys = ["a", "b", "c"];
+
+  test("is none with nothing chosen", () => {
+    expect(chooseAllState(new Set(), keys)).toBe(false);
+  });
+
+  test("is some with part of them chosen", () => {
+    expect(chooseAllState(new Set(["b"]), keys)).toBe("indeterminate");
+  });
+
+  test("is all only when every row shown is chosen", () => {
+    expect(chooseAllState(new Set(keys), keys)).toBe(true);
+    expect(chooseAllState(new Set(["a", "b"]), keys)).toBe("indeterminate");
+  });
+
+  // A page of a list chooses the page it is showing. What was chosen on a page since left behind
+  // is still chosen, and says nothing about whether this page is whole.
+  test("reads the rows shown and not the whole choice", () => {
+    expect(chooseAllState(new Set([...keys, "d"]), keys)).toBe(true);
+  });
+
+  test("is none where there is nothing to choose", () => {
+    expect(chooseAllState(new Set(), [])).toBe(false);
+    expect(chooseAllState(new Set(["d"]), [])).toBe(false);
+  });
+});
+
+describe("the chosen rows as boxes", () => {
+  test("rows chosen one after another stand as one box, and a row left out parts them", () => {
+    const keys = ["a", "b", "c", "d", "e"];
+
+    expect(chosenRuns(keys, new Set(["a", "b", "d"]))).toEqual([["a", "b"], ["d"]]);
+    expect(chosenRuns(keys, new Set(["e", "c", "d"]))).toEqual([["c", "d", "e"]]);
+    expect(chosenRuns(keys, new Set())).toEqual([]);
+  });
+});
+
+describe("what a press means", () => {
+  test("chooses all from none and from some", () => {
+    expect(chooseAllPress(false)).toBe(true);
+    expect(chooseAllPress("indeterminate")).toBe(true);
+  });
+
+  test("gives the whole choice up from all", () => {
+    expect(chooseAllPress(true)).toBe(false);
+  });
+
+  test("is what the control is called", () => {
+    expect(chooseAllLabel(wording, false)).toBe(wording("common.action.choose_all"));
+    expect(chooseAllLabel(wording, "indeterminate")).toBe(wording("common.action.choose_all"));
+    expect(chooseAllLabel(wording, true)).toBe(wording("common.action.choose_none"));
+  });
+});
+
+describe("the line the choosing controls stand on", () => {
+  // The one thing a reader takes in at a glance from a list being chosen is whether the marks
+  // stand straight. The control over the list holds its box to the cell's leading edge, so it
+  // lands wherever that cell's own leading room puts it — the same room a row gives its own mark —
+  // rather than half a cell further in.
+  test("holds the box to the leading edge of its cell", () => {
+    expect(CHOOSE_CELL).toContain("justify-start");
+    expect(CHOOSE_CELL).not.toContain("justify-center");
+  });
+
+  // The cell stays a square of the toolbar's own height, so a finger has something to aim at.
+  test("keeps the cell a square of the bar's height", () => {
+    expect(CHOOSE_CELL).toContain("size-9");
+    expect(CHOOSE_CELL).toContain("pointer-coarse:size-10");
+  });
+
+  test("hangs out of the reading column by what a row's own mark hangs out by", () => {
+    expect(CHOOSE_GUTTER).toBe("-ms-1");
+  });
+});
+
+const control = await Bun.file(new URL("../../app/components/ChooseAll.vue", import.meta.url)).text();
+
+describe("the choose-all control", () => {
+  test("takes the cell's shape from the one place rather than writing it again", () => {
+    expect(control).toContain("CHOOSE_CELL");
+    expect(control).not.toContain("size-9 items-center justify-center");
+  });
+});
