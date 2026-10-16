@@ -129,6 +129,7 @@ Each is named with everything it exports.
 | `palettes` | `Palette`, `PALETTES`, `DEFAULT_PALETTE`, `isPaletteId`, `paletteOf`, `paletteTokens`, `paletteDeclarations` |
 | `search` | `SearchField`, `SearchMatch`, `SearchPart`, `searchPhrase`, `searchHits`, `highlightParts`, `hitSnippet`, `matchFields`, `filterRecords` |
 | `wording` | `Translate`, `WordingParams`, `Pack` |
+| `wording-keys` | `WORDING_KEYS`, `WordingKey` |
 | `files` | `FileConflict` |
 | `code-language` | `codeLanguage` |
 | `screen-mode` | `DocumentScheme`, `DEFAULT_SCHEME`, `SCHEME_COOKIE`, `isDocumentScheme` |
@@ -148,7 +149,8 @@ Each runs in the browser alone, on every screen, from the moment the page is up.
 
 ## Wording keys
 
-The layer reads these 76 keys and no others. Placeholders are named after each key.
+The layer reads these 76 keys and no others. The `wording-keys` shared module lists them, the one
+list a host's pack is held to. Placeholders are named after each key.
 
 - **`common.action`:** `cancel`, `choose_all`, `choose_none`, `close`, `close_all_tabs`,
   `close_other_tabs`, `close_right_tabs`, `copy`, `discard`, `fit_screen`, `more`, `next_picture`,

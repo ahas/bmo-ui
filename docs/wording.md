@@ -57,7 +57,8 @@ list; `docs/boundary.md` names every one of them.
 
 ## The guard
 
-- **The layer's key list is the one place its keys are declared.** A test reads the layer's files
+- **The layer's key list is the one place its keys are declared:** the `wording-keys` shared module,
+  which the layer's own tests and a host's alike read. A test reads the layer's files
   and fails on a key asked for that the list lacks, on a key the list holds that nothing asks for, on
   a key built out of pieces, and on a key not named by the rule above. A host's own test holds its
   pack to the list, so every key the layer reads is answered.
