@@ -134,6 +134,10 @@ Each is named with everything it exports.
 | `code-language` | `codeLanguage` |
 | `screen-mode` | `DocumentScheme`, `DEFAULT_SCHEME`, `SCHEME_COOKIE`, `isDocumentScheme` |
 
+- **`search` folds letter case in the locale each call is handed,** the runtime's own where none is.
+  It reads no app configuration, so it runs alike in a browser and on a server; a host searching in
+  the app hands it `countLocale`'s answer, as the layer's own components do.
+
 ## Page plugins
 
 Each runs in the browser alone, on every screen, from the moment the page is up.

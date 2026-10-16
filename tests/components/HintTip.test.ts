@@ -1,0 +1,29 @@
+import { describe, expect, test } from "bun:test";
+
+import { TOOLTIP_UI } from "~/domain/tooltip";
+
+// The layer's one tooltip for words that say more than what they stand on. Read off the file that
+// ships: what a rendered screen would not name is how a finger, which has no hover, brings it up.
+
+const tip = await Bun.file(new URL("../../app/components/HintTip.vue", import.meta.url)).text();
+const cutLine = await Bun.file(new URL("../../app/components/CutLineTip.vue", import.meta.url)).text();
+
+describe("the shared tooltip", () => {
+  test("rests on the layer's one long press where a tap acts, and puts itself away on the next touch", () => {
+    expect(tip).toContain('import { useLongPress } from "../domain/longpress";');
+    expect(tip).toContain("surface: () => (props.press && !props.disabled ? element() : null)");
+    expect(tip).toContain('if (by === "touch" && !props.press) showForFinger();');
+    expect(tip).toContain('{ once: true, capture: true }');
+  });
+
+  test("names a cut name only where its box actually cuts it", () => {
+    expect(tip).toContain("box.scrollWidth > box.clientWidth");
+    expect(tip).toContain("if (value && props.cut && !isCut()) return;");
+  });
+
+  test("wraps long words rather than cutting them, as the cut-line tooltip does", () => {
+    expect(TOOLTIP_UI.text).toBe("whitespace-normal break-words");
+    expect(tip).toContain(':ui="TOOLTIP_UI"');
+    expect(cutLine).toContain("const ui = { ...TOOLTIP_UI,");
+  });
+});

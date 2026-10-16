@@ -56,7 +56,9 @@ default; a screen supplies what it holds and what a press means there. Every exp
   highlighted.
 - **A hit only in hidden data is said under the line** (`SearchHit`): when nothing the line shows
   matched, one line under it names the field it matched in and the words around the hit.
-- Letter case is folded in the host's locale (`docs/boundary.md`).
+- **Letter case is folded in the host's locale** (`docs/boundary.md`). The module is shared and reads
+  no app configuration, so each call is handed the locale; the layer's own components hand it the
+  host's setting.
 
 ## Tab bar and toolbar
 
