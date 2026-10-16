@@ -1,0 +1,24 @@
+# How this repository is tested and checked (the testbed's docs/declaration.md). The layer is taken
+# by its consumers through Nuxt's `extends` and runs inside their builds, so it declares no build and
+# no deployment of its own.
+testbed = 0
+name = "bmo-ui"
+
+[test]
+languages = ["bun", "browser"]
+files = ["tests/**/*.test.ts"]
+# Each of these drives a real Chromium, so they run one at a time in the browser lane.
+browser = ["tests/browser/**/*.test.ts"]
+setup = ["bun install --frozen-lockfile"]
+
+[check]
+quick = ["korean", "layout", "dependencies"]
+# No code file holds Korean, so the ledger allows none anywhere.
+korean_ledger = "korean-ledger.json"
+# The layer stands on registry packages alone; no other repository is a dependency.
+base_libraries = []
+
+[[check.step]]
+id = "typecheck"
+command = "bun run typecheck"
+lane = "wide"

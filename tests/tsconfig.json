@@ -1,0 +1,11 @@
+{
+  // The tests read the layer's code through the aliases Nuxt gives the app, and run under Bun, so
+  // they take the app's config with Bun's types beside it. Bun maps an import through the tsconfig
+  // nearest the file doing the importing, which for a test is this one.
+  "extends": "../.nuxt/tsconfig.app.json",
+  "compilerOptions": {
+    "types": ["bun"]
+  },
+  "include": ["./**/*", "../.nuxt/nuxt.d.ts"],
+  "exclude": []
+}

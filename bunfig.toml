@@ -1,0 +1,3 @@
+[test]
+# Every test file runs with happy-dom's document and window registered (tests/happy-dom.ts).
+preload = ["./tests/happy-dom.ts"]
