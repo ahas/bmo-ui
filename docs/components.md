@@ -369,6 +369,10 @@ default; a screen supplies what it holds and what a press means there. Every exp
   corner, and its language at its top left where its fence names one (the code-copy and code-colour
   modules). A diagram fence is drawn as a figure (the diagram module), the source standing until it
   is drawn and where it cannot be.
+- **The editor's two code themes are its own with their background taken out** (the code-themes
+  module), so a code view stands on the surface the host gives it, and every colour a token takes
+  reads at 4.5:1 or better on a fenced block's ground, the muted surface, under every theme in both
+  modes.
 - **The file components** are a file's text in the read-only viewer (`FilesText`), a name renamed in
   place (`FilesNameField`), an upload's progress (`FilesProgress`), and the one question asked when a
   change would land on names already taken (`FilesConflictDialog`): replace, keep both, skip, or give
