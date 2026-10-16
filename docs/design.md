@@ -316,7 +316,9 @@ whole in `docs/boundary.md`; this document says what each is for and how the lay
   list, so a theme added there is offered, drawn and checked with nothing else changed. Each theme's
   name is the key `common.label.theme_<id>`.
 - **The screen mode stands beside the theme and apart from it:** system, light or dark, kept in a
-  cookie whose name the layer states, and every theme is drawn in both modes.
+  cookie whose name the layer states, and every theme is drawn in both modes. A reader who never
+  chose a mode reads dark. The mode is kept in a cookie so a page rendered on the server already
+  stands in it.
 - Where a reader's choice is kept, and how it reaches the page, is the host's.
 
 ## Palettes

@@ -1,7 +1,12 @@
+import { DEFAULT_SCHEME, SCHEME_COOKIE } from "./shared/screen-mode";
+
 // The layer a consumer extends. It brings the component library and what every screen built on it
 // stands on; the host brings its own modules, its language pack, its address and its pages.
 export default defineNuxtConfig({
   modules: ["@nuxt/ui"],
+  // The screen mode is dark until a reader chooses another, and it is kept in a cookie so a server
+  // rendering a page knows the mode it stands in (`docs/design.md`, "Themes").
+  colorMode: { preference: DEFAULT_SCHEME, storage: "cookie", storageKey: SCHEME_COOKIE },
   compatibilityDate: "2025-09-01",
   devtools: { enabled: false },
   app: {

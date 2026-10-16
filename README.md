@@ -32,6 +32,7 @@ components and behaviours every screen is built from. It is a Nuxt layer, built 
 |---|---|
 | `docs/` | The canonical documents: the design foundations, the wording contract, the components and the boundary |
 | `patches/` | The patch applied to a dependency on install |
+| `shared/` | The shared modules, read by the layer's code and the host's alike |
 | `tests/` | The tests, with the browser lane's files and their support under `tests/browser/` |
 
 At the root stand the package manifest, which holds the version, its lockfile, the Nuxt

@@ -240,7 +240,8 @@ Every token is a custom property stated by the layer's stylesheet on the root un
   safe area; popovers held to their room; the message bar's focus on its bar; text areas at full
   width.
 - **The layer's Nuxt configuration** brings the library as its module with its semantic colours, the
-  viewport meta (`viewport-fit=cover`, the keyboard resizing the content), and the screen mode's
+  viewport meta (`viewport-fit=cover`, the keyboard resizing the content), the screen mode (dark
+  until a reader chooses another, kept in the cookie `screen-mode` names), and the screen mode's
   ground painted from the first frame.
 
 ## What the host owes
