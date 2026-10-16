@@ -1,7 +1,7 @@
-import { DEFAULT_SCHEME } from "#shared/screen-mode";
+import { DEFAULT_SCHEME } from "../../shared/screen-mode";
 
 import type { ComputedRef, InjectionKey, Ref, WritableComputedRef } from "vue";
-import type { Scheme } from "#shared/themes";
+import type { Scheme } from "../../shared/themes";
 
 // The mode a part of the screen is drawn in. It is the page's own screen mode, except inside a box
 // drawn in a mode of its own — a theme's preview — which hands its mode to everything under it, so
