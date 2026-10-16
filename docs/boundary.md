@@ -96,7 +96,7 @@ Each is named with everything it exports.
 | `modality` | `InputModality`, `MODALITY_ATTRIBUTE`, `modalityOfKey`, `watchInputModality` |
 | `monaco` | `languageOf`, `fenceLanguage`, `colourised`, `CodeView`, `openCodeView`, `SourceSelection`, `SourceView`, `openSourceView` |
 | `moving-list` | `unfoldItem`, `settleItem`, `foldItem` |
-| `numbers` | `COUNT_LOCALE`, `countText`, `FigureLine`, `COUNT_BADGE`, `figurePlaces`, `turnOf`, `progressText` |
+| `numbers` | `countLocale`, `countText`, `FigureLine`, `COUNT_BADGE`, `figurePlaces`, `turnOf`, `progressText` |
 | `openings` | `useOpenings` |
 | `overlays` | `OVER_LAYERS`, `isBackEscape`, `refuseStalePresses`, `refuseHandedBackFocus`, `watchOverlays` |
 | `player` | `Playing`, `playAlone`, `playClock`, `knownLength`, `loudnessOf`, `easedLoudness`, `AURA_STILL`, `auraOf`, `PlayerButton`, `PlayerSignal`, `buttonAfter` |
@@ -116,8 +116,10 @@ Each is named with everything it exports.
 
 - **`player` takes a sound's address as given.** Where a sound is fetched from is the host's.
 - **`monaco` opens code and source views only.** Any other view over the editor is the host's.
-- **`numbers` and `time` read the host's locale and zone** (see What the host owes); `COUNT_LOCALE` is
-  the locale figures are written in, the host's tag or the runtime's own.
+- **`numbers` and `time` read the host's locale and zone** (see What the host owes) each time they
+  write, so they import no locale and nothing is read before the app stands. `countLocale` answers
+  the locale figures are written in: the host's tag, or nothing where none is set, which is the
+  runtime's own.
 
 ## Shared modules
 
@@ -254,8 +256,9 @@ Every token is a custom property stated by the layer's stylesheet on the root un
     runtime's own;
   - `dateLocale`, the name of a dayjs locale the host has loaded, dates' words are written in; by
     default dayjs's built-in one.
-  A host that renders on the server states all three, since the server's runtime and the browser's
-  need not agree.
+  The layer's own app configuration states the setting with nothing in it, so each default stands
+  until the host states a value. A host that renders on the server states all three, since the
+  server's runtime and the browser's need not agree.
 - **The patch.** The patch under `patches/` is applied to the same `reka-ui` version in the host's own
   install. It makes a collapsible region's id with the region's root, so a button drawn before its
   region already names it and no id stands twice.
