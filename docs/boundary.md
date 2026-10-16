@@ -4,6 +4,10 @@ Everything the layer exposes and everything a host owes it. A change to anything
 the version rules in the README, and this document changes in the same commit. What each piece does
 is stated in `docs/design.md`, `docs/wording.md` and `docs/components.md`.
 
+The guard test holds the code to this document: every component, page plugin and module the layer
+ships is named here with everything it exports, nothing is named here that it does not ship, and the
+wording keys listed here are the ones the layer's list holds.
+
 ## How a host takes it
 
 - **The host extends the layer** from its Nuxt configuration. The layer brings Nuxt UI as its module,

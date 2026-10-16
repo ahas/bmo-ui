@@ -46,6 +46,9 @@ These rules hold every change to this repository.
   browser lane. They are skipped where the browser build playwright-core pins is not on the machine.
 - The patch under `patches/` is applied to the dependency it names by the package manager on install;
   a host extending the layer applies the same patch in its own install.
+- `tests/guard.test.ts` holds the rules above off every file of the repository: the dependencies, the
+  language, the names, the servers, the wording keys and the boundary document. A file that breaks
+  one of them fails it.
 
 ## The stages of a change
 
