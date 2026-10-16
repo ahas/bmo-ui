@@ -91,6 +91,9 @@ whole in `docs/boundary.md`; this document says what each is for and how the lay
   is. Full screen is read from the standard change, its WebKit prefix, and the begin and end an
   iPhone's own player announces on the video, since an iPhone plays full screen outside the page.
   The fullscreen plugin holds this for as long as the page is open.
+- **The bars at the top of the window stand at one height.** The library's header height,
+  `--ui-header-height`, is 3rem, so a top bar and the heads of the panels beside it make one line
+  across the window.
 
 ### The bars a phone lays over the page
 
@@ -251,8 +254,8 @@ whole in `docs/boundary.md`; this document says what each is for and how the lay
   - **Behind it stands Pretendard, for what Apple SD Gothic Neo lacks.** The layer carries Pretendard
     in the four weights the screens use — 400, 500, 600 and 700 — each cut to exactly the letters
     that face lacks: most accented Latin, the middle dot, the minus sign and the narrow spaces,
-    around 33KB a weight. Each face names the ranges it covers, so a letter outside them goes
-    straight to the faces behind.
+    around 33KB a weight. Its files hold those letters alone, so a letter they lack goes straight
+    to the faces behind.
   - Should a face arrive late, letters stand first in the font behind and are swapped in place when
     it arrives.
 - **Monospace letters stand in CaskaydiaCove,** Cascadia Code from Nerd Fonts, carried and served
@@ -356,7 +359,10 @@ whole in `docs/boundary.md`; this document says what each is for and how the lay
   of its own, and `ThemePreview`, `ThemeSwatch` and `PaletteSwatch` state their entry's tokens on
   their own box, so what is inside reads them whatever the page stands in.
 - **Every pair keeps the contrast promises in both modes.** The checks of the badges and of the focus
-  ring run over every theme, and the check of the palette's grounds over every palette.
+  ring run over every theme, and the check of the palette's grounds over every palette under every
+  theme: the library's words read at 4.5:1 or better on both grounds in both modes, and the mode's
+  pair resolves to the mode's own grounds on the root, on `.light` and on `.dark`, a box of either
+  mode standing in a page of the other included.
 
 ## Focus
 

@@ -30,7 +30,7 @@ components and behaviours every screen is built from. It is a Nuxt layer, built 
 
 | Folder | What it holds |
 |---|---|
-| `app/` | The layer's app code: the components under `components/`, the domain modules under `domain/`, the app configuration stating the host's setting with nothing in it, and the declaration typing templates by the host's i18n module |
+| `app/` | The layer's app code: the stylesheet and the fonts with their licences under `assets/`, the components under `components/`, the domain modules under `domain/`, the app configuration holding the library's overrides and the host's setting with nothing in it, and the declaration typing templates by the host's i18n module |
 | `docs/` | The canonical documents: the design foundations, the wording contract, the components and the boundary |
 | `patches/` | The patch applied to a dependency on install |
 | `shared/` | The shared modules, read by the layer's code and the host's alike |

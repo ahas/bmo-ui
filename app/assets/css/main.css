@@ -1,0 +1,665 @@
+@import "tailwindcss";
+@import "@nuxt/ui";
+
+/* How wide a central panel's content stands before it stops growing; it is centred in whatever is
+   left over (`docs/design.md`, "Width"). Every screen's body is laid out in a container, so the
+   width is one number here rather than a class on each of them. */
+:root {
+  --ui-container: 48rem;
+  /* A top bar and the heads of the panels beside it, one height across the window. */
+  --ui-header-height: 3rem;
+}
+
+/* How much of the window is actually on the screen, and where that part begins (`docs/design.md`,
+   "The vertical"). A shell is laid out from these two, and so is anything that must not grow past
+   what can be seen. The window itself is the answer wherever nothing is covering it; where a
+   browser lays a virtual keyboard over its own page the screen module writes the smaller numbers
+   here instead, so the box at the foot of a screen stays above the keys rather than behind them. */
+:root {
+  --bmo-screen: 100dvh;
+  --bmo-screen-top: 0px;
+}
+
+/* What a phone drawing the page edge to edge lays over it: its status bar at the top and its
+   gesture bar at the foot (`docs/design.md`, "The bars a phone lays over the page"). A dialog stands
+   clear of both and a sheet reaching the foot clears the gesture bar; a device that reports neither
+   leaves both at nought. */
+:root {
+  --bmo-safe-top: env(safe-area-inset-top, 0px);
+  --bmo-safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Every scrollbar is the thin one, in the colour the borders are, on no track of its own
+   (`docs/design.md`, "Scrollbars"): panes read side by side are parted by their edges, and a wide
+   bar between them is a wall. It is set here for everything at once — the standard properties for
+   the browsers that have them, the WebKit parts for the ones that do not — since a scrollbar
+   belongs to whatever happens to overflow rather than to any one screen. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--ui-border-accented) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--ui-border-accented);
+  border-radius: 9999px;
+}
+
+/* Pretendard, Copyright (c) 2021 Kil Hyung-jin, SIL Open Font License 1.1, its licence beside the
+   files (`docs/design.md`, "Fonts"). It stands behind the interface's face for the letters that
+   face lacks — most accented Latin, the middle dot, the minus sign, the narrow spaces — and its
+   files carry those alone, so a letter they lack goes straight to the faces behind. */
+
+@font-face {
+  font-family: "Pretendard";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../fonts/Pretendard-Regular.gap.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Pretendard";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("../fonts/Pretendard-Medium.gap.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Pretendard";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("../fonts/Pretendard-SemiBold.gap.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Pretendard";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("../fonts/Pretendard-Bold.gap.woff2") format("woff2");
+}
+
+/* CaskaydiaCove, the Nerd Fonts build of Cascadia Code, Copyright (c) 2019 Microsoft Corporation,
+   SIL Open Font License 1.1. Its licence sits beside it as Pretendard's does.
+
+   It is the monospace face at one weight, cut to letters, digits, punctuation, arrows and
+   box-drawing. The icon glyphs a Nerd Font is otherwise carried for are not among them: icons are
+   drawn as pictures rather than as letters, and carrying them would cost thirty times the file.
+   Nothing asks for a bold monospace either; a browser thickens what it has where one is called
+   for. */
+
+@font-face {
+  font-family: "CaskaydiaCove NFM";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../fonts/CaskaydiaCoveNFM-Regular.subset.woff2") format("woff2");
+}
+
+/* Tabular figures at their true advance (`docs/design.md`, "Fonts"). Chromium on Linux rounds each
+   glyph's advance to a whole pixel after hinting, which lands digits of one shared width a pixel
+   apart; drawn at geometric precision, every digit stands at the one width the face gives it. */
+.tabular-nums {
+  text-rendering: geometricPrecision;
+}
+
+@theme {
+  /* Nothing is drawn under 14px. The library's components that ask for the step below it — a
+     badge, a small button, a menu item — are drawn at 14px as well. */
+  --text-xs: 0.875rem;
+  --text-xs--line-height: calc(1.25 / 0.875);
+
+  /* Every transition a class asks for without naming its own length — a colour under the pointer,
+     a mark turning, an opacity — is a thing changing state where it stands. */
+  --default-transition-duration: var(--bmo-motion-quick);
+  --default-transition-timing-function: var(--bmo-ease-move);
+
+  --font-sans:
+    "Apple SD Gothic Neo", "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, "Segoe UI", Roboto,
+    "Helvetica Neue", "Noto Sans KR", "Malgun Gothic", "Apple Color Emoji", "Segoe UI Emoji",
+    sans-serif;
+
+  /* The fixed-width face, and behind it the interface's own. No monospace face has Hangul, so a
+     Hangul word in a fixed-width place would otherwise fall past the whole stack onto whatever the
+     reader's machine happens to have. The interface's face standing second catches it, with
+     Pretendard behind it for the letters that face lacks, so a line of code with a Hangul comment
+     in it is one face for the code and the interface's face for the words. The system stack stays
+     behind them, for a machine that has none of them yet. */
+  --font-mono:
+    "CaskaydiaCove NFM", "Apple SD Gothic Neo", "Pretendard", ui-monospace, SFMono-Regular, Menlo,
+    Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+/* How long movements take and how they ease (`docs/design.md`, "Motion"). Every movement the layer
+   draws or retimes names one of these rather than a number of its own, so a kind of movement is
+   the same length wherever it happens.
+   - quick: a thing changing state where it stands — a colour, a mark turning, a tab's marker —
+     and a menu, a list or a tooltip out of its control, which keeps up with the pointer. Felt,
+     never waited on: under a tenth of a second reads as no change at all.
+   - pop: a dialog out of the control pressed to open it, and its shade; a sheet sliding in. The
+     reader is waiting to read it, so it is the shortest that still shows where it came from.
+   - unfold: a box changing size — a notice unfolding, a region opening or folding, one shape
+     moving to the next — and a list's items sliding to new places. Its edges travel furthest and
+     the eye follows them; shorter, the new size reads as a jump.
+   - enter decelerates: it arrives at speed and settles, so it can be read before it has stopped.
+     exit accelerates: it starts slowly where the eye already is and is gone at speed, the enter
+     run backwards. move eases both ends, for a thing that stays on the screen while it changes. */
+:root {
+  --bmo-motion-quick: 150ms;
+  --bmo-motion-pop: 200ms;
+  --bmo-motion-unfold: 320ms;
+  --bmo-ease-enter: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --bmo-ease-exit: cubic-bezier(0.4, 0, 1, 1);
+  --bmo-ease-move: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* The palette's two grounds in the mode they are read in (`docs/design.md`, "Palettes"). The
+   palettes module states both modes' grounds; each mode resolves its own pair on its own class as
+   well as on the root, so a box drawn in a mode the page is not in reads its mode's grounds. */
+:root,
+.light {
+  --bmo-palette-own: var(--bmo-palette-own-light);
+  --bmo-palette-other: var(--bmo-palette-other-light);
+}
+
+.dark {
+  --bmo-palette-own: var(--bmo-palette-own-dark);
+  --bmo-palette-other: var(--bmo-palette-other-dark);
+}
+
+/* A box that cuts what it holds at its own corners: a picture running to its edges
+   (`docs/design.md`, "Corners"). */
+@utility rounded-inherit {
+  border-radius: inherit;
+}
+
+/* A list whose items come, go and change places (see MovingList): the items that stay slide, and
+   one that comes or goes changes its box, clipped, with the margin that takes in the list's gap.
+   All of it is one movement along the list's own axis, so it shares one length and one easing. */
+.bmo-list-move {
+  transition: transform var(--bmo-motion-unfold) var(--bmo-ease-move);
+}
+
+.bmo-list-enter-active,
+.bmo-list-leave-active {
+  overflow: clip;
+  transition:
+    height var(--bmo-motion-unfold) var(--bmo-ease-move),
+    padding var(--bmo-motion-unfold) var(--bmo-ease-move),
+    border-width var(--bmo-motion-unfold) var(--bmo-ease-move),
+    margin var(--bmo-motion-unfold) var(--bmo-ease-move);
+}
+
+/* A tab's panel (see TabSlide): the old one leaves to one side while the new one comes in from the
+   other, both together and nothing inside either moving of its own. The leaving panel is lifted out
+   of the flow over the place the new one takes. */
+.bmo-slide-forward-enter-active,
+.bmo-slide-forward-leave-active,
+.bmo-slide-back-enter-active,
+.bmo-slide-back-leave-active {
+  transition: transform var(--bmo-motion-unfold) var(--bmo-ease-move);
+}
+
+.bmo-slide-forward-leave-active,
+.bmo-slide-back-leave-active {
+  position: absolute;
+  inset: 0;
+}
+
+.bmo-slide-forward-enter-from,
+.bmo-slide-back-leave-to {
+  transform: translateX(100%);
+}
+
+.bmo-slide-forward-leave-to,
+.bmo-slide-back-enter-from {
+  transform: translateX(-100%);
+}
+
+/* A coloured badge in the light mode (`docs/design.md`, "Colour"). The 500 shade the light mode
+   paints every colour with is a fill colour, and a word drawn in it — on white, or on the badge's
+   own tint — falls well short of 4.5:1, as does a white word on it. Every badge carries this class
+   (the layer's badge override), and so may a line of words drawn in a state colour on a plain
+   surface, so each colour is taken to its 800 shade inside it — the step at which every colour
+   still reads on the elevated surface under its own tint — and every shape follows at once: a
+   solid badge's fill darkens under its white word, and the other shapes' words darken on their own
+   tint. The dark mode's 400 shade already reads, and is left alone. */
+:root:not(.dark) .badge-ink {
+  --ui-primary: var(--ui-color-primary-800);
+  --ui-secondary: var(--ui-color-secondary-800);
+  --ui-success: var(--ui-color-success-800);
+  --ui-info: var(--ui-color-info-800);
+  --ui-warning: var(--ui-color-warning-800);
+  --ui-error: var(--ui-color-error-800);
+}
+
+/* Focus (`docs/design.md`, "Focus"). What the keyboard has reached is ringed once, the same way on
+   every screen: a thin line in the theme's accent, a little outside the element so it follows the
+   element's own corners without covering its edge. The accent is taken at the step that still reads
+   at 3:1 on every surface — the light mode's 500 does not, so the light mode takes the 600. A press
+   of the mouse or a finger draws nothing; telling the two apart is the browser's own
+   :focus-visible. */
+:root {
+  --bmo-focus-width: 2px;
+  --bmo-focus-gap: 2px;
+}
+
+:root,
+.light {
+  --bmo-focus: var(--ui-color-primary-600);
+}
+
+.dark {
+  --bmo-focus: var(--ui-color-primary-400);
+}
+
+/* The ring itself, on every element the browser's own default would otherwise ring. It stands under
+   every class, so a component that clips or hides it still says so with a class of its own. */
+@layer base {
+  :focus-visible,
+  a:focus-visible {
+    outline: var(--bmo-focus-width) solid var(--bmo-focus);
+    outline-offset: var(--bmo-focus-gap);
+  }
+}
+
+/* The component library rings its controls in their own colour at three pixels, which for a neutral
+   control is the inverted one — a thick white line in the dark mode. Its colour and width are set
+   aside here, above every class, for the element itself, for a container the library rings when what
+   it holds has focus, and for a pseudo-element a link rings in its place; whether a ring is drawn at
+   all and how far out it stands stay with the class that asked for it. A control that also redraws
+   its own edge in that inverted colour keeps the edge it rests with: the ring alone says it has
+   focus. */
+:focus-visible,
+:focus-visible::before,
+:focus-visible::after,
+[data-slot]:has(:focus-visible) {
+  outline-color: var(--bmo-focus);
+  outline-width: var(--bmo-focus-width);
+}
+
+:focus-visible,
+[data-slot]:has(> :focus-visible) {
+  --ui-border-inverted: var(--ui-border-accented);
+}
+
+/* A field — a place a value is typed or chosen in — wears its focus on its own edge, which takes the
+   accent, and draws no ring around it; one drawn with no edge takes the elevated background by its
+   own class instead. A text box holds the caret however it was focused, so the browser counts every
+   focus of one as visible and the edge shows for a press as well. */
+:is(
+    input:not([type="checkbox"], [type="radio"], [type="range"], [type="file"], [type="color"], [type="button"], [type="submit"], [type="reset"], [type="image"]),
+    textarea,
+    select,
+    [role="combobox"],
+    [contenteditable]
+  ):focus-visible {
+  outline-style: none;
+  --tw-ring-color: var(--bmo-focus);
+}
+
+/* A bar written in — the message bar the layer's chat prompt override marks — wears its text's
+   focus on the bar: no ring around the bar or the text, and its background a step up however the
+   focus came. Its edge takes the accent only where the keyboard brought the focus there, which the
+   page's root marks (the input-modality plugin); a press of the mouse or a finger changes its
+   colour alone. The buttons inside it ring as every button does. */
+.focus-bar {
+  outline-style: none;
+}
+
+.focus-bar:has(:is(textarea, [contenteditable]):focus) {
+  --tw-ring-color: var(--ui-border);
+  background-color: var(--ui-bg-elevated);
+}
+
+:root[data-input="key"] .focus-bar:has(:is(textarea, [contenteditable]):focus) {
+  --tw-ring-color: var(--bmo-focus);
+}
+
+/* A row inside a box that clips what stands past its edge — a scrolling list, a tab bar, a table —
+   draws the ring inside its own edge, at the same width. */
+@utility focus-inset {
+  &:focus-visible {
+    outline-offset: calc(var(--bmo-focus-width) * -1);
+  }
+}
+
+/* A list of names, each with its value: a `dl` of `dt` and `dd` in turn, or a skeleton of bars
+   standing for them in the same turn (`docs/components.md`). From the small breakpoint up the name
+   stands beside its value; under it, on a phone, the name stands over its value and a pair is
+   parted from the next by more than its own two lines are.
+   A value is never cut: the value column is at least as wide as its widest unbreakable run, and the
+   list scrolls sideways inside itself past its box. The gaps are the list's own classes. */
+@utility pair-list {
+  display: grid;
+  grid-template-columns: minmax(min-content, 1fr);
+  overflow-x: auto;
+
+  & > :nth-child(2n + 3) {
+    margin-top: calc(var(--spacing) * 2);
+  }
+
+  @variant sm {
+    grid-template-columns: max-content minmax(min-content, 1fr);
+
+    & > :nth-child(2n + 3) {
+      margin-top: 0;
+    }
+  }
+}
+
+/* A line wider than the box it stands in (see MarqueeLine). A line that fits is clipped and
+   ellipsised exactly as any other line is; only a line with somewhere to go takes the moving class,
+   and it is the one copy of the words that slides. The distance and the duration arrive as custom
+   properties rather than as an animation named per line, which is what lets a row that rewrites its
+   words once a second adjust a movement already under way instead of starting it over. */
+
+.marquee {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.marquee-line {
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.marquee-line--moving {
+  width: max-content;
+  max-width: none;
+  overflow: visible;
+  text-overflow: clip;
+  animation: marquee-slide var(--marquee-duration) linear infinite;
+}
+
+/* Out to the end and back, pausing at each end so both ends are read rather than merely turned
+   around at. The pauses are stops of the cycle rather than a count of seconds, since a keyframe
+   stop is a percentage; what is constant across every line is the speed, which the duration the
+   line is handed is worked out from. */
+@keyframes marquee-slide {
+  0%,
+  12% {
+    transform: translateX(0);
+  }
+
+  50%,
+  62% {
+    transform: translateX(calc(-1 * var(--marquee-distance)));
+  }
+
+  100% {
+    transform: translateX(0);
+  }
+}
+
+/* Read at leisure: the line holds still while the pointer is on it, and while the row it belongs
+   to is the one the keyboard is on. */
+.marquee:hover .marquee-line--moving,
+.marquee:focus-within .marquee-line--moving,
+:focus-visible .marquee-line--moving {
+  animation-play-state: paused;
+}
+
+/* Asked for no motion, the line does not move on its own, and its box is scrolled by hand
+   instead so the end of it is still reachable. The bar appears only where a line overflows,
+   since a line that fits never widens its box. */
+@media (prefers-reduced-motion: reduce) {
+  .marquee {
+    overflow-x: auto;
+  }
+
+  .marquee-line--moving {
+    animation: none;
+  }
+}
+
+/* How a dialog comes and goes (the dialog-origin plugin). It fades while growing out of the control
+   pressed to open it and shrinking back into it: the control's place arrives as the dialog's
+   transform origin, and how small it starts as --bmo-dialog-from. A dialog nothing was pressed for
+   is handed neither, so it stands at its full size and only fades, since it comes from no place.
+   Asked for no motion, every dialog only fades. */
+@keyframes bmo-dialog-in {
+  from {
+    opacity: 0;
+    transform: scale(var(--bmo-dialog-from, 1));
+  }
+}
+
+@keyframes bmo-dialog-out {
+  to {
+    opacity: 0;
+    transform: scale(var(--bmo-dialog-from, 1));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Nothing moves, turns or changes size for a reader who asked for less movement: whatever a
+     transition would have moved is where it ends at once. A colour changes at once too, which
+     costs nothing, and a fade that a dialog or a region keeps is an animation, which this leaves
+     alone. */
+  *,
+  ::before,
+  ::after {
+    transition-duration: 0s !important;
+  }
+
+  /* A region folding open stands at its full height at once and only fades, as a dialog does. */
+  @keyframes collapsible-down {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @keyframes collapsible-up {
+    to {
+      opacity: 0;
+    }
+  }
+
+  @keyframes bmo-dialog-in {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @keyframes bmo-dialog-out {
+    to {
+      opacity: 0;
+    }
+  }
+}
+
+/* A fenced block in the host's rendered text, inside its container carrying `markdown`
+   (`docs/components.md`). It is a surface of its own and scrolls sideways rather than folding: a
+   line of code broken at the panel's edge is a line that was never written. */
+.markdown pre {
+  margin: 0.85em 0;
+  padding: 0.7em 0.85em;
+  overflow-x: auto;
+  border: 1px solid var(--ui-border);
+  border-radius: calc(var(--ui-radius) * 2);
+  background-color: var(--ui-bg-muted);
+}
+
+.markdown pre code {
+  padding: 0;
+  border-radius: 0;
+  background-color: transparent;
+  color: var(--ui-text);
+}
+
+/* A fenced block stands in a box with its copy button over the top right corner (the code-copy
+   module). The box carries the block's spacing, and the block keeps clear of the button on its
+   right. The button is always shown, so a finger has it without hovering, and it names itself
+   beside it on hover and on focus the way every icon button does; after a press it says it copied
+   and shows a check for a moment. */
+.markdown .markdown-code {
+  position: relative;
+  margin: 0.85em 0;
+}
+
+.markdown .markdown-code > pre {
+  margin: 0;
+  padding-right: 3rem;
+}
+
+/* A block whose fence names its language carries the name at its top left, a head row centred on
+   the copy button's line, and its lines start under that row (the code-colour module colours
+   them). The name keeps the block's own inset from the left. */
+.markdown .markdown-code[data-language] > pre {
+  padding-top: 2.25rem;
+}
+
+.markdown-code-head {
+  position: absolute;
+  top: 0.25rem;
+  right: 2.5rem;
+  left: 0;
+  display: flex;
+  height: 2rem;
+  align-items: center;
+  padding-left: 0.85em;
+  pointer-events: none;
+}
+
+.markdown-code-language {
+  overflow: hidden;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: var(--ui-text-muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.markdown-copy {
+  position: absolute;
+  top: 0.25rem;
+  right: 0.25rem;
+  display: inline-flex;
+  width: 2rem;
+  height: 2rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--ui-radius);
+  background-color: var(--ui-bg-muted);
+  color: var(--ui-text-muted);
+  cursor: pointer;
+}
+
+.markdown-copy:hover {
+  background-color: var(--ui-bg-accented);
+  color: var(--ui-text-highlighted);
+}
+
+.markdown-copy:active {
+  background-color: var(--ui-bg-accented);
+  color: var(--ui-text-highlighted);
+}
+
+.markdown-copy:focus-visible {
+  outline-offset: calc(var(--bmo-focus-width) * -1);
+}
+
+.markdown-copy svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.markdown-copy .markdown-copy-done,
+.markdown-copy[data-copied] .markdown-copy-idle {
+  display: none;
+}
+
+.markdown-copy[data-copied] .markdown-copy-done {
+  display: block;
+  color: var(--ui-success);
+}
+
+.markdown-copy::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  top: 50%;
+  right: calc(100% + 0.25rem);
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--ui-radius);
+  box-shadow: 0 0 0 1px var(--ui-border);
+  background-color: var(--ui-bg);
+  color: var(--ui-text-highlighted);
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-50%);
+  /* It grows out of the button it names, as every tooltip does. */
+  transform-origin: right center;
+  scale: 0.95;
+  transition:
+    opacity var(--bmo-motion-quick) var(--bmo-ease-enter),
+    scale var(--bmo-motion-quick) var(--bmo-ease-enter);
+}
+
+.markdown-copy:hover::after,
+.markdown-copy:focus-visible::after,
+.markdown-copy[data-copied]::after {
+  opacity: 1;
+  scale: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .markdown-copy::after {
+    transition: none;
+  }
+}
+
+/* A diagram (the diagram module) stands on a line of its own, centred in the column at the size it
+   was laid out at. It shrinks to the column by at most a fifth, a floor the drawing sets on the
+   picture itself, and past that it scrolls sideways inside its own box, as a wide table does, so
+   its words keep a reading size on a phone. Until it is drawn, and where its source cannot be
+   drawn, the source stands as the code block it was written as. */
+.markdown .markdown-diagram {
+  margin: 1.5rem 0;
+}
+
+.markdown .markdown-diagram[data-drawn] > pre {
+  display: none;
+}
+
+.markdown-diagram-figure {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.markdown-diagram-figure > svg {
+  display: block;
+  margin-inline: auto;
+  max-width: 100%;
+  height: auto;
+}
+
+/* The mark for work in progress always turns, wherever it stands — a chip, a row, a tab — so it
+   reads as a spinner and never as a still circle. */
+[class*="progress-activity"] {
+  animation: spin 1s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [class*="progress-activity"] {
+    animation: none;
+  }
+}

@@ -190,6 +190,7 @@ Every token is a custom property stated by the layer's stylesheet on the root un
   and `.light` to the light values and on `.dark` to the dark ones.
 - **Width:** `--ui-container`, 48rem, the reading width; `--bmo-inset`, a container's own side room,
   added outside the reading width.
+- **Height:** the library's `--ui-header-height`, 3rem, one height for a top bar and a panel's head.
 - **Screen:** `--bmo-screen`, the visible height, `100dvh` while nothing overlays; `--bmo-screen-top`,
   where the visible screen starts, `0px` while nothing overlays.
 - **Safe area:** `--bmo-safe-top` and `--bmo-safe-bottom`, the device's insets, nought where it
@@ -244,9 +245,9 @@ Every token is a custom property stated by the layer's stylesheet on the root un
   safe area; popovers held to their room; the message bar's focus on its bar; text areas at full
   width.
 - **The layer's Nuxt configuration** brings the library as its module with its semantic colours, the
-  viewport meta (`viewport-fit=cover`, the keyboard resizing the content), the screen mode (dark
-  until a reader chooses another, kept in the cookie `screen-mode` names), and the screen mode's
-  ground painted from the first frame.
+  layer's stylesheet, the viewport meta (`viewport-fit=cover`, the keyboard resizing the content), the
+  screen mode (dark until a reader chooses another, kept in the cookie `screen-mode` names), and the
+  screen mode's ground painted from the first frame.
 
 ## What the host owes
 
