@@ -309,6 +309,9 @@ default; a screen supplies what it holds and what a press means there. Every exp
 - **The press that closes one is the press being handled.** An outside touch that has not become the
   press being handled closes nothing, so a button pressed inside a dialog does what it was pressed for
   rather than closing the dialog.
+- **What floats over every layer is under none.** A host's own region standing over whatever is open
+  — a question asked from inside a dialog — carries the overlays module's `OVER_LAYERS` mark; a press,
+  a tap or a focus there is outside no floating thing and closes nothing.
 - **One context menu at a time.** A right click elsewhere closes it before opening the menu of the
   place pressed, and a tap elsewhere only closes it.
 - **Small dialogs stand in the middle; sheets are parts of the page.** On a narrow screen a sheet

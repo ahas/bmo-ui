@@ -1,0 +1,255 @@
+import { closeLayer, listenForBack, openLayer } from "./layers";
+
+// Everything the component library floats over the page — a dialog, a sheet, a drawer, a popover,
+// a dropdown or select list, a context menu — is a layer of the back gesture, and none of them
+// says so for itself. They are found on the page instead: the library marks every one of them as
+// a dismissable layer and says on the same element whether it stands open, so watching the page
+// for those marks finds each one the moment it opens and the moment it closes, whichever screen
+// drew it and whether or not that screen was written knowing about the gesture. A screen added
+// later cannot be the one that forgot.
+//
+// A tooltip carries the same mark but never stands "open": its states say how it was brought up
+// instead, and it answers the pointer rather than a press, so it is not a layer.
+//
+// What closes a layer here is the Esc key, which every one of them answers and which the library
+// hands only to the top one — the same way a keyboard closes it.
+
+const LAYER = "[data-dismissable-layer]";
+
+// The event the library raises on a layer when a press landed outside it, cancellable, and the
+// only say anything here has in whether that press closes anything. It is dispatched on the
+// pressed element and does not bubble, so it is caught on the way down instead.
+const OUTSIDE_PRESS = "dismissableLayer.pointerDownOutside";
+
+// What floats over every layer rather than standing in one carries this attribute: a host's own
+// region whose question stands over whatever dialog or drawer it was asked from (`docs/components.md`,
+// "Floating things"). A press or a focus there is outside no layer, so answering the question never
+// puts away what it was asked from.
+export const OVER_LAYERS = "data-over-layers";
+
+function overLayers(target: EventTarget | null | undefined): boolean {
+  return target instanceof Element && target.closest(`[${OVER_LAYERS}]`) !== null;
+}
+
+// How many times a layer is asked before it is taken to refuse. A tooltip standing over it takes
+// the first Esc for itself; nothing stands higher than that.
+const ESCAPE_TRIES = 2;
+
+// What stands, in the order it opened, and the layer each was registered as.
+const standing = new Map<Element, number>();
+
+let escaping = false;
+
+// Whether the Esc being handled is this module closing a layer for the back gesture rather than a
+// key pressed. A shortcut of a screen's own that answers Esc lets such a one pass, since the press
+// it stands for was meant for the layer alone.
+export function isBackEscape(): boolean {
+  return escaping;
+}
+
+function isOpen(element: Element): boolean {
+  return element.isConnected && element.getAttribute("data-state") === "open";
+}
+
+function escape(): void {
+  escaping = true;
+
+  try {
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", code: "Escape", bubbles: true, cancelable: true }));
+  } finally {
+    escaping = false;
+  }
+}
+
+// A turn for the close to reach the page: the screen's own update, then whatever the library
+// schedules after it.
+function settle(): Promise<void> {
+  return nextTick().then(() => new Promise((resolve) => setTimeout(resolve, 0)));
+}
+
+async function dismiss(element: Element): Promise<void> {
+  for (let tried = 0; tried < ESCAPE_TRIES && isOpen(element); tried += 1) {
+    escape();
+    await settle();
+  }
+
+  // One that refuses to close stands on, and so stands as a layer again with an entry of its own;
+  // the press that was spent on it is not the reader's last.
+  if (isOpen(element)) {
+    standing.delete(element);
+    sweep();
+  }
+}
+
+function sweep(): void {
+  const found = Array.from(document.querySelectorAll(LAYER)).filter(isOpen);
+
+  // Those gone first, the top one first, so each takes its own entry back rather than burying it.
+  for (const [element, id] of Array.from(standing).reverse()) {
+    if (!found.includes(element)) {
+      standing.delete(element);
+      closeLayer(id);
+    }
+  }
+
+  for (const element of found) {
+    if (!standing.has(element)) {
+      standing.set(element, openLayer(() => void dismiss(element)));
+    }
+  }
+}
+
+function topLayer(): Element | null {
+  const all = Array.from(standing.keys()).filter(isOpen);
+
+  return all.at(-1) ?? null;
+}
+
+// A press outside a layer closes it only while it is the press being handled.
+//
+// On a touch screen the library cannot act on the press itself: the browser raises the press and
+// the tap it becomes far apart, and a press may never become a tap at all — the finger drags off
+// instead, or the tap is the one the rule below spends on closing the top layer and stops going
+// any further. So the library holds the press and waits for a tap to arrive, and a press that
+// never got one is still waiting when the next tap comes. That next tap is then read as the old
+// press landing, wherever it fell: a button inside the dialog does what it was pressed for and
+// the dialog goes in the same moment, which is how a dialog comes to close on the very press
+// meant to work it.
+//
+// What settles it is that a press outside is one press: the one the reader has just made. A
+// press being told about that is not the last one made is not landing now and closes nothing, and
+// neither is one on what floats over every layer.
+export function refuseStalePresses(): void {
+  let pressed: Event | null = null;
+
+  window.addEventListener("pointerdown", (event) => { pressed = event; }, true);
+
+  window.addEventListener(
+    OUTSIDE_PRESS,
+    (event) => {
+      const said = (event as CustomEvent<{ originalEvent?: Event }>).detail?.originalEvent ?? null;
+
+      if (said !== pressed || overLayers(said?.target)) {
+        event.preventDefault();
+      }
+    },
+    true
+  );
+}
+
+// The event the library raises where the focus has just landed, when it landed outside a layer;
+// cancellable, and the only say anything here has in whether that move closes anything. Like the
+// press above, it is dispatched there and does not bubble.
+const OUTSIDE_FOCUS = "dismissableLayer.focusOutside";
+
+// The event the library raises on a layer's focus scope as the layer goes. A turn after it, the
+// scope hands the focus back to wherever it stood when the layer opened.
+const HANDING_BACK = "focusScope.autoFocusOnUnmount";
+
+// The focus a going layer hands back moves out of nothing the reader is in.
+//
+// A menu gives the focus back to its own button as it goes. When the reader's choice in it opened
+// something else — a choice opening a panel of details beside the button — that something already
+// stands by the time the focus arrives at the button, and the button is outside it. Told of that
+// move, it closes the moment it opened. The move is the library putting its own things in order
+// rather than the reader going anywhere, so a focus outside told of it closes nothing, whichever
+// floating thing the choice opened and whichever screen drew it. A press outside, Esc and back
+// still close it.
+export function refuseHandedBackFocus(): void {
+  const handedBack = new WeakSet<Event>();
+  let handing = 0;
+
+  window.addEventListener(
+    HANDING_BACK,
+    () => {
+      handing += 1;
+      // The library's own turn is queued only after this event has been dispatched, so it runs
+      // after this one's first turn and before its second.
+      setTimeout(() => setTimeout(() => { handing -= 1; }, 0), 0);
+    },
+    true
+  );
+
+  window.addEventListener(
+    "focusin",
+    (event) => {
+      if (handing > 0) {
+        handedBack.add(event);
+      }
+    },
+    true
+  );
+
+  window.addEventListener(
+    OUTSIDE_FOCUS,
+    (event) => {
+      const said = (event as CustomEvent<{ originalEvent?: Event }>).detail?.originalEvent;
+
+      if (said !== undefined && (handedBack.has(said) || overLayers(said.target))) {
+        event.preventDefault();
+      }
+    },
+    true
+  );
+}
+
+// A finger's press outside what stands on top only puts that away. On a touch screen the press
+// that dismisses a menu is the same tap that would press what lies under it — another row, whose
+// tap opens its own menu, a link, a button — and a person tapping away to close something has not
+// yet looked at what is under their finger. So the click that press ends in goes nowhere, and the
+// next tap is the one that acts. A mouse is left alone: it points before it presses. What floats
+// over every layer is under no layer, so a tap on it acts.
+function listenForTaps(): void {
+  let away = false;
+
+  window.addEventListener(
+    "pointerdown",
+    (event) => {
+      const top = topLayer();
+
+      away = event.pointerType === "touch" && top !== null && !(event.target instanceof Node && top.contains(event.target)) && !overLayers(event.target);
+    },
+    true
+  );
+
+  window.addEventListener(
+    "click",
+    (event) => {
+      if (!away) {
+        return;
+      }
+
+      away = false;
+      event.preventDefault();
+      event.stopPropagation();
+
+      const top = topLayer();
+
+      if (top !== null) {
+        void dismiss(top);
+      }
+    },
+    true
+  );
+}
+
+let watching = false;
+
+export function watchOverlays(): void {
+  if (watching || import.meta.server) {
+    return;
+  }
+
+  watching = true;
+  listenForBack();
+  listenForTaps();
+  refuseStalePresses();
+  refuseHandedBackFocus();
+  new MutationObserver(sweep).observe(document.body, {
+    subtree: true,
+    childList: true,
+    attributes: true,
+    attributeFilter: ["data-state"]
+  });
+  sweep();
+}
