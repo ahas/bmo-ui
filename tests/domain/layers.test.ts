@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, test } from "bun:test";
 
-import { closeLayer, handlePop, holdHistory, layerCount, openLayer, stepsLanded } from "~/domain/layers";
+import { closeLayer, handlePop, holdHistory, layerCount, listenForBack, openLayer, stepsLanded } from "~/domain/layers";
 
 import type { LayerHistory } from "~/domain/layers";
 
@@ -349,5 +349,28 @@ describe("a press with nothing standing", () => {
 
     expect(layerCount()).toBe(0);
     expect(now.at).toBe(0);
+  });
+});
+
+// A host with no pages stands on the framework's small router, which has no history of its own.
+describe("a layer closed in a host whose router keeps no history", () => {
+  test("takes its entry back through the browser itself", () => {
+    const steps: string[] = [];
+    const back = window.history.back.bind(window.history);
+
+    Object.assign(globalThis, { useRouter: () => ({ options: {}, beforeEach: () => undefined }) });
+    window.history.back = () => void steps.push("back");
+
+    try {
+      listenForBack();
+
+      const id = openLayer(() => undefined);
+
+      closeLayer(id);
+
+      expect(steps).toEqual(["back"]);
+    } finally {
+      window.history.back = back;
+    }
   });
 });

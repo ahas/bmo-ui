@@ -59,6 +59,7 @@ wording keys listed here are the ones the layer's list holds.
 | `SettingsGroup` | A group of settings rows under a small heading. |
 | `SettingsRow` | One setting: its name, a muted line, its control. |
 | `SettingsSegment` | A choice of two or three as one segmented control. |
+| `ShareLinkDialog` | The one dialog a share link is made, shown, copied and ended in, over the road the host hands it. |
 | `ShellClose` | The close of a modal or a side sheet. |
 | `SkeletonBar` | The one shimmering bar. |
 | `SkeletonLine` | One line of text not yet arrived. |
@@ -82,6 +83,7 @@ Each is named with everything it exports.
 | `bars` | `BarColor`, `BAR_SIZE`, `STACKED_LEGEND`, `INLINE_LEGEND`, `FOLDED_LEGEND` |
 | `chooseall` | `ChooseAllState`, `chooseAllState`, `chosenRuns`, `chooseAllPress`, `chooseAllLabel`, `CHOOSE_CELL`, `CHOOSE_GUTTER` |
 | `closing` | `OVERLAY_CLOSE_MS`, `useHeldWhileClosing` |
+| `clipboard` | `copyText` |
 | `code-colour` | `colouredRuns`, `colourCode`, `forgetCode` |
 | `code-copy` | `blockText`, `copyFromPress` |
 | `code-themes` | `CODE_THEMES` |
@@ -115,17 +117,21 @@ Each is named with everything it exports.
 | `scheme` | `provideBoxScheme`, `useDarkScheme`, `usePageScheme`, `usePreviewScheme` |
 | `screen` | `NARROW_MAX_PX`, `NARROW_QUERY`, `useNarrow`, `VisibleReading`, `VisibleFrame`, `visibleFrame`, `SCREEN_HEIGHT_PROPERTY`, `SCREEN_TOP_PROPERTY`, `SCREEN_FRAME`, `useVisibleScreen`, `STABLE_GUTTER`, `useWidth`, `useScrollGutter` |
 | `scroll-within` | `offsetFor`, `scrollWithin` |
+| `share-links` | `ShareLink`, `ShareSpan`, `ShareRoad`, `ShareMark`, `shareEnded`, `shareUntilText` |
 | `side-parts` | `SPLIT_HANDLE`, `FULL_SHEET` |
 | `sound-tap` | `TAP_FFT`, `Tap`, `tapOf` |
 | `tab-slide` | `SlideDirection`, `slideDirection`, `useSlideDirection` |
 | `table-sections` | `TableSection`, `SectionHeading`, `sectionHeading`, `headingOf`, `sectionedRows`, `sectionedRowId` |
 | `tabs` | `TAB_ROW_UI`, `TAB_ROW_LINE`, `BarTab`, `BarMenuItem`, `BarAction`, `BarProperty`, `SwitchItem`, `SeenTab`, `openInTabs`, `mergeTabs`, `pinTab`, `pinnedFirst`, `lastSeen`, `moveTab`, `othersOf`, `rightOf`, `allOf`, `fileTabLabel`, `baseName` |
-| `time` | `FOREVER_LABEL`, `formatClock`, `formatDay`, `formatDayClock`, `clockUnder`, `formatDateClock`, `formatStamp`, `formatTime`, `dayKey`, `spanClock`, `elapsedText`, `timerClock`, `remainingText`, `shareLeftText`, `useNowSeconds`, `toUnixSeconds` |
-| `tooltip` | `TOOLTIP_UI` |
+| `time` | `FOREVER_LABEL`, `formatClock`, `formatDay`, `formatShortDay`, `formatDayClock`, `clockUnder`, `formatDateClock`, `formatStamp`, `formatTime`, `dayKey`, `spanClock`, `elapsedText`, `timerClock`, `remainingText`, `useNowSeconds`, `toUnixSeconds` |
+| `tooltip` | `TOOLTIP_UI`, `TOOLTIP_PROVIDER` |
 | `waveform` | `WAVE_DETAIL`, `WAVE_FETCH_LIMIT`, `WAVE_FLOOR`, `Waveform`, `peaksOf`, `waveBars`, `barCount`, `loudnessAt`, `waveformOf` |
 | `zoom` | `ZoomView`, `Point`, `Size`, `FIT`, `MIN_SCALE`, `MAX_SCALE`, `DOUBLE_SCALE`, `bounded`, `zoomedTo`, `wheeled`, `moved`, `pinched`, `toggled`, `fittedSize`, `swipeStep` |
 
 - **`player` takes a sound's address as given.** Where a sound is fetched from is the host's.
+- **`share-links` takes a link's road as given.** How a link is read, made and ended, the page it
+  opens and the spans offered are the host's; the module holds their shapes and the one reading of a
+  link's end, as the date it stands until.
 - **`monaco` opens code and source views only.** Any other view over the editor is the host's.
 - **`numbers` and `time` read the host's locale and zone** (see What the host owes) each time they
   write, so they import no locale and nothing is read before the app stands. `countLocale` answers
@@ -164,32 +170,38 @@ Each runs in the browser alone, on every screen, from the moment the page is up.
 
 ## Wording keys
 
-The layer reads these 76 keys and no others. The `wording-keys` shared module lists them, the one
+The layer reads these 90 keys and no others. The `wording-keys` shared module lists them, the one
 list a host's pack is held to. Placeholders are named after each key.
 
 - **`common.action`:** `cancel`, `choose_all`, `choose_none`, `close`, `close_all_tabs`,
-  `close_other_tabs`, `close_right_tabs`, `copy`, `discard`, `fit_screen`, `more`, `next_picture`,
-  `pause`, `pin`, `play`, `previous_picture`, `save`, `unpin`, `zoom_in`, `zoom_out`.
+  `close_other_tabs`, `close_right_tabs`, `copy`, `create_link`, `discard`, `fit_screen`, `more`,
+  `next_picture`, `pause`, `pin`, `play`, `previous_picture`, `save`, `unpin`, `unshare`, `zoom_in`,
+  `zoom_out`.
 - **`common.aria`:** `close_named` `{name}`, `column_width` `{name}`, `decrease`, `download_named`
-  `{name}`, `image_zoom` `{title}`, `increase`, `more_notices` `{n}`, `pinned_named` `{name}`.
-- **`common.error`:** `editor_failed`, `picture_failed`, `video_failed`.
+  `{name}`, `image_zoom` `{title}`, `increase`, `more_notices` `{n}`, `pinned_named` `{name}`,
+  `share_address`.
+- **`common.error`:** `editor_failed`, `link_copy_failed`, `picture_failed`, `share_create_failed`,
+  `share_read_failed`, `unshare_failed`, `video_failed`.
 - **`common.label`:** `day_format` (a date format the time module's day is written in), `days`
-  `{d}`, `days_hours` `{d}` `{h}`, `expired`, `forever`, `hours` `{h}`, `hours_minutes` `{h}` `{m}`,
-  `left_days` `{n}`, `left_hours` `{n}`, `left_minutes` `{n}`, `left_under_minute`, `minutes` `{m}`,
-  `minutes_seconds` `{m}` `{s}`, `palette_forest`, `palette_lemon`, `palette_sea`, `palette_sunset`,
-  `palette_teal`, `palette_violet`, `play_position`, `properties`, `seconds` `{n}`, `theme_forest`,
-  `theme_sea`, `theme_sunset`, `theme_teal`, `theme_violet`, `unplayable`.
-- **`common.message`:** `discard_confirm`, and the theme preview's words: `preview_badge`,
-  `preview_field`, `preview_link`, `preview_meta`, `preview_note`.
-- **`common.status`:** `copied`, `loading`, `picture_loading`, `video_loading`.
+  `{d}`, `days_hours` `{d}` `{h}`, `expired`, `expiry`, `forever`, `hours` `{h}`, `hours_minutes`
+  `{h}` `{m}`, `left_days` `{n}`, `left_hours` `{n}`, `left_minutes` `{n}`, `left_under_minute`,
+  `link`, `minutes` `{m}`, `minutes_seconds` `{m}` `{s}`, `palette_forest`, `palette_lemon`,
+  `palette_sea`, `palette_sunset`, `palette_teal`, `palette_violet`, `play_position`, `properties`,
+  `seconds` `{n}`, `share_until` `{date}`, `short_day_format` (the short date format the time
+  module's short day is written in, the year in two figures), `theme_forest`, `theme_sea`,
+  `theme_sunset`, `theme_teal`, `theme_violet`, `unplayable`.
+- **`common.message`:** `discard_confirm`, `link_copied`, and the theme preview's words:
+  `preview_badge`, `preview_field`, `preview_link`, `preview_meta`, `preview_note`.
+- **`common.status`:** `copied`, `loading`, `picture_loading`, `share_loading`, `video_loading`.
+- **`common.title`:** `share_link`.
 - **`files.action`:** `keep_both`, `replace`, `skip`.
 - **`files.aria`:** `name_field`.
 - **`files.label`:** `progress` `{done}` `{all}` `{percent}`.
 - **`files.message`:** `conflict`.
 - **`files.status`:** `uploading`.
 
-That is 20 actions, 8 accessible names, 3 errors, 28 labels, 6 messages and 4 statuses under
-`common`, and 7 keys under `files`.
+That is 22 actions, 9 accessible names, 7 errors, 32 labels, 7 messages, 5 statuses and 1 title
+under `common`, and 7 keys under `files`.
 
 ## Tokens
 
@@ -288,6 +300,11 @@ Every token is a custom property stated by the layer's stylesheet on the root un
   The layer's own app configuration states the setting with nothing in it, so each default stands
   until the host states a value. A host that renders on the server states all three, since the
   server's runtime and the browser's need not agree.
+- **The tooltip setting.** The host's app root, the library's `UApp`, is handed the tooltip
+  module's `TOOLTIP_PROVIDER` as its tooltip setting, so a focus the keyboard did not bring — the
+  one a closing dialog or sheet hands back to its control — brings up no tooltip
+  (`docs/components.md`, "Tooltips"). The layer's shared tooltip holds this on its own; the setting
+  holds it for every other tooltip the library draws.
 - **The patch.** The patch under `patches/` is applied to the same `reka-ui` version in the host's own
   install. It makes a collapsible region's id with the region's root, so a button drawn before its
   region already names it and no id stands twice.
@@ -302,7 +319,8 @@ Every token is a custom property stated by the layer's stylesheet on the root un
 
 - **The layer requires** Nuxt 4.5 or later within 4, `@nuxtjs/i18n` 10.6 or later within 10 and
   `vue-i18n` 11.4.8 or later within 11, the engine that module requires, as peers, and brings Nuxt
-  UI 4.11 or later within 4.
+  UI 4.11 or later within 4, with the two icon sets it draws from: Material Symbols and the Material
+  Icon Theme.
 - **It stands on registry packages alone;** no other repository is a dependency.
 - **One version for the whole repository,** the manifest's; the README states what may change at
   which release.

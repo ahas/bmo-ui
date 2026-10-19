@@ -254,11 +254,16 @@ export function listenForBack(): void {
   listening = true;
   window.addEventListener("popstate", (event) => handlePop(event.state));
 
-  // A step of this module's is taken through the router, told not to read the pop it makes: read
-  // as a move, it would cancel whatever navigation was begun while it was on its way.
+  // A step of this module's is taken through the router's history, told not to read the pop it
+  // makes: read as a move, it would cancel whatever navigation was begun while it was on its way.
+  // A host with no pages stands on the framework's own small router, which keeps no history of its
+  // own and so has no navigation for the pop to cancel; there the step is the browser's.
   const router = useRouter();
+  const routerHistory = (router.options as { history?: typeof router.options.history }).history;
 
-  stepBack = () => router.options.history.go(-1, false);
+  if (routerHistory !== undefined) {
+    stepBack = () => routerHistory.go(-1, false);
+  }
 
   // A navigation waits for a step back still on its way, which would otherwise land on top of it.
   // The wait begins with a turn of the screen's own updates, since the close that asks for the step

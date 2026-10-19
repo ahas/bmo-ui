@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 
-import { TOOLTIP_UI } from "~/domain/tooltip";
+import { TOOLTIP_PROVIDER, TOOLTIP_UI } from "~/domain/tooltip";
 
 // The layer's one tooltip for words that say more than what they stand on. Read off the file that
 // ships: what a rendered screen would not name is how a finger, which has no hover, brings it up.
@@ -19,6 +19,14 @@ describe("the shared tooltip", () => {
   test("names a cut name only where its box actually cuts it", () => {
     expect(tip).toContain("box.scrollWidth > box.clientWidth");
     expect(tip).toContain("if (value && props.cut && !isCut()) return;");
+  });
+
+  // A closing dialog hands the focus back to the control it was opened from; on a phone that focus
+  // would leave the control's name standing over the screen the reader returned to.
+  test("comes up for no focus the keyboard did not bring, as the setting a host hands the library says", () => {
+    expect(TOOLTIP_PROVIDER).toEqual({ ignoreNonKeyboardFocus: true });
+    expect(tip).toContain(':ignore-non-keyboard-focus="TOOLTIP_PROVIDER.ignoreNonKeyboardFocus"');
+    expect(tip).toContain('event.target.matches(":focus-visible")');
   });
 
   test("wraps long words rather than cutting them, as the cut-line tooltip does", () => {

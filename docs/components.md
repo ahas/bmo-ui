@@ -168,6 +168,39 @@ default; a screen supplies what it holds and what a press means there. Every exp
 - **The theme and palette pictures** — `ThemePreview`, `ThemeSwatch` and `PaletteSwatch` — draw an
   entry in one mode on their own box, as a row's choices.
 
+## Share links
+
+- **One dialog makes, shows and ends a share link** (`ShareLinkDialog`), whatever is shared. It is a
+  small form, so it is the settings dialog in the middle of the screen at every width, titled by
+  what it is, the name of what is shared under the title where the screen behind does not say it.
+- **The host hands it the road its links go by** (the share-links module): how the one standing link
+  is read, how one is made for a span, how it is ended, and the page a link opens, as a path or a
+  whole address. The dialog calls no server and knows nothing of what a link opens. The host also
+  hands it the spans offered, each a value of its own and the words it is chosen by, and which one is
+  offered first; which spans there are is the host's policy.
+- **It opens on what stands.** Each time it opens it reads afresh, a skeleton standing while it reads.
+  With no link it offers the spans as one dropdown, and making one is the footer's action; with a
+  link it shows the address in a read-only field in the machine face, every character chosen on
+  focus, a copy button beside it naming itself in a tooltip, and a chip of the link's end. Ending the
+  link is the footer's action, in the colour of an action that removes something.
+- **Making one leaves the dialog standing.** The link made takes the form's place, so the address is
+  read and copied where it was asked for. A link is given another life by being ended and made again;
+  nothing edits one.
+- **The address is one somebody outside can open:** the road's page read against the page the
+  dialog stands on.
+- **A link's end is shown as the date it ends on, never as time left.** The chip says the date it
+  stands until, in the host's short date format, with the moment it ends to the minute in a tooltip;
+  a link that never ends says it has no end, and one past its end says it has ended, in the failure
+  colour. The share-links module's reading is the one every screen uses wherever it names a link's
+  end, so a list of links and the dialog read alike. Whether a link has ended is read against a
+  clock moved while the screen stands.
+- **A copy says whether it worked** on the message pill. A refused read, make or end says why inside
+  the dialog, in the host's words for the failure where it hands the dialog its own reading of one,
+  and the server's message otherwise.
+- **The screen is told what it is shared by.** Each read, make and end tells the screen behind the
+  link's end as it now stands, or that nothing is shared, so the screen need not ask the server again.
+- **What stands is kept while the dialog closes,** so its body does not blink on the way out.
+
 ## Messages
 
 - **Everything said to the reader stands in one place:** a notice of something that arrived, the word
@@ -253,6 +286,12 @@ default; a screen supplies what it holds and what a press means there. Every exp
   goes are the tooltip's, stated once in the tooltip module.
 - **A pointer brings it up on hover and the keyboard on focus,** including a focus landing on a
   control inside what it stands on. It grows out of what it stands on at `quick`.
+- **A focus the keyboard did not bring brings up no tooltip.** A dialog or a sheet that closes — by
+  the back gesture as much as by a press — hands the focus back to the control it was opened from,
+  and on a phone that control's name would otherwise stand over what the reader returned to. The
+  shared tooltip holds this itself, and the tooltip module's provider setting holds it for every
+  tooltip the library draws, once the host hands it to the library's app root (`docs/boundary.md`,
+  "What the host owes").
 - **A finger has no hover.** Where a tap does nothing else, a tap brings it up; where a tap acts, a
   finger rests on it instead, by the one held finger, and lifting presses nothing. The next touch
   anywhere puts it away.
@@ -376,4 +415,7 @@ default; a screen supplies what it holds and what a press means there. Every exp
 - **The file components** are a file's text in the read-only viewer (`FilesText`), a name renamed in
   place (`FilesNameField`), an upload's progress (`FilesProgress`), and the one question asked when a
   change would land on names already taken (`FilesConflictDialog`): replace, keep both, skip, or give
-  the change up. A file's icon comes from the file-icons module.
+  the change up. A file's icon comes from the file-icons module, drawn from the Material Icon Theme
+  set the layer brings as a dependency.
+- **Text is put on the clipboard through the clipboard module,** which falls back to the browser's
+  older copy where the clipboard API is refused, and answers whether the copy went through.

@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, test } from "bun:test";
 
 import dayjs from "dayjs";
 
-import { clockUnder, formatDay, remainingText, shareLeftText, timerClock } from "~/domain/time";
+import { clockUnder, formatDay, formatShortDay, remainingText, timerClock } from "~/domain/time";
 
 import type { Translate } from "#shared/wording";
 
@@ -17,14 +17,14 @@ function hostSays(setting: { zone?: string; locale?: string; dateLocale?: string
 
 beforeEach(() => hostSays({ zone: "UTC", locale: "en-US" }));
 
-// How much of a share link's life is left, as the chip beside it reads. It is said in one unit,
-// always floored, and a link with no life left says so rather than counting into the negative.
+// How much of a wait is left, as a line counting it down reads. It is said in one unit, always
+// floored, and a wait with nothing left says so rather than counting into the negative.
 
 const HOUR = 60 * 60;
 const DAY = 24 * HOUR;
 const NOW = 1_800_000_000;
 
-describe("what is left of a link", () => {
+describe("what is left of a wait", () => {
   test("is said in the one unit a person would say it in", () => {
     expect(remainingText(wording, NOW + 3 * HOUR, NOW)).toBe(wording("common.label.left_hours", { n: "3" }));
     expect(remainingText(wording, NOW + 45 * 60, NOW)).toBe(wording("common.label.left_minutes", { n: "45" }));
@@ -45,7 +45,7 @@ describe("what is left of a link", () => {
     expect(remainingText(wording, NOW + 60, NOW)).toBe(wording("common.label.left_minutes", { n: "1" }));
   });
 
-  test("a link whose time has passed says so and never counts backwards", () => {
+  test("a wait whose time has passed says so and never counts backwards", () => {
     expect(remainingText(wording, NOW, NOW)).toBe(wording("common.label.expired"));
     expect(remainingText(wording, NOW - 1, NOW)).toBe(wording("common.label.expired"));
     expect(remainingText(wording, NOW - 30 * DAY, NOW)).toBe(wording("common.label.expired"));
@@ -59,19 +59,6 @@ describe("what is left of a link", () => {
   });
 });
 
-// A link meant to stand has no time to count down to. What reads its life says what it is instead —
-// not a blank, and not a figure worked out from a time nobody set.
-describe("what is left of a link that never ends", () => {
-  test("is the word for having no end, whenever it is read", () => {
-    expect(shareLeftText(wording, null, NOW)).toBe(wording("common.label.forever"));
-    expect(shareLeftText(wording, null, NOW + 100 * 365 * DAY)).toBe(wording("common.label.forever"));
-  });
-
-  test("is the countdown as before for a link that does end", () => {
-    expect(shareLeftText(wording, NOW + 3 * HOUR, NOW)).toBe(wording("common.label.left_hours", { n: "3" }));
-    expect(shareLeftText(wording, NOW, NOW)).toBe(wording("common.label.expired"));
-  });
-});
 
 // A short wait ticking down reads as a timer face: minutes and two-digit seconds, hours only past an hour.
 describe("a timer face", () => {
@@ -115,5 +102,17 @@ describe("the zone and the words a time is shown in", () => {
 
   test("are dayjs's built-in words where the host names no locale", () => {
     expect(formatDay(() => "dddd", sent)).toBe("Monday");
+  });
+});
+
+describe("a short day", () => {
+  const sent = 1_791_770_460;
+
+  test("is written in the format the pack gives it, in the host's zone", () => {
+    expect(formatShortDay(() => "YY/MM/DD", sent)).toBe("26/10/12");
+
+    hostSays({ zone: "America/New_York" });
+
+    expect(formatShortDay(() => "YY/MM/DD", sent)).toBe("26/10/11");
   });
 });

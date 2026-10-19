@@ -5,6 +5,7 @@
     "": {
       "name": "bmo-ui",
       "dependencies": {
+        "@iconify-json/material-icon-theme": "^1.2.72",
         "@iconify-json/material-symbols": "^1.2.93",
         "@nuxt/ui": "^4.11.2",
         "@tanstack/vue-table": "8.21.3",
@@ -191,6 +192,8 @@
     "@floating-ui/vue": ["@floating-ui/vue@1.1.11", "", { "dependencies": { "@floating-ui/dom": "^1.7.6", "@floating-ui/utils": "^0.2.11", "vue-demi": ">=0.13.0" } }, "sha512-HzHKCNVxnGS35r9fCHBc3+uCnjw9IWIlCPL683cGgM9Kgj2BiAl8x1mS7vtvP6F9S/e/q4O6MApwSHj8hNLGfw=="],
 
     "@happy-dom/global-registrator": ["@happy-dom/global-registrator@20.14.5", "", { "dependencies": { "@types/node": ">=20.0.0", "happy-dom": "^20.14.5" } }, "sha512-B05ID9DhSwLs6mlm1fzlkAtTIvB3duCvjJjfr19LBrlTK7VZtRjDqoTRIVv13GuYuNdhByu8LSZgThwV3Rkj7g=="],
+
+    "@iconify-json/material-icon-theme": ["@iconify-json/material-icon-theme@1.2.72", "", { "dependencies": { "@iconify/types": "*" } }, "sha512-zNe7VGXvUGMeexC8DTSa+NNF2ng5gLAgQL8GQgEBLfqnG7W52dfL/X8cwNx5OmhaZkA+fuKZ6DFVrDdg5vqp/Q=="],
 
     "@iconify-json/material-symbols": ["@iconify-json/material-symbols@1.2.93", "", { "dependencies": { "@iconify/types": "*" } }, "sha512-IfbpRixmEdeBrl2Bc+RtNZGb3NcTnMiPP4WausCParQYpIdezEYYbgMggJC1cYzm1q0f77p53t5tppy9PWsrvQ=="],
 

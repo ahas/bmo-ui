@@ -1,7 +1,8 @@
 <template>
   <!-- The shared tooltip for words that say more than what they stand on: a name cut to fit its
        box, a number standing for something with a name (`docs/components.md`, "Tooltips"). A
-       pointer brings it up on hover and the keyboard on focus, the library's own way. A finger has
+       pointer brings it up on hover and the keyboard on focus, the library's own way; a focus the
+       keyboard did not bring, as one handed back by a closing dialog, brings up nothing. A finger has
        no hover, so it brings it up with a tap where a tap does nothing else, and by resting on what
        it stands on where a tap acts there; the next touch anywhere puts it away. Its words wrap
        inside a box no wider than a phone has room for, so a long name is read whole. -->
@@ -10,6 +11,7 @@
     :text="props.text"
     :disabled="props.disabled"
     disable-closing-trigger
+    :ignore-non-keyboard-focus="TOOLTIP_PROVIDER.ignoreNonKeyboardFocus"
     :content="tipContent"
     :ui="TOOLTIP_UI"
   >
@@ -36,7 +38,7 @@
 
 <script setup lang="ts">
 import { useLongPress } from "../domain/longpress";
-import { TOOLTIP_UI } from "../domain/tooltip";
+import { TOOLTIP_PROVIDER, TOOLTIP_UI } from "../domain/tooltip";
 
 import type { Component, ComponentPublicInstance } from "vue";
 

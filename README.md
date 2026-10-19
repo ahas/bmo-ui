@@ -36,6 +36,7 @@ components and behaviours every screen is built from. It is a Nuxt layer, built 
 | `app/` | The layer's app code: the stylesheet and the fonts with their licences under `assets/`, the components under `components/`, the domain modules under `domain/`, the app configuration holding the library's overrides and the host's setting with nothing in it, and the declaration typing templates by the host's i18n module |
 | `docs/` | The canonical documents: the design foundations, the wording contract, the components and the boundary |
 | `patches/` | The patch applied to a dependency on install |
+| `releases/` | The packed file of each version a host takes |
 | `shared/` | The shared modules, read by the layer's code and the host's alike |
 | `tests/` | The tests, with the browser lane's files and their support under `tests/browser/` |
 
@@ -48,3 +49,8 @@ quick checks read, and `CLAUDE.md`.
 - **One version for the whole repository,** the manifest's, following semantic versioning over the
   boundary that `docs/boundary.md` states.
 - **While the major is 0,** a minor release may change the boundary; from 1 on, only a major may.
+- **A version is one packed file,** kept under `releases/` by its version's name. It is packed with
+  `bun pm pack` from a scratch export (`git archive`) of the committed tree, never from a checkout,
+  and the manifest's file list names everything it holds: the layer's code, its stylesheet and fonts,
+  the patch, the Nuxt configuration, the README and the documents. A host takes that one file, so
+  every host of a version stands on the same bytes.

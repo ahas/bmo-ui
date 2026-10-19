@@ -34,6 +34,12 @@ export function formatDay(t: Translate, unixSeconds: number): string {
   return shown(unixSeconds).format(t("common.label.day_format"));
 }
 
+// The date alone in its fewest figures, the year in two, for a place a whole day says enough in:
+// the day a link stands until.
+export function formatShortDay(t: Translate, unixSeconds: number): string {
+  return shown(unixSeconds).format(t("common.label.short_day_format"));
+}
+
 // The date and the clock without the year or the seconds, for a point on a span of days.
 export function formatDayClock(unixSeconds: number): string {
   return shown(unixSeconds).format("MM-DD HH:mm");
@@ -125,10 +131,10 @@ export function timerClock(seconds: number): string {
 }
 
 // How much of something's life is left, as a reader counts it down. A stretch that is over
-// (`spanClock`) is said to the second because it is a measurement; what is left of a share link
-// is not measured but glanced at, so it is said in the one unit a person would say it in and
-// never in two. Always floored — a link with fifty-nine minutes left has "59 minutes left" and not an
-// hour, because the one thing this must never do is promise more time than there is.
+// (`spanClock`) is said to the second because it is a measurement; what is left of a wait is not
+// measured but glanced at, so it is said in the one unit a person would say it in and never in
+// two. Always floored — a wait with fifty-nine minutes left has "59 minutes left" and not an hour,
+// because the one thing this must never do is promise more time than there is.
 export function remainingText(t: Translate, untilUnixSeconds: number, nowUnixSeconds: number): string {
   const left = untilUnixSeconds - nowUnixSeconds;
 
@@ -149,13 +155,6 @@ export function remainingText(t: Translate, untilUnixSeconds: number, nowUnixSec
   }
 
   return t("common.label.left_days", { n: countText(Math.floor(left / 86_400)) });
-}
-
-// The same, for a life that may have no end. A link made to stand has no time to count down to,
-// so what stands in that place is the word for what it is rather than a blank or a span of its
-// own invention.
-export function shareLeftText(t: Translate, expiresAt: number | null, nowUnixSeconds: number): string {
-  return expiresAt === null ? t(FOREVER_LABEL) : remainingText(t, expiresAt, nowUnixSeconds);
 }
 
 // How often a line counting down is moved on unless it asks for finer. A countdown said in minutes
