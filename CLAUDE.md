@@ -17,9 +17,10 @@ These rules hold every change to this repository.
 ## Language
 
 - Everything in this repository is English: code, comments, strings, tests, documents, commit messages
-  and branch names. No Korean in code or tests; the quick checks' ledger allows none.
+  and branch names. No Korean in code or tests; the quick checks' ledger names the test files that
+  hold Hangul input written as escapes and allows every other file none.
 - Test input is neutral English. Where a test is about how Hangul behaves, the Hangul is written as
-  `\u` escapes.
+  `\u` escapes and its file's count stands in the ledger.
 - No personal data: no user names, home directories, machine names, host names or addresses, and no
   name of any agent or product that uses the layer. The `bmo-` prefix is the library's own namespace,
   and `ahas-ui`, the layer's skill, is one name in the namespace harnesses load upstream skills from.

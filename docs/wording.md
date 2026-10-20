@@ -56,7 +56,8 @@ list; `docs/boundary.md` names every one of them.
 - **A string that is data stays in the code:** one compared against a value, used as an id, or
   matched against stored text.
 - **The layer holds no words at all,** so it holds no Hangul and no text in any other language. The
-  quick checks' ledger allows none in its code and tests.
+  only Hangul in its tests is input for what a test shows of Hangul, written as `\u` escapes; the
+  quick checks' ledger names the three test files that hold it and allows every other file none.
 
 ## The guard
 
