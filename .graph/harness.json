@@ -33,8 +33,8 @@
       "search/lists",
       "console/contract"
     ],
-    "base": "5ff3c1cb6ab69559e0f19190efb70bcfcd4da71a",
-    "changed": 1792521058268
+    "base": "831e306c018d8c8a8b746a05ef5733f2d0705f86",
+    "changed": 1792535445791
   },
   {
     "id": "harness/server",
