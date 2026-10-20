@@ -1,0 +1,96 @@
+[
+  {
+    "id": "theme/mode",
+    "title": "Screen mode and box schemes",
+    "what": "The light, dark and system screen mode kept in a cookie and read by the page, and the scheme a box or a theme picture stands in apart from the page (app/domain/scheme.ts, shared/screen-mode.ts).",
+    "files": [
+      "shared/screen-mode.ts",
+      "app/domain/scheme.ts",
+      "docs/design.md"
+    ],
+    "symbols": [
+      "DocumentScheme",
+      "DEFAULT_SCHEME",
+      "SCHEME_COOKIE",
+      "isDocumentScheme",
+      "provideBoxScheme",
+      "useDarkScheme",
+      "usePageScheme",
+      "usePreviewScheme"
+    ],
+    "aliases": [],
+    "needs": [
+      "theme/themes"
+    ],
+    "base": "2c8f2b157886586e664f125b23f336240de9749f",
+    "changed": 1792497757619
+  },
+  {
+    "id": "theme/palettes",
+    "title": "Palettes",
+    "what": "The six palettes, each the reader's own ground and everyone else's in both modes, the default teal, and the token declarations that state them (shared/palettes.ts).",
+    "files": [
+      "shared/palettes.ts",
+      "docs/design.md"
+    ],
+    "symbols": [
+      "Palette",
+      "PALETTES",
+      "DEFAULT_PALETTE",
+      "isPaletteId",
+      "paletteOf",
+      "paletteTokens",
+      "paletteDeclarations"
+    ],
+    "aliases": [],
+    "needs": [
+      "theme/themes"
+    ],
+    "base": "2c8f2b157886586e664f125b23f336240de9749f",
+    "changed": 1792497757610
+  },
+  {
+    "id": "theme/pictures",
+    "title": "Theme and palette pictures",
+    "what": "The small pieces that draw a theme or a palette in one mode on their own box: a screen fragment, a theme's accent and grey dots, and a palette's two grounds.",
+    "files": [
+      "app/components/ThemePreview.vue",
+      "app/components/ThemeSwatch.vue",
+      "app/components/PaletteSwatch.vue"
+    ],
+    "symbols": [],
+    "aliases": [],
+    "needs": [
+      "theme/themes",
+      "theme/palettes",
+      "theme/mode"
+    ],
+    "base": "2c8f2b157886586e664f125b23f336240de9749f",
+    "changed": 1792497757627
+  },
+  {
+    "id": "theme/themes",
+    "title": "Themes",
+    "what": "The five themes, each an accent and a neutral grey with the key of its name, the default teal, and the token and head declarations a chosen theme is stated by (shared/themes.ts).",
+    "files": [
+      "shared/themes.ts",
+      "docs/design.md"
+    ],
+    "symbols": [
+      "Scheme",
+      "ScaleName",
+      "Theme",
+      "THEMES",
+      "DEFAULT_THEME",
+      "isThemeId",
+      "themeOf",
+      "themeTokens",
+      "themeDeclarations",
+      "declarations"
+    ],
+    "aliases": [],
+    "needs": [],
+    "base": "2c8f2b157886586e664f125b23f336240de9749f",
+    "changed": 1792497757601
+  }
+]

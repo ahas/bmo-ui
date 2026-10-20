@@ -1,0 +1,641 @@
+[
+  {
+    "id": "components/audio",
+    "title": "Audio player and waveform",
+    "what": "A kept sound's play and pause, its waveform as progress, its download and turning figures, with the waveform peaks, loudness and the audio tap read here.",
+    "files": [
+      "app/components/AudioPlayer.vue",
+      "app/domain/player.ts",
+      "app/domain/waveform.ts",
+      "app/domain/sound-tap.ts",
+      "docs/components.md"
+    ],
+    "symbols": [
+      "Playing",
+      "playAlone",
+      "playClock",
+      "knownLength",
+      "loudnessOf",
+      "easedLoudness",
+      "AURA_STILL",
+      "auraOf",
+      "PlayerButton",
+      "PlayerSignal",
+      "buttonAfter",
+      "WAVE_DETAIL",
+      "WAVE_FETCH_LIMIT",
+      "WAVE_FLOOR",
+      "Waveform",
+      "peaksOf",
+      "waveBars",
+      "barCount",
+      "loudnessAt",
+      "waveformOf",
+      "TAP_FFT",
+      "Tap",
+      "tapOf"
+    ],
+    "aliases": [],
+    "needs": [
+      "components/screen"
+    ],
+    "base": "2c8f2b157886586e664f125b23f336240de9749f",
+    "changed": 1792497757663
+  },
+  {
+    "id": "components/clipboard",
+    "title": "Clipboard copying",
+    "what": "Text put on the clipboard through the browser's current API, with the older selection as its fallback, answering whether the copy went through.",
+    "files": [
+      "app/domain/clipboard.ts"
+    ],
+    "symbols": [
+      "copyText"
+    ],
+    "aliases": [],
+    "needs": [],
+    "base": "2c8f2b157886586e664f125b23f336240de9749f",
+    "changed": 1792497757798
+  },
+  {
+    "id": "components/code",
+    "title": "Code views and rendered blocks",
+    "what": "The editor's read-only code and source views, a file or fence's language, coloured runs for a block, its copy button, the editor's two themes, and the drawing of a diagram fence (app/domain/monaco.ts and its kin).",
+    "files": [
+      "app/domain/monaco.ts",
+      "app/domain/code-colour.ts",
+      "app/domain/code-copy.ts",
+      "app/domain/code-themes.ts",
+      "app/domain/diagram.ts",
+      "shared/code-language.ts",
+      "docs/components.md"
+    ],
+    "symbols": [
+      "languageOf",
+      "fenceLanguage",
+      "colourised",
+      "CodeView",
+      "openCodeView",
+      "SourceSelection",
+      "SourceView",
+      "colouredRuns",
+      "colourCode",
+      "forgetCode",
+      "blockText",
+      "copyFromPress",
+      "CODE_THEMES",
+      "isDiagram",
+      "drawDiagrams",
+      "codeLanguage"
+    ],
+    "aliases": [],
+    "needs": [
+      "wording/keys"
+    ],
+    "base": "2c8f2b157886586e664f125b23f336240de9749f",
+    "changed": 1792497757821
+  },
+  {
+    "id": "components/failures",
+    "title": "Failure text",
+    "what": "What a failed call says: the server's own message where it gave one, the caller's words otherwise, and whether a 504 answered late.",
+    "files": [
+      "app/domain/errors.ts"
+    ],
+    "symbols": [
+      "failureText",
+      "answeredLate"
+    ],
+    "aliases": [],
+    "needs": [],
+    "base": "2c8f2b157886586e664f125b23f336240de9749f",
+    "changed": 1792497757791
+  },
+  {
+    "id": "components/files",
+    "title": "Files",
+    "what": "A file's text in the read-only viewer, a name renamed in place chosen up to its ending, an upload's progress by files and bytes, and the question asked when a change lands on names already taken.",
+    "files": [
+      "app/components/FilesText.vue",
+      "app/components/FilesNameField.vue",
+      "app/components/FilesProgress.vue",
+      "app/components/FilesConflictDialog.vue",
+      "shared/files.ts",
+      "docs/components.md"
+    ],
+    "symbols": [
+      "FileConflict"
+    ],
+    "aliases": [],
+    "needs": [
+      "components/code",
+      "components/failures",
+      "components/numbers"
+    ],
+    "base": "2c8f2b157886586e664f125b23f336240de9749f",
+    "changed": 1792497757828
+  },
+  {
+    "id": "components/forms",
+    "title": "Forms and writing boxes",
+    "what": "A form that saves once from its foot, asks before leaving with changes and keeps a refused save, the text box that grows with its text, the number box, and how Enter sends or breaks a line.",
+    "files": [
+      "app/components/GrowingTextarea.vue",
+      "app/components/NumberInput.vue",
+      "app/domain/form-save.ts",
+      "app/domain/prompt.ts",
+      "docs/components.md",
+      "docs/design.md"
+    ],
+    "symbols": [
+      "FormPart",
+      "FormSave",
+      "askDiscard",
+      "useCloseGuard",
+      "useFormSave",
+      "useFormPart",
+      "useLeaveGuard",
+      "TOUCH_QUERY",
+      "EnterKeys",
+      "enterKeys",
+      "PromptEnter",
+      "usePromptEnter",
+      "PROMPT_MAX_ROWS",
+      "PROMPT_TEXTAREA_UI",
+      "PROMPT_WORDS_WRAP"
+    ],
+    "aliases": [],
+    "needs": [
+      "components/messages",
+      "components/screen",
+      "wording/keys"
+    ],
+    "base": "2c8f2b157886586e664f125b23f336240de9749f",
+    "changed": 1792497757775
+  },
+  {
+    "id": "components/messages",
+    "title": "Message island",
+    "what": "The one pill at the top of the screen: notices, the word that an action went through or failed, and questions, one standing and the rest waiting (app/domain/island.ts, MessageIsland).",
+    "files": [
+      "app/components/MessageIsland.vue",
+      "app/domain/island.ts",
+      "docs/components.md"
+    ],
+    "symbols": [
+      "IslandTone",
+      "IslandAction",
+      "IslandMessage",
+      "IslandSaid",
+      "IslandAsked",
+      "IslandState",
+      "TONE_ICONS",
+      "TONE_MS",
+      "WAITING_MAX",
+      "emptyIsland",
+      "messageOf",
+      "questionOf",
+      "expands",
+      "pressable",
+      "endsItself",
+      "raise",
+      "settle",
+      "Island",
+      "ISLAND_STATE",
+      "islandState",
+      "useIsland"
+    ],
+    "aliases": [],
+    "needs": [
+      "components/numbers",
+      "components/overlays",
+      "components/failures"
+    ],
+    "base": "2c8f2b157886586e664f125b23f336240de9749f",
+    "changed": 1792497757721
+  },
+  {
+    "id": "components/motion",
+    "title": "Moving list and marquee",
+    "what": "A list whose items come, go and change places by position alone, and a line that slides when it is longer than its box, with the travel and timing each works out (app/domain/moving-list.ts, marquee.ts).",
+    "files": [
+      "app/components/MovingList.vue",
+      "app/components/MarqueeLine.vue",
+      "app/domain/moving-list.ts",
+      "app/domain/marquee.ts",
+      "docs/design.md"
+    ],
+    "symbols": [
+      "unfoldItem",
+      "settleItem",
+      "foldItem",
+      "MARQUEE_SLACK_PX",
+      "MARQUEE_SPEED_PX_PER_SECOND",
+      "MARQUEE_TRAVEL_SHARE",
+      "MARQUEE_MIN_SECONDS",
+      "MarqueeVars",
+      "MarqueeMotion",
+      "marqueeDistance",
+      "marqueeSeconds",
+      "marqueeVars",
+      "useMarquee"
+    ],
+    "aliases": [],
+    "needs": [
+      "layer/styles"
+    ],
+    "base": "2c8f2b157886586e664f125b23f336240de9749f",
+    "changed": 1792497757705
+  },
+  {
+    "id": "components/numbers",
+    "title": "Figures, counts and bars",
+    "what": "Counting without a locale of its own, thousands separators, the count badge, turning figures and sentences, the steady-width figure, and the shared look of a segmented bar and its legends.",
+    "files": [
+      "app/components/RollingNumber.vue",
+      "app/components/RollingSentence.vue",
+      "app/components/SteadyFigure.vue",
+      "app/domain/numbers.ts",
+      "app/domain/bars.ts",
+      "docs/design.md"
+    ],
+    "symbols": [
+      "countLocale",
+      "countText",
+      "FigureLine",
+      "COUNT_BADGE",
+      "figurePlaces",
+      "turnOf",
+      "progressText",
+      "BarColor",
+      "BAR_SIZE",
+      "STACKED_LEGEND",
+      "INLINE_LEGEND",
+      "FOLDED_LEGEND"
+    ],
+    "aliases": [],
+    "needs": [
+      "wording/keys"
+    ],
+    "base": "2c8f2b157886586e664f125b23f336240de9749f",
+    "changed": 1792497757697
+  },
+  {
+    "id": "components/overlays",
+    "title": "Floating things and the back gesture",
+    "what": "The layer's reading of what floats over a screen: back closing it one layer at a time, the page history it keeps, a dialog growing out of its control, sheet and splitter part shapes, and what a closing thing keeps.",
+    "files": [
+      "app/components/ShellClose.vue",
+      "app/domain/layers.ts",
+      "app/domain/overlays.ts",
+      "app/domain/dialog-origin.ts",
+      "app/domain/side-parts.ts",
+      "app/domain/openings.ts",
+      "app/domain/closing.ts",
+      "app/plugins/overlays.client.ts",
+      "app/plugins/dialog-origin.client.ts",
+      "docs/components.md"
+    ],
+    "symbols": [
+      "stepsLanded",
+      "layerCount",
+      "LayerHistory",
+      "holdHistory",
+      "openLayer",
+      "closeLayer",
+      "handlePop",
+      "listenForBack",
+      "useBackClose",
+      "OVER_LAYERS",
+      "isBackEscape",
+      "refuseStalePresses",
+      "refuseHandedBackFocus",
+      "watchOverlays",
+      "Press",
+      "originOf",
+      "watchDialogOrigins",
+      "SPLIT_HANDLE",
+      "FULL_SHEET",
+      "useOpenings",
+      "OVERLAY_CLOSE_MS",
+      "useHeldWhileClosing"
+    ],
+    "aliases": [],
+    "needs": [],
+    "base": "2c8f2b157886586e664f125b23f336240de9749f",
+    "changed": 1792497757728
+  },
+  {
+    "id": "components/pictures",
+    "title": "Pictures and video",
+    "what": "A picture opened whole and zoomed by wheel, drag, pinch, double press or buttons, and pictures and video that keep their place while loading and name a failure.",
+    "files": [
+      "app/components/ImageViewer.vue",
+      "app/components/LoadingImage.vue",
+      "app/components/LoadingVideo.vue",
+      "app/domain/zoom.ts",
+      "docs/components.md"
+    ],
+    "symbols": [
+      "ZoomView",
+      "Point",
+      "Size",
+      "FIT",
+      "MIN_SCALE",
+      "MAX_SCALE",
+      "DOUBLE_SCALE",
+      "bounded",
+      "zoomedTo",
+      "wheeled",
+      "moved",
+      "pinched",
+      "toggled",
+      "fittedSize",
+      "swipeStep"
+    ],
+    "aliases": [],
+    "needs": [],
+    "base": "2c8f2b157886586e664f125b23f336240de9749f",
+    "changed": 1792497757671
+  },
+  {
+    "id": "components/property-list",
+    "title": "Property list",
+    "what": "A file's or a document's details as a name and value list, the one shape of a pair list everywhere.",
+    "files": [
+      "app/components/PropertyList.vue",
+      "docs/components.md"
+    ],
+    "symbols": [],
+    "aliases": [],
+    "needs": [
+      "components/tabs"
+    ],
+    "base": "2c8f2b157886586e664f125b23f336240de9749f",
+    "changed": 1792497757712
+  },
+  {
+    "id": "components/screen",
+    "title": "Visible screen and frame",
+    "what": "The visible screen's height and top as tokens, the narrow-screen reading, and the frame of a screen that stands on no shell, with the scroll places a video's full screen puts back.",
+    "files": [
+      "app/domain/screen.ts",
+      "app/components/ScreenFrame.vue",
+      "app/domain/fullscreen.ts",
+      "app/plugins/fullscreen.client.ts",
+      "docs/design.md"
+    ],
+    "symbols": [
+      "NARROW_MAX_PX",
+      "NARROW_QUERY",
+      "useNarrow",
+      "VisibleReading",
+      "VisibleFrame",
+      "visibleFrame",
+      "SCREEN_HEIGHT_PROPERTY",
+      "SCREEN_TOP_PROPERTY",
+      "SCREEN_FRAME",
+      "useVisibleScreen",
+      "STABLE_GUTTER",
+      "useWidth",
+      "useScrollGutter",
+      "keepPlace",
+      "holdThroughFullscreen"
+    ],
+    "aliases": [],
+    "needs": [
+      "layer/styles"
+    ],
+    "base": "2c8f2b157886586e664f125b23f336240de9749f",
+    "changed": 1792497757657
+  },
+  {
+    "id": "components/settings",
+    "title": "Settings sections",
+    "what": "The parts a settings screen is built from: groups of rows under small headings, a row's name, muted line and control, a segmented choice of two or three, and a setting's own form as a dialog.",
+    "files": [
+      "app/components/SettingsDialog.vue",
+      "app/components/SettingsGroup.vue",
+      "app/components/SettingsRow.vue",
+      "app/components/SettingsSegment.vue",
+      "docs/components.md"
+    ],
+    "symbols": [],
+    "aliases": [],
+    "needs": [
+      "components/forms",
+      "interaction/lists"
+    ],
+    "base": "2c8f2b157886586e664f125b23f336240de9749f",
+    "changed": 1792497757783
+  },
+  {
+    "id": "components/share",
+    "title": "Share links",
+    "what": "The one dialog a share link is made, shown, copied and ended in, over the road the host hands it, and the shapes of a link, its spans and its end (app/domain/share-links.ts).",
+    "files": [
+      "app/components/ShareLinkDialog.vue",
+      "app/domain/share-links.ts",
+      "docs/components.md"
+    ],
+    "symbols": [
+      "ShareLink",
+      "ShareSpan",
+      "ShareRoad",
+      "ShareMark",
+      "shareEnded",
+      "shareUntilText"
+    ],
+    "aliases": [],
+    "needs": [
+      "components/forms",
+      "components/failures",
+      "components/messages",
+      "components/time",
+      "components/clipboard"
+    ],
+    "base": "2c8f2b157886586e664f125b23f336240de9749f",
+    "changed": 1792497757806
+  },
+  {
+    "id": "components/skeletons",
+    "title": "Skeletons and the painted flag",
+    "what": "The one shimmering bar and the text, region and status placeholders drawn from it, which wait for the flag the painted plugin raises once hydration ends (app/domain/loading.ts).",
+    "files": [
+      "app/components/SkeletonBar.vue",
+      "app/components/SkeletonLine.vue",
+      "app/components/SkeletonText.vue",
+      "app/components/SkeletonStatus.vue",
+      "app/components/ContentSkeleton.vue",
+      "app/domain/loading.ts",
+      "app/plugins/painted.client.ts",
+      "docs/components.md"
+    ],
+    "symbols": [
+      "useInitialRead",
+      "useLastRead",
+      "markPainted",
+      "usePainted"
+    ],
+    "aliases": [],
+    "needs": [],
+    "base": "2c8f2b157886586e664f125b23f336240de9749f",
+    "changed": 1792497757650
+  },
+  {
+    "id": "components/table",
+    "title": "Data table and column widths",
+    "what": "The shared table with sideways scroll, stuck names, movable column widths, labelled sections and three layouts, its placeholder, the resize edge, and the three-state choose-all control.",
+    "files": [
+      "app/components/DataTable.vue",
+      "app/components/DataTableSkeleton.vue",
+      "app/components/ColumnResizeHandle.vue",
+      "app/components/ChooseAll.vue",
+      "app/domain/column-widths.ts",
+      "app/domain/table-sections.ts",
+      "app/domain/chooseall.ts",
+      "docs/components.md"
+    ],
+    "symbols": [
+      "MIN_COLUMN_PX",
+      "RESIZE_STEP_PX",
+      "ColumnWidths",
+      "tableHeaders",
+      "setColumnWidth",
+      "useColumnWidths",
+      "TableSection",
+      "SectionHeading",
+      "sectionHeading",
+      "headingOf",
+      "sectionedRows",
+      "sectionedRowId",
+      "ChooseAllState",
+      "chooseAllState",
+      "chosenRuns",
+      "chooseAllPress",
+      "chooseAllLabel",
+      "CHOOSE_CELL",
+      "CHOOSE_GUTTER"
+    ],
+    "aliases": [],
+    "needs": [
+      "wording/keys"
+    ],
+    "base": "2c8f2b157886586e664f125b23f336240de9749f",
+    "changed": 1792497757687
+  },
+  {
+    "id": "components/tabs",
+    "title": "Tab bar, toolbar and actions",
+    "what": "The open-and-close tab bar with pinning, its menu and dragging, the sliding tab panel and shared-width switch, the group of actions that folds to a menu, and the one-target toolbar.",
+    "files": [
+      "app/components/TabBar.vue",
+      "app/components/TabSlide.vue",
+      "app/components/TabSwitch.vue",
+      "app/components/ActionGroup.vue",
+      "app/components/ToolBar.vue",
+      "app/domain/tabs.ts",
+      "app/domain/tab-slide.ts",
+      "app/domain/actionbar.ts",
+      "docs/components.md"
+    ],
+    "symbols": [
+      "TAB_ROW_UI",
+      "TAB_ROW_LINE",
+      "BarTab",
+      "BarMenuItem",
+      "BarAction",
+      "BarProperty",
+      "SwitchItem",
+      "SeenTab",
+      "openInTabs",
+      "mergeTabs",
+      "pinTab",
+      "pinnedFirst",
+      "lastSeen",
+      "moveTab",
+      "othersOf",
+      "rightOf",
+      "allOf",
+      "fileTabLabel",
+      "baseName",
+      "SlideDirection",
+      "slideDirection",
+      "useSlideDirection",
+      "BAR_GATHERS_UNDER_PX",
+      "GATHERED_ACTIONS",
+      "STANDING_ACTIONS",
+      "barGathers",
+      "actionsOutside",
+      "useBarRoom",
+      "useBarGathers"
+    ],
+    "aliases": [],
+    "needs": [
+      "components/screen"
+    ],
+    "base": "2c8f2b157886586e664f125b23f336240de9749f",
+    "changed": 1792497757679
+  },
+  {
+    "id": "components/time",
+    "title": "Times and dates",
+    "what": "Times, days, stamps, elapsed spans and countdowns written in the host's zone, locale and dayjs date locale, and the seconds clock a screen ticks on (app/domain/time.ts).",
+    "files": [
+      "app/domain/time.ts",
+      "docs/design.md"
+    ],
+    "symbols": [
+      "FOREVER_LABEL",
+      "formatClock",
+      "formatDay",
+      "formatShortDay",
+      "formatDayClock",
+      "clockUnder",
+      "formatDateClock",
+      "formatStamp",
+      "formatTime",
+      "dayKey",
+      "spanClock",
+      "elapsedText",
+      "timerClock",
+      "remainingText",
+      "useNowSeconds",
+      "toUnixSeconds"
+    ],
+    "aliases": [],
+    "needs": [
+      "components/numbers",
+      "wording/keys"
+    ],
+    "base": "2c8f2b157886586e664f125b23f336240de9749f",
+    "changed": 1792497757814
+  },
+  {
+    "id": "components/tooltips",
+    "title": "Tooltips and cut lines",
+    "what": "The shared tooltip for words that say more than what they stand on, and the one layer that shows any line cut with an ellipsis whole, with the measuring both do.",
+    "files": [
+      "app/components/HintTip.vue",
+      "app/components/CutLineTip.vue",
+      "app/domain/tooltip.ts",
+      "app/domain/cut-lines.ts",
+      "docs/components.md"
+    ],
+    "symbols": [
+      "TOOLTIP_UI",
+      "TOOLTIP_PROVIDER",
+      "LineBox",
+      "boxCuts",
+      "cutLineAt",
+      "cutLineIn",
+      "lineWords"
+    ],
+    "aliases": [],
+    "needs": [
+      "interaction/touch"
+    ],
+    "base": "2c8f2b157886586e664f125b23f336240de9749f",
+    "changed": 1792497757736
+  }
+]

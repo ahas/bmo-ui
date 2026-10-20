@@ -1,0 +1,62 @@
+[
+  {
+    "id": "layer/fonts",
+    "title": "Fonts",
+    "what": "The carried faces: Pretendard in four weights cut to the letters Apple SD Gothic Neo lacks, CaskaydiaCove for monospace, their licences, and the stacks that name them. The files stand in app/assets/fonts.",
+    "files": [
+      "app/assets/fonts/",
+      "docs/design.md"
+    ],
+    "symbols": [],
+    "aliases": [],
+    "needs": [],
+    "base": "2c8f2b157886586e664f125b23f336240de9749f",
+    "changed": 1792497757580
+  },
+  {
+    "id": "layer/overrides",
+    "title": "Component library overrides",
+    "what": "The layer's app configuration: Nuxt UI's icons, colours, motion timing, badges, dropdown widths, dialog placement, safe-area room and writing-box width, and the empty bmoUi settings a host states.",
+    "files": [
+      "app/app.config.ts"
+    ],
+    "symbols": [],
+    "aliases": [],
+    "needs": [
+      "theme/themes"
+    ],
+    "base": "2c8f2b157886586e664f125b23f336240de9749f",
+    "changed": 1792497757587
+  },
+  {
+    "id": "layer/setup",
+    "title": "Layer configuration",
+    "what": "The Nuxt layer a host extends: Nuxt UI as its module, the layer's stylesheet, the viewport meta, the dark-first screen mode kept in a cookie, and the ground painted before the stylesheets arrive.",
+    "files": [
+      "nuxt.config.ts",
+      "package.json"
+    ],
+    "symbols": [],
+    "aliases": [],
+    "needs": [
+      "layer/styles",
+      "theme/mode"
+    ],
+    "base": "2c8f2b157886586e664f125b23f336240de9749f",
+    "changed": 1792497757594
+  },
+  {
+    "id": "layer/styles",
+    "title": "Stylesheet and design tokens",
+    "what": "The layer's stylesheet: the reading width, header height, screen and safe-area tokens, motion, focus, the palette grounds, badge ink, markdown code styles, keyframes and scrollbars, as docs/design.md states them.",
+    "files": [
+      "app/assets/css/main.css",
+      "docs/design.md"
+    ],
+    "symbols": [],
+    "aliases": [],
+    "needs": [],
+    "base": "2c8f2b157886586e664f125b23f336240de9749f",
+    "changed": 1792497757574
+  }
+]

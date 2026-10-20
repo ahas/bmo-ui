@@ -1,0 +1,23 @@
+[
+  {
+    "id": "console/contract",
+    "title": "Console bundle contract",
+    "what": "The console plugin contract: the declaration file, its JSON Schema and reading, and the relay address a bundle's screen calls its service at (shared/console-bundle.ts, app/domain/relay.ts).",
+    "files": [
+      "shared/console-bundle.ts",
+      "app/domain/relay.ts",
+      "docs/console-bundles.md"
+    ],
+    "symbols": [
+      "CONSOLE_BUNDLE_FILE",
+      "ConsoleBundle",
+      "CONSOLE_BUNDLE_SCHEMA",
+      "consoleBundle",
+      "relayAddress"
+    ],
+    "aliases": [],
+    "needs": [],
+    "base": "2c8f2b157886586e664f125b23f336240de9749f",
+    "changed": 1792497757837
+  }
+]

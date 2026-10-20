@@ -1,0 +1,30 @@
+[
+  {
+    "id": "search/lists",
+    "title": "List search",
+    "what": "One search for every list: matching a phrase without regard to case, marking hits in shown text, naming a field that matched only in hidden data, and filtering records (shared/search.ts, SearchText, SearchHit).",
+    "files": [
+      "shared/search.ts",
+      "app/components/SearchText.vue",
+      "app/components/SearchHit.vue",
+      "docs/components.md"
+    ],
+    "symbols": [
+      "SearchField",
+      "SearchMatch",
+      "SearchPart",
+      "searchPhrase",
+      "searchHits",
+      "highlightParts",
+      "hitSnippet",
+      "matchFields",
+      "filterRecords"
+    ],
+    "aliases": [],
+    "needs": [
+      "components/numbers"
+    ],
+    "base": "2c8f2b157886586e664f125b23f336240de9749f",
+    "changed": 1792497757642
+  }
+]

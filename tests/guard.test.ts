@@ -233,7 +233,12 @@ describe("what the layer says", () => {
   });
 
   test("names no other repository under the layer's prefix", () => {
-    const others = prose.flatMap(({ path, text }) =>
+    // The graph's settings name the layout the graph engine reads its folders by, and a layout is not
+    // a repository the layer knows; every other word of the file is still held to the rule.
+    const settings = (one: { path: string; text: string }) =>
+      one.path === ".graph/settings.toml" ? { ...one, text: one.text.replace(/^layout\s*=.*$/m, "") } : one;
+
+    const others = prose.map(settings).flatMap(({ path, text }) =>
       [...words(text)].filter((word) => word.startsWith("bmo-") && !OWN_NAMESPACE.has(word.split("-")[1]!)).map((word) => `${path}: ${word}`)
     );
 

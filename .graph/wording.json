@@ -1,0 +1,23 @@
+[
+  {
+    "id": "wording/keys",
+    "title": "Wording keys",
+    "what": "The layer's one list of language-pack keys under common and files, and the types a host's translator and pack are handed by (shared/wording.ts, shared/wording-keys.ts).",
+    "files": [
+      "shared/wording.ts",
+      "shared/wording-keys.ts",
+      "docs/wording.md"
+    ],
+    "symbols": [
+      "WORDING_KEYS",
+      "WordingKey",
+      "Translate",
+      "WordingParams",
+      "Pack"
+    ],
+    "aliases": [],
+    "needs": [],
+    "base": "2c8f2b157886586e664f125b23f336240de9749f",
+    "changed": 1792497757635
+  }
+]

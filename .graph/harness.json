@@ -1,0 +1,58 @@
+[
+  {
+    "id": "harness/catalogue",
+    "title": "Component catalogue",
+    "what": "The catalogue a harness reads: components and page plugins from the boundary document and their examples, their props, slots and events, the design tokens and the contract document, with the generator that writes the data file.",
+    "files": [
+      "catalogue/catalogue.ts",
+      "catalogue/catalogue.json",
+      "catalogue/generate.ts",
+      "catalogue/examples/",
+      "docs/harness.md"
+    ],
+    "symbols": [
+      "CatalogueKind",
+      "CatalogueProp",
+      "CataloguePart",
+      "CatalogueEntry",
+      "CatalogueToken",
+      "CatalogueData",
+      "ComponentDetail",
+      "CatalogueError",
+      "components",
+      "component",
+      "tokens",
+      "pluginContract",
+      "CATALOGUE_FILE",
+      "catalogueData",
+      "catalogueText",
+      "exampleNames"
+    ],
+    "aliases": [],
+    "needs": [
+      "search/lists",
+      "console/contract"
+    ],
+    "base": "2c8f2b157886586e664f125b23f336240de9749f",
+    "changed": 1792497757844
+  },
+  {
+    "id": "harness/server",
+    "title": "MCP server and command",
+    "what": "The bmo-ui command that starts the layer's MCP server on standard input and output, its four tools, and the ahas-ui skill a harness loads it through.",
+    "files": [
+      "bin/bmo-ui.ts",
+      "mcp/server.ts",
+      "skills/ahas-ui/SKILL.md"
+    ],
+    "symbols": [
+      "uiServer"
+    ],
+    "aliases": [],
+    "needs": [
+      "harness/catalogue"
+    ],
+    "base": "2c8f2b157886586e664f125b23f336240de9749f",
+    "changed": 1792497757851
+  }
+]
