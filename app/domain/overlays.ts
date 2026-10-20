@@ -32,7 +32,8 @@ function overLayers(target: EventTarget | null | undefined): boolean {
 }
 
 // How many times a layer is asked before it is taken to refuse. A tooltip standing over it takes
-// the first Esc for itself; nothing stands higher than that.
+// the first Esc for itself, and none stands higher than that; one that has been asked stops
+// answering the keyboard as it goes (the patch under `patches/`), so the next ask is the layer's.
 const ESCAPE_TRIES = 2;
 
 // What stands, in the order it opened, and the layer each was registered as.

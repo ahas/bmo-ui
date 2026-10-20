@@ -322,6 +322,8 @@ default; a screen supplies what it holds and what a press means there. Every exp
   - A choice that closes one floating thing and opens another in the same press pushes the new entry
     only once the old one's step back has landed.
   - The focus handed back to the control a floating thing was opened from closes nothing.
+  - A tooltip naming a control of what the press closes is put away in the same press: it is asked
+    first, and the floating thing is asked again before the press is over.
   - A choice that changes the page leaves its entry behind, and returning passes it.
   - Taking an entry back is the layer's own step, never a move of the reader's; a move begun while
     that step is landing waits for it.

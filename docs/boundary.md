@@ -335,8 +335,10 @@ Every token is a custom property stated by the layer's stylesheet on the root un
   (`docs/components.md`, "Tooltips"). The layer's shared tooltip holds this on its own; the setting
   holds it for every other tooltip the library draws.
 - **The patch.** The patch under `patches/` is applied to the same `reka-ui` version in the host's own
-  install. It makes a collapsible region's id with the region's root, so a button drawn before its
-  region already names it and no id stands twice.
+  install. It gives a collapsible region its own id from the region's root, so a button drawn before
+  its region already names it and no id stands twice, and it stops a closed tooltip answering the
+  keyboard, so the press that closes a dialog or a drawer is not taken by the tooltip that names a
+  control inside it.
 - **The choice of theme and palette.** Where a reader's choice is kept, and stating its declarations
   in the page's head from the first frame, are the host's. Without a theme's declarations the
   library's own colours stand; the palette tokens stand only once a palette's declarations are
