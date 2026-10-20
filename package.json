@@ -1,6 +1,6 @@
 {
   "name": "bmo-ui",
-  "version": "0.1.0-rev.3",
+  "version": "0.1.0-rev.2",
   "private": true,
   "type": "module",
   "main": "./nuxt.config.ts",

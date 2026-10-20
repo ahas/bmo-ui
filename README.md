@@ -61,8 +61,9 @@ quick checks read, and `CLAUDE.md`.
 
 - **One version for the whole repository,** the manifest's, following semantic versioning over the
   boundary that `docs/boundary.md` states.
-- **Until the first release the base stays 0.1.0,** and each version carries a `-rev.N` suffix, N
-  counting the versions in the repository's history from 1. Any revision may change the boundary.
+- **Until the first release the base stays 0.1.0,** and each later version carries a `-rev.N`
+  suffix. The first 0.1.0 is the base and no revision; each version after it is one revision, N
+  counting them from 1. Any revision may change the boundary.
   `docs/boundary.md` names the revision each packed file under an earlier numbering holds.
 - **From the first release,** while the major is 0, a minor release may change the boundary; from 1
   on, only a major may.
