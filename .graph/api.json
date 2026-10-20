@@ -31,8 +31,8 @@
       "harness/server",
       "harness/catalogue"
     ],
-    "base": "5ff3c1cb6ab69559e0f19190efb70bcfcd4da71a",
-    "changed": 1792529689786,
+    "base": "8fd270835ac0df456a824c102b76be831bf0aef0",
+    "changed": 1792531125288,
     "boundary": {
       "side": "exposes"
     }
@@ -85,8 +85,8 @@
       "components/files",
       "console/contract"
     ],
-    "base": "16e1f1465a7c3f6721e434a67605acc743342a66",
-    "changed": 1792521970974,
+    "base": "8fd270835ac0df456a824c102b76be831bf0aef0",
+    "changed": 1792531125309,
     "boundary": {
       "side": "exposes"
     }
