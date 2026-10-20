@@ -354,3 +354,6 @@ Every token is a custom property stated by the layer's stylesheet on the root un
 - **It stands on registry packages alone;** no other repository is a dependency.
 - **One version for the whole repository,** the manifest's; the README states what may change at
   which release.
+- **The packed files under the earlier numbering** stay under `releases/` by their own names:
+  `bmo-ui-0.2.0.tgz` holds revision `0.1.0-rev.2` and `bmo-ui-0.3.0.tgz` holds revision
+  `0.1.0-rev.3`, each under its earlier number. Revision `0.1.0-rev.1` has no packed file.

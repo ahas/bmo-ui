@@ -61,7 +61,11 @@ quick checks read, and `CLAUDE.md`.
 
 - **One version for the whole repository,** the manifest's, following semantic versioning over the
   boundary that `docs/boundary.md` states.
-- **While the major is 0,** a minor release may change the boundary; from 1 on, only a major may.
+- **Until the first release the base stays 0.1.0,** and each version carries a `-rev.N` suffix, N
+  counting the versions in the repository's history from 1. Any revision may change the boundary.
+  `docs/boundary.md` names the revision each packed file under an earlier numbering holds.
+- **From the first release,** while the major is 0, a minor release may change the boundary; from 1
+  on, only a major may.
 - **A version is one packed file,** kept under `releases/` by its version's name. It is packed with
   `bun pm pack` from a scratch export (`git archive`) of the committed tree, never from a checkout,
   and the manifest's file list names everything it holds: the layer's code, its stylesheet and fonts,
