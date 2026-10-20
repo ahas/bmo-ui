@@ -15,6 +15,9 @@ components and behaviours every screen is built from. It is a Nuxt layer, built 
 - **A coding harness takes it as an MCP server,** `bmo-ui mcp`, a catalogue of its components, tokens
   and contract, with the `ahas-ui` skill beside it (`docs/harness.md`).
 - **It depends on no other repository,** only on registry packages.
+- **It holds no personal data.** A person's name, mail address, home folder, device or network detail
+  belongs in the host's configuration, and an example uses a neutral name; the guard test reads every
+  file for one (`docs/PERSONAL-DATA.md`).
 
 ## Using it
 
@@ -46,7 +49,7 @@ components and behaviours every screen is built from. It is a Nuxt layer, built 
 | `app/` | The layer's app code: the stylesheet and the fonts with their licences under `assets/`, the components under `components/`, the domain modules under `domain/`, the app configuration holding the library's overrides and the host's setting with nothing in it, and the declaration typing templates by the host's i18n module |
 | `bin/` | The package's command |
 | `catalogue/` | The catalogue module with its data file, the generator writing that file, and every component's example under `examples/` |
-| `docs/` | The canonical documents: the design foundations, the wording contract, the components, the console plugin contract, the harness plugin and the boundary |
+| `docs/` | The canonical documents: the design foundations, the wording contract, the components, the console plugin contract, the harness plugin, the personal data rule and the boundary |
 | `mcp/` | The MCP server the command starts |
 | `patches/` | The patch applied to a dependency on install |
 | `releases/` | The packed file of each version a host takes |

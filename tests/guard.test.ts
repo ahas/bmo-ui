@@ -152,15 +152,14 @@ describe("how the layer reaches its own files", () => {
   });
 });
 
-// Hashes of the names the layer never holds: the agents that use it, the person it was written for,
-// and the machines it was written on. They stand here as hashes so the guard does not hold the names
-// it keeps out.
+// Hashes of the names the layer never holds: the agents that use it and the machines it was written
+// on. They stand here as hashes so the guard does not hold the names it keeps out. The owner's name
+// the layer may hold stands in `docs/PERSONAL-DATA.md`.
 const FORBIDDEN_NAMES = new Set([
   "0fc8d10256be80aeb2670c0c0b7fa04ed32527765c4cc4a48e6287ae9b5636da",
   "02ee4e7f75c0ba2a0083da7eb3752990aeaf4d6df05c5057d494314d4109ef6e",
   "0ab3cad9838f06812c3f9a2cae3ec74e769dbeb81222e6b251943360aae06f46",
   "97ff1c43b5f53c1255cb910bd70bb0ca00ad88dd79cef10a29ced779251d7cac",
-  "e3dedc654e0a197ada9cb291f3688aac226b2463e86c9fabf1abd0bd620005b7",
   "81d5bee880ddd42048c5bdae8f3148d5923aede286964e1ccb33f7dd5e6cb897",
   "004eb446d1d3055a7808bfb19f95977ac3fab12a06342adc78171d30fe82b949",
   "9a882899305053bb1b8b619e11902afc8721bf4312990121bd0b5bf26cea6ac5",
@@ -245,14 +244,7 @@ describe("what the layer says", () => {
     expect(others).toEqual([]);
   });
 
-  // A home folder written out names the person it belongs to; one written from the tilde names nobody.
-  test("holds no home folder", () => {
-    expect(lines(/\/(?:home|Users)\/[\w.-]|[A-Za-z]:\\Users\\/, prose)).toEqual([]);
-  });
-
-  test("names no address and no host of anybody's", () => {
-    expect(lines(/(?<![\w.])(?:\d{1,3}\.){3}\d{1,3}(?![\w.])/, prose)).toEqual([]);
-
+  test("names no host of anybody's", () => {
     const hosts = prose
       .filter(({ path }) => !LICENCE.test(path))
       .flatMap(({ path, text }) => [...text.matchAll(/\b[a-z][a-z0-9+.-]*:\/\/[^\s"'`)<>\]]+/gi)].map((one) => ({ path, url: one[0] })))
@@ -263,6 +255,45 @@ describe("what the layer says", () => {
       });
 
     expect(hosts).toEqual([]);
+  });
+});
+
+// The personal data no file may hold (`docs/PERSONAL-DATA.md`): a mail address, a home folder, a phone
+// number, a token and a network address. A value belongs to the host's configuration and an example
+// uses a neutral name; the owner's name and the layer's development address are allowed, and an
+// address in a reserved example domain belongs to nobody.
+const MAIL = /(?<![\w.%+-])[A-Za-z0-9_%+-]+(?:\.[A-Za-z0-9_%+-]+)*@(?:[A-Za-z0-9-]*[A-Za-z-][A-Za-z0-9-]*\.)+[A-Za-z]{2,}/g;
+const HOME_FOLDER = /\/(?:home|Users)\/[\w.-]|[A-Za-z]:\\Users\\/;
+const PHONE_NUMBER = /(?<![\w.-])(?:\+?\d{1,3}[\s.-]?)?\(?\d{2,4}\)?[\s.-]\d{3,4}[\s.-]\d{4}(?![\w.-])/;
+const TOKEN = /(?:gh[pousr]_[A-Za-z0-9]{20,}|sk-[A-Za-z0-9]{20,}|xox[baprs]-[A-Za-z0-9-]{10,}|AKIA[0-9A-Z]{16})/;
+// Every address, so a private range is held as much as a public one.
+const NETWORK_ADDRESS = /(?<![\w.])(?:\d{1,3}\.){3}\d{1,3}(?![\w.])/;
+
+function allowedAddress(address: string): boolean {
+  return address.toLowerCase() === "dev@ahas.io" || RESERVED_HOST.test(address.slice(address.lastIndexOf("@") + 1));
+}
+
+function mailAddresses(): string[] {
+  return prose.flatMap(({ path, text }) =>
+    text.split("\n").flatMap((line, at) => {
+      const found = [...line.matchAll(MAIL)].filter((one) => !allowedAddress(one[0]));
+
+      return found.length > 0 ? [`${path}:${at + 1}: ${line.trim()}`] : [];
+    })
+  );
+}
+
+describe("the personal data the repository holds", () => {
+  test("is none: no mail address, home folder, phone number, token or network address", () => {
+    expect(mailAddresses()).toEqual([]);
+    expect(lines(HOME_FOLDER, prose)).toEqual([]);
+    expect(lines(PHONE_NUMBER, prose)).toEqual([]);
+    expect(lines(TOKEN, prose)).toEqual([]);
+    expect(lines(NETWORK_ADDRESS, prose)).toEqual([]);
+  });
+
+  test("and the document stating the rule stands in the repository", () => {
+    expect(repositoryPaths).toContain("docs/PERSONAL-DATA.md");
   });
 });
 
