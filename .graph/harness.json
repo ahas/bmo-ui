@@ -39,11 +39,11 @@
   {
     "id": "harness/server",
     "title": "MCP server and command",
-    "what": "The bmo-ui command that starts the layer's MCP server on standard input and output, its four tools, and the ahas-ui skill a harness loads it through.",
+    "what": "The bmo-ui command that starts the layer's MCP server on standard input and output, its four tools, and the bmo-ui skill a harness loads it through.",
     "files": [
       "bin/bmo-ui.ts",
       "mcp/server.ts",
-      "skills/ahas-ui/SKILL.md"
+      "skills/bmo-ui/SKILL.md"
     ],
     "symbols": [
       "uiServer"
@@ -53,6 +53,6 @@
       "harness/catalogue"
     ],
     "base": "5ff3c1cb6ab69559e0f19190efb70bcfcd4da71a",
-    "changed": 1792521058271
+    "changed": 1792529689795
   }
 ]

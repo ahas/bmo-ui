@@ -1,5 +1,5 @@
 ---
-name: ahas-ui
+name: bmo-ui
 description: Build or restyle a screen on the bmo-ui Nuxt layer, or write a console bundle that a console attaches by the layer's console plugin contract. Use before writing the first component, colour, size or wording of such a screen, and before declaring a bundle.
 ---
 

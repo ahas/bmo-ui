@@ -177,7 +177,7 @@ const OWN_NAMESPACE = new Set(["code", "dialog", "ease", "focus", "inset", "isla
 
 // The layer's own skill, named under the namespace a harness loads upstream skills from
 // (`docs/harness.md`, "The skill"). It is one name, so its parts are not read as words of their own.
-const OWN_SKILL = "ahas-ui";
+const OWN_SKILL = "bmo-ui";
 
 function words(said: string): Set<string> {
   const found = new Set<string>();

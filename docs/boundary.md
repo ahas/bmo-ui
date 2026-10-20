@@ -185,7 +185,7 @@ What a coding harness takes the layer through (`docs/harness.md`).
   MCP server on standard input and output.
 - **The MCP server's tools** are `ui_components`, `ui_component`, `ui_tokens` and
   `ui_plugin_contract`, and no others; what each takes and answers is in the harness document.
-- **The skill** `ahas-ui`, in the package's `skills/` folder.
+- **The skill** `bmo-ui`, in the package's `skills/` folder.
 - **The catalogue module,** imported by path from the package's `catalogue/` folder with its data file
   beside it:
 

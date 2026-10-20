@@ -13,7 +13,7 @@ components and behaviours every screen is built from. It is a Nuxt layer, built 
 - **It states the console plugin contract** every console bundle conforms to, so a console attaches
   each bundle by its declaration alone (`docs/console-bundles.md`).
 - **A coding harness takes it as an MCP server,** `bmo-ui mcp`, a catalogue of its components, tokens
-  and contract, with the `ahas-ui` skill beside it (`docs/harness.md`).
+  and contract, with the `bmo-ui` skill beside it (`docs/harness.md`).
 - **It depends on no other repository,** only on registry packages.
 - **It holds no personal data.** A person's name, mail address, home folder, device or network detail
   belongs in the host's configuration, and an example uses a neutral name; the guard test reads every
@@ -54,7 +54,7 @@ components and behaviours every screen is built from. It is a Nuxt layer, built 
 | `patches/` | The patch applied to a dependency on install |
 | `releases/` | The packed file of each version a host takes |
 | `shared/` | The shared modules, read by the layer's code and the host's alike |
-| `skills/` | The `ahas-ui` skill |
+| `skills/` | The `bmo-ui` skill |
 | `tests/` | The tests, with the browser lane's files and their support under `tests/browser/` |
 
 At the root stand the package manifest, which holds the version and the licence, its lockfile, the

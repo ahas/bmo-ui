@@ -20,7 +20,7 @@
   {
     "id": "api/harness",
     "title": "Harness plugin API",
-    "what": "The ahas-ui harness plugin: the bmo-ui command, its MCP server's four tools and the skill, as docs/harness.md states them.",
+    "what": "The bmo-ui harness plugin: the bmo-ui command, its MCP server's four tools and the skill, as docs/harness.md states them.",
     "files": [
       "docs/harness.md",
       "package.json"
@@ -32,7 +32,7 @@
       "harness/catalogue"
     ],
     "base": "5ff3c1cb6ab69559e0f19190efb70bcfcd4da71a",
-    "changed": 1792521058205,
+    "changed": 1792529689786,
     "boundary": {
       "side": "exposes"
     }

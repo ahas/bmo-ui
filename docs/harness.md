@@ -1,7 +1,7 @@
 # The harness plugin
 
 A coding harness takes the layer as its first entry point through its plugin: an MCP server the
-package's own command starts, and the `ahas-ui` skill that tells a harness when and how to use it.
+package's own command starts, and the `bmo-ui` skill that tells a harness when and how to use it.
 The server is a catalogue a harness reads while it builds a screen on the layer or a console bundle;
 it calls no service and changes nothing.
 
@@ -54,7 +54,7 @@ carries the file written again with it.
 
 ## The skill
 
-The `ahas-ui` skill stands in the package's `skills/` folder, in the shape a harness loads a skill in:
+The `bmo-ui` skill stands in the package's `skills/` folder, in the shape a harness loads a skill in:
 a description naming when it applies, then what to do. It applies to building or restyling a screen on
 the layer, and to writing a console bundle; it tells a harness to read the catalogue before writing a
 component or a value of its own, and the contract before declaring a bundle.
