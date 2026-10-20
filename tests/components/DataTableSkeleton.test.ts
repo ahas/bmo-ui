@@ -33,4 +33,9 @@ describe("the shared table's placeholder", () => {
     expect(skeleton).toContain('layout: "own"');
     expect(skeleton).toContain("dense.value");
   });
+
+  test("keeps the head's line box when a column's name is not known yet", () => {
+    // A bar in a line box of the head's own line height, so an unnamed head is as tall as a named one.
+    expect(skeleton).toContain('class="flex h-5 items-center"><SkeletonBar');
+  });
 });

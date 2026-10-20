@@ -9,7 +9,7 @@
       <thead class="bg-elevated">
         <tr>
           <th v-for="(name, at) in standing" :key="at" :class="head">
-            <SkeletonBar v-if="name === ''" class="h-4 w-2/3" />
+            <span v-if="name === ''" class="flex h-5 items-center"><SkeletonBar class="h-4 w-2/3" /></span>
             <template v-else>{{ name }}</template>
           </th>
         </tr>
