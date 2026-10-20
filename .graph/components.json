@@ -492,6 +492,7 @@
       "app/components/ColumnResizeHandle.vue",
       "app/components/ChooseAll.vue",
       "app/domain/column-widths.ts",
+      "app/domain/table-layout.ts",
       "app/domain/table-sections.ts",
       "app/domain/chooseall.ts",
       "docs/components.md"
@@ -503,6 +504,10 @@
       "tableHeaders",
       "setColumnWidth",
       "useColumnWidths",
+      "TableLayout",
+      "TABLE_BOX",
+      "TABLE_HEAD",
+      "TABLE_ROW_HEIGHT",
       "TableSection",
       "SectionHeading",
       "sectionHeading",
@@ -521,8 +526,8 @@
     "needs": [
       "wording/keys"
     ],
-    "base": "5ff3c1cb6ab69559e0f19190efb70bcfcd4da71a",
-    "changed": 1792521058253
+    "base": "75be219f01647bbd7704ec9a17593b8df2d1b610",
+    "changed": 1792534854714
   },
   {
     "id": "components/tabs",

@@ -374,6 +374,10 @@ default; a screen supplies what it holds and what a press means there. Every exp
   a column's name, or pressing the arrow keys on that edge, widens or narrows that column. The first
   move holds every column at the width it stood at, so only the one moved changes. Another set of
   columns starts again at natural widths. Cell slots are told when widths are held.
+  - A cell in a hand-held width is cut with an ellipsis, so the shared tooltip layer finds it and
+    shows the whole value where it stands (`CutLineTip`).
+  - The edge takes the shared focus ring, drawn inside its own edge because the table clips what
+    stands past it; a pointer over it or a press on it widens and colours its line instead.
 - **Rows may stand in labelled parts** (the table-sections module), each with a heading row; rows in
   no named part stand last.
 - **A row that can be chosen** is pressed by pointer or by Enter.
@@ -382,8 +386,11 @@ default; a screen supplies what it holds and what a press means there. Every exp
   default, its own height among other content; or `dense`, the close grid of a record browser.
 - **A screen may mark a row** with classes of its own, such as the one chosen, and may key rows itself
   where one row stands in two parts.
-- **Its placeholder** (`DataTableSkeleton`) takes the same column names, so the head stands at once and
-  only the cells wait.
+- **Its placeholder** (`DataTableSkeleton`) takes the same column names and the same layout, so the
+  head stands at once and only the cells wait. It stands in the table's own box and at the table's
+  own head and row heights, so nothing moves when the rows land; at a narrow width the box scrolls
+  sideways as the table's does, and no column name is cut.
+  - A column whose name is not known yet waits with a bar in the head, in its own column.
 
 ## Skeletons and loading
 

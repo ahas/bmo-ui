@@ -39,6 +39,7 @@
 
 <script setup lang="ts" generic="T">
 import { useColumnWidths } from "../domain/column-widths";
+import { TABLE_BOX, TABLE_HEAD, TABLE_ROW_HEIGHT } from "../domain/table-layout";
 import { headingOf, sectionedRowId, sectionedRows } from "../domain/table-sections";
 
 import type { TableColumn, TableRow } from "@nuxt/ui";
@@ -186,14 +187,8 @@ function headingCell(name: string, scope: unknown): boolean {
   return headingOf((scope as { row?: { original?: unknown } } | undefined)?.row?.original) !== null;
 }
 
-const LAYOUTS = {
-  fill: { root: "min-h-0 min-w-0 flex-1 overflow-auto", base: "w-full min-w-[36rem]" },
-  own: { root: "min-w-0 overflow-x-auto", base: "w-full min-w-[36rem]" },
-  dense: { root: "min-h-0 overflow-auto", base: "min-w-full" }
-} as const;
-
 const tableUi = computed(() => {
-  const layout = LAYOUTS[props.layout];
+  const layout = TABLE_BOX[props.layout];
   const dense = props.layout === "dense";
 
   return {
@@ -201,12 +196,12 @@ const tableUi = computed(() => {
     base: fixed.value ? "table-fixed w-(--data-table-width)" : layout.base,
     // The head row draws no line of its own: the table already draws the separator under the head.
     thead: "bg-elevated [&>tr]:border-b-0",
-    th: dense
-      ? "relative truncate py-1 ps-2 pe-4 text-start text-sm font-medium whitespace-nowrap text-highlighted"
-      : "relative px-2 py-2 text-start text-sm font-medium whitespace-nowrap text-highlighted first:ps-4 last:pe-4",
+    th: TABLE_HEAD[dense ? "dense" : "own"],
+    // A cell of a column held by hand is cut with an ellipsis, so the line is one the shared tooltip
+    // layer finds and shows whole; until then the box scrolls sideways and cuts nothing.
     td: dense
-      ? ["truncate px-2 py-1 align-top text-sm", fixed.value ? "" : "max-w-64"].join(" ")
-      : ["p-0 align-top text-sm whitespace-nowrap", fixed.value ? "overflow-hidden" : ""].join(" "),
+      ? [`${TABLE_ROW_HEIGHT.dense} truncate px-2 py-1 align-top text-sm`, fixed.value ? "" : "max-w-64"].join(" ")
+      : [`${TABLE_ROW_HEIGHT.own} p-0 align-top text-sm whitespace-nowrap`, fixed.value ? "truncate" : ""].join(" "),
     tr: dense
       ? "border-b border-default/60 last:border-b-0 data-[selectable=true]:cursor-pointer data-[selectable=true]:hover:bg-elevated/50 data-[selectable=true]:active:bg-accented/50 focus-inset"
       : "border-b border-default last:border-b-0 data-[selectable=true]:cursor-pointer data-[selectable=true]:hover:bg-elevated/50 data-[selectable=true]:active:bg-accented/50 focus-inset"

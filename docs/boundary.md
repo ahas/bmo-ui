@@ -35,7 +35,7 @@ wording keys listed here are the ones the layer's list holds.
 | `ContentSkeleton` | The placeholder region: busy status, a surface nothing presses through, the caller's piece repeated. |
 | `CutLineTip` | The one layer that shows any line cut with an ellipsis whole, in the shared tooltip. |
 | `DataTable` | The shared table: sideways scroll, stuck names, movable widths, labelled parts, three layouts. |
-| `DataTableSkeleton` | The shared table's placeholder, its head drawn from the same column names. |
+| `DataTableSkeleton` | The shared table's placeholder, its head and rows in the table's own columns, box and height. |
 | `FilesConflictDialog` | The one question when a change would land on names already taken. |
 | `FilesNameField` | A name renamed in place, chosen up to its ending. |
 | `FilesProgress` | An upload's progress, by files and by bytes, with a bar. |
@@ -123,6 +123,7 @@ Each is named with everything it exports.
 | `side-parts` | `SPLIT_HANDLE`, `FULL_SHEET` |
 | `sound-tap` | `TAP_FFT`, `Tap`, `tapOf` |
 | `tab-slide` | `SlideDirection`, `slideDirection`, `useSlideDirection` |
+| `table-layout` | `TableLayout`, `TABLE_BOX`, `TABLE_HEAD`, `TABLE_ROW_HEIGHT` |
 | `table-sections` | `TableSection`, `SectionHeading`, `sectionHeading`, `headingOf`, `sectionedRows`, `sectionedRowId` |
 | `tabs` | `TAB_ROW_UI`, `TAB_ROW_LINE`, `BarTab`, `BarMenuItem`, `BarAction`, `BarProperty`, `SwitchItem`, `SeenTab`, `openInTabs`, `mergeTabs`, `pinTab`, `pinnedFirst`, `lastSeen`, `moveTab`, `othersOf`, `rightOf`, `allOf`, `fileTabLabel`, `baseName` |
 | `time` | `FOREVER_LABEL`, `formatClock`, `formatDay`, `formatShortDay`, `formatDayClock`, `clockUnder`, `formatDateClock`, `formatStamp`, `formatTime`, `dayKey`, `spanClock`, `elapsedText`, `timerClock`, `remainingText`, `useNowSeconds`, `toUnixSeconds` |

@@ -55,6 +55,23 @@ describe("a table in parts", () => {
   });
 });
 
+describe("a table whose columns are held by hand", () => {
+  // A hand-narrowed column cuts its cells; the cut line ends in an ellipsis, which is how the shared
+  // tooltip layer finds a line cut to fit its box (the cut-lines module).
+  test("cuts a cell with an ellipsis, so the shared tooltip finds it", () => {
+    expect(table).toContain('fixed.value ? "truncate" : ""');
+    expect(table).not.toContain('fixed.value ? "overflow-hidden" : ""');
+  });
+
+  // The box, the head cell and the row heights are stated once for the table and its placeholder.
+  test("takes its box, head and row height from the table-layout module", () => {
+    expect(table).toContain("TABLE_BOX[props.layout]");
+    expect(table).toContain("TABLE_HEAD[dense");
+    expect(table).toContain("TABLE_ROW_HEIGHT.own");
+    expect(table).toContain("TABLE_ROW_HEIGHT.dense");
+  });
+});
+
 describe("a table of rows to press or widen", () => {
   // A row pressed as a whole shows it can be, in every layout: a hand, and a step of background on
   // hover and on press that its resting row does not have.

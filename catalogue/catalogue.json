@@ -241,12 +241,18 @@
     {
       "name": "DataTableSkeleton",
       "kind": "component",
-      "line": "The shared table's placeholder, its head drawn from the same column names.",
+      "line": "The shared table's placeholder, its head and rows in the table's own columns, box and height.",
       "props": [
         {
           "name": "headers",
           "type": "string[]",
           "required": true
+        },
+        {
+          "name": "layout",
+          "type": "TableLayout | undefined",
+          "required": false,
+          "default": "\"own\""
         },
         {
           "name": "rows",
