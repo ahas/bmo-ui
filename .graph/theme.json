@@ -22,8 +22,8 @@
     "needs": [
       "theme/themes"
     ],
-    "base": "2c8f2b157886586e664f125b23f336240de9749f",
-    "changed": 1792497757619
+    "base": "5ff3c1cb6ab69559e0f19190efb70bcfcd4da71a",
+    "changed": 1792521058298
   },
   {
     "id": "theme/palettes",
@@ -46,8 +46,8 @@
     "needs": [
       "theme/themes"
     ],
-    "base": "2c8f2b157886586e664f125b23f336240de9749f",
-    "changed": 1792497757610
+    "base": "5ff3c1cb6ab69559e0f19190efb70bcfcd4da71a",
+    "changed": 1792521058301
   },
   {
     "id": "theme/pictures",
@@ -65,8 +65,8 @@
       "theme/palettes",
       "theme/mode"
     ],
-    "base": "2c8f2b157886586e664f125b23f336240de9749f",
-    "changed": 1792497757627
+    "base": "5ff3c1cb6ab69559e0f19190efb70bcfcd4da71a",
+    "changed": 1792521058304
   },
   {
     "id": "theme/themes",
@@ -90,7 +90,7 @@
     ],
     "aliases": [],
     "needs": [],
-    "base": "2c8f2b157886586e664f125b23f336240de9749f",
-    "changed": 1792497757601
+    "base": "5ff3c1cb6ab69559e0f19190efb70bcfcd4da71a",
+    "changed": 1792521058306
   }
 ]

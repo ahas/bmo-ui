@@ -11,8 +11,8 @@
     "needs": [
       "console/contract"
     ],
-    "base": "2c8f2b157886586e664f125b23f336240de9749f",
-    "changed": 1792497757867,
+    "base": "5ff3c1cb6ab69559e0f19190efb70bcfcd4da71a",
+    "changed": 1792521058201,
     "boundary": {
       "side": "exposes"
     }
@@ -31,8 +31,8 @@
       "harness/server",
       "harness/catalogue"
     ],
-    "base": "2c8f2b157886586e664f125b23f336240de9749f",
-    "changed": 1792497757876,
+    "base": "5ff3c1cb6ab69559e0f19190efb70bcfcd4da71a",
+    "changed": 1792521058205,
     "boundary": {
       "side": "exposes"
     }
@@ -85,8 +85,8 @@
       "components/files",
       "console/contract"
     ],
-    "base": "2c8f2b157886586e664f125b23f336240de9749f",
-    "changed": 1792497757858,
+    "base": "5ff3c1cb6ab69559e0f19190efb70bcfcd4da71a",
+    "changed": 1792521058208,
     "boundary": {
       "side": "exposes"
     }

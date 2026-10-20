@@ -54,9 +54,14 @@ components and behaviours every screen is built from. It is a Nuxt layer, built 
 | `skills/` | The `ahas-ui` skill |
 | `tests/` | The tests, with the browser lane's files and their support under `tests/browser/` |
 
-At the root stand the package manifest, which holds the version, its lockfile, the Nuxt
-configuration, the TypeScript and Bun configurations, the testbed declaration, the Korean ledger the
-quick checks read, and `CLAUDE.md`.
+At the root stand the package manifest, which holds the version and the licence, its lockfile, the
+Nuxt configuration, the TypeScript and Bun configurations, the testbed declaration, the Korean ledger
+the quick checks read, `CLAUDE.md`, and the MIT licence in `LICENSE`.
+
+## Licence
+
+- **The layer is under the MIT licence,** stated in `LICENSE` at the root and in the manifest's
+  `license` field.
 
 ## Version
 
@@ -72,5 +77,5 @@ quick checks read, and `CLAUDE.md`.
   `bun pm pack` from a scratch export (`git archive`) of the committed tree, never from a checkout,
   and the manifest's file list names everything it holds: the layer's code, its stylesheet and fonts,
   the patch, the command, the MCP server, the catalogue module and its data file, the skill, the Nuxt
-  configuration, the README and the documents. A host takes that one file, so
+  configuration, the README, the licence and the documents. A host takes that one file, so
   every host of a version stands on the same bytes.
