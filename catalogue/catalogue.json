@@ -1,0 +1,1733 @@
+{
+  "entries": [
+    {
+      "name": "ActionGroup",
+      "kind": "component",
+      "line": "The one group of actions on what a tab or a toolbar stands for, folding to a menu; the properties action last.",
+      "props": [
+        {
+          "name": "actions",
+          "type": "readonly BarAction[]",
+          "required": true
+        },
+        {
+          "name": "properties",
+          "type": "readonly BarProperty[] | null | undefined",
+          "required": false,
+          "default": "null"
+        },
+        {
+          "name": "propertiesTitle",
+          "type": "string | null | undefined",
+          "required": false,
+          "default": "null"
+        },
+        {
+          "name": "label",
+          "type": "string | undefined",
+          "required": false
+        },
+        {
+          "name": "narrowFold",
+          "type": "boolean | undefined",
+          "required": false,
+          "default": "true"
+        },
+        {
+          "name": "size",
+          "type": "\"sm\" | \"xs\" | \"md\" | \"lg\" | \"xl\" | undefined",
+          "required": false,
+          "default": "\"sm\""
+        }
+      ],
+      "slots": [],
+      "events": [],
+      "example": "<ActionGroup :actions=\"actions\" :properties=\"properties\" :properties-title=\"t('notes.title.details')\" :label=\"t('notes.aria.note_actions')\" />"
+    },
+    {
+      "name": "AudioPlayer",
+      "kind": "component",
+      "line": "A kept sound: a play and pause button, its waveform as its progress, and a download.",
+      "props": [
+        {
+          "name": "src",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "download",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "size",
+          "type": "string | null",
+          "required": true
+        },
+        {
+          "name": "autoplay",
+          "type": "boolean | undefined",
+          "required": false,
+          "default": "false"
+        },
+        {
+          "name": "trailRoom",
+          "type": "number | null | undefined",
+          "required": false,
+          "default": "null"
+        }
+      ],
+      "slots": [],
+      "events": [],
+      "example": "<AudioPlayer src=\"https://example.com/sounds/morning.ogg\" download=\"https://example.com/sounds/morning.ogg?download=1\" name=\"morning.ogg\" size=\"1.2 MB\" />"
+    },
+    {
+      "name": "ChooseAll",
+      "kind": "component",
+      "line": "The three-state checkbox that takes every row shown or gives the choice up.",
+      "props": [
+        {
+          "name": "keys",
+          "type": "readonly string[]",
+          "required": true
+        },
+        {
+          "name": "selected",
+          "type": "ReadonlySet<string>",
+          "required": true
+        }
+      ],
+      "slots": [],
+      "events": [
+        {
+          "name": "choose",
+          "type": "[all: boolean]"
+        }
+      ],
+      "example": "<ChooseAll :keys=\"shown\" :selected=\"selected\" @choose=\"choose\" />"
+    },
+    {
+      "name": "ColumnResizeHandle",
+      "kind": "component",
+      "line": "The right edge of a column's name, dragged or moved with the arrow keys.",
+      "props": [
+        {
+          "name": "label",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "width",
+          "type": "number | undefined",
+          "required": false
+        }
+      ],
+      "slots": [],
+      "events": [
+        {
+          "name": "start",
+          "type": "[event: PointerEvent]"
+        },
+        {
+          "name": "nudge",
+          "type": "[by: number]"
+        }
+      ],
+      "example": "<table>\n  <thead>\n    <tr ref=\"head\">\n      <th v-for=\"name in names\" :key=\"name\" class=\"relative\" :style=\"{ width: `${widths[name] ?? 0}px` }\">\n        {{ name }}\n        <ColumnResizeHandle :label=\"name\" :width=\"widths[name]\" @start=\"startResize($event, name)\" @nudge=\"nudge(name, $event)\" />\n      </th>\n    </tr>\n  </thead>\n</table>"
+    },
+    {
+      "name": "ContentSkeleton",
+      "kind": "component",
+      "line": "The placeholder region: busy status, a surface nothing presses through, the caller's piece repeated.",
+      "props": [
+        {
+          "name": "rows",
+          "type": "number | undefined",
+          "required": false,
+          "default": "1"
+        },
+        {
+          "name": "listClass",
+          "type": "string | undefined",
+          "required": false,
+          "default": "\"\""
+        },
+        {
+          "name": "label",
+          "type": "string | undefined",
+          "required": false
+        }
+      ],
+      "slots": [
+        {
+          "name": "default",
+          "type": "{ index: number; }"
+        }
+      ],
+      "events": [],
+      "example": "<ContentSkeleton v-if=\"loading\" :rows=\"4\" list-class=\"flex flex-col gap-2\" :label=\"t('notes.status.loading_notes')\">\n  <div class=\"flex items-center gap-3 p-3\">\n    <SkeletonBar class=\"size-8 rounded-full\" />\n    <SkeletonText :lines=\"2\" size=\"sm\" />\n  </div>\n</ContentSkeleton>"
+    },
+    {
+      "name": "CutLineTip",
+      "kind": "component",
+      "line": "The one layer that shows any line cut with an ellipsis whole, in the shared tooltip.",
+      "props": [],
+      "slots": [],
+      "events": [],
+      "example": "<UApp>\n  <NuxtPage />\n  <CutLineTip />\n</UApp>"
+    },
+    {
+      "name": "DataTable",
+      "kind": "component",
+      "line": "The shared table: sideways scroll, stuck names, movable widths, labelled parts, three layouts.",
+      "props": [
+        {
+          "name": "data",
+          "type": "T[]",
+          "required": true
+        },
+        {
+          "name": "columns",
+          "type": "TableColumn<T>[]",
+          "required": true
+        },
+        {
+          "name": "layout",
+          "type": "\"fill\" | \"own\" | \"dense\" | undefined",
+          "required": false,
+          "default": "\"own\""
+        },
+        {
+          "name": "selectable",
+          "type": "boolean | undefined",
+          "required": false,
+          "default": "false"
+        },
+        {
+          "name": "sections",
+          "type": "TableSection[] | undefined",
+          "required": false
+        },
+        {
+          "name": "sectionOf",
+          "type": "((row: T) => string | null | undefined) | undefined",
+          "required": false
+        },
+        {
+          "name": "rowKey",
+          "type": "((row: T) => string) | undefined",
+          "required": false
+        },
+        {
+          "name": "rowClass",
+          "type": "((row: T) => string) | undefined",
+          "required": false
+        }
+      ],
+      "slots": [],
+      "events": [
+        {
+          "name": "select",
+          "type": "[row: T, index: number]"
+        }
+      ],
+      "example": "<DataTable :data=\"files\" :columns=\"columns\" layout=\"fill\" selectable @select=\"open\">\n  <template #name-cell=\"{ row }\">\n    <span class=\"flex min-w-0 items-center gap-2\">\n      <UIcon :name=\"fileIcon(row.original.name)\" class=\"size-4 shrink-0\" />\n      <span class=\"truncate\">{{ row.original.name }}</span>\n    </span>\n  </template>\n</DataTable>"
+    },
+    {
+      "name": "DataTableSkeleton",
+      "kind": "component",
+      "line": "The shared table's placeholder, its head drawn from the same column names.",
+      "props": [
+        {
+          "name": "headers",
+          "type": "string[]",
+          "required": true
+        },
+        {
+          "name": "rows",
+          "type": "number | undefined",
+          "required": false,
+          "default": "6"
+        },
+        {
+          "name": "label",
+          "type": "string | undefined",
+          "required": false
+        }
+      ],
+      "slots": [],
+      "events": [],
+      "example": "<DataTableSkeleton v-if=\"loading\" :headers=\"headers\" :rows=\"8\" :label=\"t('notes.status.loading_files')\" />"
+    },
+    {
+      "name": "FilesConflictDialog",
+      "kind": "component",
+      "line": "The one question when a change would land on names already taken.",
+      "props": [
+        {
+          "name": "names",
+          "type": "readonly string[]",
+          "required": true
+        },
+        {
+          "name": "open",
+          "type": "boolean",
+          "required": true
+        }
+      ],
+      "slots": [],
+      "events": [
+        {
+          "name": "update:open",
+          "type": "[value: boolean]"
+        },
+        {
+          "name": "answer",
+          "type": "[choice: \"replace\" | \"rename\" | \"skip\" | null]"
+        }
+      ],
+      "example": "<FilesConflictDialog v-model:open=\"asking\" :names=\"taken\" @answer=\"settle\" />"
+    },
+    {
+      "name": "FilesNameField",
+      "kind": "component",
+      "line": "A name renamed in place, chosen up to its ending.",
+      "props": [
+        {
+          "name": "name",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "folder",
+          "type": "boolean",
+          "required": true
+        }
+      ],
+      "slots": [],
+      "events": [
+        {
+          "name": "rename",
+          "type": "[name: string]"
+        },
+        {
+          "name": "cancel",
+          "type": "[]"
+        }
+      ],
+      "example": "<FilesNameField v-if=\"renaming\" :name=\"name\" :folder=\"false\" @rename=\"rename\" @cancel=\"renaming = false\" />\n<span v-else>{{ name }}</span>"
+    },
+    {
+      "name": "FilesProgress",
+      "kind": "component",
+      "line": "An upload's progress, by files and by bytes, with a bar.",
+      "props": [
+        {
+          "name": "progress",
+          "type": "FilesUploading | null",
+          "required": true
+        }
+      ],
+      "slots": [],
+      "events": [],
+      "example": "<FilesProgress :progress=\"uploading\" />"
+    },
+    {
+      "name": "FilesText",
+      "kind": "component",
+      "line": "A text file in the read-only code viewer, coloured by its name's language.",
+      "props": [
+        {
+          "name": "text",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "required": true
+        }
+      ],
+      "slots": [],
+      "events": [],
+      "example": "<div class=\"flex h-96 flex-col\">\n  <FilesText :text=\"text\" name=\"plan.md\" />\n</div>"
+    },
+    {
+      "name": "GrowingTextarea",
+      "kind": "component",
+      "line": "A form's text box that grows with its text and never scrolls inside.",
+      "props": [
+        {
+          "name": "modelValue",
+          "type": "string | undefined",
+          "required": false
+        }
+      ],
+      "slots": [],
+      "events": [
+        {
+          "name": "update:modelValue",
+          "type": "[value: string | undefined]"
+        }
+      ],
+      "example": "<UFormField :label=\"t('notes.label.body')\">\n  <GrowingTextarea v-model=\"body\" :rows=\"3\" :maxlength=\"2000\" />\n</UFormField>"
+    },
+    {
+      "name": "HintTip",
+      "kind": "component",
+      "line": "The shared tooltip for words that say more than what they stand on.",
+      "props": [
+        {
+          "name": "text",
+          "type": "string | undefined",
+          "required": false,
+          "default": "undefined"
+        },
+        {
+          "name": "label",
+          "type": "string | undefined",
+          "required": false,
+          "default": "undefined"
+        },
+        {
+          "name": "cut",
+          "type": "boolean | undefined",
+          "required": false,
+          "default": "false"
+        },
+        {
+          "name": "press",
+          "type": "boolean | undefined",
+          "required": false,
+          "default": "false"
+        },
+        {
+          "name": "disabled",
+          "type": "boolean | undefined",
+          "required": false,
+          "default": "false"
+        },
+        {
+          "name": "as",
+          "type": "string | globalThis.Component | undefined",
+          "required": false,
+          "default": "\"span\""
+        },
+        {
+          "name": "side",
+          "type": "\"left\" | \"right\" | \"top\" | \"bottom\" | undefined",
+          "required": false,
+          "default": "undefined"
+        }
+      ],
+      "slots": [
+        {
+          "name": "content",
+          "type": "{}"
+        },
+        {
+          "name": "default",
+          "type": "{}"
+        }
+      ],
+      "events": [
+        {
+          "name": "ask",
+          "type": "[]"
+        }
+      ],
+      "example": "<HintTip :text=\"t('notes.label.word_count', { n: 1472 })\" cut>\n  <span class=\"truncate\">{{ t(\"notes.label.words_short\", { n: \"1.4k\" }) }}</span>\n</HintTip>"
+    },
+    {
+      "name": "ImageViewer",
+      "kind": "component",
+      "line": "A picture opened whole, zoomed and moved by wheel, drag, pinch, double press and buttons.",
+      "props": [
+        {
+          "name": "src",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "canPrevious",
+          "type": "boolean | undefined",
+          "required": false,
+          "default": "false"
+        },
+        {
+          "name": "canNext",
+          "type": "boolean | undefined",
+          "required": false,
+          "default": "false"
+        },
+        {
+          "name": "returnFocus",
+          "type": "boolean | undefined",
+          "required": false,
+          "default": "true"
+        },
+        {
+          "name": "open",
+          "type": "boolean",
+          "required": true
+        }
+      ],
+      "slots": [
+        {
+          "name": "actions",
+          "type": "{}"
+        }
+      ],
+      "events": [
+        {
+          "name": "update:open",
+          "type": "[value: boolean]"
+        },
+        {
+          "name": "previous",
+          "type": "[]"
+        },
+        {
+          "name": "next",
+          "type": "[]"
+        },
+        {
+          "name": "loaded",
+          "type": "[natural: Size]"
+        }
+      ],
+      "example": "<ImageViewer\n  v-model:open=\"open\"\n  :src=\"pictures[at]!.src\"\n  :title=\"pictures[at]!.name\"\n  :can-previous=\"at > 0\"\n  :can-next=\"at < pictures.length - 1\"\n  @previous=\"at -= 1\"\n  @next=\"at += 1\"\n>\n  <template #actions>\n    <UButton icon=\"i-material-symbols-download\" color=\"neutral\" variant=\"ghost\" :aria-label=\"t('notes.action.download')\" :href=\"pictures[at]!.src\" download />\n  </template>\n</ImageViewer>"
+    },
+    {
+      "name": "LoadingImage",
+      "kind": "component",
+      "line": "A picture that keeps its place while it loads and says when it failed.",
+      "props": [
+        {
+          "name": "src",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "alt",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "imageClass",
+          "type": "string | undefined",
+          "required": false
+        },
+        {
+          "name": "eager",
+          "type": "boolean | undefined",
+          "required": false
+        },
+        {
+          "name": "fill",
+          "type": "boolean | undefined",
+          "required": false
+        },
+        {
+          "name": "shape",
+          "type": "{ width: number; height: number; } | null | undefined",
+          "required": false
+        },
+        {
+          "name": "standIn",
+          "type": "string | null | undefined",
+          "required": false
+        }
+      ],
+      "slots": [],
+      "events": [
+        {
+          "name": "loaded",
+          "type": "[shape: { width: number; height: number; }]"
+        }
+      ],
+      "example": "<LoadingImage src=\"https://example.com/pictures/sea.jpg\" :alt=\"t('notes.label.cover_picture')\" :shape=\"shape\" image-class=\"rounded-sm\" @loaded=\"loaded\" />"
+    },
+    {
+      "name": "LoadingVideo",
+      "kind": "component",
+      "line": "A video that keeps its place while it loads and says when it failed.",
+      "props": [
+        {
+          "name": "src",
+          "type": "string",
+          "required": true
+        }
+      ],
+      "slots": [],
+      "events": [],
+      "example": "<LoadingVideo src=\"https://example.com/videos/walk.mp4\" />"
+    },
+    {
+      "name": "MarqueeLine",
+      "kind": "component",
+      "line": "A line that slides when it is longer than its box.",
+      "props": [],
+      "slots": [
+        {
+          "name": "default",
+          "type": "{}"
+        }
+      ],
+      "events": [],
+      "example": "<div class=\"flex min-w-0 flex-col\">\n  <MarqueeLine>{{ track.title }} · {{ track.album }}</MarqueeLine>\n</div>"
+    },
+    {
+      "name": "MessageIsland",
+      "kind": "component",
+      "line": "The one pill every notice and question stands on.",
+      "props": [],
+      "slots": [],
+      "events": [],
+      "example": "<UApp>\n  <NuxtPage />\n  <MessageIsland />\n</UApp>\n<UButton :label=\"t('notes.action.save')\" @click=\"save\" />"
+    },
+    {
+      "name": "MovingList",
+      "kind": "component",
+      "line": "A list whose items come, go and change places by position alone.",
+      "props": [
+        {
+          "name": "tag",
+          "type": "string | undefined",
+          "required": false,
+          "default": "\"ul\""
+        }
+      ],
+      "slots": [
+        {
+          "name": "default",
+          "type": "{}"
+        }
+      ],
+      "events": [],
+      "example": "<MovingList class=\"flex flex-col\">\n  <li v-for=\"item in items\" :key=\"item.id\" class=\"px-3 py-2\">{{ item.name }}</li>\n</MovingList>"
+    },
+    {
+      "name": "NumberInput",
+      "kind": "component",
+      "line": "The number box, as wide as its values, with its two step buttons.",
+      "props": [
+        {
+          "name": "digits",
+          "type": "number",
+          "required": true
+        },
+        {
+          "name": "unit",
+          "type": "string | undefined",
+          "required": false,
+          "default": "\"\""
+        }
+      ],
+      "slots": [],
+      "events": [],
+      "example": "<NumberInput v-model=\"minutes\" :digits=\"3\" :min=\"1\" :max=\"600\" :unit=\"t('notes.label.minutes_unit')\" />"
+    },
+    {
+      "name": "PaletteSwatch",
+      "kind": "component",
+      "line": "A palette's two grounds as dots, in one mode.",
+      "props": [
+        {
+          "name": "palette",
+          "type": "Palette",
+          "required": true
+        },
+        {
+          "name": "scheme",
+          "type": "Scheme",
+          "required": true
+        }
+      ],
+      "slots": [],
+      "events": [],
+      "example": "<div class=\"flex gap-3\">\n  <PaletteSwatch v-for=\"palette in PALETTES\" :key=\"palette.id\" :palette=\"palette\" scheme=\"dark\" />\n</div>"
+    },
+    {
+      "name": "PropertyList",
+      "kind": "component",
+      "line": "A file's or a document's details as a name and value list.",
+      "props": [
+        {
+          "name": "rows",
+          "type": "readonly BarProperty[]",
+          "required": true
+        },
+        {
+          "name": "title",
+          "type": "string | null | undefined",
+          "required": false
+        }
+      ],
+      "slots": [],
+      "events": [],
+      "example": "<PropertyList :rows=\"rows\" :title=\"t('notes.title.details')\" />"
+    },
+    {
+      "name": "RollingNumber",
+      "kind": "component",
+      "line": "A number that turns only its changed characters.",
+      "props": [
+        {
+          "name": "value",
+          "type": "number",
+          "required": true
+        },
+        {
+          "name": "text",
+          "type": "string | undefined",
+          "required": false
+        }
+      ],
+      "slots": [],
+      "events": [],
+      "example": "<RollingNumber :value=\"unread\" :text=\"countText(unread)\" />"
+    },
+    {
+      "name": "RollingSentence",
+      "kind": "component",
+      "line": "A sentence of the pack with turning figures in its placeholders.",
+      "props": [
+        {
+          "name": "keypath",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "figures",
+          "type": "Record<string, number | { value: number; text: string; }>",
+          "required": true
+        },
+        {
+          "name": "words",
+          "type": "Record<string, string> | undefined",
+          "required": false,
+          "default": "{}"
+        },
+        {
+          "name": "tag",
+          "type": "string | undefined",
+          "required": false,
+          "default": "\"span\""
+        }
+      ],
+      "slots": [],
+      "events": [],
+      "example": "<RollingSentence keypath=\"notes.message.synced_of\" :figures=\"{ done: synced, all: { value: total, text: countText(total) } }\" :words=\"{ folder: 'notes' }\" tag=\"p\" />"
+    },
+    {
+      "name": "ScreenFrame",
+      "kind": "component",
+      "line": "The frame of a screen that stands on no shell, pinned to the visible screen.",
+      "props": [],
+      "slots": [
+        {
+          "name": "default",
+          "type": "{}"
+        }
+      ],
+      "events": [],
+      "example": "<ScreenFrame>\n  <header class=\"flex h-(--ui-header-height) shrink-0 items-center border-b border-default px-4\">{{ t(\"notes.title.notes\") }}</header>\n  <main class=\"min-h-0 flex-1 overflow-y-auto p-4\">\n    <NuxtPage />\n  </main>\n</ScreenFrame>"
+    },
+    {
+      "name": "SearchHit",
+      "kind": "component",
+      "line": "The line under a row that matched only in hidden data.",
+      "props": [
+        {
+          "name": "match",
+          "type": "SearchMatch | null",
+          "required": true
+        },
+        {
+          "name": "query",
+          "type": "string | null | undefined",
+          "required": false
+        }
+      ],
+      "slots": [],
+      "events": [],
+      "example": "<UInput v-model=\"query\" icon=\"i-material-symbols-search\" :placeholder=\"t('notes.placeholder.search')\" />\n<ul>\n  <li v-for=\"row in rows\" :key=\"row.note.id\">\n    <SearchText :text=\"row.note.title\" :query=\"query\" />\n    <SearchHit :match=\"row.match\" :query=\"query\" />\n  </li>\n</ul>"
+    },
+    {
+      "name": "SearchText",
+      "kind": "component",
+      "line": "A shown text with the search's hits marked.",
+      "props": [
+        {
+          "name": "text",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "query",
+          "type": "string | null | undefined",
+          "required": false
+        }
+      ],
+      "slots": [],
+      "events": [],
+      "example": "<UInput v-model=\"query\" icon=\"i-material-symbols-search\" :placeholder=\"t('notes.placeholder.search')\" />\n<ul>\n  <li v-for=\"name in shown\" :key=\"name\"><SearchText :text=\"name\" :query=\"query\" /></li>\n</ul>"
+    },
+    {
+      "name": "SettingsDialog",
+      "kind": "component",
+      "line": "A setting's own form as a dialog, asking before it closes on changes.",
+      "props": [
+        {
+          "name": "title",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "description",
+          "type": "string | undefined",
+          "required": false,
+          "default": "undefined"
+        },
+        {
+          "name": "wide",
+          "type": "boolean | undefined",
+          "required": false
+        },
+        {
+          "name": "dirty",
+          "type": "boolean | undefined",
+          "required": false,
+          "default": "undefined"
+        },
+        {
+          "name": "open",
+          "type": "boolean | undefined",
+          "required": false,
+          "default": "false"
+        }
+      ],
+      "slots": [
+        {
+          "name": "default",
+          "type": "{}"
+        },
+        {
+          "name": "footer",
+          "type": "{ close: () => undefined; }"
+        }
+      ],
+      "events": [
+        {
+          "name": "update:open",
+          "type": "[value: boolean]"
+        }
+      ],
+      "example": "<SettingsDialog v-model:open=\"open\" :title=\"t('notes.title.rename_folder')\" :dirty=\"name !== saved\">\n  <UFormField :label=\"t('notes.label.name')\">\n    <UInput v-model=\"name\" class=\"w-full\" />\n  </UFormField>\n\n  <template #footer=\"{ close }\">\n    <UButton color=\"neutral\" variant=\"ghost\" :label=\"t('common.action.cancel')\" @click=\"close\" />\n    <UButton :label=\"t('common.action.save')\" @click=\"(saved = name), (open = false)\" />\n  </template>\n</SettingsDialog>"
+    },
+    {
+      "name": "SettingsGroup",
+      "kind": "component",
+      "line": "A group of settings rows under a small heading.",
+      "props": [
+        {
+          "name": "title",
+          "type": "string | undefined",
+          "required": false,
+          "default": "undefined"
+        }
+      ],
+      "slots": [
+        {
+          "name": "aside",
+          "type": "{}"
+        },
+        {
+          "name": "default",
+          "type": "{}"
+        }
+      ],
+      "events": [],
+      "example": "<SettingsGroup :title=\"t('notes.title.reading')\">\n  <SettingsRow :label=\"t('notes.label.wrap_lines')\">\n    <USwitch v-model=\"wrap\" />\n  </SettingsRow>\n  <SettingsRow :label=\"t('notes.label.font_size')\">\n    <NumberInput v-model=\"size\" :digits=\"2\" :min=\"12\" :max=\"24\" unit=\"px\" />\n  </SettingsRow>\n</SettingsGroup>"
+    },
+    {
+      "name": "SettingsRow",
+      "kind": "component",
+      "line": "One setting: its name, a muted line, its control.",
+      "props": [
+        {
+          "name": "label",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "description",
+          "type": "string | undefined",
+          "required": false,
+          "default": "undefined"
+        }
+      ],
+      "slots": [
+        {
+          "name": "description",
+          "type": "{}"
+        },
+        {
+          "name": "default",
+          "type": "{}"
+        }
+      ],
+      "events": [],
+      "example": "<SettingsRow :label=\"t('notes.label.sync')\" :description=\"t('notes.message.sync_hint')\">\n  <USwitch v-model=\"sync\" />\n</SettingsRow>"
+    },
+    {
+      "name": "SettingsSegment",
+      "kind": "component",
+      "line": "A choice of two or three as one segmented control.",
+      "props": [
+        {
+          "name": "items",
+          "type": "{ label: string; value: string; }[]",
+          "required": true
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "modelValue",
+          "type": "string",
+          "required": true
+        }
+      ],
+      "slots": [],
+      "events": [
+        {
+          "name": "update:modelValue",
+          "type": "[value: string]"
+        }
+      ],
+      "example": "<SettingsRow :label=\"t('notes.label.sort_by')\">\n  <SettingsSegment v-model=\"sort\" :items=\"items\" :label=\"t('notes.label.sort_by')\" />\n</SettingsRow>"
+    },
+    {
+      "name": "ShareLinkDialog",
+      "kind": "component",
+      "line": "The one dialog a share link is made, shown, copied and ended in, over the road the host hands it.",
+      "props": [
+        {
+          "name": "road",
+          "type": "ShareRoad",
+          "required": true
+        },
+        {
+          "name": "spans",
+          "type": "ShareSpan[]",
+          "required": true
+        },
+        {
+          "name": "span",
+          "type": "string | undefined",
+          "required": false,
+          "default": "undefined"
+        },
+        {
+          "name": "subject",
+          "type": "string | undefined",
+          "required": false,
+          "default": "undefined"
+        },
+        {
+          "name": "explain",
+          "type": "((error: unknown, fallback: string) => string) | undefined",
+          "required": false,
+          "default": "failureText"
+        },
+        {
+          "name": "open",
+          "type": "boolean | undefined",
+          "required": false,
+          "default": "false"
+        }
+      ],
+      "slots": [],
+      "events": [
+        {
+          "name": "update:open",
+          "type": "[value: boolean]"
+        },
+        {
+          "name": "shared",
+          "type": "[mark: ShareMark | null]"
+        }
+      ],
+      "example": "<ShareLinkDialog v-model:open=\"open\" :road=\"road\" :spans=\"spans\" span=\"7\" :subject=\"'plan.md'\" @shared=\"markShared\" />"
+    },
+    {
+      "name": "ShellClose",
+      "kind": "component",
+      "line": "The close of a modal or a side sheet.",
+      "props": [],
+      "slots": [],
+      "events": [
+        {
+          "name": "close",
+          "type": "[]"
+        }
+      ],
+      "example": "<USlideover v-model:open=\"open\" :title=\"t('notes.title.details')\" :close=\"false\">\n  <template #actions>\n    <ShellClose @close=\"open = false\" />\n  </template>\n  <template #body>\n    <p>{{ t(\"notes.message.no_details\") }}</p>\n  </template>\n</USlideover>"
+    },
+    {
+      "name": "SkeletonBar",
+      "kind": "component",
+      "line": "The one shimmering bar.",
+      "props": [],
+      "slots": [],
+      "events": [],
+      "example": "<div class=\"flex items-center gap-3\">\n  <SkeletonBar class=\"size-10 rounded-full\" />\n  <SkeletonBar class=\"h-4 w-40\" />\n</div>"
+    },
+    {
+      "name": "SkeletonLine",
+      "kind": "component",
+      "line": "One line of text not yet arrived.",
+      "props": [
+        {
+          "name": "size",
+          "type": "\"sm\" | \"lg\" | \"base\" | undefined",
+          "required": false,
+          "default": "\"sm\""
+        },
+        {
+          "name": "width",
+          "type": "string | undefined",
+          "required": false,
+          "default": "\"w-full\""
+        }
+      ],
+      "slots": [],
+      "events": [],
+      "example": "<div class=\"flex flex-col gap-1\">\n  <SkeletonLine size=\"lg\" width=\"w-1/2\" />\n  <SkeletonLine width=\"w-1/3\" />\n</div>"
+    },
+    {
+      "name": "SkeletonStatus",
+      "kind": "component",
+      "line": "The busy status alone, for a place kept inline.",
+      "props": [
+        {
+          "name": "label",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "as",
+          "type": "\"span\" | \"div\" | undefined",
+          "required": false,
+          "default": "\"span\""
+        }
+      ],
+      "slots": [
+        {
+          "name": "default",
+          "type": "{}"
+        }
+      ],
+      "events": [],
+      "example": "<p>\n  {{ t(\"notes.label.size\") }}:\n  <SkeletonStatus v-if=\"size === null\" :label=\"t('notes.status.measuring')\">\n    <SkeletonLine width=\"w-12\" />\n  </SkeletonStatus>\n  <span v-else>{{ size }}</span>\n</p>"
+    },
+    {
+      "name": "SkeletonText",
+      "kind": "component",
+      "line": "A passage of placeholder lines.",
+      "props": [
+        {
+          "name": "lines",
+          "type": "number | undefined",
+          "required": false,
+          "default": "3"
+        },
+        {
+          "name": "size",
+          "type": "\"sm\" | \"lg\" | \"base\" | undefined",
+          "required": false,
+          "default": "\"base\""
+        },
+        {
+          "name": "lastWidth",
+          "type": "string | undefined",
+          "required": false,
+          "default": "\"w-3/5\""
+        }
+      ],
+      "slots": [],
+      "events": [],
+      "example": "<article class=\"flex flex-col gap-3\">\n  <SkeletonLine size=\"lg\" width=\"w-2/3\" />\n  <SkeletonText :lines=\"4\" last-width=\"w-2/5\" />\n</article>"
+    },
+    {
+      "name": "SteadyFigure",
+      "kind": "component",
+      "line": "A figure that keeps the width of the widest it reaches.",
+      "props": [
+        {
+          "name": "widest",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "align",
+          "type": "\"start\" | \"end\" | undefined",
+          "required": false,
+          "default": "\"end\""
+        }
+      ],
+      "slots": [
+        {
+          "name": "default",
+          "type": "{}"
+        }
+      ],
+      "events": [],
+      "example": "<SteadyFigure widest=\"0:00:00\">{{ timerClock(elapsed) }}</SteadyFigure>"
+    },
+    {
+      "name": "TabBar",
+      "kind": "component",
+      "line": "The open-and-close tab bar, with pinning, its menu and dragging.",
+      "props": [
+        {
+          "name": "tabs",
+          "type": "readonly BarTab[]",
+          "required": true
+        },
+        {
+          "name": "active",
+          "type": "string | null",
+          "required": true
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "readonly",
+          "type": "boolean | undefined",
+          "required": false,
+          "default": "false"
+        },
+        {
+          "name": "pinnable",
+          "type": "boolean | undefined",
+          "required": false,
+          "default": "true"
+        },
+        {
+          "name": "menu",
+          "type": "((id: string) => readonly BarMenuItem[]) | null | undefined",
+          "required": false,
+          "default": "null"
+        },
+        {
+          "name": "actions",
+          "type": "readonly BarAction[] | undefined",
+          "required": false,
+          "default": "[]"
+        },
+        {
+          "name": "properties",
+          "type": "readonly BarProperty[] | null | undefined",
+          "required": false,
+          "default": "null"
+        },
+        {
+          "name": "propertiesTitle",
+          "type": "string | null | undefined",
+          "required": false,
+          "default": "null"
+        },
+        {
+          "name": "actionsNarrowFold",
+          "type": "boolean | undefined",
+          "required": false,
+          "default": "true"
+        }
+      ],
+      "slots": [
+        {
+          "name": "switch",
+          "type": "{}"
+        },
+        {
+          "name": "actions",
+          "type": "{}"
+        }
+      ],
+      "events": [
+        {
+          "name": "close",
+          "type": "[ids: string[]]"
+        },
+        {
+          "name": "update:active",
+          "type": "[id: string]"
+        },
+        {
+          "name": "move",
+          "type": "[from: number, to: number]"
+        },
+        {
+          "name": "pin",
+          "type": "[id: string, on: boolean]"
+        }
+      ],
+      "example": "<TabBar v-model:active=\"active\" :tabs=\"tabs\" :label=\"t('notes.aria.open_notes')\" :actions=\"actions\" @close=\"close\" @move=\"move\" @pin=\"pin\" />"
+    },
+    {
+      "name": "TabSlide",
+      "kind": "component",
+      "line": "A tabbed panel that slides sideways as its tab changes.",
+      "props": [
+        {
+          "name": "at",
+          "type": "number",
+          "required": true
+        }
+      ],
+      "slots": [
+        {
+          "name": "default",
+          "type": "{}"
+        }
+      ],
+      "events": [],
+      "example": "<TabSwitch v-model=\"view\" :items=\"items\" :label=\"t('notes.aria.view')\" />\n<TabSlide :at=\"items.findIndex((item) => item.value === view)\">\n  <ul v-if=\"view === 'recent'\" key=\"recent\">\n    <li>plan.md</li>\n  </ul>\n  <ul v-else key=\"pinned\">\n    <li>notes.md</li>\n  </ul>\n</TabSlide>"
+    },
+    {
+      "name": "TabSwitch",
+      "kind": "component",
+      "line": "A view switch whose choices share its width.",
+      "props": [
+        {
+          "name": "items",
+          "type": "readonly SwitchItem<T>[]",
+          "required": true
+        },
+        {
+          "name": "modelValue",
+          "type": "T",
+          "required": true
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "compact",
+          "type": "boolean | undefined",
+          "required": false
+        }
+      ],
+      "slots": [],
+      "events": [
+        {
+          "name": "update:modelValue",
+          "type": "[value: T]"
+        }
+      ],
+      "example": "<TabSwitch v-model=\"view\" :items=\"items\" :label=\"t('notes.aria.view')\" />"
+    },
+    {
+      "name": "ThemePreview",
+      "kind": "component",
+      "line": "A small piece of a screen in one theme and one mode.",
+      "props": [
+        {
+          "name": "theme",
+          "type": "Theme",
+          "required": true
+        },
+        {
+          "name": "scheme",
+          "type": "Scheme",
+          "required": true
+        }
+      ],
+      "slots": [],
+      "events": [],
+      "example": "<SettingsGroup :title=\"t('notes.title.theme')\">\n  <div class=\"grid grid-cols-2 gap-3\">\n    <ThemePreview :theme=\"theme\" scheme=\"light\" />\n    <ThemePreview :theme=\"theme\" scheme=\"dark\" />\n  </div>\n</SettingsGroup>"
+    },
+    {
+      "name": "ThemeSwatch",
+      "kind": "component",
+      "line": "A theme's accent and raised grey as dots, in one mode.",
+      "props": [
+        {
+          "name": "theme",
+          "type": "Theme",
+          "required": true
+        },
+        {
+          "name": "scheme",
+          "type": "Scheme",
+          "required": true
+        }
+      ],
+      "slots": [],
+      "events": [],
+      "example": "<USelect v-model=\"chosen\" :items=\"items\" value-key=\"value\">\n  <template #item-leading=\"{ item }\">\n    <ThemeSwatch :theme=\"themeOf(item.value)\" scheme=\"dark\" />\n  </template>\n</USelect>"
+    },
+    {
+      "name": "ToolBar",
+      "kind": "component",
+      "line": "The toolbar flush against one target, cells parted by dividers.",
+      "props": [
+        {
+          "name": "label",
+          "type": "string",
+          "required": true
+        }
+      ],
+      "slots": [
+        {
+          "name": "default",
+          "type": "{}"
+        }
+      ],
+      "events": [],
+      "example": "<ToolBar :label=\"t('notes.aria.editor_tools')\">\n  <UTooltip :text=\"t('notes.action.bold')\">\n    <UButton icon=\"i-material-symbols-format-bold\" color=\"neutral\" variant=\"ghost\" :aria-label=\"t('notes.action.bold')\" />\n  </UTooltip>\n  <UTooltip :text=\"t('notes.action.italic')\">\n    <UButton icon=\"i-material-symbols-format-italic\" color=\"neutral\" variant=\"ghost\" :aria-label=\"t('notes.action.italic')\" />\n  </UTooltip>\n  <UButton class=\"ms-auto\" color=\"neutral\" variant=\"ghost\" :label=\"t('common.action.save')\" />\n</ToolBar>"
+    },
+    {
+      "name": "dialog-origin",
+      "kind": "page-plugin",
+      "line": "Every dialog the library draws grows out of the control pressed to open it."
+    },
+    {
+      "name": "fullscreen",
+      "kind": "page-plugin",
+      "line": "A video let go of full screen finds the parts around it where they were left."
+    },
+    {
+      "name": "icon-styles",
+      "kind": "page-plugin",
+      "line": "The icon library's styles are put in behind the page's other stylesheets, so a first-drawn icon never redraws the letters."
+    },
+    {
+      "name": "input-modality",
+      "kind": "page-plugin",
+      "line": "Which hand last moved the focus is marked on the page's root for the stylesheet."
+    },
+    {
+      "name": "overlays",
+      "kind": "page-plugin",
+      "line": "What the library floats closes to the back gesture and to a finger's tap away from it."
+    },
+    {
+      "name": "painted",
+      "kind": "page-plugin",
+      "line": "The flag the skeletons wait for is raised once hydration ends."
+    }
+  ],
+  "tokens": {
+    "--bmo-ease-enter": {
+      "group": "ease",
+      "light": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+      "dark": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+      "source": "layer"
+    },
+    "--bmo-ease-exit": {
+      "group": "ease",
+      "light": "cubic-bezier(0.4, 0, 1, 1)",
+      "dark": "cubic-bezier(0.4, 0, 1, 1)",
+      "source": "layer"
+    },
+    "--bmo-ease-move": {
+      "group": "ease",
+      "light": "cubic-bezier(0.4, 0, 0.2, 1)",
+      "dark": "cubic-bezier(0.4, 0, 0.2, 1)",
+      "source": "layer"
+    },
+    "--bmo-focus": {
+      "group": "focus",
+      "light": "var(--ui-color-primary-600)",
+      "dark": "var(--ui-color-primary-400)",
+      "source": "layer"
+    },
+    "--bmo-focus-gap": {
+      "group": "focus",
+      "light": "2px",
+      "dark": "2px",
+      "source": "layer"
+    },
+    "--bmo-focus-width": {
+      "group": "focus",
+      "light": "2px",
+      "dark": "2px",
+      "source": "layer"
+    },
+    "--bmo-motion-pop": {
+      "group": "motion",
+      "light": "200ms",
+      "dark": "200ms",
+      "source": "layer"
+    },
+    "--bmo-motion-quick": {
+      "group": "motion",
+      "light": "150ms",
+      "dark": "150ms",
+      "source": "layer"
+    },
+    "--bmo-motion-unfold": {
+      "group": "motion",
+      "light": "320ms",
+      "dark": "320ms",
+      "source": "layer"
+    },
+    "--bmo-palette-other": {
+      "group": "palette",
+      "light": "var(--bmo-palette-other-light)",
+      "dark": "var(--bmo-palette-other-dark)",
+      "source": "layer"
+    },
+    "--bmo-palette-other-dark": {
+      "group": "palette",
+      "light": "#27272a",
+      "dark": "#27272a",
+      "source": "layer"
+    },
+    "--bmo-palette-other-light": {
+      "group": "palette",
+      "light": "#f4f4f5",
+      "dark": "#f4f4f5",
+      "source": "layer"
+    },
+    "--bmo-palette-own": {
+      "group": "palette",
+      "light": "var(--bmo-palette-own-light)",
+      "dark": "var(--bmo-palette-own-dark)",
+      "source": "layer"
+    },
+    "--bmo-palette-own-dark": {
+      "group": "palette",
+      "light": "#17504f",
+      "dark": "#17504f",
+      "source": "layer"
+    },
+    "--bmo-palette-own-light": {
+      "group": "palette",
+      "light": "#d8f3f3",
+      "dark": "#d8f3f3",
+      "source": "layer"
+    },
+    "--bmo-safe-bottom": {
+      "group": "safe",
+      "light": "env(safe-area-inset-bottom, 0px)",
+      "dark": "env(safe-area-inset-bottom, 0px)",
+      "source": "layer"
+    },
+    "--bmo-safe-top": {
+      "group": "safe",
+      "light": "env(safe-area-inset-top, 0px)",
+      "dark": "env(safe-area-inset-top, 0px)",
+      "source": "layer"
+    },
+    "--bmo-screen": {
+      "group": "screen",
+      "light": "100dvh",
+      "dark": "100dvh",
+      "source": "layer"
+    },
+    "--bmo-screen-top": {
+      "group": "screen",
+      "light": "0px",
+      "dark": "0px",
+      "source": "layer"
+    },
+    "--default-transition-duration": {
+      "group": "default",
+      "light": "var(--bmo-motion-quick)",
+      "dark": "var(--bmo-motion-quick)",
+      "source": "layer"
+    },
+    "--default-transition-timing-function": {
+      "group": "default",
+      "light": "var(--bmo-ease-move)",
+      "dark": "var(--bmo-ease-move)",
+      "source": "layer"
+    },
+    "--font-mono": {
+      "group": "font",
+      "light": "\"CaskaydiaCove NFM\", \"Apple SD Gothic Neo\", \"Pretendard\", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, \"Liberation Mono\", \"Courier New\", monospace",
+      "dark": "\"CaskaydiaCove NFM\", \"Apple SD Gothic Neo\", \"Pretendard\", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, \"Liberation Mono\", \"Courier New\", monospace",
+      "source": "layer"
+    },
+    "--font-sans": {
+      "group": "font",
+      "light": "\"Apple SD Gothic Neo\", \"Pretendard\", -apple-system, BlinkMacSystemFont, system-ui, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans KR\", \"Malgun Gothic\", \"Apple Color Emoji\", \"Segoe UI Emoji\", sans-serif",
+      "dark": "\"Apple SD Gothic Neo\", \"Pretendard\", -apple-system, BlinkMacSystemFont, system-ui, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans KR\", \"Malgun Gothic\", \"Apple Color Emoji\", \"Segoe UI Emoji\", sans-serif",
+      "source": "layer"
+    },
+    "--text-xs": {
+      "group": "text",
+      "light": "0.875rem",
+      "dark": "0.875rem",
+      "source": "layer"
+    },
+    "--text-xs--line-height": {
+      "group": "text",
+      "light": "calc(1.25 / 0.875)",
+      "dark": "calc(1.25 / 0.875)",
+      "source": "layer"
+    },
+    "--ui-bg": {
+      "group": "bg",
+      "light": "#fff",
+      "dark": "var(--ui-color-neutral-900)",
+      "source": "library"
+    },
+    "--ui-bg-accented": {
+      "group": "bg",
+      "light": "var(--ui-color-neutral-200)",
+      "dark": "var(--ui-color-neutral-700)",
+      "source": "library"
+    },
+    "--ui-bg-elevated": {
+      "group": "bg",
+      "light": "var(--ui-color-neutral-100)",
+      "dark": "var(--ui-color-neutral-800)",
+      "source": "library"
+    },
+    "--ui-bg-inverted": {
+      "group": "bg",
+      "light": "var(--ui-color-neutral-900)",
+      "dark": "#fff",
+      "source": "library"
+    },
+    "--ui-bg-muted": {
+      "group": "bg",
+      "light": "var(--ui-color-neutral-50)",
+      "dark": "var(--ui-color-neutral-800)",
+      "source": "library"
+    },
+    "--ui-border": {
+      "group": "border",
+      "light": "var(--ui-color-neutral-200)",
+      "dark": "var(--ui-color-neutral-800)",
+      "source": "library"
+    },
+    "--ui-border-accented": {
+      "group": "border",
+      "light": "var(--ui-color-neutral-300)",
+      "dark": "var(--ui-color-neutral-700)",
+      "source": "library"
+    },
+    "--ui-border-inverted": {
+      "group": "border",
+      "light": "var(--ui-color-neutral-900)",
+      "dark": "#fff",
+      "source": "library"
+    },
+    "--ui-border-muted": {
+      "group": "border",
+      "light": "var(--ui-color-neutral-200)",
+      "dark": "var(--ui-color-neutral-700)",
+      "source": "library"
+    },
+    "--ui-color-neutral-50": {
+      "group": "color",
+      "light": "oklch(98.5% 0 none)",
+      "dark": "oklch(98.5% 0 none)",
+      "source": "layer"
+    },
+    "--ui-color-neutral-100": {
+      "group": "color",
+      "light": "oklch(96.7% 0.001 286.375)",
+      "dark": "oklch(96.7% 0.001 286.375)",
+      "source": "layer"
+    },
+    "--ui-color-neutral-200": {
+      "group": "color",
+      "light": "oklch(92% 0.004 286.32)",
+      "dark": "oklch(92% 0.004 286.32)",
+      "source": "layer"
+    },
+    "--ui-color-neutral-300": {
+      "group": "color",
+      "light": "oklch(87.1% 0.006 286.286)",
+      "dark": "oklch(87.1% 0.006 286.286)",
+      "source": "layer"
+    },
+    "--ui-color-neutral-400": {
+      "group": "color",
+      "light": "oklch(70.5% 0.015 286.067)",
+      "dark": "oklch(70.5% 0.015 286.067)",
+      "source": "layer"
+    },
+    "--ui-color-neutral-500": {
+      "group": "color",
+      "light": "oklch(55.2% 0.016 285.938)",
+      "dark": "oklch(55.2% 0.016 285.938)",
+      "source": "layer"
+    },
+    "--ui-color-neutral-600": {
+      "group": "color",
+      "light": "oklch(44.2% 0.017 285.786)",
+      "dark": "oklch(44.2% 0.017 285.786)",
+      "source": "layer"
+    },
+    "--ui-color-neutral-700": {
+      "group": "color",
+      "light": "oklch(37% 0.013 285.805)",
+      "dark": "oklch(37% 0.013 285.805)",
+      "source": "layer"
+    },
+    "--ui-color-neutral-800": {
+      "group": "color",
+      "light": "oklch(27.4% 0.006 286.033)",
+      "dark": "oklch(27.4% 0.006 286.033)",
+      "source": "layer"
+    },
+    "--ui-color-neutral-900": {
+      "group": "color",
+      "light": "oklch(21% 0.006 285.885)",
+      "dark": "oklch(21% 0.006 285.885)",
+      "source": "layer"
+    },
+    "--ui-color-neutral-950": {
+      "group": "color",
+      "light": "oklch(14.1% 0.005 285.823)",
+      "dark": "oklch(14.1% 0.005 285.823)",
+      "source": "layer"
+    },
+    "--ui-color-primary-50": {
+      "group": "color",
+      "light": "oklch(98.4% 0.014 180.72)",
+      "dark": "oklch(98.4% 0.014 180.72)",
+      "source": "layer"
+    },
+    "--ui-color-primary-100": {
+      "group": "color",
+      "light": "oklch(95.3% 0.051 180.801)",
+      "dark": "oklch(95.3% 0.051 180.801)",
+      "source": "layer"
+    },
+    "--ui-color-primary-200": {
+      "group": "color",
+      "light": "oklch(91% 0.096 180.426)",
+      "dark": "oklch(91% 0.096 180.426)",
+      "source": "layer"
+    },
+    "--ui-color-primary-300": {
+      "group": "color",
+      "light": "oklch(85.5% 0.138 181.071)",
+      "dark": "oklch(85.5% 0.138 181.071)",
+      "source": "layer"
+    },
+    "--ui-color-primary-400": {
+      "group": "color",
+      "light": "oklch(77.7% 0.152 181.912)",
+      "dark": "oklch(77.7% 0.152 181.912)",
+      "source": "layer"
+    },
+    "--ui-color-primary-500": {
+      "group": "color",
+      "light": "oklch(70.4% 0.14 182.503)",
+      "dark": "oklch(70.4% 0.14 182.503)",
+      "source": "layer"
+    },
+    "--ui-color-primary-600": {
+      "group": "color",
+      "light": "oklch(60% 0.118 184.704)",
+      "dark": "oklch(60% 0.118 184.704)",
+      "source": "layer"
+    },
+    "--ui-color-primary-700": {
+      "group": "color",
+      "light": "oklch(51.1% 0.096 186.391)",
+      "dark": "oklch(51.1% 0.096 186.391)",
+      "source": "layer"
+    },
+    "--ui-color-primary-800": {
+      "group": "color",
+      "light": "oklch(43.7% 0.078 188.216)",
+      "dark": "oklch(43.7% 0.078 188.216)",
+      "source": "layer"
+    },
+    "--ui-color-primary-900": {
+      "group": "color",
+      "light": "oklch(38.6% 0.063 188.416)",
+      "dark": "oklch(38.6% 0.063 188.416)",
+      "source": "layer"
+    },
+    "--ui-color-primary-950": {
+      "group": "color",
+      "light": "oklch(27.7% 0.046 192.524)",
+      "dark": "oklch(27.7% 0.046 192.524)",
+      "source": "layer"
+    },
+    "--ui-container": {
+      "group": "container",
+      "light": "48rem",
+      "dark": "48rem",
+      "source": "layer"
+    },
+    "--ui-header-height": {
+      "group": "header",
+      "light": "3rem",
+      "dark": "3rem",
+      "source": "layer"
+    },
+    "--ui-radius": {
+      "group": "radius",
+      "light": "0.25rem",
+      "dark": "0.25rem",
+      "source": "library"
+    },
+    "--ui-text": {
+      "group": "text",
+      "light": "var(--ui-color-neutral-700)",
+      "dark": "var(--ui-color-neutral-200)",
+      "source": "library"
+    },
+    "--ui-text-dimmed": {
+      "group": "text",
+      "light": "var(--ui-color-neutral-400)",
+      "dark": "var(--ui-color-neutral-500)",
+      "source": "library"
+    },
+    "--ui-text-highlighted": {
+      "group": "text",
+      "light": "var(--ui-color-neutral-900)",
+      "dark": "#fff",
+      "source": "library"
+    },
+    "--ui-text-inverted": {
+      "group": "text",
+      "light": "#fff",
+      "dark": "var(--ui-color-neutral-900)",
+      "source": "library"
+    },
+    "--ui-text-muted": {
+      "group": "text",
+      "light": "var(--ui-color-neutral-500)",
+      "dark": "var(--ui-color-neutral-400)",
+      "source": "library"
+    },
+    "--ui-text-toned": {
+      "group": "text",
+      "light": "var(--ui-color-neutral-600)",
+      "dark": "var(--ui-color-neutral-300)",
+      "source": "library"
+    }
+  }
+}

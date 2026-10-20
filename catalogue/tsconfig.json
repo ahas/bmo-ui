@@ -1,0 +1,12 @@
+{
+  // The harness plugin's code — the catalogue, its generator, the MCP server and the command — runs
+  // under Bun, and the components' examples are app code using the layer's components. The typecheck
+  // reads them all as one project beside the app's, with the app's declarations so an example is held
+  // to the components it uses.
+  "extends": "../.nuxt/tsconfig.app.json",
+  "compilerOptions": {
+    "types": ["bun"]
+  },
+  "include": ["./**/*", "../mcp/**/*", "../bin/**/*", "../.nuxt/nuxt.d.ts", "../app/**/*.d.ts"],
+  "exclude": []
+}

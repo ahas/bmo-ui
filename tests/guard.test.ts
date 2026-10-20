@@ -74,10 +74,12 @@ function programsOf(path: string, source: string): Program[] {
   return codes.filter((one): one is string => one !== undefined).map(program);
 }
 
-// The layer's own code: everything a host takes when it extends the layer.
+// The layer's own code: everything a host takes when it extends the layer, and the harness plugin's
+// code beside it. The components' examples stand for a host's screen and keep a host's words, so they
+// are read as a host's code is: by the typecheck, not by these rules.
 const layerCode: CodeFile[] = await Promise.all(
   repositoryPaths
-    .filter((path) => path === "nuxt.config.ts" || /^(app|shared)\/.+\.(ts|vue)$/.test(path))
+    .filter((path) => path === "nuxt.config.ts" || /^(app|shared|bin|mcp)\/.+\.(ts|vue)$/.test(path) || /^catalogue\/[^/]+\.ts$/.test(path))
     .map(async (path) => ({ path, programs: programsOf(path, await text(path)) }))
 );
 
@@ -174,11 +176,17 @@ const FORBIDDEN_NAMES = new Set([
 // another repository.
 const OWN_NAMESPACE = new Set(["code", "dialog", "ease", "focus", "inset", "island", "list", "motion", "palette", "safe", "screen", "slide", "touch", "ui"]);
 
+// The layer's own skill, named under the namespace a harness loads upstream skills from
+// (`docs/harness.md`, "The skill"). It is one name, so its parts are not read as words of their own.
+const OWN_SKILL = "ahas-ui";
+
 function words(said: string): Set<string> {
   const found = new Set<string>();
 
   for (const [word] of said.toLowerCase().matchAll(/[\p{L}\p{N}]+(?:-[\p{L}\p{N}]+)*/gu)) {
     found.add(word);
+
+    if (word === OWN_SKILL) continue;
 
     for (const part of word.split("-")) found.add(part);
   }
@@ -474,5 +482,12 @@ describe("the boundary document", () => {
 
   test("names every shared module with everything it exports", () => {
     expect(namedModules("Shared modules")).toEqual(modulesIn("shared/"));
+  });
+
+  test("names the catalogue module with everything it exports", () => {
+    // The folder's generator writes the module's data and ships with no host.
+    const { generate: _generator, ...shippedModules } = modulesIn("catalogue/");
+
+    expect(namedModules("The harness plugin")).toEqual(shippedModules);
   });
 });

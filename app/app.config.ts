@@ -375,9 +375,10 @@ export default defineAppConfig({
       }
     }
   },
-  // How figures and times are written, the host's to state (`docs/boundary.md`, "What the host
-  // owes"). Nothing is set here, so each default stands until the host states a value: the runtime's
-  // own zone and locale, and dayjs's built-in locale for the words of a date.
+  // How figures and times are written and where services are relayed, the host's to state
+  // (`docs/boundary.md`, "What the host owes"). Nothing is set here, so each default stands until the
+  // host states a value: the runtime's own zone and locale, dayjs's built-in locale for the words of a
+  // date, and the root for the relay.
   bmoUi: {} as {
     // An IANA zone name every time is shown in.
     zone?: string;
@@ -385,5 +386,7 @@ export default defineAppConfig({
     locale?: string;
     // The name of a dayjs locale the host has loaded.
     dateLocale?: string;
+    // The path every service a console bundle calls is relayed under (`docs/console-bundles.md`).
+    relayBase?: string;
   }
 });

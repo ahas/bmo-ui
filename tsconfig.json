@@ -1,12 +1,14 @@
 {
-  // Nuxt's own project configs carry the layer's code; the tests under tests/ are a project of their
-  // own beside them, so the typecheck reads them too.
+  // Nuxt's own project configs carry the layer's code; the tests under tests/ and the harness plugin's
+  // code, whose project stands in catalogue/, are projects of their own beside them, so the typecheck
+  // reads them too.
   "files": [],
   "references": [
     { "path": "./.nuxt/tsconfig.app.json" },
     { "path": "./.nuxt/tsconfig.server.json" },
     { "path": "./.nuxt/tsconfig.shared.json" },
     { "path": "./.nuxt/tsconfig.node.json" },
-    { "path": "./tests" }
+    { "path": "./tests" },
+    { "path": "./catalogue" }
   ]
 }

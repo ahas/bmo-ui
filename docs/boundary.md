@@ -2,7 +2,8 @@
 
 Everything the layer exposes and everything a host owes it. A change to anything listed here follows
 the version rules in the README, and this document changes in the same commit. What each piece does
-is stated in `docs/design.md`, `docs/wording.md` and `docs/components.md`.
+is stated in `docs/design.md`, `docs/wording.md` and `docs/components.md`; the console plugin
+contract in `docs/console-bundles.md`; the harness plugin in `docs/harness.md`.
 
 The guard test holds the code to this document: every component, page plugin and module the layer
 ships is named here with everything it exports, nothing is named here that it does not ship, and the
@@ -114,6 +115,7 @@ Each is named with everything it exports.
 | `overlays` | `OVER_LAYERS`, `isBackEscape`, `refuseStalePresses`, `refuseHandedBackFocus`, `watchOverlays` |
 | `player` | `Playing`, `playAlone`, `playClock`, `knownLength`, `loudnessOf`, `easedLoudness`, `AURA_STILL`, `auraOf`, `PlayerButton`, `PlayerSignal`, `buttonAfter` |
 | `prompt` | `TOUCH_QUERY`, `EnterKeys`, `enterKeys`, `PromptEnter`, `usePromptEnter`, `PROMPT_MAX_ROWS`, `PROMPT_TEXTAREA_UI`, `PROMPT_WORDS_WRAP` |
+| `relay` | `relayAddress` |
 | `scheme` | `provideBoxScheme`, `useDarkScheme`, `usePageScheme`, `usePreviewScheme` |
 | `screen` | `NARROW_MAX_PX`, `NARROW_QUERY`, `useNarrow`, `VisibleReading`, `VisibleFrame`, `visibleFrame`, `SCREEN_HEIGHT_PROPERTY`, `SCREEN_TOP_PROPERTY`, `SCREEN_FRAME`, `useVisibleScreen`, `STABLE_GUTTER`, `useWidth`, `useScrollGutter` |
 | `scroll-within` | `offsetFor`, `scrollWithin` |
@@ -133,6 +135,8 @@ Each is named with everything it exports.
   opens and the spans offered are the host's; the module holds their shapes and the one reading of a
   link's end, as the date it stands until.
 - **`monaco` opens code and source views only.** Any other view over the editor is the host's.
+- **`relay` makes an address and calls nothing.** It answers where a screen calls a service, under
+  the host's relay base (see What the host owes); the call itself is the screen's.
 - **`numbers` and `time` read the host's locale and zone** (see What the host owes) each time they
   write, so they import no locale and nothing is read before the app stands. `countLocale` answers
   the locale figures are written in: the host's tag, or nothing where none is set, which is the
@@ -150,10 +154,15 @@ Each is named with everything it exports.
 | `files` | `FileConflict` |
 | `code-language` | `codeLanguage` |
 | `screen-mode` | `DocumentScheme`, `DEFAULT_SCHEME`, `SCHEME_COOKIE`, `isDocumentScheme` |
+| `console-bundle` | `CONSOLE_BUNDLE_FILE`, `ConsoleBundle`, `CONSOLE_BUNDLE_SCHEMA`, `consoleBundle` |
 
 - **`search` folds letter case in the locale each call is handed,** the runtime's own where none is.
   It reads no app configuration, so it runs alike in a browser and on a server; a host searching in
   the app hands it `countLocale`'s answer, as the layer's own components do.
+- **`console-bundle` is the contract's declaration** (`docs/console-bundles.md`): the file a bundle
+  declares itself in, the declaration's JSON Schema, its type with every optional field filled, and
+  the reading that fills them or refuses a declaration naming each field at fault. It runs alike in a
+  browser, on a server and in a test.
 
 ## Page plugins
 
@@ -167,6 +176,22 @@ Each runs in the browser alone, on every screen, from the moment the page is up.
 | `input-modality` | Which hand last moved the focus is marked on the page's root for the stylesheet. |
 | `overlays` | What the library floats closes to the back gesture and to a finger's tap away from it. |
 | `painted` | The flag the skeletons wait for is raised once hydration ends. |
+
+## The harness plugin
+
+What a coding harness takes the layer through (`docs/harness.md`).
+
+- **The command** `bmo-ui`, named in the manifest and run by Bun. Its one command, `mcp`, starts the
+  MCP server on standard input and output.
+- **The MCP server's tools** are `ui_components`, `ui_component`, `ui_tokens` and
+  `ui_plugin_contract`, and no others; what each takes and answers is in the harness document.
+- **The skill** `ahas-ui`, in the package's `skills/` folder.
+- **The catalogue module,** imported by path from the package's `catalogue/` folder with its data file
+  beside it:
+
+| Module | Exports |
+| --- | --- |
+| `catalogue` | `CatalogueKind`, `CatalogueProp`, `CataloguePart`, `CatalogueEntry`, `CatalogueToken`, `CatalogueData`, `ComponentDetail`, `CatalogueError`, `components`, `component`, `tokens`, `pluginContract` |
 
 ## Wording keys
 
@@ -296,10 +321,14 @@ Every token is a custom property stated by the layer's stylesheet on the root un
   - `locale`, a BCP 47 tag figures are written in and letter case is folded in; by default the
     runtime's own;
   - `dateLocale`, the name of a dayjs locale the host has loaded, dates' words are written in; by
-    default dayjs's built-in one.
+    default dayjs's built-in one;
+  - `relayBase`, the path a console relays every service under, which the relay module's addresses
+    start with; by default none, so a service is called at its name from the root.
   The layer's own app configuration states the setting with nothing in it, so each default stands
-  until the host states a value. A host that renders on the server states all three, since the
+  until the host states a value. A host that renders on the server states the first three, since the
   server's runtime and the browser's need not agree.
+- **What a console owes a bundle,** where the host is a console: the contract's own list
+  (`docs/console-bundles.md`, "What a console owes").
 - **The tooltip setting.** The host's app root, the library's `UApp`, is handed the tooltip
   module's `TOOLTIP_PROVIDER` as its tooltip setting, so a focus the keyboard did not bring — the
   one a closing dialog or sheet hands back to its control — brings up no tooltip
@@ -320,7 +349,8 @@ Every token is a custom property stated by the layer's stylesheet on the root un
 - **The layer requires** Nuxt 4.5 or later within 4, `@nuxtjs/i18n` 10.6 or later within 10 and
   `vue-i18n` 11.4.8 or later within 11, the engine that module requires, as peers, and brings Nuxt
   UI 4.11 or later within 4, with the two icon sets it draws from: Material Symbols and the Material
-  Icon Theme.
+  Icon Theme. The command and its MCP server run under Bun 1.3 or later, on the MCP SDK 1.32 or later
+  within 1 and zod 4.
 - **It stands on registry packages alone;** no other repository is a dependency.
 - **One version for the whole repository,** the manifest's; the README states what may change at
   which release.
