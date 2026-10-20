@@ -85,8 +85,8 @@
       "components/files",
       "console/contract"
     ],
-    "base": "0159acea7fa43ba13b85714b3232dac7057f85c3",
-    "changed": 1792536920860,
+    "base": "48f5d9fc20056bf11f83fb88486b4cf3596c050c",
+    "changed": 1792537553654,
     "boundary": {
       "side": "exposes"
     }
