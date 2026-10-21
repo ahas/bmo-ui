@@ -45,7 +45,7 @@ components and behaviours every screen is built from. It is a Nuxt layer, built 
 
 | Folder | What it holds |
 |---|---|
-| `.graph/` | The code dependency graph: the repository's settings, one node per feature with its files and the features it needs, and a boundary node for each API the layer offers |
+| `.graph/` | The code dependency graph: the repository's settings, one node per feature with its files and the features it needs, and a boundary node for each API the layer offers. Its area files are generated in the checkout and untracked, so a fresh checkout builds them again, while `settings.toml` is the repository's configuration and stays tracked |
 | `app/` | The layer's app code: the stylesheet and the fonts with their licences under `assets/`, the components under `components/`, the domain modules under `domain/`, the app configuration holding the library's overrides and the host's setting with nothing in it, and the declaration typing templates by the host's i18n module |
 | `bin/` | The package's command |
 | `catalogue/` | The catalogue module with its data file, the generator writing that file, and every component's example under `examples/` |
