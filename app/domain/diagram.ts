@@ -10,12 +10,17 @@
 // Mermaid is several megabytes and most texts carry no diagram, so it is fetched the first time a
 // place is drawn and never before.
 //
-// A diagram stands at the size it was laid out at, and gives up at most a fifth of it to fit the
-// column: a flow a little wider than a phone fits, and one laid out much wider keeps words a reader
-// can read and scrolls sideways inside its own box, the way a wide table does. The page itself never
-// moves sideways.
+// A diagram stands whole in its column, at the size it was laid out at or smaller, never wider than
+// the column, so neither the page nor the diagram's own box moves sideways. Its figure is a stage it
+// is zoomed and moved on, as a picture opened whole is (the zoom module): the wheel over it zooms
+// around the pointer, two fingers pinch it, a drag moves it once it is zoomed, a double click zooms
+// in at a point or back out to fitting, and the zoom buttons the host's renderer stands beside it
+// zoom out, zoom in and fit. A zoomed diagram is clipped to its figure.
+
+import { FIT, MAX_SCALE, MIN_SCALE, moved, pinched, toggled, wheeled, zoomedTo } from "./zoom";
 
 import type { Mermaid } from "mermaid";
+import type { Point, Size, ZoomView } from "./zoom";
 
 // The language a fenced block names to be a diagram.
 const LANGUAGE = "mermaid";
@@ -157,9 +162,6 @@ let drawings = 0;
 // for the lines as they break here.
 const LABELS = ".nodeLabel, .edgeLabel, .label, .messageText, .noteText, .actor, .loopText { word-break: keep-all; overflow-wrap: anywhere; }";
 
-// How far a diagram shrinks to fit its column before it scrolls instead.
-const SMALLEST = 0.8;
-
 // The size Mermaid measured the diagram at, taken off its view box.
 function naturalWidth(svg: SVGSVGElement): number | null {
   const width = svg.viewBox.baseVal?.width ?? 0;
@@ -193,7 +195,14 @@ async function drawOne(mermaid: Mermaid, place: HTMLElement, dark: boolean): Pro
     if (figure === null) {
       figure = document.createElement("div");
       figure.className = "markdown-diagram-figure";
-      place.append(figure);
+      // The figure stands where the source stood, ahead of the zoom buttons.
+      const source = place.querySelector(":scope > pre");
+
+      if (source === null) {
+        place.append(figure);
+      } else {
+        source.after(figure);
+      }
     }
 
     figure.innerHTML = svg;
@@ -203,12 +212,12 @@ async function drawOne(mermaid: Mermaid, place: HTMLElement, dark: boolean): Pro
 
     if (picture !== null && width !== null) {
       picture.style.maxWidth = "";
-      picture.style.minWidth = `${Math.ceil(width * SMALLEST)}px`;
       picture.style.height = "auto";
       picture.setAttribute("width", String(Math.ceil(width)));
     }
 
     place.dataset.drawn = mark;
+    zoomable(place);
     delete place.dataset.failed;
   } catch {
     // A source Mermaid refuses stays the code it was written as.
@@ -216,6 +225,226 @@ async function drawOne(mermaid: Mermaid, place: HTMLElement, dark: boolean): Pro
     delete place.dataset.drawn;
     place.dataset.failed = "";
   }
+}
+
+// How a drawn diagram is zoomed. The view is the zoom module's: the figure is the stage, and the
+// diagram fitted in it is the picture, standing centred across and filling the figure's height.
+interface Zoom {
+  view: ZoomView;
+  // The fingers or the pointer on the figure, and the view and points the present gesture began at.
+  pointers: Map<number, Point>;
+  gesture: { view: ZoomView; points: Map<number, Point> } | null;
+}
+
+const zooms = new WeakMap<HTMLElement, Zoom>();
+
+// One notch of a wheel scrolling by lines, in pixels, so a wheel zooms as far whatever it counts in.
+const LINE_PX = 16;
+// How far a press of a zoom button zooms.
+const STEP = 1.5;
+
+function figureOf(place: HTMLElement): HTMLElement | null {
+  return place.querySelector<HTMLElement>(":scope > .markdown-diagram-figure");
+}
+
+function stageOf(figure: HTMLElement): Size {
+  return { width: figure.clientWidth, height: figure.clientHeight };
+}
+
+// The diagram's size as it stands fitted in the figure, read off its laid-out width and shape rather
+// than its box, which a zoom has already transformed.
+function fittedOf(figure: HTMLElement): Size {
+  const picture = figure.querySelector("svg");
+  const box = picture?.viewBox.baseVal;
+
+  if (picture === null || box === undefined || box.width <= 0 || box.height <= 0) return { width: 0, height: 0 };
+
+  const width = Math.min(Number(picture.getAttribute("width")) || box.width, figure.clientWidth);
+
+  return { width, height: (width * box.height) / box.width };
+}
+
+// A point on the screen, as the figure's centre sees it.
+function local(figure: HTMLElement, event: { clientX: number; clientY: number }): Point {
+  const box = figure.getBoundingClientRect();
+
+  return { x: event.clientX - box.left - box.width / 2, y: event.clientY - box.top - box.height / 2 };
+}
+
+function show(place: HTMLElement, zoom: Zoom, view: ZoomView): void {
+  const figure = figureOf(place);
+  const picture = figure?.querySelector("svg");
+
+  zoom.view = view;
+
+  if (picture !== null && picture !== undefined) {
+    picture.style.transform = view.scale > MIN_SCALE || view.x !== 0 || view.y !== 0 ? `translate(${view.x}px, ${view.y}px) scale(${view.scale})` : "";
+  }
+
+  if (view.scale > MIN_SCALE) {
+    place.dataset.zoomed = "";
+  } else {
+    delete place.dataset.zoomed;
+  }
+
+  for (const button of place.querySelectorAll<HTMLButtonElement>(":scope > .markdown-diagram-tools [data-diagram-zoom]")) {
+    const towards = button.dataset.diagramZoom;
+
+    button.disabled = towards === "in" ? view.scale >= MAX_SCALE : view.scale <= MIN_SCALE;
+  }
+}
+
+// The view a change asks for, in the figure as it stands now.
+function stepped(place: HTMLElement, change: (view: ZoomView, fitted: Size, stage: Size) => ZoomView): void {
+  const zoom = zooms.get(place);
+  const figure = figureOf(place);
+
+  if (zoom === undefined || figure === null) return;
+
+  show(place, zoom, change(zoom.view, fittedOf(figure), stageOf(figure)));
+}
+
+function onWheel(this: HTMLElement, event: WheelEvent): void {
+  const zoom = zooms.get(this);
+  const figure = figureOf(this);
+
+  if (zoom === undefined || figure === null || !figure.contains(event.target as Node)) return;
+
+  const lines = event.deltaMode === WheelEvent.DOM_DELTA_LINE ? LINE_PX : 1;
+  // A pinch on a trackpad arrives as a wheel with ctrl held and small steps; it zooms faster.
+  const delta = event.deltaY * lines * (event.ctrlKey ? 4 : 1);
+  const next = wheeled(zoom.view, delta, local(figure, event), fittedOf(figure), stageOf(figure));
+
+  // A wheel that has nothing left to zoom — out at fitting, in at the most — scrolls the page on, so
+  // reading past a diagram never sticks on it. A trackpad's pinch is always the diagram's, since the
+  // browser would otherwise zoom the whole page.
+  if (next.scale === zoom.view.scale && !event.ctrlKey) return;
+
+  event.preventDefault();
+  show(this, zoom, next);
+}
+
+function begin(zoom: Zoom): void {
+  zoom.gesture = { view: zoom.view, points: new Map(zoom.pointers) };
+}
+
+function onPointerDown(this: HTMLElement, event: PointerEvent): void {
+  const zoom = zooms.get(this);
+  const figure = figureOf(this);
+
+  if (zoom === undefined || figure === null || event.button > 0 || !figure.contains(event.target as Node)) return;
+
+  // A fitted diagram under a mouse is left to select its words; a finger is followed, for a pinch.
+  if (event.pointerType === "mouse" && zoom.view.scale <= MIN_SCALE) return;
+
+  if (event.pointerType === "mouse") event.preventDefault();
+
+  figure.setPointerCapture?.(event.pointerId);
+  zoom.pointers.set(event.pointerId, local(figure, event));
+  begin(zoom);
+}
+
+function onPointerMove(this: HTMLElement, event: PointerEvent): void {
+  const zoom = zooms.get(this);
+  const figure = figureOf(this);
+
+  if (zoom === undefined || figure === null || zoom.gesture === null || !zoom.pointers.has(event.pointerId)) return;
+
+  const now = local(figure, event);
+
+  zoom.pointers.set(event.pointerId, now);
+
+  const ids = [...zoom.pointers.keys()];
+  const fitted = fittedOf(figure);
+  const stage = stageOf(figure);
+
+  if (ids.length >= 2) {
+    const [a, b] = ids as [number, number];
+    const from: [Point, Point] = [zoom.gesture.points.get(a)!, zoom.gesture.points.get(b)!];
+    const to: [Point, Point] = [zoom.pointers.get(a)!, zoom.pointers.get(b)!];
+
+    show(this, zoom, pinched(zoom.gesture.view, from, to, fitted, stage));
+
+    return;
+  }
+
+  // One finger on a fitted diagram moves nothing: the page scrolls under it.
+  if (zoom.gesture.view.scale <= MIN_SCALE) return;
+
+  const start = zoom.gesture.points.get(event.pointerId)!;
+
+  show(this, zoom, moved(zoom.gesture.view, { x: now.x - start.x, y: now.y - start.y }, fitted, stage));
+}
+
+function onPointerUp(this: HTMLElement, event: PointerEvent): void {
+  const zoom = zooms.get(this);
+
+  if (zoom === undefined || !zoom.pointers.delete(event.pointerId)) return;
+
+  // One finger left of two carries on from where the pinch left the diagram.
+  if (zoom.pointers.size > 0) {
+    begin(zoom);
+  } else {
+    zoom.gesture = null;
+  }
+}
+
+// Two fingers on the figure are the diagram's pinch, never the page's scroll.
+function onTouchMove(this: HTMLElement, event: TouchEvent): void {
+  const figure = figureOf(this);
+
+  if (figure !== null && event.touches.length >= 2 && event.cancelable && figure.contains(event.target as Node)) {
+    event.preventDefault();
+  }
+}
+
+function onDoubleClick(this: HTMLElement, event: MouseEvent): void {
+  const figure = figureOf(this);
+
+  if (figure === null || !figure.contains(event.target as Node)) return;
+
+  event.preventDefault();
+  window.getSelection()?.removeAllRanges();
+  stepped(this, (view, fitted, stage) => toggled(view, local(figure, event), fitted, stage));
+}
+
+function onClick(this: HTMLElement, event: MouseEvent): void {
+  const button = (event.target as Element | null)?.closest<HTMLButtonElement>("[data-diagram-zoom]");
+
+  if (button === null || button === undefined || !this.contains(button)) return;
+
+  const towards = button.dataset.diagramZoom;
+  const centre: Point = { x: 0, y: 0 };
+
+  if (towards === "in") {
+    stepped(this, (view, fitted, stage) => zoomedTo(view, view.scale * STEP, centre, fitted, stage));
+  } else if (towards === "out") {
+    stepped(this, (view, fitted, stage) => zoomedTo(view, view.scale / STEP, centre, fitted, stage));
+  } else if (towards === "fit") {
+    stepped(this, () => FIT);
+  }
+}
+
+// A drawn place becomes zoomable once; a diagram drawn again — in the other theme — stands fitted.
+function zoomable(place: HTMLElement): void {
+  let zoom = zooms.get(place);
+
+  if (zoom === undefined) {
+    zoom = { view: FIT, pointers: new Map(), gesture: null };
+    zooms.set(place, zoom);
+    place.addEventListener("wheel", onWheel, { passive: false });
+    place.addEventListener("pointerdown", onPointerDown);
+    place.addEventListener("pointermove", onPointerMove);
+    place.addEventListener("pointerup", onPointerUp);
+    place.addEventListener("pointercancel", onPointerUp);
+    place.addEventListener("touchmove", onTouchMove, { passive: false });
+    place.addEventListener("dblclick", onDoubleClick);
+    place.addEventListener("click", onClick);
+  }
+
+  zoom.pointers.clear();
+  zoom.gesture = null;
+  show(place, zoom, FIT);
 }
 
 // Draws every diagram place under the element in the theme given. Resolves once all of them are

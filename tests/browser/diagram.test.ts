@@ -22,6 +22,8 @@ let page: Page;
 // The labels are Hangul, since how its words break and are measured is what a label has to survive.
 const ITEM = "\ud56d\ubaa9\uc73c\ub85c \uc62c\ub9bc";
 const FLOW = ["flowchart TD", `  A[\uc694\uccad] --> B[${ITEM}]`, "  B --> C[\uc791\uc5c5]"].join("\n");
+// A flow laid out far wider than the column.
+const WIDE = ["flowchart LR", ...Array.from({ length: 8 }, (_, at) => `  N${at}[a box with a long label ${at}] --> N${at + 1}`)].join("\n");
 
 interface Seen {
   drawn: string | null;
@@ -80,16 +82,150 @@ describe.skipIf(!ready)("a diagram in a text", () => {
     expect(seen.sourceShown).toBe(false);
   }, 60_000);
 
-  test("stands at the size it was laid out at, giving up at most a fifth of it to the column", async () => {
-    const seen = await drawn(diagramPlace(FLOW), false);
-    const sizes = await page.evaluate(() => {
-      const svg = document.querySelector<SVGSVGElement>("#out svg")!;
+  test("stands whole in its column at the size it was laid out at or smaller, so nothing moves sideways", async () => {
+    for (const source of [FLOW, WIDE]) {
+      const seen = await drawn(diagramPlace(source), false);
+      const sizes = await page.evaluate(() => {
+        const out = document.getElementById("out")!;
+        const figure = out.querySelector<HTMLElement>(".markdown-diagram-figure")!;
+        const svg = figure.querySelector<SVGSVGElement>("svg")!;
 
-      return { laidOut: svg.viewBox.baseVal.width, floor: svg.style.minWidth };
+        return {
+          laidOut: svg.viewBox.baseVal.width,
+          shown: svg.getBoundingClientRect().width,
+          column: out.clientWidth,
+          figureScrolls: figure.scrollWidth > figure.clientWidth,
+          pageScrolls: document.documentElement.scrollWidth > window.innerWidth
+        };
+      });
+
+      expect(seen.width).toBe(Math.ceil(sizes.laidOut));
+      expect(sizes.shown).toBeCloseTo(Math.min(Math.ceil(sizes.laidOut), sizes.column), 0);
+      expect(sizes.figureScrolls).toBe(false);
+      expect(sizes.pageScrolls).toBe(false);
+    }
+  }, 60_000);
+
+  // The diagram's place with its zoom buttons as a host's renderer stands them.
+  function zoomablePlace(source: string): string {
+    const tools = ["out", "in", "fit"].map((towards) => `<button type="button" data-diagram-zoom="${towards}" aria-label="${towards}" data-tooltip="${towards}"></button>`).join("");
+
+    return diagramPlace(source).replace(/<\/div>$/, `<div class="markdown-diagram-tools">${tools}</div></div>`);
+  }
+
+  // How the diagram stands zoomed: its transform, whether its place says it is zoomed, and which
+  // zoom buttons have nothing left to do.
+  async function zoomState(): Promise<{ transform: string; zoomed: boolean; disabled: string[] }> {
+    return page.evaluate(() => {
+      const place = document.querySelector<HTMLElement>("#out div[data-diagram]")!;
+
+      return {
+        transform: place.querySelector<SVGSVGElement>("svg")!.style.transform,
+        zoomed: place.dataset.zoomed !== undefined,
+        disabled: [...place.querySelectorAll<HTMLButtonElement>("[data-diagram-zoom]")].filter((button) => button.disabled).map((button) => button.dataset.diagramZoom!)
+      };
     });
+  }
 
-    expect(seen.width).toBe(Math.ceil(sizes.laidOut));
-    expect(sizes.floor).toBe(`${Math.ceil(sizes.laidOut * 0.8)}px`);
+  async function figureCentre(): Promise<{ x: number; y: number }> {
+    const box = (await page.locator("#out .markdown-diagram-figure").boundingBox())!;
+
+    return { x: box.x + box.width / 2, y: box.y + box.height / 2 };
+  }
+
+  test("zooms around the pointer under the wheel, and lets a wheel with nothing to zoom scroll the page on", async () => {
+    await drawn(zoomablePlace(WIDE), false);
+
+    expect(await zoomState()).toEqual({ transform: "", zoomed: false, disabled: ["out", "fit"] });
+    expect(await page.evaluate(() => [...document.querySelector("#out div[data-diagram]")!.children].map((child) => child.className || child.tagName))).toEqual([
+      "PRE",
+      "markdown-diagram-figure",
+      "markdown-diagram-tools"
+    ]);
+
+    const centre = await figureCentre();
+    const outward = await page.evaluate(({ x, y }) => {
+      const event = new WheelEvent("wheel", { deltaY: 100, clientX: x, clientY: y, bubbles: true, cancelable: true });
+
+      document.elementFromPoint(x, y)!.dispatchEvent(event);
+
+      return event.defaultPrevented;
+    }, centre);
+
+    expect(outward).toBe(false);
+    expect((await zoomState()).transform).toBe("");
+
+    await page.mouse.move(centre.x + 40, centre.y);
+    await page.mouse.wheel(0, -200);
+    await page.waitForFunction(() => document.querySelector<SVGSVGElement>("#out svg")!.style.transform !== "");
+
+    const zoomed = await zoomState();
+
+    expect(zoomed.zoomed).toBe(true);
+    expect(zoomed.disabled).toEqual([]);
+
+    const [, x, , scale] = zoomed.transform.match(/translate\((-?[\d.]+)px, (-?[\d.]+)px\) scale\(([\d.]+)\)/)!.map(Number) as number[];
+
+    expect(scale).toBeGreaterThan(1);
+    // The point under the pointer stays put, so the picture moves away from the side zoomed at.
+    expect(x).toBeLessThan(0);
+  }, 60_000);
+
+  test("moves a zoomed diagram under a drag, and the buttons zoom in, out and back to fitting", async () => {
+    await drawn(zoomablePlace(WIDE), false);
+    await page.click("#out [data-diagram-zoom=in]");
+    await page.click("#out [data-diagram-zoom=in]");
+
+    const zoomedIn = await zoomState();
+
+    expect(zoomedIn.transform).toMatch(/scale\(2\.25\)/);
+
+    const centre = await figureCentre();
+
+    await page.mouse.move(centre.x, centre.y);
+    await page.mouse.down();
+    await page.mouse.move(centre.x + 30, centre.y + 10, { steps: 4 });
+    await page.mouse.up();
+
+    const dragged = await zoomState();
+
+    expect(dragged.transform).not.toBe(zoomedIn.transform);
+    expect(dragged.transform).toMatch(/^translate\(30px, 10px\)/);
+
+    await page.click("#out [data-diagram-zoom=out]");
+    expect((await zoomState()).transform).toMatch(/scale\(1\.5\)/);
+
+    await page.click("#out [data-diagram-zoom=fit]");
+    expect(await zoomState()).toEqual({ transform: "", zoomed: false, disabled: ["out", "fit"] });
+  }, 60_000);
+
+  test("zooms in at a double click and back out to fitting at the next", async () => {
+    await drawn(zoomablePlace(FLOW), false);
+
+    const centre = await figureCentre();
+
+    await page.mouse.dblclick(centre.x, centre.y);
+    expect((await zoomState()).transform).toMatch(/scale\(2\.5\)/);
+
+    await page.mouse.dblclick(centre.x, centre.y);
+    expect((await zoomState()).transform).toBe("");
+  }, 60_000);
+
+  test("stands fitted again when it is drawn again in the other theme", async () => {
+    await drawn(zoomablePlace(FLOW), false);
+    await page.click("#out [data-diagram-zoom=in]");
+    expect((await zoomState()).zoomed).toBe(true);
+
+    await page.evaluate(async () => (window as unknown as { draw: (dark: boolean) => Promise<void> }).draw(true));
+    expect(await zoomState()).toEqual({ transform: "", zoomed: false, disabled: ["out", "fit"] });
+  }, 60_000);
+
+  test("shows no zoom buttons while its source stands", async () => {
+    await drawn(zoomablePlace("flowchart TD\n  A --> --> B["), false);
+
+    const shown = await page.evaluate(() => document.querySelector<HTMLElement>("#out .markdown-diagram-tools")!.checkVisibility());
+
+    expect(shown).toBe(false);
   }, 60_000);
 
   test("breaks a Hangul label between words, never between the syllables of one", async () => {

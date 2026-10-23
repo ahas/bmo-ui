@@ -273,14 +273,17 @@ Every token is a custom property stated by the layer's stylesheet on the root un
 - **Rendered text:** inside a host's container carrying `markdown`, the layer styles a fenced block,
   its box with the copy button, its language head and a diagram's figure, under the classes
   `markdown-code`, `markdown-code-head`, `markdown-code-language`, `markdown-copy`,
-  `markdown-diagram` and `markdown-diagram-figure`.
+  `markdown-diagram`, `markdown-diagram-figure` and `markdown-diagram-tools`.
 - **A fenced block as the host's renderer stands it,** for the code-copy, code-colour and diagram
   modules to read: a `markdown-code` box holding the block's `pre` and `code`, the box carrying
   `data-language` with its fence's word where the fence names one, and its copy button a `button`
   carrying `data-copy` beside the `pre`; a diagram's fence a `div` carrying `data-diagram` and
-  holding its source as a `pre` and `code`. The modules mark what they did on the same elements:
-  `data-coloured` on a coloured `code`, `data-copied` on a button that has just copied, and
-  `data-drawn` or `data-failed` on a diagram's place.
+  holding its source as a `pre` and `code`, and after it, where the host gives a diagram zoom
+  buttons, a `markdown-diagram-tools` row of `button`s each carrying `data-diagram-zoom` as `out`,
+  `in` or `fit`, named in the host's words by `aria-label` and `data-tooltip`. The modules mark what they did on the same elements:
+  `data-coloured` on a coloured `code`, `data-copied` on a button that has just copied,
+  `data-drawn` or `data-failed` on a diagram's place, `data-zoomed` on a place whose diagram stands
+  zoomed, and `disabled` on a zoom button with nothing left to do.
 - **The work-in-progress mark** — an icon of the progress-activity kind — always turns, and stands
   still where less movement was asked for.
 - **Keyframes:** `bmo-dialog-in`, `bmo-dialog-out`, `marquee-slide`.

@@ -628,10 +628,11 @@
 }
 
 /* A diagram (the diagram module) stands on a line of its own, centred in the column at the size it
-   was laid out at. It shrinks to the column by at most a fifth, a floor the drawing sets on the
-   picture itself, and past that it scrolls sideways inside its own box, as a wide table does, so
-   its words keep a reading size on a phone. Until it is drawn, and where its source cannot be
-   drawn, the source stands as the code block it was written as. */
+   was laid out at, and shrinks to the column whole where it is wider, so neither the page nor its
+   own box moves sideways. Its figure is the stage it is zoomed on: what a zoom carries past the
+   figure's edge is clipped, a finger on a fitted diagram scrolls the page while two pinch it, and a
+   zoomed one is moved by a drag. Until it is drawn, and where its source cannot be drawn, the source
+   stands as the code block it was written as, with no zoom buttons. */
 .markdown .markdown-diagram {
   margin: 1.5rem 0;
 }
@@ -642,7 +643,18 @@
 
 .markdown-diagram-figure {
   max-width: 100%;
-  overflow-x: auto;
+  overflow: hidden;
+  touch-action: pan-y;
+}
+
+.markdown .markdown-diagram[data-zoomed] > .markdown-diagram-figure {
+  touch-action: none;
+  cursor: grab;
+  user-select: none;
+}
+
+.markdown .markdown-diagram[data-zoomed] > .markdown-diagram-figure:active {
+  cursor: grabbing;
 }
 
 .markdown-diagram-figure > svg {
@@ -650,6 +662,90 @@
   margin-inline: auto;
   max-width: 100%;
   height: auto;
+  transform-origin: center;
+}
+
+/* The zoom buttons the host's renderer stands beside a diagram: zoom out, zoom in and fit, in a row
+   at the foot of the figure on its trailing side, always shown so a finger has them without
+   hovering. A button with nothing left to do stands dimmed. */
+.markdown-diagram-tools {
+  display: none;
+}
+
+.markdown .markdown-diagram[data-drawn] > .markdown-diagram-tools {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.25rem;
+  margin-top: 0.25rem;
+}
+
+.markdown-diagram-tools > button {
+  position: relative;
+  display: inline-flex;
+  width: 2rem;
+  height: 2rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--ui-radius);
+  background-color: var(--ui-bg-muted);
+  color: var(--ui-text-muted);
+  cursor: pointer;
+}
+
+.markdown-diagram-tools > button:hover:not(:disabled),
+.markdown-diagram-tools > button:active:not(:disabled) {
+  background-color: var(--ui-bg-accented);
+  color: var(--ui-text-highlighted);
+}
+
+.markdown-diagram-tools > button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.markdown-diagram-tools > button:focus-visible {
+  outline-offset: calc(var(--bmo-focus-width) * -1);
+}
+
+.markdown-diagram-tools svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+/* A zoom button names itself over it on hover and on focus, as the copy button does beside it. */
+.markdown-diagram-tools > button::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 0.25rem);
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--ui-radius);
+  box-shadow: 0 0 0 1px var(--ui-border);
+  background-color: var(--ui-bg);
+  color: var(--ui-text-highlighted);
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transform-origin: right bottom;
+  scale: 0.95;
+  transition:
+    opacity var(--bmo-motion-quick) var(--bmo-ease-enter),
+    scale var(--bmo-motion-quick) var(--bmo-ease-enter);
+}
+
+.markdown-diagram-tools > button:hover::after,
+.markdown-diagram-tools > button:focus-visible::after {
+  opacity: 1;
+  scale: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .markdown-diagram-tools > button::after {
+    transition: none;
+  }
 }
 
 /* The mark for work in progress always turns, wherever it stands — a chip, a row, a tab — so it
