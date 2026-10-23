@@ -11,6 +11,17 @@ export function relayAddress(serviceName: string, path = ""): string {
   return underAppBase(`${relayBase}/${serviceName}${rest}`);
 }
 
+// A call a screen makes to a service through the console's relay: the address `relayAddress` makes for the
+// service's name and the path, handed to the app's fetcher with the screen's own options, and the answer as
+// the fetcher reads it. The service, the path, the method and the body are the screen's; a service other than
+// the bundle's own is one its manifest names under `calls`. This is the one place the layer takes a fetcher.
+export function relayCall<T = unknown>(serviceName: string, path: string, options?: RelayOptions): Promise<T> {
+  return $fetch<T>(relayAddress(serviceName, path), options as never) as Promise<T>;
+}
+
+// What a screen hands the app's fetcher beside the address.
+export type RelayOptions = NonNullable<Parameters<typeof $fetch>[1]>;
+
 // The address a screen opens a socket to its service at: the relay address over the page's own
 // origin, in the socket scheme matching the page's. It reads the page's address, so it is made in the
 // browser alone.

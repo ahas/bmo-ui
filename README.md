@@ -8,7 +8,8 @@ components and behaviours every screen is built from. It is a Nuxt layer, built 
   language pack.
 - **It shows no words of its own.** Every word is a key the host's language pack answers, and the
   locale and time zone dates are read in are the host's to set.
-- **It knows no consumer** and calls no server. What it exposes and what a host owes it is its whole
+- **It knows no consumer** and names no server: it calls only the service and path a screen hands
+  its relay, and the translator a console names. What it exposes and what a host owes it is its whole
   boundary (`docs/boundary.md`).
 - **It states the console plugin contract** every console bundle conforms to, so a console finds
   each service while it runs and attaches its bundle by the manifest it answers alone
@@ -26,7 +27,8 @@ components and behaviours every screen is built from. It is a Nuxt layer, built 
 - Install `@nuxtjs/i18n` in the host and give it a pack answering every key the boundary document
   lists. The layer names it and its engine, `vue-i18n`, as peers.
 - Apply the patch in `patches/` to the same dependency in the host's own install.
-- A console states its relay base in its app configuration and attaches each bundle by the contract.
+- A console states its relay base in its app configuration, names its translator in its runtime
+  configuration where it has one, and attaches each bundle by the contract.
 - A harness launches `bmo-ui mcp` from the host's install and loads the skill under `skills/`.
 
 ## Working on it

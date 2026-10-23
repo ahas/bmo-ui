@@ -54,10 +54,16 @@ const manifest = z
     pushKinds: z
       .array(z.string().regex(/^[a-z][a-z0-9-]*\.[a-z][a-z0-9-]*$/, "an event kind, a resource and its change"))
       .default([])
-      .describe("The event kinds a console may raise as a notice to a reader not on the screen.")
+      .describe("The event kinds a console may raise as a notice to a reader not on the screen."),
+    calls: z
+      .array(z.string().regex(KEBAB, "a name in kebab-case"))
+      .default([])
+      .describe("The other services the screens call through the console, each by the service name its own manifest gives it.")
   })
   .strict()
-  .refine((one) => one.title.startsWith(`${one.name}.`), { path: ["title"], message: "a key under the bundle's namespace" });
+  .refine((one) => one.title.startsWith(`${one.name}.`), { path: ["title"], message: "a key under the bundle's namespace" })
+  .refine((one) => !one.calls.includes(one.serviceName), { path: ["calls"], message: "another service than the bundle's own" })
+  .refine((one) => new Set(one.calls).size === one.calls.length, { path: ["calls"], message: "each service named once" });
 
 // A manifest as a console reads it, every optional field but the stylesheet filled.
 export type ConsoleManifest = z.output<typeof manifest>;
@@ -79,6 +85,11 @@ export function consoleManifest(value: unknown): ConsoleManifest {
 // Whether a reader holding one role may open a screen needing another.
 export function roleAllows(held: ConsoleRole, needed: ConsoleRole): boolean {
   return CONSOLE_ROLES.indexOf(held) <= CONSOLE_ROLES.indexOf(needed);
+}
+
+// Whether a bundle's screens call a service: their own, or one their manifest names under `calls`.
+export function screensCall(manifest: ConsoleManifest, serviceName: string): boolean {
+  return manifest.serviceName === serviceName || manifest.calls.includes(serviceName);
 }
 
 // The bundle's words as the service answers them: each locale's tree under the locale's code, every

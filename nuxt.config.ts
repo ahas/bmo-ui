@@ -12,6 +12,14 @@ export default defineNuxtConfig({
   // The screen mode is dark until a reader chooses another, and it is kept in a cookie so a server
   // rendering a page knows the mode it stands in (`docs/design.md`, "Themes").
   colorMode: { preference: DEFAULT_SCHEME, storage: "cookie", storageKey: SCHEME_COOKIE },
+  // The translator a console names (`docs/boundary.md`, "What the host owes"): the service it is relayed under
+  // and its translating route, settings of the host's deployment. Both stand empty, so nothing translates
+  // until the host names one.
+  runtimeConfig: {
+    public: {
+      bmoUi: { translator: { service: "", path: "" } }
+    }
+  },
   compatibilityDate: "2025-09-01",
   devtools: { enabled: false },
   app: {

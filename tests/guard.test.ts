@@ -298,8 +298,10 @@ describe("the personal data the repository holds", () => {
 });
 
 // What reaches a server: the framework's fetchers, a fixed address handed to the browser's own, or a
-// server's routes written out.
+// server's routes written out. The relay's call is the one place the layer takes the app's fetcher, for the
+// service and path a screen hands it (`docs/boundary.md`, "Domain modules").
 const FETCHERS = new Set(["$fetch", "useFetch", "useLazyFetch", "useRequestFetch"]);
+const RELAY_CALL = "app/domain/relay.ts";
 const OPENERS = new Set(["fetch", "EventSource", "WebSocket", "sendBeacon"]);
 
 function fixedAddress(node: unknown): boolean {
@@ -309,11 +311,11 @@ function fixedAddress(node: unknown): boolean {
 }
 
 describe("the servers the layer calls", () => {
-  test("are none: it takes no fetcher, opens no fixed address and writes no route", () => {
+  test("are none of its own: it takes no fetcher but the relay's call, opens no fixed address and writes no route", () => {
     const calls = layerCode.flatMap((file) =>
       [...nodesOf(file)]
         .filter((node) => {
-          if (node.type === "Identifier") return FETCHERS.has(node.name as string);
+          if (node.type === "Identifier") return FETCHERS.has(node.name as string) && !(file.path === RELAY_CALL && node.name === "$fetch");
 
           if (node.type === "CallExpression" || node.type === "NewExpression") {
             const callee = node.callee as { type: string; name?: string; property?: { name?: string } };

@@ -115,7 +115,7 @@ Each is named with everything it exports.
 | `overlays` | `OVER_LAYERS`, `isBackEscape`, `refuseStalePresses`, `refuseHandedBackFocus`, `watchOverlays` |
 | `player` | `Playing`, `playAlone`, `playClock`, `knownLength`, `loudnessOf`, `easedLoudness`, `AURA_STILL`, `auraOf`, `PlayerButton`, `PlayerSignal`, `buttonAfter` |
 | `prompt` | `TOUCH_QUERY`, `EnterKeys`, `enterKeys`, `PromptEnter`, `usePromptEnter`, `PROMPT_MAX_ROWS`, `PROMPT_TEXTAREA_UI`, `PROMPT_WORDS_WRAP` |
-| `relay` | `relayAddress`, `relaySocketAddress` |
+| `relay` | `relayAddress`, `relaySocketAddress`, `relayCall`, `RelayOptions` |
 | `scheme` | `provideBoxScheme`, `useDarkScheme`, `usePageScheme`, `usePreviewScheme` |
 | `screen` | `NARROW_MAX_PX`, `NARROW_QUERY`, `useNarrow`, `VisibleReading`, `VisibleFrame`, `visibleFrame`, `SCREEN_HEIGHT_PROPERTY`, `SCREEN_TOP_PROPERTY`, `SCREEN_FRAME`, `useVisibleScreen`, `STABLE_GUTTER`, `useWidth`, `useScrollGutter` |
 | `scroll-within` | `offsetFor`, `scrollWithin` |
@@ -128,6 +128,7 @@ Each is named with everything it exports.
 | `tabs` | `TAB_ROW_UI`, `TAB_ROW_LINE`, `BarTab`, `BarMenuItem`, `BarAction`, `BarProperty`, `SwitchItem`, `SeenTab`, `openInTabs`, `mergeTabs`, `pinTab`, `pinnedFirst`, `lastSeen`, `moveTab`, `othersOf`, `rightOf`, `allOf`, `fileTabLabel`, `baseName` |
 | `time` | `FOREVER_LABEL`, `formatClock`, `formatDay`, `formatShortDay`, `formatDayClock`, `clockUnder`, `formatDateClock`, `formatStamp`, `formatTime`, `dayKey`, `spanClock`, `elapsedText`, `timerClock`, `remainingText`, `useNowSeconds`, `toUnixSeconds` |
 | `tooltip` | `TOOLTIP_UI`, `TOOLTIP_PROVIDER` |
+| `translation` | `Reading`, `Translator`, `Untranslated`, `TRANSLATION_BATCH`, `translatorOf`, `hasTranslator`, `translated` |
 | `waveform` | `WAVE_DETAIL`, `WAVE_FETCH_LIMIT`, `WAVE_FLOOR`, `Waveform`, `peaksOf`, `waveBars`, `barCount`, `loudnessAt`, `waveformOf` |
 | `zoom` | `ZoomView`, `Point`, `Size`, `FIT`, `MIN_SCALE`, `MAX_SCALE`, `DOUBLE_SCALE`, `bounded`, `zoomedTo`, `wheeled`, `moved`, `pinched`, `toggled`, `fittedSize`, `swipeStep` |
 
@@ -136,11 +137,18 @@ Each is named with everything it exports.
   opens and the spans offered are the host's; the module holds their shapes and the one reading of a
   link's end, as the date it stands until.
 - **`monaco` opens code and source views only.** Any other view over the editor is the host's.
-- **`relay` makes an address and calls nothing.** It answers where a screen calls a service, under
-  the app's base path and the host's relay base (see What the host owes), complete as given to the
-  app's fetcher and to the browser alike; and where a screen opens a socket to it, the same address
-  over the page's origin in the socket's scheme, read in the browser. The call itself is the
-  screen's.
+- **`relay` makes an address, and calls only where a screen asks it to.** It answers where a screen
+  calls a service, under the app's base path and the host's relay base (see What the host owes),
+  complete as given to the app's fetcher and to the browser alike; and where a screen opens a socket
+  to it, the same address over the page's origin in the socket's scheme, read in the browser. Its
+  call hands that address and the screen's options to the app's fetcher and answers what the fetcher
+  reads: the service, the path, the method and the body are the screen's, and the layer names none.
+  It is the one place the layer takes a fetcher.
+- **`translation` asks the translator the host names** (`docs/console-bundles.md`, "Translation"),
+  through the relay's call: readings in the order of the texts handed, each distinct original asked
+  once, in batches of `TRANSLATION_BATCH`, at most two batches at a time, and every whole reading kept
+  for the life of the tab by language and original. A refusal, a call that fails and a host naming no
+  translator are each an `Untranslated` failure; the batches answered before a failure stay kept.
 - **`numbers` and `time` read the host's locale and zone** (see What the host owes) each time they
   write, so they import no locale and nothing is read before the app stands. `countLocale` answers
   the locale figures are written in: the host's tag, or nothing where none is set, which is the
@@ -158,7 +166,7 @@ Each is named with everything it exports.
 | `files` | `FileConflict` |
 | `code-language` | `codeLanguage` |
 | `screen-mode` | `DocumentScheme`, `DEFAULT_SCHEME`, `SCHEME_COOKIE`, `isDocumentScheme` |
-| `console-manifest` | `CONSOLE_MANIFEST_ROUTE`, `OWNER_KEY_HEADER`, `OWNER_ROLE_HEADER`, `CONSOLE_ROLES`, `ConsoleRole`, `ConsoleManifest`, `CONSOLE_MANIFEST_SCHEMA`, `consoleManifest`, `roleAllows`, `ConsoleWords`, `ConsoleBundleModule` |
+| `console-manifest` | `CONSOLE_MANIFEST_ROUTE`, `OWNER_KEY_HEADER`, `OWNER_ROLE_HEADER`, `CONSOLE_ROLES`, `ConsoleRole`, `ConsoleManifest`, `CONSOLE_MANIFEST_SCHEMA`, `consoleManifest`, `roleAllows`, `screensCall`, `ConsoleWords`, `ConsoleBundleModule` |
 
 - **`search` folds letter case in the locale each call is handed,** the runtime's own where none is.
   It reads no app configuration, so it runs alike in a browser and on a server; a host searching in
@@ -166,8 +174,9 @@ Each is named with everything it exports.
 - **`console-manifest` is the contract's manifest** (`docs/console-bundles.md`): the route a service
   answers it at, the two headers a console relays the owner key and the role in, the roles and whether
   one held allows one needed, the manifest's JSON Schema, its type with every optional field but the
-  stylesheet filled, the reading that fills them or refuses a manifest naming each field at fault, and
-  the types of a bundle's words and of its module's default export. A service and a console import it
+  stylesheet filled, the reading that fills them or refuses a manifest naming each field at fault,
+  whether a bundle's screens call a service (their own, or one named under `calls`), and the types of
+  a bundle's words and of its module's default export. A service and a console import it
   alike; it runs in a browser, on a server and in a test.
 
 ## Page plugins
@@ -337,6 +346,11 @@ Every token is a custom property stated by the layer's stylesheet on the root un
   The layer's own app configuration states the setting with nothing in it, so each default stands
   until the host states a value. A host that renders on the server states the first three, since the
   server's runtime and the browser's need not agree.
+- **The translator, where the host has one.** The host states it in its public runtime configuration,
+  under `bmoUi`, as `translator`: `service`, the name the translator is relayed under, and `path`, its
+  translating route on the service's own API. Both are settings of the host's deployment, each read
+  from the environment as Nuxt reads a runtime setting. The layer's own configuration states both
+  empty, so a host that names none translates nothing.
 - **What a console owes a bundle,** where the host is a console: the contract's own list
   (`docs/console-bundles.md`, "What a console owes").
 - **The tooltip setting.** The host's app root, the library's `UApp`, is handed the tooltip

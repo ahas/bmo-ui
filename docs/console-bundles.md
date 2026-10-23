@@ -9,9 +9,10 @@ by its manifest alone, with no code and no build of its own per bundle, and a bu
 for every console that follows the contract.
 
 The layer states the contract and supplies its mechanism: the manifest's shape and its reading, the
-roles and the headers that carry them, the address a screen calls its service at, and the components
-and tokens a screen is built from. A console supplies the policy: which services it asks, how often,
-where it relays them and how it lists their screens. A service supplies its own guard.
+roles and the headers that carry them, the address a screen calls a service at and the call itself,
+the shape of a translator's route and the asking of it, and the components and tokens a screen is
+built from. A console supplies the policy: which services it asks, how often, where it relays them,
+which service translates and how it lists their screens. A service supplies its own guard.
 
 ## What a bundle is
 
@@ -35,9 +36,10 @@ where it relays them and how it lists their screens. A service supplies its own 
 - **Its addresses follow its bytes.** The module's and the stylesheet's paths change whenever their
   bytes do, so a console and a browser may keep what they loaded, and a rebuilt bundle reaches a
   console as a manifest naming new paths.
-- **One service.** A bundle draws the screens of the one service its manifest names. Whatever its
-  screens read, of that service or of another, they read from the service that serves it through the
-  console's relay; a bundle keeps no copy of what a service serves and relays nothing itself.
+- **One service, and the services it names.** A bundle draws the screens of the one service its
+  manifest names. Whatever its screens read, they read through the console's relay: of their own
+  service, and of another service only one the manifest names under `calls`, on that service's own
+  terms. A bundle keeps no copy of what a service serves and relays nothing itself.
 
 ## The manifest
 
@@ -67,6 +69,7 @@ none of them a dot or two standing for a folder.
 | `events` | Whether the screens read the service's event stream through the console. | no, false |
 | `websocket` | Whether the screens open a WebSocket to the service through the console. | no, false |
 | `pushKinds` | The service's event kinds a console may raise as a notice to a reader who is not on the screen, each written as the stream names it, a resource and its change. | no, none |
+| `calls` | The other services the screens call through the console, each by the service name its own manifest gives it, in kebab-case; never the bundle's own service, and none twice. | no, none |
 
 Reading a manifest fills each optional field but the stylesheet with its default, so a console reads
 every other field of every manifest.
@@ -107,6 +110,14 @@ every other field of every manifest.
   unchanged, behind its own sign-in. The event stream and a WebSocket go the same way, where the manifest asks for them; a
   WebSocket is opened at the module's socket address, the same address over the page's own origin in
   the socket's scheme.
+- **Calls to another service.** A screen calls a service its manifest names under `calls` at the
+  same kind of address, under that service's name, and the `relay` module's call makes it through the
+  app's fetcher. The console relays it on the called service's own terms: only the paths that
+  service's own manifest lets through, and only for a reader whose role and owner key allow that
+  service's manifest. A call from a bundle's page to a service another manifest names, which is neither
+  the bundle's own nor one it names under `calls`, is refused with a 403. The console knows the page a
+  call comes from by the page address the browser sends with it; reading another bundle's module, its
+  stylesheet or a file beside its module is never refused, so a screen opened from another stands.
 - **An address is complete as given.** Whatever a screen hands the browser — a call through the
   app's fetcher, a picture's source, a link, a download, an event stream, a socket — it hands the
   address the module answers for it, and the console adds nothing. The app's fetcher leaves
@@ -115,6 +126,29 @@ every other field of every manifest.
 - **Notices.** A console that raises notices reads the service's event stream for the kinds under
   `pushKinds` and raises each in the words the bundle's words give that kind, under the bundle's
   namespace, to the readers whose role allows the manifest's.
+
+## Translation
+
+A console may name a **translator**: a service with a route that takes texts and a language and
+answers their readings. The layer states the route's shape and asks it through the `translation`
+module; the console names the service and the route in its runtime configuration; a bundle that
+translates names that service under `calls`, and its screens hand the module texts and a language.
+
+- **The ask** is a `POST` of a JSON object: `language`, a language tag, and `originals`, the texts in
+  order.
+- **The answer** is a 200 with a JSON object holding `readings`, one for each original in the order
+  given, each with `text`, the reading in the language, and `whole`, whether every part of it was
+  rendered. An original already in the language is its own reading. A reading that is not whole holds
+  the parts the translator could not render as they stood.
+- **Any other answer is a refusal,** and the module answers the screen with a failure rather than a
+  reading. A screen shows its own texts where a translation fails; a translation never stands in the
+  way of reading the original.
+- **Where the console names no translator,** nothing translates: the module answers every ask with
+  the failure, and a screen asks whether a translator is named before offering a translation.
+- **The module asks sparingly.** It sends each distinct original once, answers an empty one as itself,
+  asks in batches of a fixed size, at most two at a time, and keeps each whole reading for the life
+  of the tab, by its language and original, so no text is asked for twice. A reading that is not whole
+  is answered and not kept.
 
 ## Roles and the owner key
 
@@ -147,6 +181,13 @@ every other field of every manifest.
   screen path, for the readers its role allows; a relay of its service under the relay base, for the
   service's API prefix, its module and its stylesheet; the stream and the WebSocket where the manifest
   asks for them; the bundle's words; and its notice kinds.
+- **It relays a bundle's calls** to the services named under `calls` on each called service's own
+  terms, and refuses a call from a bundle's page to a service another manifest names that the bundle
+  does not name.
+- **It names its translator, where it has one,** in its runtime configuration under `bmoUi`, as
+  `translator`: the service's name, which a bundle names under `calls`, and the path of its
+  translating route on the service's own API, which that service's manifest lets through
+  (`docs/boundary.md`, "What the host owes").
 - **It sets the owner key and the role** on everything it relays, and replaces any the browser sent.
 - **It states its relay base** in its app configuration, under `bmoUi`, as `relayBase`: the path every
   service is relayed under, from the app's base path. Where none is stated, a service is called at its

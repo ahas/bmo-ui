@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, test } from "bun:test";
 
-import { relayAddress, relaySocketAddress } from "../../app/domain/relay";
+import { relayAddress, relayCall, relaySocketAddress } from "../../app/domain/relay";
 
 // The address a bundle's screen calls a service at (`docs/console-bundles.md`, "How a bundle mounts").
 
@@ -87,5 +87,25 @@ describe("a service's socket address", () => {
     pageAt("https://console.example.test/notes");
 
     expect(relaySocketAddress("notes", "/live")).toBe("wss://console.example.test/relay/notes/live");
+  });
+});
+
+describe("a call through the relay", () => {
+  test("hands the app's fetcher the relay address and the screen's own options, and answers what it reads", async () => {
+    const asked: unknown[][] = [];
+
+    Object.assign(globalThis, {
+      $fetch: async (...args: unknown[]) => {
+        asked.push(args);
+
+        return { readings: [] };
+      }
+    });
+    hostSays("/relay", "/console/");
+
+    const answer = await relayCall("words-out", "/console/translations", { method: "POST", body: { language: "en" } });
+
+    expect(answer).toEqual({ readings: [] });
+    expect(asked).toEqual([["/console/relay/words-out/console/translations", { method: "POST", body: { language: "en" } }]]);
   });
 });

@@ -30,7 +30,9 @@ These rules hold every change to this repository.
 
 - **No consumer.** The layer knows no screen, service, route or product by name. It supplies the
   mechanism, the extension point and a safe default; the host supplies the policy.
-- **No server.** Nothing in the layer calls a server route or holds a type of a host's domain.
+- **No server of its own.** Nothing in the layer names a server route or holds a type of a host's
+  domain. The relay module's call is the one place it takes the app's fetcher, calling the service and
+  path a screen hands it; the translation module reaches the translator the host names through it.
 - **No words of its own.** Every word a component shows is a key into the host's language pack, under
   `common.*` or `files.*`; the layer ships no locale and does not install the i18n module. The keys it
   reads are declared in one list, and the boundary document names them.

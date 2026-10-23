@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 
-import { CONSOLE_MANIFEST_ROUTE, CONSOLE_MANIFEST_SCHEMA, CONSOLE_ROLES, consoleManifest, roleAllows } from "../../shared/console-manifest";
+import { CONSOLE_MANIFEST_ROUTE, CONSOLE_MANIFEST_SCHEMA, CONSOLE_ROLES, consoleManifest, roleAllows, screensCall } from "../../shared/console-manifest";
 
 // The console plugin contract's manifest (`docs/console-bundles.md`, "The manifest").
 
@@ -38,7 +38,8 @@ describe("a service's manifest", () => {
       ownerKey: false,
       events: false,
       websocket: false,
-      pushKinds: []
+      pushKinds: [],
+      calls: []
     });
   });
 
@@ -76,6 +77,13 @@ describe("a service's manifest", () => {
     expect(consoleManifest({ ...answered, bundle: "/console/bundle.v2.min.js" }).bundle).toBe("/console/bundle.v2.min.js");
   });
 
+  test("keeps the services its screens call, and refuses its own, a name named twice or one out of kebab-case", () => {
+    expect(consoleManifest({ ...answered, calls: ["words-out", "files"] }).calls).toEqual(["words-out", "files"]);
+    expect(faultsOf({ ...answered, calls: ["notes"] })).toContain("calls: another service than the bundle's own");
+    expect(faultsOf({ ...answered, calls: ["files", "files"] })).toContain("calls: each service named once");
+    expect(faultsOf({ ...answered, calls: ["Files"] })).toContain("calls.0:");
+  });
+
   test("is refused where its title lies outside its namespace", () => {
     expect(faultsOf({ ...answered, title: "common.title.screen" })).toContain("title: a key under the bundle's namespace");
   });
@@ -98,12 +106,23 @@ describe("a role", () => {
   });
 });
 
+describe("the services a bundle's screens call", () => {
+  test("are their own and those named under calls, and no other", () => {
+    const read = consoleManifest({ ...answered, calls: ["files"] });
+
+    expect(screensCall(read, "notes")).toBe(true);
+    expect(screensCall(read, "files")).toBe(true);
+    expect(screensCall(read, "mail")).toBe(false);
+    expect(screensCall(consoleManifest(answered), "files")).toBe(false);
+  });
+});
+
 describe("the manifest's JSON Schema", () => {
   test("requires the fields a service states and closes the object", () => {
     expect(CONSOLE_MANIFEST_SCHEMA.required).toEqual(["name", "title", "icon", "screenPath", "serviceName", "bundle", "words", "role"]);
     expect(CONSOLE_MANIFEST_SCHEMA.additionalProperties).toBe(false);
     expect(Object.keys(CONSOLE_MANIFEST_SCHEMA.properties as object).toSorted()).toEqual(
-      [...Object.keys(answered), "stylesheet", "apiPrefix", "ownerKey", "events", "websocket", "pushKinds"].toSorted()
+      [...Object.keys(answered), "stylesheet", "apiPrefix", "ownerKey", "events", "websocket", "pushKinds", "calls"].toSorted()
     );
     expect((CONSOLE_MANIFEST_SCHEMA.properties as Record<string, { enum?: unknown }>).role!.enum).toEqual(["administrator", "member"]);
   });
