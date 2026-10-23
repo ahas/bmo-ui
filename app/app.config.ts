@@ -386,7 +386,8 @@ export default defineAppConfig({
     locale?: string;
     // The name of a dayjs locale the host has loaded.
     dateLocale?: string;
-    // The path every service a console bundle calls is relayed under (`docs/console-bundles.md`).
+    // The path, from the app's base path, every service a console bundle calls is relayed under
+    // (`docs/console-bundles.md`).
     relayBase?: string;
   }
 });

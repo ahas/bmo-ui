@@ -54,10 +54,16 @@ every bundle.
   belong to the bundle that draws it, so a console carries none of them: it merges each bundle's
   pack into its own, through the i18n module's layers or by reading the folder the declaration names.
 - **Calls.** A screen calls its service at the address the `relay` domain module answers for the
-  service's name and a path: the console's relay base, the service's name, then the path as the
-  service's own API writes it. The console relays everything under that address to the service
-  unchanged, behind its own sign-in. The event stream and a WebSocket go the same way, where the
-  declaration asks for them.
+  service's name and a path: the base path the console app is served under, the console's relay
+  base, the service's name, then the path as the service's own API writes it. The console relays
+  everything under that address to the service unchanged, behind its own sign-in. The event stream
+  and a WebSocket go the same way, where the declaration asks for them; a WebSocket is opened at the
+  module's socket address, the same address over the page's own origin in the socket's scheme.
+- **An address is complete as given.** Whatever a screen hands the browser — a call through the
+  app's fetcher, a picture's source, a link, a download, an event stream, a socket — it hands the
+  address the module answers for it, and the console adds nothing. The app's fetcher leaves
+  an address already under the app's base path as it is, so the same address serves a call and a
+  raw address alike.
 - **Notices.** A console that raises notices reads the service's event stream for the kinds under
   `pushKinds` and raises each in the words the bundle's pack gives that kind, under the bundle's
   namespace.
@@ -71,7 +77,12 @@ every bundle.
   under the relay base, the stream and the WebSocket where declared, the bundle's pack, and its notice
   kinds.
 - **It states its relay base** in its app configuration, under `bmoUi`, as `relayBase`: the path every
-  service is relayed under. Where none is stated, a service is called at its name from the root.
+  service is relayed under, from the app's base path. Where none is stated, a service is called at its
+  name from the app's base path.
+- **It serves the app under one base path,** Nuxt's own `app.baseURL`, which the relay module reads
+  from the runtime configuration each time it makes an address and puts ahead of the relay base. An
+  address that already stands under the base path is not given it twice, so a relay base stated with
+  the base path in it reads the same.
 - **It refuses a bundle whose declaration does not read,** and two bundles sharing a name or a screen
   path, rather than attaching either over the other.
 

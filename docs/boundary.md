@@ -115,7 +115,7 @@ Each is named with everything it exports.
 | `overlays` | `OVER_LAYERS`, `isBackEscape`, `refuseStalePresses`, `refuseHandedBackFocus`, `watchOverlays` |
 | `player` | `Playing`, `playAlone`, `playClock`, `knownLength`, `loudnessOf`, `easedLoudness`, `AURA_STILL`, `auraOf`, `PlayerButton`, `PlayerSignal`, `buttonAfter` |
 | `prompt` | `TOUCH_QUERY`, `EnterKeys`, `enterKeys`, `PromptEnter`, `usePromptEnter`, `PROMPT_MAX_ROWS`, `PROMPT_TEXTAREA_UI`, `PROMPT_WORDS_WRAP` |
-| `relay` | `relayAddress` |
+| `relay` | `relayAddress`, `relaySocketAddress` |
 | `scheme` | `provideBoxScheme`, `useDarkScheme`, `usePageScheme`, `usePreviewScheme` |
 | `screen` | `NARROW_MAX_PX`, `NARROW_QUERY`, `useNarrow`, `VisibleReading`, `VisibleFrame`, `visibleFrame`, `SCREEN_HEIGHT_PROPERTY`, `SCREEN_TOP_PROPERTY`, `SCREEN_FRAME`, `useVisibleScreen`, `STABLE_GUTTER`, `useWidth`, `useScrollGutter` |
 | `scroll-within` | `offsetFor`, `scrollWithin` |
@@ -137,7 +137,10 @@ Each is named with everything it exports.
   link's end, as the date it stands until.
 - **`monaco` opens code and source views only.** Any other view over the editor is the host's.
 - **`relay` makes an address and calls nothing.** It answers where a screen calls a service, under
-  the host's relay base (see What the host owes); the call itself is the screen's.
+  the app's base path and the host's relay base (see What the host owes), complete as given to the
+  app's fetcher and to the browser alike; and where a screen opens a socket to it, the same address
+  over the page's origin in the socket's scheme, read in the browser. The call itself is the
+  screen's.
 - **`numbers` and `time` read the host's locale and zone** (see What the host owes) each time they
   write, so they import no locale and nothing is read before the app stands. `countLocale` answers
   the locale figures are written in: the host's tag, or nothing where none is set, which is the
@@ -324,7 +327,8 @@ Every token is a custom property stated by the layer's stylesheet on the root un
   - `dateLocale`, the name of a dayjs locale the host has loaded, dates' words are written in; by
     default dayjs's built-in one;
   - `relayBase`, the path a console relays every service under, which the relay module's addresses
-    start with; by default none, so a service is called at its name from the root.
+    start with after the app's base path; by default none, so a service is called at its name from
+    the app's base path.
   The layer's own app configuration states the setting with nothing in it, so each default stands
   until the host states a value. A host that renders on the server states the first three, since the
   server's runtime and the browser's need not agree.
