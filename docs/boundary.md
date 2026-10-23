@@ -158,15 +158,17 @@ Each is named with everything it exports.
 | `files` | `FileConflict` |
 | `code-language` | `codeLanguage` |
 | `screen-mode` | `DocumentScheme`, `DEFAULT_SCHEME`, `SCHEME_COOKIE`, `isDocumentScheme` |
-| `console-bundle` | `CONSOLE_BUNDLE_FILE`, `ConsoleBundle`, `CONSOLE_BUNDLE_SCHEMA`, `consoleBundle` |
+| `console-manifest` | `CONSOLE_MANIFEST_ROUTE`, `OWNER_KEY_HEADER`, `OWNER_ROLE_HEADER`, `CONSOLE_ROLES`, `ConsoleRole`, `ConsoleManifest`, `CONSOLE_MANIFEST_SCHEMA`, `consoleManifest`, `roleAllows`, `ConsoleWords`, `ConsoleBundleModule` |
 
 - **`search` folds letter case in the locale each call is handed,** the runtime's own where none is.
   It reads no app configuration, so it runs alike in a browser and on a server; a host searching in
   the app hands it `countLocale`'s answer, as the layer's own components do.
-- **`console-bundle` is the contract's declaration** (`docs/console-bundles.md`): the file a bundle
-  declares itself in, the declaration's JSON Schema, its type with every optional field filled, and
-  the reading that fills them or refuses a declaration naming each field at fault. It runs alike in a
-  browser, on a server and in a test.
+- **`console-manifest` is the contract's manifest** (`docs/console-bundles.md`): the route a service
+  answers it at, the two headers a console relays the owner key and the role in, the roles and whether
+  one held allows one needed, the manifest's JSON Schema, its type with every optional field but the
+  stylesheet filled, the reading that fills them or refuses a manifest naming each field at fault, and
+  the types of a bundle's words and of its module's default export. A service and a console import it
+  alike; it runs in a browser, on a server and in a test.
 
 ## Page plugins
 

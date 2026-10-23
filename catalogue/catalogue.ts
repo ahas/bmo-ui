@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 
-import { CONSOLE_BUNDLE_FILE, CONSOLE_BUNDLE_SCHEMA } from "../shared/console-bundle";
+import { CONSOLE_MANIFEST_ROUTE, CONSOLE_MANIFEST_SCHEMA } from "../shared/console-manifest";
 import { filterRecords } from "../shared/search";
 
 import data from "./catalogue.json";
@@ -108,10 +108,10 @@ export function tokens(group?: string | null): { tokens: Record<string, Catalogu
   return { tokens: Object.fromEntries(chosen) };
 }
 
-// The console plugin contract: the file a bundle declares itself in, its JSON Schema and the
-// contract's document whole.
-export function pluginContract(): { contract: { file: string; declaration: Record<string, unknown>; document: string } } {
+// The console plugin contract: the route a service answers its manifest at, the manifest's JSON
+// Schema and the contract's document whole.
+export function pluginContract(): { contract: { route: string; manifest: Record<string, unknown>; document: string } } {
   const document = readFileSync(new URL("../docs/console-bundles.md", import.meta.url), "utf8");
 
-  return { contract: { file: CONSOLE_BUNDLE_FILE, declaration: CONSOLE_BUNDLE_SCHEMA, document } };
+  return { contract: { route: CONSOLE_MANIFEST_ROUTE, manifest: CONSOLE_MANIFEST_SCHEMA, document } };
 }

@@ -10,8 +10,9 @@ components and behaviours every screen is built from. It is a Nuxt layer, built 
   locale and time zone dates are read in are the host's to set.
 - **It knows no consumer** and calls no server. What it exposes and what a host owes it is its whole
   boundary (`docs/boundary.md`).
-- **It states the console plugin contract** every console bundle conforms to, so a console attaches
-  each bundle by its declaration alone (`docs/console-bundles.md`).
+- **It states the console plugin contract** every console bundle conforms to, so a console finds
+  each service while it runs and attaches its bundle by the manifest it answers alone
+  (`docs/console-bundles.md`).
 - **A coding harness takes it as an MCP server,** `bmo-ui mcp`, a catalogue of its components, tokens
   and contract, with the `bmo-ui` skill beside it (`docs/harness.md`).
 - **It depends on no other repository,** only on registry packages.

@@ -4,7 +4,7 @@ import { describe, expect, test } from "bun:test";
 
 import { CatalogueError, component, components, pluginContract, tokens } from "../../catalogue/catalogue";
 import { CATALOGUE_FILE, catalogueText, exampleNames } from "../../catalogue/generate";
-import { CONSOLE_BUNDLE_FILE, CONSOLE_BUNDLE_SCHEMA } from "../../shared/console-bundle";
+import { CONSOLE_MANIFEST_ROUTE, CONSOLE_MANIFEST_SCHEMA } from "../../shared/console-manifest";
 
 // The catalogue the MCP server's tools answer from (`docs/harness.md`, "The catalogue").
 
@@ -88,11 +88,11 @@ describe("the tokens", () => {
 });
 
 describe("the plugin contract", () => {
-  test("answers the declaration's file, its schema and the contract's document", () => {
+  test("answers the manifest's route, its schema and the contract's document", () => {
     const { contract } = pluginContract();
 
-    expect(contract.file).toBe(CONSOLE_BUNDLE_FILE);
-    expect(contract.declaration).toEqual(CONSOLE_BUNDLE_SCHEMA);
+    expect(contract.route).toBe(CONSOLE_MANIFEST_ROUTE);
+    expect(contract.manifest).toEqual(CONSOLE_MANIFEST_SCHEMA);
     expect(contract.document).toStartWith("# The console plugin contract\n");
   });
 });

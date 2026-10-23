@@ -25,7 +25,7 @@ them, and a failure as a `code` and an `error`.
 | `ui_components` | `q`, words to narrow by, or none | A page of the components and page plugins, each by its `name`, its `kind` (a component or a page plugin) and its one `line`. Every one stands in the one page. |
 | `ui_component` | `name`, a component's name | The component: its `name`, its `line`, its `props` (each by name, type, whether required, and its default and its description where it has them), its `slots` (each by name and the values it hands its content), its `events` (each by name and the values it carries) and an `example` of its use as a template. A name that is no component is refused as `not-found`. |
 | `ui_tokens` | `group`, one group's name, or none | The design tokens, each by its custom property: its `group`, its value in the `light` mode and in the `dark` mode, and whether the layer or the component library states it. A group is the property's first word past the namespace, so `color`, `text`, `bg`, `border`, `font`, `radius`, `motion`, `ease`, `palette` and their kin. |
-| `ui_plugin_contract` | nothing | The console plugin contract: the file a bundle declares itself in, the declaration's JSON Schema, and the contract's document whole (`docs/console-bundles.md`). |
+| `ui_plugin_contract` | nothing | The console plugin contract: the route a service answers its manifest at, the manifest's JSON Schema, and the contract's document whole (`docs/console-bundles.md`). |
 
 A kind is `component` or `page-plugin`. The words `ui_components` narrows by are matched against
 each name and line as the layer's own list search matches them (`docs/components.md`, "List
@@ -57,4 +57,4 @@ carries the file written again with it.
 The `bmo-ui` skill stands in the package's `skills/` folder, in the shape a harness loads a skill in:
 a description naming when it applies, then what to do. It applies to building or restyling a screen on
 the layer, and to writing a console bundle; it tells a harness to read the catalogue before writing a
-component or a value of its own, and the contract before declaring a bundle.
+component or a value of its own, and the contract before publishing a bundle.

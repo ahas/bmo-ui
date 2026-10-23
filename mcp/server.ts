@@ -72,10 +72,10 @@ export function uiServer(): McpServer {
   server.registerTool(
     "ui_plugin_contract",
     {
-      description: "The console plugin contract a console bundle declares itself and mounts by.",
+      description: "The console plugin contract a service publishes its console bundle and manifest by.",
       inputSchema: {},
       outputSchema: {
-        contract: z.object({ file: z.string(), declaration: z.record(z.string(), z.unknown()), document: z.string() })
+        contract: z.object({ route: z.string(), manifest: z.record(z.string(), z.unknown()), document: z.string() })
       }
     },
     () => answered(() => pluginContract())

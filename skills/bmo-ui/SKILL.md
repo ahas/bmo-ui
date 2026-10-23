@@ -1,6 +1,6 @@
 ---
 name: bmo-ui
-description: Build or restyle a screen on the bmo-ui Nuxt layer, or write a console bundle that a console attaches by the layer's console plugin contract. Use before writing the first component, colour, size or wording of such a screen, and before declaring a bundle.
+description: Build or restyle a screen on the bmo-ui Nuxt layer, or write a console bundle that a console attaches by the layer's console plugin contract. Use before writing the first component, colour, size or wording of such a screen, and before publishing a bundle or its manifest.
 ---
 
 # Building on bmo-ui
@@ -37,11 +37,14 @@ anything of your own, since what the layer already has is the one a screen is me
 
 ## Writing a console bundle
 
-1. **Ask `ui_plugin_contract`.** It answers the file a bundle declares itself in, the declaration's
-   JSON Schema and the contract's whole document. Follow the document.
-2. **Declare the bundle** at its package's root, in that file, by the schema, and read it in the
-   bundle's own test through the layer's `consoleBundle` reading, so a declaration that breaks the
-   contract fails there first.
-3. **Keep to the contract:** pages only under the declared screen path, components prefixed with the
-   bundle's name, words only under its namespace in its own pack, and every call through the layer's
-   relay address for the service's name, never a fixed address.
+1. **Ask `ui_plugin_contract`.** It answers the route a service answers its manifest at, the
+   manifest's JSON Schema and the contract's whole document. Follow the document.
+2. **Answer the manifest** at that route from the service, by the schema, and read it in the
+   service's own test through the layer's `consoleManifest` reading, so a manifest that breaks the
+   contract fails there first. Answer the bundle's module, stylesheet and words at the paths it names.
+3. **Build the bundle as a browser module** leaving unbundled the libraries the console shares, its
+   default export the routes of its screens.
+4. **Keep to the contract:** routes only under the manifest's screen path, words only under its
+   namespace, every address through the layer's relay module for the service's name, never a fixed
+   address, and every route of the service guarded by the console's credential, the manifest's role
+   and, where it asks for one, the owner key.
