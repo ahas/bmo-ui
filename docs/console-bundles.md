@@ -63,13 +63,14 @@ none of them a dot or two standing for a folder.
 | `bundle` | The path of the service's API its module is answered at. | yes |
 | `stylesheet` | The path of the service's API its stylesheet is answered at. | no, none |
 | `words` | The path of the service's API its words are answered at. | yes |
-| `apiPrefix` | The path of the service's API every call the screens make stands under. A console relays nothing of the service outside it but the module and the stylesheet. | no, `/` |
+| `apiPrefix` | The path of the service's API every call the screens make stands under. A console relays nothing of the service outside it but the module, the stylesheet and the routes under `relays`. | no, `/` |
 | `role` | The least role a reader holds to open the screen: `administrator` or `member`. | yes |
 | `ownerKey` | Whether every call the screens make needs the reader's owner key. | no, false |
 | `events` | Whether the screens read the service's event stream through the console. | no, false |
 | `websocket` | Whether the screens open a WebSocket to the service through the console. | no, false |
 | `pushKinds` | The service's event kinds a console may raise as a notice to a reader who is not on the screen, each written as the stream names it, a resource and its change. | no, none |
 | `calls` | The other services the screens call through the console, each by the service name its own manifest gives it, in kebab-case; never the bundle's own service, and none twice. | no, none |
+| `relays` | The service's own routes outside the API prefix that a console relays as well, each its `method` (`GET`, `POST`, `PUT`, `PATCH` or `DELETE`) and its `path`, one whole path of the service's API; none twice. | no, none |
 
 Reading a manifest fills each optional field but the stylesheet with its default, so a console reads
 every other field of every manifest.
@@ -106,8 +107,9 @@ every other field of every manifest.
 - **Calls.** A screen calls its service at the address the `relay` domain module answers for the
   service's name and a path: the base path the console app is served under, the console's relay
   base, the service's name, then the path as the service's own API writes it. The console relays
-  everything under that address whose path stands under the service's API prefix to the service
-  unchanged, behind its own sign-in. The event stream and a WebSocket go the same way, where the manifest asks for them; a
+  everything under that address whose path stands under the service's API prefix, and every call
+  whose method and path are a route the manifest names under `relays`, to the service unchanged,
+  behind its own sign-in. The event stream and a WebSocket go the same way, where the manifest asks for them; a
   WebSocket is opened at the module's socket address, the same address over the page's own origin in
   the socket's scheme.
 - **Calls to another service.** A screen calls a service its manifest names under `calls` at the
@@ -131,8 +133,9 @@ every other field of every manifest.
 
 A console may name a **translator**: a service with a route that takes texts and a language and
 answers their readings. The layer states the route's shape and asks it through the `translation`
-module; the console names the service and the route in its runtime configuration; a bundle that
-translates names that service under `calls`, and its screens hand the module texts and a language.
+module; the console names the service and the route in its runtime configuration, with how many
+texts one ask carries and how many asks stand at once; a bundle that translates names that service
+under `calls`, and its screens hand the module texts and a language.
 
 - **The ask** is a `POST` of a JSON object: `language`, a language tag, and `originals`, the texts in
   order.
@@ -140,15 +143,26 @@ translates names that service under `calls`, and its screens hand the module tex
   given, each with `text`, the reading in the language, and `whole`, whether every part of it was
   rendered. An original already in the language is its own reading. A reading that is not whole holds
   the parts the translator could not render as they stood.
+- **A busy answer is waited out.** A 503, a translator taking no more asks for now, and a 504, a
+  console that waited past its bound for the translator to begin answering, are each asked again
+  with the same originals after a wait: 2 seconds, then 4, then 8, three asks again at most. An ask
+  still answered busy after the last answers each of its originals as **untranslated**: the original
+  itself, not whole, marked `untranslated`. The other asks of the same translation are answered as
+  they came, and a screen shows an untranslated text as its original.
 - **Any other answer is a refusal,** and the module answers the screen with a failure rather than a
   reading. A screen shows its own texts where a translation fails; a translation never stands in the
   way of reading the original.
 - **Where the console names no translator,** nothing translates: the module answers every ask with
   the failure, and a screen asks whether a translator is named before offering a translation.
 - **The module asks sparingly.** It sends each distinct original once, answers an empty one as itself,
-  asks in batches of a fixed size, at most two at a time, and keeps each whole reading for the life
-  of the tab, by its language and original, so no text is asked for twice. A reading that is not whole
-  is answered and not kept.
+  and keeps each whole reading for the life of the tab, by its language and original, so no text kept
+  is asked for again, by a later translation or by an ask made again after a busy answer. A reading
+  that is not whole, an untranslated one among them, is answered and not kept. The readings stand in
+  the order of the texts handed, whatever order the asks were answered in.
+- **How much it asks at once is the console's.** One ask carries at most the console's `batch`
+  originals, by default 4, and the tab holds at most the console's `asksAtOnce` asks out at once, by
+  default 1. The bound is the tab's, not a screen's: every translation in the tab waits its turn
+  behind it, and an ask waiting out a busy answer holds its place while it waits.
 
 ## Roles and the owner key
 
@@ -162,12 +176,17 @@ translates names that service under `calls`, and its screens hand the module tex
 - **The console offers a screen** only to a reader whose role allows the manifest's role, and a screen
   whose manifest asks for the owner key only to a login that has one: no menu entry, no module and no
   notice for anyone else. This spares a reader a screen that would refuse them; it guards nothing.
-- **The service is the guard.** On every route the screens use, its module and its stylesheet among
-  them, a service refuses a call that lacks the console's credential with a 401, and a call whose
-  `Owner-Role` is missing or does not allow the manifest's role, or, where the manifest asks for the
-  owner key, whose `Owner-Key` is missing, with a 403. It answers a call with the owner's own data and
+- **The service is the guard.** On every route the screens use, its module, its stylesheet and the
+  routes under `relays` among them, a service refuses a call that lacks the console's credential with
+  a 401, and a call whose `Owner-Role` is missing or does not allow the manifest's role, or, where
+  the manifest asks for the owner key, whose `Owner-Key` is missing, with a 403. It answers a call with the owner's own data and
   never another's. A route that needs more than the screen's role refuses on its own terms; the
   manifest's role is the floor of every route, not the whole of the service's guard.
+- **A relayed route serves the service's other callers too.** A route under `relays` is the
+  service's own, which callers other than a console reach on their own terms; a call to it that
+  carries the console's credential and a reader's role is held to the manifest's role and owner key
+  as every route of the screens is, so a reader reaches through a console no more of it than the
+  manifest opens.
 
 ## What a console owes
 
@@ -179,15 +198,16 @@ translates names that service under `calls`, and its screens hand the module tex
   shared module, the absent left out and the conflicting refused.
 - **It attaches each bundle by its manifest alone:** an entry under its title and icon leading to its
   screen path, for the readers its role allows; a relay of its service under the relay base, for the
-  service's API prefix, its module and its stylesheet; the stream and the WebSocket where the manifest
-  asks for them; the bundle's words; and its notice kinds.
+  service's API prefix, the routes under `relays`, its module and its stylesheet; the stream and the
+  WebSocket where the manifest asks for them; the bundle's words; and its notice kinds.
 - **It relays a bundle's calls** to the services named under `calls` on each called service's own
   terms, and refuses a call from a bundle's page to a service another manifest names that the bundle
   does not name.
 - **It names its translator, where it has one,** in its runtime configuration under `bmoUi`, as
-  `translator`: the service's name, which a bundle names under `calls`, and the path of its
-  translating route on the service's own API, which that service's manifest lets through
-  (`docs/boundary.md`, "What the host owes").
+  `translator`: the service's name, which a bundle names under `calls`, the path of its translating
+  route on the service's own API, which that service's manifest lets through under its API prefix or
+  among its `relays`, and, where it holds others than the defaults, the most originals one ask
+  carries and how many asks a tab holds out at once (`docs/boundary.md`, "What the host owes").
 - **It sets the owner key and the role** on everything it relays, and replaces any the browser sent.
 - **It states its relay base** in its app configuration, under `bmoUi`, as `relayBase`: the path every
   service is relayed under, from the app's base path. Where none is stated, a service is called at its
@@ -202,6 +222,9 @@ translates names that service under `calls`, and its screens hand the module tex
 - **It answers its manifest** at the route, by the schema, and reads it in its own test through the
   shared module's reading, so a manifest that breaks the contract fails there first.
 - **It answers its module, its stylesheet and its words** at the paths the manifest names.
+- **It names a route of its own under `relays`** only where a console's screens need it as the
+  service's other callers have it, so no route of the service stands twice, once for a console and
+  once for the rest.
 - **It guards every route itself** by the console's credential, the role and the owner key, as the
   contract states.
 

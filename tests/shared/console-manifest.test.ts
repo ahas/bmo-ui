@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 
-import { CONSOLE_MANIFEST_ROUTE, CONSOLE_MANIFEST_SCHEMA, CONSOLE_ROLES, consoleManifest, roleAllows, screensCall } from "../../shared/console-manifest";
+import { CONSOLE_MANIFEST_ROUTE, CONSOLE_MANIFEST_SCHEMA, CONSOLE_ROLES, consoleManifest, relaysRoute, roleAllows, screensCall } from "../../shared/console-manifest";
 
 // The console plugin contract's manifest (`docs/console-bundles.md`, "The manifest").
 
@@ -39,7 +39,8 @@ describe("a service's manifest", () => {
       events: false,
       websocket: false,
       pushKinds: [],
-      calls: []
+      calls: [],
+      relays: []
     });
   });
 
@@ -84,6 +85,19 @@ describe("a service's manifest", () => {
     expect(faultsOf({ ...answered, calls: ["Files"] })).toContain("calls.0:");
   });
 
+  test("keeps the routes it relays outside its prefix, and refuses one named twice, an unknown method or no path", () => {
+    const relays = [
+      { method: "POST", path: "/readings" },
+      { method: "GET", path: "/readings/kept" }
+    ] as const;
+
+    expect(consoleManifest({ ...answered, relays }).relays).toEqual([...relays]);
+    expect(faultsOf({ ...answered, relays: [relays[0], relays[0]] })).toContain("relays: each route named once");
+    expect(faultsOf({ ...answered, relays: [{ method: "TRACE", path: "/readings" }] })).toContain("relays.0.method:");
+    expect(faultsOf({ ...answered, relays: [{ method: "POST", path: "readings" }] })).toContain("relays.0.path:");
+    expect(faultsOf({ ...answered, relays: [{ method: "POST", path: "/readings", role: "member" }] })).toContain("relays.0");
+  });
+
   test("is refused where its title lies outside its namespace", () => {
     expect(faultsOf({ ...answered, title: "common.title.screen" })).toContain("title: a key under the bundle's namespace");
   });
@@ -117,12 +131,24 @@ describe("the services a bundle's screens call", () => {
   });
 });
 
+describe("the routes a manifest relays", () => {
+  test("are its method, in any letter case, and its whole path, and no other", () => {
+    const read = consoleManifest({ ...answered, relays: [{ method: "POST", path: "/readings" }] });
+
+    expect(relaysRoute(read, "POST", "/readings")).toBe(true);
+    expect(relaysRoute(read, "post", "/readings")).toBe(true);
+    expect(relaysRoute(read, "GET", "/readings")).toBe(false);
+    expect(relaysRoute(read, "POST", "/readings/kept")).toBe(false);
+    expect(relaysRoute(consoleManifest(answered), "POST", "/readings")).toBe(false);
+  });
+});
+
 describe("the manifest's JSON Schema", () => {
   test("requires the fields a service states and closes the object", () => {
     expect(CONSOLE_MANIFEST_SCHEMA.required).toEqual(["name", "title", "icon", "screenPath", "serviceName", "bundle", "words", "role"]);
     expect(CONSOLE_MANIFEST_SCHEMA.additionalProperties).toBe(false);
     expect(Object.keys(CONSOLE_MANIFEST_SCHEMA.properties as object).toSorted()).toEqual(
-      [...Object.keys(answered), "stylesheet", "apiPrefix", "ownerKey", "events", "websocket", "pushKinds", "calls"].toSorted()
+      [...Object.keys(answered), "stylesheet", "apiPrefix", "ownerKey", "events", "websocket", "pushKinds", "calls", "relays"].toSorted()
     );
     expect((CONSOLE_MANIFEST_SCHEMA.properties as Record<string, { enum?: unknown }>).role!.enum).toEqual(["administrator", "member"]);
   });

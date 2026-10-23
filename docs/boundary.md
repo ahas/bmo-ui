@@ -128,7 +128,7 @@ Each is named with everything it exports.
 | `tabs` | `TAB_ROW_UI`, `TAB_ROW_LINE`, `BarTab`, `BarMenuItem`, `BarAction`, `BarProperty`, `SwitchItem`, `SeenTab`, `openInTabs`, `mergeTabs`, `pinTab`, `pinnedFirst`, `lastSeen`, `moveTab`, `othersOf`, `rightOf`, `allOf`, `fileTabLabel`, `baseName` |
 | `time` | `FOREVER_LABEL`, `formatClock`, `formatDay`, `formatShortDay`, `formatDayClock`, `clockUnder`, `formatDateClock`, `formatStamp`, `formatTime`, `dayKey`, `spanClock`, `elapsedText`, `timerClock`, `remainingText`, `useNowSeconds`, `toUnixSeconds` |
 | `tooltip` | `TOOLTIP_UI`, `TOOLTIP_PROVIDER` |
-| `translation` | `Reading`, `Translator`, `Untranslated`, `TRANSLATION_BATCH`, `translatorOf`, `hasTranslator`, `translated` |
+| `translation` | `Reading`, `Translator`, `Untranslated`, `TRANSLATION_BATCH`, `TRANSLATION_ASKS_AT_ONCE`, `translatorOf`, `hasTranslator`, `translated` |
 | `waveform` | `WAVE_DETAIL`, `WAVE_FETCH_LIMIT`, `WAVE_FLOOR`, `Waveform`, `peaksOf`, `waveBars`, `barCount`, `loudnessAt`, `waveformOf` |
 | `zoom` | `ZoomView`, `Point`, `Size`, `FIT`, `MIN_SCALE`, `MAX_SCALE`, `DOUBLE_SCALE`, `bounded`, `zoomedTo`, `wheeled`, `moved`, `pinched`, `toggled`, `fittedSize`, `swipeStep` |
 
@@ -146,9 +146,13 @@ Each is named with everything it exports.
   It is the one place the layer takes a fetcher.
 - **`translation` asks the translator the host names** (`docs/console-bundles.md`, "Translation"),
   through the relay's call: readings in the order of the texts handed, each distinct original asked
-  once, in batches of `TRANSLATION_BATCH`, at most two batches at a time, and every whole reading kept
-  for the life of the tab by language and original. A refusal, a call that fails and a host naming no
-  translator are each an `Untranslated` failure; the batches answered before a failure stay kept.
+  once, in batches of the host's `batch` (`TRANSLATION_BATCH` where it names none), at most the host's
+  `asksAtOnce` batches out at once across the tab (`TRANSLATION_ASKS_AT_ONCE` where it names none),
+  and every whole reading kept for the life of the tab by language and original. A batch answered 503
+  or 504 is asked again after 2, 4 and 8 seconds, and one still busy after the last answers its texts
+  as untranslated readings, each its original, not whole, with `untranslated` set. Any other refusal,
+  a call that fails and a host naming no translator are each an `Untranslated` failure; the batches
+  answered before a failure stay kept.
 - **`numbers` and `time` read the host's locale and zone** (see What the host owes) each time they
   write, so they import no locale and nothing is read before the app stands. `countLocale` answers
   the locale figures are written in: the host's tag, or nothing where none is set, which is the
@@ -166,7 +170,7 @@ Each is named with everything it exports.
 | `files` | `FileConflict` |
 | `code-language` | `codeLanguage` |
 | `screen-mode` | `DocumentScheme`, `DEFAULT_SCHEME`, `SCHEME_COOKIE`, `isDocumentScheme` |
-| `console-manifest` | `CONSOLE_MANIFEST_ROUTE`, `OWNER_KEY_HEADER`, `OWNER_ROLE_HEADER`, `CONSOLE_ROLES`, `ConsoleRole`, `ConsoleManifest`, `CONSOLE_MANIFEST_SCHEMA`, `consoleManifest`, `roleAllows`, `screensCall`, `ConsoleWords`, `ConsoleBundleModule` |
+| `console-manifest` | `CONSOLE_MANIFEST_ROUTE`, `OWNER_KEY_HEADER`, `OWNER_ROLE_HEADER`, `CONSOLE_ROLES`, `ConsoleRole`, `RELAY_METHODS`, `RelayMethod`, `ConsoleManifest`, `CONSOLE_MANIFEST_SCHEMA`, `consoleManifest`, `roleAllows`, `screensCall`, `relaysRoute`, `ConsoleWords`, `ConsoleBundleModule` |
 
 - **`search` folds letter case in the locale each call is handed,** the runtime's own where none is.
   It reads no app configuration, so it runs alike in a browser and on a server; a host searching in
@@ -175,7 +179,8 @@ Each is named with everything it exports.
   answers it at, the two headers a console relays the owner key and the role in, the roles and whether
   one held allows one needed, the manifest's JSON Schema, its type with every optional field but the
   stylesheet filled, the reading that fills them or refuses a manifest naming each field at fault,
-  whether a bundle's screens call a service (their own, or one named under `calls`), and the types of
+  whether a bundle's screens call a service (their own, or one named under `calls`), the methods a
+  route under `relays` is named by and whether a manifest names a method and path there, and the types of
   a bundle's words and of its module's default export. A service and a console import it
   alike; it runs in a browser, on a server and in a test.
 
@@ -347,10 +352,13 @@ Every token is a custom property stated by the layer's stylesheet on the root un
   until the host states a value. A host that renders on the server states the first three, since the
   server's runtime and the browser's need not agree.
 - **The translator, where the host has one.** The host states it in its public runtime configuration,
-  under `bmoUi`, as `translator`: `service`, the name the translator is relayed under, and `path`, its
-  translating route on the service's own API. Both are settings of the host's deployment, each read
-  from the environment as Nuxt reads a runtime setting. The layer's own configuration states both
-  empty, so a host that names none translates nothing.
+  under `bmoUi`, as `translator`: `service`, the name the translator is relayed under; `path`, its
+  translating route on the service's own API; `batch`, the most originals one ask carries; and
+  `asksAtOnce`, how many asks a tab holds out at once. Each is a setting of the host's deployment,
+  read from the environment as Nuxt reads a runtime setting. The layer's own configuration states the
+  service and the path empty, so a host that names none translates nothing, and the two bounds at
+  `TRANSLATION_BATCH` and `TRANSLATION_ASKS_AT_ONCE`, 4 and 1; a bound that is not a whole number of
+  one or more reads as its default.
 - **What a console owes a bundle,** where the host is a console: the contract's own list
   (`docs/console-bundles.md`, "What a console owes").
 - **The tooltip setting.** The host's app root, the library's `UApp`, is handed the tooltip

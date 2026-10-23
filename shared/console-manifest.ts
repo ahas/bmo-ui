@@ -20,6 +20,11 @@ export const CONSOLE_ROLES = ["administrator", "member"] as const;
 
 export type ConsoleRole = (typeof CONSOLE_ROLES)[number];
 
+// The methods a route a console relays outside the API prefix is named by.
+export const RELAY_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE"] as const;
+
+export type RelayMethod = (typeof RELAY_METHODS)[number];
+
 const KEBAB = /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/;
 
 // A path of the service's own API, from its root: segments of the characters an address carries
@@ -58,12 +63,27 @@ const manifest = z
     calls: z
       .array(z.string().regex(KEBAB, "a name in kebab-case"))
       .default([])
-      .describe("The other services the screens call through the console, each by the service name its own manifest gives it.")
+      .describe("The other services the screens call through the console, each by the service name its own manifest gives it."),
+    relays: z
+      .array(
+        z
+          .object({
+            method: z.enum(RELAY_METHODS).describe("The route's method."),
+            path: apiPath("The route's whole path on the service's API.")
+          })
+          .strict()
+      )
+      .default([])
+      .describe("The service's own routes outside the API prefix that a console relays as well.")
   })
   .strict()
   .refine((one) => one.title.startsWith(`${one.name}.`), { path: ["title"], message: "a key under the bundle's namespace" })
   .refine((one) => !one.calls.includes(one.serviceName), { path: ["calls"], message: "another service than the bundle's own" })
-  .refine((one) => new Set(one.calls).size === one.calls.length, { path: ["calls"], message: "each service named once" });
+  .refine((one) => new Set(one.calls).size === one.calls.length, { path: ["calls"], message: "each service named once" })
+  .refine((one) => new Set(one.relays.map((route) => `${route.method} ${route.path}`)).size === one.relays.length, {
+    path: ["relays"],
+    message: "each route named once"
+  });
 
 // A manifest as a console reads it, every optional field but the stylesheet filled.
 export type ConsoleManifest = z.output<typeof manifest>;
@@ -90,6 +110,13 @@ export function roleAllows(held: ConsoleRole, needed: ConsoleRole): boolean {
 // Whether a bundle's screens call a service: their own, or one their manifest names under `calls`.
 export function screensCall(manifest: ConsoleManifest, serviceName: string): boolean {
   return manifest.serviceName === serviceName || manifest.calls.includes(serviceName);
+}
+
+// Whether a manifest names a route under `relays`: the method, in any letter case, and the whole path.
+export function relaysRoute(manifest: ConsoleManifest, method: string, path: string): boolean {
+  const asked = method.toUpperCase();
+
+  return manifest.relays.some((route) => route.method === asked && route.path === path);
 }
 
 // The bundle's words as the service answers them: each locale's tree under the locale's code, every
