@@ -43,6 +43,20 @@ These rules hold every change to this repository.
 - **No hand-written parser for a general format.** Where no library fits, the reason is written
   beside the code.
 
+## A change from a repository below
+
+A repository below that needs a change this layer does not serve sends it as a pull request against this
+repository's GitHub repository, from a branch made from this repository's main. Its job never commits to
+this main and keeps no copy of the change.
+
+The change is written as the general case, with this layer's own tests. Before it is opened and again in
+review it is held to the rule that it names no repository that asked for it, no provider or unit of one, no
+branch for one unit, and no data or test fixture only the asker uses.
+
+Whoever holds this repository's work reviews the pull request and merges it or sends it back with the reason
+on it; a review service may assist. A merge raises this layer's version in semver, and the repository that
+asked pins that version and resumes the part it stopped.
+
 ## Code and tests
 
 - Tests live in `tests/`, never beside the source. Every test file runs with happy-dom registered
