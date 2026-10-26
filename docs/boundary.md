@@ -170,7 +170,7 @@ Each is named with everything it exports.
 | `files` | `FileConflict` |
 | `code-language` | `codeLanguage` |
 | `screen-mode` | `DocumentScheme`, `DEFAULT_SCHEME`, `SCHEME_COOKIE`, `isDocumentScheme` |
-| `console-manifest` | `CONSOLE_MANIFEST_ROUTE`, `OWNER_KEY_HEADER`, `OWNER_ROLE_HEADER`, `CONSOLE_ROLES`, `ConsoleRole`, `RELAY_METHODS`, `RelayMethod`, `ConsoleManifest`, `CONSOLE_MANIFEST_SCHEMA`, `consoleManifest`, `roleAllows`, `screensCall`, `relaysRoute`, `ConsoleWords`, `ConsoleBundleModule` |
+| `console-manifest` | `CONSOLE_MANIFEST_ROUTE`, `OWNER_KEY_HEADER`, `OWNER_ROLE_HEADER`, `CONSOLE_ROLES`, `ConsoleRole`, `RELAY_METHODS`, `RelayMethod`, `ConsoleManifest`, `CONSOLE_MANIFEST_SCHEMA`, `consoleManifest`, `roleAllows`, `screensCall`, `relaysRoute`, `shareRead`, `ConsoleWords`, `ConsoleBundleModule` |
 
 - **`search` folds letter case in the locale each call is handed,** the runtime's own where none is.
   It reads no app configuration, so it runs alike in a browser and on a server; a host searching in
@@ -180,7 +180,8 @@ Each is named with everything it exports.
   one held allows one needed, the manifest's JSON Schema, its type with every optional field but the
   stylesheet filled, the reading that fills them or refuses a manifest naming each field at fault,
   whether a bundle's screens call a service (their own, or one named under `calls`), the methods a
-  route under `relays` is named by and whether a manifest names a method and path there, and the types of
+  route under `relays` is named by and whether a manifest names a method and path there, whether a method and path
+  are a share read a manifest names under `shareReads`, and the types of
   a bundle's words and of its module's default export. A service and a console import it
   alike; it runs in a browser, on a server and in a test.
 
