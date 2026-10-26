@@ -172,6 +172,9 @@ describe("the share reads a manifest names", () => {
     expect(shareRead(read, "GET", "/links/Ab3_x/files")).toBe(false);
     expect(shareRead(read, "GET", "/links/Ab3_x/files/12/more")).toBe(false);
     expect(shareRead(read, "GET", "/notes/Ab3_x")).toBe(false);
+    for (const climbing of ["/links/..", "/links/.", "/links/%2e%2e", "/links/%2E", "/links/Ab3_x/files/.."]) {
+      expect(shareRead(read, "GET", climbing)).toBe(false);
+    }
     expect(shareRead(consoleManifest(answered), "GET", "/links/Ab3_x")).toBe(false);
   });
 });
