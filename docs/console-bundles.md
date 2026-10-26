@@ -125,6 +125,14 @@ every other field of every manifest.
   address the module answers for it, and the console adds nothing. The app's fetcher leaves
   an address already under the app's base path as it is, so the same address serves a call and a
   raw address alike.
+- **The title bar.** A console may draw one title bar over every screen, a bundle's among them. Where it
+  does, it provides, under the injection key `bmo-console-title-bar`, an object naming in `screenActions`
+  the selector of the place in its bar a screen lays what acts on it as a whole. A route that asks for the
+  console's bar says so in its meta, `consoleTitleBar: true`, and the console draws the bar over it, named by
+  the manifest's title and icon. A screen whose route asks and that finds the key provided draws no bar of
+  its own, and teleports what acts on it as a whole into the place `screenActions` names, deferred, since the
+  bar stands before the screen does; found without the key — on its service's own page, or under a console
+  that draws no shared bar — it draws its own. A route that does not ask stands as its bundle draws it.
 - **Notices.** A console that raises notices reads the service's event stream for the kinds under
   `pushKinds` and raises each in the words the bundle's words give that kind, under the bundle's
   namespace, to the readers whose role allows the manifest's.
@@ -208,6 +216,10 @@ under `calls`, and its screens hand the module texts and a language.
   route on the service's own API, which that service's manifest lets through under its API prefix or
   among its `relays`, and, where it holds others than the defaults, the most originals one ask
   carries and how many asks a tab holds out at once (`docs/boundary.md`, "What the host owes").
+- **It offers its title bar, where it draws one over every screen,** under the key `bmo-console-title-bar`,
+  and draws it over a bundle's route that asks for it in its meta ("How a bundle mounts", the title bar): the bar
+  and its place stand before that route's screen mounts, on every way to it — the first load, from another of the
+  console's screens, from another bundle's — and stay while the screen being left still stands.
 - **It sets the owner key and the role** on everything it relays, and replaces any the browser sent.
 - **It states its relay base** in its app configuration, under `bmoUi`, as `relayBase`: the path every
   service is relayed under, from the app's base path. Where none is stated, a service is called at its
