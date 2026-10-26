@@ -133,6 +133,9 @@ every other field of every manifest.
   its own, and teleports what acts on it as a whole into the place `screenActions` names, deferred, since the
   bar stands before the screen does; found without the key — on its service's own page, or under a console
   that draws no shared bar — it draws its own. A route that does not ask stands as its bundle draws it.
+- **The screen's foot.** A bar a screen stands at its foot for the reader to act from — an input bar, a row of
+  keys — carries the attribute `data-screen-foot`. What a console floats over the page area of its own accord
+  stands above every element so marked, so it never covers that bar until the reader moves it there.
 - **Notices.** A console that raises notices reads the service's event stream for the kinds under
   `pushKinds` and raises each in the words the bundle's words give that kind, under the bundle's
   namespace, to the readers whose role allows the manifest's.
@@ -220,6 +223,9 @@ under `calls`, and its screens hand the module texts and a language.
   and draws it over a bundle's route that asks for it in its meta ("How a bundle mounts", the title bar): the bar
   and its place stand before that route's screen mounts, on every way to it — the first load, from another of the
   console's screens, from another bundle's — and stay while the screen being left still stands.
+- **It keeps a screen's foot clear,** standing whatever it floats over the page area of its own accord above every
+  element carrying `data-screen-foot` ("How a bundle mounts", the screen's foot), so it does not cover a screen's
+  foot bar until the reader moves it there.
 - **It sets the owner key and the role** on everything it relays, and replaces any the browser sent.
 - **It states its relay base** in its app configuration, under `bmoUi`, as `relayBase`: the path every
   service is relayed under, from the app's base path. Where none is stated, a service is called at its
