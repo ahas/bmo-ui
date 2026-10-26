@@ -133,6 +133,9 @@ every other field of every manifest.
   its own, and teleports what acts on it as a whole into the place `screenActions` names, deferred, since the
   bar stands before the screen does; found without the key — on its service's own page, or under a console
   that draws no shared bar — it draws its own. A route that does not ask stands as its bundle draws it.
+- **The screen's foot.** A bar a screen stands at its foot for the reader to act from — an input bar, a row of
+  keys — carries the attribute `data-screen-foot`. What a console floats over the page area of its own accord
+  stands above every element so marked, so it never covers that bar until the reader moves it there.
 - **Notices.** A console that raises notices reads the service's event stream for the kinds under
   `pushKinds` and raises each in the words the bundle's words give that kind, under the bundle's
   namespace, to the readers whose role allows the manifest's.
