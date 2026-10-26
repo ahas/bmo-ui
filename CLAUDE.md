@@ -54,8 +54,7 @@ review it is held to the rule that it names no repository that asked for it, no 
 branch for one unit, and no data or test fixture only the asker uses.
 
 Whoever holds this repository's work reviews the pull request and merges it or sends it back with the reason
-on it; a review service may assist. A merge raises this layer's version in semver, and the repository that
-asked pins that version and resumes the part it stopped.
+on it; a review service may assist. A merge moves no version (`docs/conventions.md` in bmo-chat, 「Versions」: a version moves only at a release the owner declares); the repository that asked builds against the merged main through its path dependency and resumes the part it stopped.
 
 ## Code and tests
 
