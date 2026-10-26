@@ -33,6 +33,8 @@ which service translates and how it lists their screens. A service supplies its 
 - **Its words** are one JSON object answered at the path the manifest names: each locale's tree under
   the locale's code, every key under the bundle's namespace. Like the manifest, they are answered to
   the console's own credential with no owner key and no role.
+- **Its share page, where it has one,** is a screen under its screen path at `/share/` and a token, which a
+  reader with no sign-in opens by holding the token ("Share pages").
 - **Its addresses follow its bytes.** The module's and the stylesheet's paths change whenever their
   bytes do, so a console and a browser may keep what they loaded, and a rebuilt bundle reaches a
   console as a manifest naming new paths.
@@ -71,6 +73,7 @@ none of them a dot or two standing for a folder.
 | `pushKinds` | The service's event kinds a console may raise as a notice to a reader who is not on the screen, each written as the stream names it, a resource and its change. | no, none |
 | `calls` | The other services the screens call through the console, each by the service name its own manifest gives it, in kebab-case; never the bundle's own service, and none twice. | no, none |
 | `relays` | The service's own routes outside the API prefix that a console relays as well, each its `method` (`GET`, `POST`, `PUT`, `PATCH` or `DELETE`) and its `path`, one whole path of the service's API; none twice. | no, none |
+| `shareReads` | The reads a share token alone permits, each a path pattern of the service's API under the API prefix: a path whose segments stand as written or as a placeholder, a name in camelCase in braces matching any one segment, with `{token}` among them once, standing for the token. A console relays a `GET` or a `HEAD` whose path a pattern matches with no session ("Share pages"); none twice. | no, none |
 
 Reading a manifest fills each optional field but the stylesheet with its default, so a console reads
 every other field of every manifest.
@@ -140,6 +143,28 @@ every other field of every manifest.
   `pushKinds` and raises each in the words the bundle's words give that kind, under the bundle's
   namespace, to the readers whose role allows the manifest's.
 
+## Share pages
+
+A share page opens one resource of the service to whoever holds a token for it, with no account and no
+sign-in. The token is the whole of the permission: the page reads only what its token opens, through the
+reads the manifest names under `shareReads`.
+
+- **Where it stands.** A bundle's share page is the route under its screen path at `/share/` and the token,
+  one segment. A console serves that address to a reader with no session, and gives that reader the one
+  bundle whose screen path the address stands under: its module, its stylesheet and its words, and nothing
+  else of any manifest.
+- **What it reads.** Every call the page makes is a share read: a `GET` or a `HEAD` whose path, under the
+  service's API prefix, a pattern under `shareReads` matches segment by segment, as many segments as the
+  pattern has, each the one written there, or any one segment where the pattern holds a placeholder. The
+  segment `{token}` matches stands for the token, so every share read carries it.
+- **How it is relayed.** A console relays a share read with no session behind it and, whoever is signed in,
+  with no owner key and no role, so the read is the same for every holder of the token. It relays nothing
+  else of the service without a session.
+- **How it is answered.** A service answers each share read for a live token alone, and only with what that
+  token opens; a token that opens nothing is refused as absent. Its module, its stylesheet and its words are
+  answered with no owner key and no role where its manifest names a share read, since a reader with no
+  sign-in loads them; they carry no reader's data.
+
 ## Translation
 
 A console may name a **translator**: a service with a route that takes texts and a language and
@@ -190,7 +215,9 @@ under `calls`, and its screens hand the module texts and a language.
 - **The service is the guard.** On every route the screens use, its module, its stylesheet and the
   routes under `relays` among them, a service refuses a call that lacks the console's credential with
   a 401, and a call whose `Owner-Role` is missing or does not allow the manifest's role, or, where
-  the manifest asks for the owner key, whose `Owner-Key` is missing, with a 403. It answers a call with the owner's own data and
+  the manifest asks for the owner key, whose `Owner-Key` is missing, with a 403. A share read is held to
+  its token instead of the role and the owner key, and so are the module and the stylesheet of a manifest
+  that names one ("Share pages"). It answers a call with the owner's own data and
   never another's. A route that needs more than the screen's role refuses on its own terms; the
   manifest's role is the floor of every route, not the whole of the service's guard.
 - **A relayed route serves the service's other callers too.** A route under `relays` is the
@@ -226,7 +253,11 @@ under `calls`, and its screens hand the module texts and a language.
 - **It keeps a screen's foot clear,** standing whatever it floats over the page area of its own accord above every
   element carrying `data-screen-foot` ("How a bundle mounts", the screen's foot), so it does not cover a screen's
   foot bar until the reader moves it there.
-- **It sets the owner key and the role** on everything it relays, and replaces any the browser sent.
+- **It sets the owner key and the role** on everything it relays but a share read, and replaces any the
+  browser sent.
+- **It opens a bundle's share page to a reader with no session** ("Share pages"): the page's address, that
+  bundle's module, stylesheet and words, and the share reads its manifest names, each relayed with no owner
+  key and no role; nothing else of any service without a session.
 - **It states its relay base** in its app configuration, under `bmoUi`, as `relayBase`: the path every
   service is relayed under, from the app's base path. Where none is stated, a service is called at its
   name from the app's base path.
@@ -244,7 +275,8 @@ under `calls`, and its screens hand the module texts and a language.
   service's other callers have it, so no route of the service stands twice, once for a console and
   once for the rest.
 - **It guards every route itself** by the console's credential, the role and the owner key, as the
-  contract states.
+  contract states, and each share read by its token.
+- **It names a share read** only for what its share page reads, each answering only what a live token opens.
 
 ## Who reads the contract
 
