@@ -148,9 +148,23 @@ export function relaysRoute(manifest: ConsoleManifest, method: string, path: str
   return manifest.relays.some((route) => route.method === asked && route.path === path);
 }
 
+// What a placeholder of a share read's pattern matches: one segment that is not empty and does not read, plain or
+// escaped, as a dot or two.
+function placeholderMatches(segment: string): boolean {
+  let read: string;
+
+  try {
+    read = decodeURIComponent(segment);
+  } catch {
+    read = segment;
+  }
+
+  return segment !== "" && read !== "." && read !== "..";
+}
+
 // Whether a method and a path are a share read the manifest names: a `GET` or a `HEAD`, in any letter case, whose
-// path a pattern under `shareReads` matches segment by segment, a placeholder matching any one segment that is not
-// empty. The path is taken as the call writes it, each segment still escaped.
+// path a pattern under `shareReads` matches segment by segment, a placeholder matching any one segment
+// `placeholderMatches` lets through. The path is taken as the call writes it, each segment still escaped.
 export function shareRead(manifest: ConsoleManifest, method: string, path: string): boolean {
   const asked = method.toUpperCase();
 
@@ -163,7 +177,7 @@ export function shareRead(manifest: ConsoleManifest, method: string, path: strin
 
     return (
       wanted.length === segments.length &&
-      wanted.every((segment, at) => (segment.startsWith("{") ? segments[at] !== "" : segment === segments[at]))
+      wanted.every((segment, at) => (segment.startsWith("{") ? placeholderMatches(segments[at]!) : segment === segments[at]))
     );
   });
 }

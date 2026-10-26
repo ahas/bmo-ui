@@ -145,25 +145,27 @@ every other field of every manifest.
 
 ## Share pages
 
-A share page opens one resource of the service to whoever holds a token for it, with no account and no
-sign-in. The token is the whole of the permission: the page reads only what its token opens, through the
-reads the manifest names under `shareReads`.
+A share page opens what a token opens of the service to whoever holds the token, with no account and no
+sign-in: one resource or several, as the service holds them under the token. The token is the whole of the
+permission: the page reads only what its token opens, through the reads the manifest names under
+`shareReads`.
 
 - **Where it stands.** A bundle's share page is the route under its screen path at `/share/` and the token,
   one segment. A console serves that address to a reader with no session, and gives that reader the one
-  bundle whose screen path the address stands under: its module, its stylesheet and its words, and nothing
-  else of any manifest.
+  bundle whose screen path is the longest the address stands under: its module, its stylesheet and its
+  words, and nothing else of any manifest.
 - **What it reads.** Every call the page makes is a share read: a `GET` or a `HEAD` whose path, under the
   service's API prefix, a pattern under `shareReads` matches segment by segment, as many segments as the
-  pattern has, each the one written there, or any one segment where the pattern holds a placeholder. The
-  segment `{token}` matches stands for the token, so every share read carries it.
+  pattern has, each the one written there, or, where the pattern holds a placeholder, any one segment that is
+  not empty and does not read, plain or escaped, as a dot or two. The segment `{token}` matches stands for
+  the token, so every share read carries it.
 - **How it is relayed.** A console relays a share read with no session behind it and, whoever is signed in,
   with no owner key and no role, so the read is the same for every holder of the token. It relays nothing
   else of the service without a session.
 - **How it is answered.** A service answers each share read for a live token alone, and only with what that
-  token opens; a token that opens nothing is refused as absent. Its module, its stylesheet and its words are
-  answered with no owner key and no role where its manifest names a share read, since a reader with no
-  sign-in loads them; they carry no reader's data.
+  token opens; a token that opens nothing is refused as absent. Where its manifest names a share read, its
+  module and its stylesheet are answered with no owner key and no role, since a reader with no sign-in loads
+  them, and they carry no reader's data.
 
 ## Translation
 
@@ -205,19 +207,21 @@ under `calls`, and its screens hand the module texts and a language.
 - **The roles** are `administrator` and `member`. An administrator holds every role a member holds,
   so a screen needing a member opens for both and one needing an administrator for the administrator
   alone. The shared module answers whether a role held allows a role needed.
-- **The console sets two headers** on every call and socket it relays, in place of any the browser
-  sent: `Owner-Key`, the signed-in login's user on the account service, its id written as a decimal
+- **The console sets two headers** on every call and socket it relays but a share read, which carries
+  neither ("Share pages"), in place of any the browser sent: `Owner-Key`, the signed-in login's user on the account service, its id written as a decimal
   number, which a login with no user carries none of; and `Owner-Role`, the role the reader holds.
   The console's own credential on the call is what makes them the console's word.
 - **The console offers a screen** only to a reader whose role allows the manifest's role, and a screen
   whose manifest asks for the owner key only to a login that has one: no menu entry, no module and no
-  notice for anyone else. This spares a reader a screen that would refuse them; it guards nothing.
+  notice for anyone else. A bundle's share page is the one exception: its module, its stylesheet and its words
+  are given to whoever opens its address, with no session ("Share pages"). This spares a reader a screen that
+  would refuse them; it guards nothing.
 - **The service is the guard.** On every route the screens use, its module, its stylesheet and the
   routes under `relays` among them, a service refuses a call that lacks the console's credential with
   a 401, and a call whose `Owner-Role` is missing or does not allow the manifest's role, or, where
   the manifest asks for the owner key, whose `Owner-Key` is missing, with a 403. A share read is held to
-  its token instead of the role and the owner key, and so are the module and the stylesheet of a manifest
-  that names one ("Share pages"). It answers a call with the owner's own data and
+  its token instead of the role and the owner key, and the module and the stylesheet of a manifest that
+  names one are answered with no owner key and no role ("Share pages"). It answers a call with the owner's own data and
   never another's. A route that needs more than the screen's role refuses on its own terms; the
   manifest's role is the floor of every route, not the whole of the service's guard.
 - **A relayed route serves the service's other callers too.** A route under `relays` is the
