@@ -223,6 +223,9 @@ under `calls`, and its screens hand the module texts and a language.
   and draws it over a bundle's route that asks for it in its meta ("How a bundle mounts", the title bar): the bar
   and its place stand before that route's screen mounts, on every way to it — the first load, from another of the
   console's screens, from another bundle's — and stay while the screen being left still stands.
+- **It keeps a screen's foot clear,** standing whatever it floats over the page area of its own accord above every
+  element carrying `data-screen-foot` ("How a bundle mounts", the screen's foot), so it does not cover a screen's
+  foot bar until the reader moves it there.
 - **It sets the owner key and the role** on everything it relays, and replaces any the browser sent.
 - **It states its relay base** in its app configuration, under `bmoUi`, as `relayBase`: the path every
   service is relayed under, from the app's base path. Where none is stated, a service is called at its
