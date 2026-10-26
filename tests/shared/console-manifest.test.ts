@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 
-import { CONSOLE_MANIFEST_ROUTE, CONSOLE_MANIFEST_SCHEMA, CONSOLE_ROLES, consoleManifest, relaysRoute, roleAllows, screensCall } from "../../shared/console-manifest";
+import { CONSOLE_MANIFEST_ROUTE, CONSOLE_MANIFEST_SCHEMA, CONSOLE_ROLES, consoleManifest, relaysRoute, roleAllows, screensCall, shareRead } from "../../shared/console-manifest";
 
 // The console plugin contract's manifest (`docs/console-bundles.md`, "The manifest").
 
@@ -40,7 +40,8 @@ describe("a service's manifest", () => {
       websocket: false,
       pushKinds: [],
       calls: [],
-      relays: []
+      relays: [],
+      shareReads: []
     });
   });
 
@@ -98,6 +99,19 @@ describe("a service's manifest", () => {
     expect(faultsOf({ ...answered, relays: [{ method: "POST", path: "/readings", role: "member" }] })).toContain("relays.0");
   });
 
+  test("keeps the reads a share token permits, and refuses a pattern without the token, outside the prefix or named twice", () => {
+    const shareReads = ["/api/v1/links/{token}", "/api/v1/links/{token}/files/{fileId}"];
+
+    expect(consoleManifest({ ...answered, apiPrefix: "/api/v1", shareReads }).shareReads).toEqual(shareReads);
+    expect(faultsOf({ ...answered, shareReads: ["/links/{id}"] })).toContain("shareReads.0: a pattern holding {token} once");
+    expect(faultsOf({ ...answered, shareReads: ["/links/{token}/{token}"] })).toContain("shareReads.0: a pattern holding {token} once");
+    expect(faultsOf({ ...answered, shareReads: ["/links/{Token}"] })).toContain("shareReads.0:");
+    expect(faultsOf({ ...answered, shareReads: ["/links/../{token}"] })).toContain("shareReads.0:");
+    expect(faultsOf({ ...answered, shareReads: ["links/{token}"] })).toContain("shareReads.0:");
+    expect(faultsOf({ ...answered, apiPrefix: "/api/v1", shareReads: ["/links/{token}"] })).toContain("shareReads: patterns under the API prefix");
+    expect(faultsOf({ ...answered, shareReads: ["/links/{token}", "/links/{token}"] })).toContain("shareReads: each pattern named once");
+  });
+
   test("is refused where its title lies outside its namespace", () => {
     expect(faultsOf({ ...answered, title: "common.title.screen" })).toContain("title: a key under the bundle's namespace");
   });
@@ -143,12 +157,34 @@ describe("the routes a manifest relays", () => {
   });
 });
 
+describe("the share reads a manifest names", () => {
+  test("are a GET or a HEAD whose path a pattern matches segment by segment, and no other", () => {
+    const read = consoleManifest({ ...answered, shareReads: ["/links/{token}", "/links/{token}/files/{fileId}"] });
+
+    expect(shareRead(read, "GET", "/links/Ab3_x")).toBe(true);
+    expect(shareRead(read, "head", "/links/Ab3_x")).toBe(true);
+    expect(shareRead(read, "GET", "/links/Ab3_x/files/12")).toBe(true);
+    expect(shareRead(read, "GET", "/links/a%2Fb/files/12")).toBe(true);
+    expect(shareRead(read, "POST", "/links/Ab3_x")).toBe(false);
+    expect(shareRead(read, "DELETE", "/links/Ab3_x")).toBe(false);
+    expect(shareRead(read, "GET", "/links")).toBe(false);
+    expect(shareRead(read, "GET", "/links/")).toBe(false);
+    expect(shareRead(read, "GET", "/links/Ab3_x/files")).toBe(false);
+    expect(shareRead(read, "GET", "/links/Ab3_x/files/12/more")).toBe(false);
+    expect(shareRead(read, "GET", "/notes/Ab3_x")).toBe(false);
+    for (const climbing of ["/links/..", "/links/.", "/links/%2e%2e", "/links/%2E", "/links/Ab3_x/files/.."]) {
+      expect(shareRead(read, "GET", climbing)).toBe(false);
+    }
+    expect(shareRead(consoleManifest(answered), "GET", "/links/Ab3_x")).toBe(false);
+  });
+});
+
 describe("the manifest's JSON Schema", () => {
   test("requires the fields a service states and closes the object", () => {
     expect(CONSOLE_MANIFEST_SCHEMA.required).toEqual(["name", "title", "icon", "screenPath", "serviceName", "bundle", "words", "role"]);
     expect(CONSOLE_MANIFEST_SCHEMA.additionalProperties).toBe(false);
     expect(Object.keys(CONSOLE_MANIFEST_SCHEMA.properties as object).toSorted()).toEqual(
-      [...Object.keys(answered), "stylesheet", "apiPrefix", "ownerKey", "events", "websocket", "pushKinds", "calls", "relays"].toSorted()
+      [...Object.keys(answered), "stylesheet", "apiPrefix", "ownerKey", "events", "websocket", "pushKinds", "calls", "relays", "shareReads"].toSorted()
     );
     expect((CONSOLE_MANIFEST_SCHEMA.properties as Record<string, { enum?: unknown }>).role!.enum).toEqual(["administrator", "member"]);
   });

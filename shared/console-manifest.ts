@@ -35,6 +35,22 @@ function apiPath(holds: string) {
   return z.string().regex(API_PATH, "a path of the service's API from its root").describe(holds);
 }
 
+// The segment of a share read's pattern that stands for the token.
+const TOKEN_SEGMENT = "{token}";
+
+// A share read's pattern: a path of the service's API whose segments stand as written or as a placeholder, a
+// camelCase name in braces matching any one segment.
+const SHARE_PATTERN = /^(?:\/(?:\{[a-z][A-Za-z0-9]*\}|(?!\.\.?(?:\/|$))[\w.~-]+))+$/;
+
+function segmentsOf(path: string): string[] {
+  return path.split("/").slice(1);
+}
+
+// Whether a path stands under an API prefix: the prefix itself or a path below it.
+function under(prefix: string, path: string): boolean {
+  return prefix === "/" || path === prefix || path.startsWith(`${prefix}/`);
+}
+
 const manifest = z
   .object({
     name: z.string().regex(KEBAB, "a name in kebab-case").describe("The bundle's name: its words' namespace."),
@@ -74,7 +90,18 @@ const manifest = z
           .strict()
       )
       .default([])
-      .describe("The service's own routes outside the API prefix that a console relays as well.")
+      .describe("The service's own routes outside the API prefix that a console relays as well."),
+    shareReads: z
+      .array(
+        z
+          .string()
+          .regex(SHARE_PATTERN, "a path pattern of the service's API, its placeholders camelCase names in braces")
+          .refine((pattern) => segmentsOf(pattern).filter((segment) => segment === TOKEN_SEGMENT).length === 1, {
+            message: "a pattern holding {token} once"
+          })
+      )
+      .default([])
+      .describe("The reads a share token alone permits: path patterns under the API prefix, each holding {token} once.")
   })
   .strict()
   .refine((one) => one.title.startsWith(`${one.name}.`), { path: ["title"], message: "a key under the bundle's namespace" })
@@ -83,7 +110,9 @@ const manifest = z
   .refine((one) => new Set(one.relays.map((route) => `${route.method} ${route.path}`)).size === one.relays.length, {
     path: ["relays"],
     message: "each route named once"
-  });
+  })
+  .refine((one) => one.shareReads.every((pattern) => under(one.apiPrefix, pattern)), { path: ["shareReads"], message: "patterns under the API prefix" })
+  .refine((one) => new Set(one.shareReads).size === one.shareReads.length, { path: ["shareReads"], message: "each pattern named once" });
 
 // A manifest as a console reads it, every optional field but the stylesheet filled.
 export type ConsoleManifest = z.output<typeof manifest>;
@@ -117,6 +146,40 @@ export function relaysRoute(manifest: ConsoleManifest, method: string, path: str
   const asked = method.toUpperCase();
 
   return manifest.relays.some((route) => route.method === asked && route.path === path);
+}
+
+// What a placeholder of a share read's pattern matches: one segment that is not empty and does not read, plain or
+// escaped, as a dot or two.
+function placeholderMatches(segment: string): boolean {
+  let read: string;
+
+  try {
+    read = decodeURIComponent(segment);
+  } catch {
+    read = segment;
+  }
+
+  return segment !== "" && read !== "." && read !== "..";
+}
+
+// Whether a method and a path are a share read the manifest names: a `GET` or a `HEAD`, in any letter case, whose
+// path a pattern under `shareReads` matches segment by segment, a placeholder matching any one segment
+// `placeholderMatches` lets through. The path is taken as the call writes it, each segment still escaped.
+export function shareRead(manifest: ConsoleManifest, method: string, path: string): boolean {
+  const asked = method.toUpperCase();
+
+  if (asked !== "GET" && asked !== "HEAD") return false;
+
+  const segments = segmentsOf(path);
+
+  return manifest.shareReads.some((pattern) => {
+    const wanted = segmentsOf(pattern);
+
+    return (
+      wanted.length === segments.length &&
+      wanted.every((segment, at) => (segment.startsWith("{") ? placeholderMatches(segments[at]!) : segment === segments[at]))
+    );
+  });
 }
 
 // The bundle's words as the service answers them: each locale's tree under the locale's code, every
