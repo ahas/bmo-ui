@@ -177,13 +177,13 @@ Each is named with everything it exports.
   the app hands it `countLocale`'s answer, as the layer's own components do.
 - **`console-manifest` is the contract's manifest** (`docs/console-bundles.md`): the route a service
   answers it at, the two headers a console relays the owner key and the role in, the roles and whether
-  one held allows one needed, the manifest's JSON Schema, its type with every optional field but the
-  stylesheet filled, the reading that fills them or refuses a manifest naming each field at fault,
-  whether a bundle's screens call a service (their own, or one named under `calls`), the methods a
-  route under `relays` is named by and whether a manifest names a method and path there, whether a method and path
-  are a share read a manifest names under `shareReads`, and the types of
-  a bundle's words and of its module's default export. A service and a console import it
-  alike; it runs in a browser, on a server and in a test.
+  one held allows one needed, the manifest's JSON Schema, its type with each optional field that states
+  a default filled, the reading that fills them or refuses a manifest naming each field at fault,
+  whether a manifest names a route whose answer holds a sidebar unread count, whether a bundle's screens
+  call a service (their own, or one named under `calls`), the methods a route under `relays` is named
+  by and whether a manifest names a method and path there, whether a method and path are a share read a
+  manifest names under `shareReads`, and the types of a bundle's words and of its module's default
+  export. A service and a console import it alike; it runs in a browser, on a server and in a test.
 
 ## Page plugins
 

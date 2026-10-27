@@ -71,12 +71,14 @@ none of them a dot or two standing for a folder.
 | `events` | Whether the screens read the service's event stream through the console. | no, false |
 | `websocket` | Whether the screens open a WebSocket to the service through the console. | no, false |
 | `pushKinds` | The service's event kinds a console may raise as a notice to a reader who is not on the screen, each written as the stream names it, a resource and its change. | no, none |
+| `sidebarUnread` | The route a console reads a sidebar unread count from: `path`, a path of the service's API under the API prefix, whose JSON answer holds the count at its root under `field`, a camelCase name, as a whole number nought or more. A console draws a positive count on the bundle's sidebar entry. | no, none |
 | `calls` | The other services the screens call through the console, each by the service name its own manifest gives it, in kebab-case; never the bundle's own service, and none twice. | no, none |
 | `relays` | The service's own routes outside the API prefix that a console relays as well, each its `method` (`GET`, `POST`, `PUT`, `PATCH` or `DELETE`) and its `path`, one whole path of the service's API; none twice. | no, none |
 | `shareReads` | The reads a share token alone permits, each a path pattern of the service's API under the API prefix: a path whose segments stand as written or as a placeholder, a name in camelCase in braces matching any one segment, with `{token}` among them once, standing for the token. A console relays a `GET` or a `HEAD` whose path a pattern matches with no session ("Share pages"); none twice. | no, none |
 
-Reading a manifest fills each optional field but the stylesheet with its default, so a console reads
-every other field of every manifest.
+Reading a manifest fills each optional field that states a default with it, so a console reads every
+field of every manifest but the stylesheet and the sidebar count, which stand only where a manifest
+names them.
 
 ## How a console finds the services
 
@@ -142,6 +144,10 @@ every other field of every manifest.
 - **Notices.** A console that raises notices reads the service's event stream for the kinds under
   `pushKinds` and raises each in the words the bundle's words give that kind, under the bundle's
   namespace, to the readers whose role allows the manifest's.
+- **The sidebar count.** Where a manifest names a `sidebarUnread`, a console reads the count for the
+  reader whose sidebar it draws, with its own credential and that reader's owner key and role, and draws
+  a positive count on the bundle's sidebar entry. It reads the count again as it chooses; one that did
+  not answer leaves the last count standing, and none is drawn before one has.
 
 ## Share pages
 
@@ -257,6 +263,8 @@ under `calls`, and its screens hand the module texts and a language.
 - **It keeps a screen's foot clear,** standing whatever it floats over the page area of its own accord above every
   element carrying `data-screen-foot` ("How a bundle mounts", the screen's foot), so it does not cover a screen's
   foot bar until the reader moves it there.
+- **It draws the sidebar count a bundle declares** ("How a bundle mounts", the sidebar count), reading it for the
+  reader whose sidebar it draws and leaving the last count where a read does not answer.
 - **It sets the owner key and the role** on everything it relays but a share read, and replaces any the
   browser sent.
 - **It opens a bundle's share page to a reader with no session** ("Share pages"): the page's address, that

@@ -30,7 +30,7 @@ describe("a service's manifest", () => {
     expect(CONSOLE_MANIFEST_ROUTE).toBe("/console-manifest");
   });
 
-  test("is read with every optional field but the stylesheet filled", () => {
+  test("is read with each optional field that states a default filled, and the two without one left out", () => {
     expect(consoleManifest(answered)).toEqual({
       ...answered,
       role: "member",
@@ -43,6 +43,8 @@ describe("a service's manifest", () => {
       relays: [],
       shareReads: []
     });
+    expect(consoleManifest(answered).stylesheet).toBeUndefined();
+    expect(consoleManifest(answered).sidebarUnread).toBeUndefined();
   });
 
   test("keeps what it states of the optional fields", () => {
@@ -54,11 +56,21 @@ describe("a service's manifest", () => {
       ownerKey: true,
       events: true,
       websocket: true,
-      pushKinds: ["note.created"]
+      pushKinds: ["note.created"],
+      sidebarUnread: { path: "/api/v1/summary", field: "unreadCount" }
     });
 
     expect([read.role, read.stylesheet, read.apiPrefix, read.ownerKey]).toEqual(["administrator", "/console/bundle-4f2a.css", "/api/v1", true]);
     expect([read.events, read.websocket, read.pushKinds]).toEqual([true, true, ["note.created"]]);
+    expect(read.sidebarUnread).toEqual({ path: "/api/v1/summary", field: "unreadCount" });
+  });
+
+  test("keeps the sidebar count it declares, and refuses one outside the API prefix, a field out of camelCase or a field of its own", () => {
+    expect(consoleManifest({ ...answered, sidebarUnread: { path: "/summary", field: "unreadCount" } }).sidebarUnread).toEqual({ path: "/summary", field: "unreadCount" });
+    expect(faultsOf({ ...answered, apiPrefix: "/screen", sidebarUnread: { path: "/summary", field: "unreadCount" } })).toContain("sidebarUnread: a path under the API prefix");
+    expect(faultsOf({ ...answered, sidebarUnread: { path: "summary", field: "unreadCount" } })).toContain("sidebarUnread.path:");
+    expect(faultsOf({ ...answered, sidebarUnread: { path: "/summary", field: "UnreadCount" } })).toContain("sidebarUnread.field:");
+    expect(faultsOf({ ...answered, sidebarUnread: { path: "/summary", field: "unreadCount", label: "notes.label.unread" } })).toContain("sidebarUnread");
   });
 
   test("is refused naming each field at fault", () => {
@@ -184,7 +196,7 @@ describe("the manifest's JSON Schema", () => {
     expect(CONSOLE_MANIFEST_SCHEMA.required).toEqual(["name", "title", "icon", "screenPath", "serviceName", "bundle", "words", "role"]);
     expect(CONSOLE_MANIFEST_SCHEMA.additionalProperties).toBe(false);
     expect(Object.keys(CONSOLE_MANIFEST_SCHEMA.properties as object).toSorted()).toEqual(
-      [...Object.keys(answered), "stylesheet", "apiPrefix", "ownerKey", "events", "websocket", "pushKinds", "calls", "relays", "shareReads"].toSorted()
+      [...Object.keys(answered), "stylesheet", "apiPrefix", "ownerKey", "events", "websocket", "pushKinds", "sidebarUnread", "calls", "relays", "shareReads"].toSorted()
     );
     expect((CONSOLE_MANIFEST_SCHEMA.properties as Record<string, { enum?: unknown }>).role!.enum).toEqual(["administrator", "member"]);
   });

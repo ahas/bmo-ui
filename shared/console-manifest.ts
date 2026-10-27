@@ -76,6 +76,17 @@ const manifest = z
       .array(z.string().regex(/^[a-z][a-z0-9-]*\.[a-z][a-z0-9-]*$/, "an event kind, a resource and its change"))
       .default([])
       .describe("The event kinds a console may raise as a notice to a reader not on the screen."),
+    sidebarUnread: z
+      .object({
+        path: apiPath("The path of the service's API the count is answered at."),
+        field: z
+          .string()
+          .regex(/^[a-z][A-Za-z0-9]*$/, "a field in camelCase")
+          .describe("The answer's field holding the count, a whole number nought or more.")
+      })
+      .strict()
+      .optional()
+      .describe("The route a console reads a sidebar unread count from, and the field of its answer that holds it."),
     calls: z
       .array(z.string().regex(KEBAB, "a name in kebab-case"))
       .default([])
@@ -112,9 +123,13 @@ const manifest = z
     message: "each route named once"
   })
   .refine((one) => one.shareReads.every((pattern) => under(one.apiPrefix, pattern)), { path: ["shareReads"], message: "patterns under the API prefix" })
-  .refine((one) => new Set(one.shareReads).size === one.shareReads.length, { path: ["shareReads"], message: "each pattern named once" });
+  .refine((one) => new Set(one.shareReads).size === one.shareReads.length, { path: ["shareReads"], message: "each pattern named once" })
+  .refine((one) => one.sidebarUnread === undefined || under(one.apiPrefix, one.sidebarUnread.path), {
+    path: ["sidebarUnread"],
+    message: "a path under the API prefix"
+  });
 
-// A manifest as a console reads it, every optional field but the stylesheet filled.
+// A manifest as a console reads it, every optional field that states a default filled.
 export type ConsoleManifest = z.output<typeof manifest>;
 
 // The manifest's JSON Schema, as a service writes its answer.
