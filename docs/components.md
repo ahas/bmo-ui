@@ -439,6 +439,35 @@ default; a screen supplies what it holds and what a press means there. Every exp
   - Where a browser holds the volume to the device's own, as a phone's may, the slider is not heard and
     the mute still holds.
 
+## The audio player as an element
+
+`AudioPlayer` also stands as a custom element, for a page that is no app of the layer's: a hosted page,
+a page in a sandbox, a page a service writes. It is the same component, drawn and behaving as it does
+on a screen.
+
+- **One script carries it whole:** Vue, the component library's parts the player is built of, the
+  player, its icons, its words' engine and its sheet. The page loads that script and nothing else;
+  the script opens no connection of its own but the player's, so a page that may load only scripts
+  over the web and fetch only its own address holds it.
+- **It defines nothing until the page asks.** The script stands one global, `BmoAudioPlayer`, whose
+  `define` takes the words the player says, keyed as a language pack keys them, the language they are
+  in, and the element's name, `bmo-audio-player` where none is given. A name already defined is left
+  as it stands.
+- **What the element is told:** `src`, where the sound plays from; `download`, where it is taken to be
+  saved, the same address where none is given; `name`, which names the player, the last part of the
+  address where none is given; `size`, the stored size already said as the page says sizes; and
+  `scheme`, `light` or `dark`, whatever the reader's system asks where none is given.
+- **It stands in a shadow root of its own,** so the page's sheet and the player's never meet. What
+  the layer's stylesheet states of the root it states of the element, and a face is left to the page,
+  so the player takes the page's type. The custom properties the sheet registers are registered on
+  the page as well, since a property is registered for the whole document or not at all.
+- **The popover and the tooltips open inside the element,** on the ground marked with its scheme, so
+  they take the same sheet and the same scheme as the player.
+- **It answers `play` and `pause`** as an audio element does, so a page's own script moves it as it
+  moved the audio element it stands for.
+- **One sound plays at a time across the page:** a player that starts stops every other element of
+  its name.
+
 ## Code and files
 
 - **Code is coloured and viewed through the monaco module:** the language a name or a fence names,

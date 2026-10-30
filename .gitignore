@@ -5,3 +5,4 @@ node_modules
 *.tsbuildinfo
 .graph/*
 !.graph/settings.toml
+dist
