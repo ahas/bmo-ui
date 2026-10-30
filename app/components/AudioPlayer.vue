@@ -1,10 +1,10 @@
 <template>
   <!-- A kept sound (`docs/components.md`, "Skeletons and loading"): a round play and pause button
        at its leading edge and beside it, as one group, the sound's own waveform, which is its
-       progress bar, running to the trailing edge over one meta line that ends in the download. It
-       has no frame of its own and stands on whatever ground holds it. The browser's own player is
-       never shown; the element under it plays the sound and nothing else. One sound or video plays
-       at a time across the screen. -->
+       progress bar, running to the trailing edge over one meta line that ends in the volume and the
+       download. It has no frame of its own and stands on whatever ground holds it. The browser's own
+       player is never shown; the element under it plays the sound and nothing else. One sound or video
+       plays at a time across the screen. -->
   <div ref="root" data-attachment role="group" :aria-label="props.name" class="flex min-w-0 items-center gap-3" @click.stop>
     <audio
       ref="element"
@@ -83,10 +83,11 @@
         </span>
       </div>
 
-      <!-- The meta line, with the download at its trailing end held to the line's own height, and past
-           it the blank whatever stands over the player's foot asks to keep there. Its parts keep the meta
-           line's own step, so a phone's narrowest player holds the place while it plays, the download and
-           the time on one line; a clock longer still never breaks, and what follows it takes the line under. -->
+      <!-- The meta line, with the volume and the download at its trailing end held to the line's own
+           height, and past them the blank whatever stands over the player's foot asks to keep there. Its
+           parts keep the meta line's own step, so a phone's narrowest player holds the place while it
+           plays, the buttons and the time on one line; a clock longer still never breaks, and what
+           follows it takes the line under. -->
       <div class="flex min-w-0 flex-wrap items-center gap-1 text-sm">
         <p v-if="broken" class="min-w-0 text-error">{{ $t("common.label.unplayable") }}</p>
         <p v-else class="flex min-w-0 items-center whitespace-nowrap text-muted tabular-nums">
@@ -100,8 +101,48 @@
           </template>
         </p>
 
-        <!-- The button stands centred in a holder one line tall, so the line keeps its own height. -->
+        <!-- The buttons stand centred in a holder one line tall, so the line keeps its own height. The
+             volume opens over the screen, a mute toggle and a slider in a popover on its button; it is
+             the page's one volume, so moving it here moves every player. -->
         <span class="ms-auto flex h-5 items-center">
+          <UPopover v-model:open="volumeOpen" :content="{ align: 'end' }">
+            <UTooltip :text="$t('common.label.volume')">
+              <UButton
+                data-volume
+                size="xs"
+                color="neutral"
+                :variant="volumeOpen ? 'soft' : 'ghost'"
+                :icon="volumeIcon"
+                :aria-label="$t('common.label.volume')"
+              />
+            </UTooltip>
+
+            <template #content>
+              <div class="flex items-center gap-2 p-2">
+                <UTooltip :text="silent ? $t('common.action.unmute') : $t('common.action.mute')">
+                  <UButton
+                    size="sm"
+                    color="neutral"
+                    variant="ghost"
+                    :icon="silent ? VOLUME_OFF_ICON : VOLUME_UP_ICON"
+                    :aria-label="silent ? $t('common.action.unmute') : $t('common.action.mute')"
+                    @click="volume.toggleMute()"
+                  />
+                </UTooltip>
+                <USlider
+                  class="w-32"
+                  size="sm"
+                  :min="0"
+                  :max="100"
+                  :step="VOLUME_STEP"
+                  :model-value="Math.round(volume.heard.value * 100)"
+                  :aria-label="$t('common.label.volume')"
+                  @update:model-value="slideTo"
+                />
+              </div>
+            </template>
+          </UPopover>
+
           <UTooltip :text="$t('common.aria.download_named', { name: props.name })">
             <UButton
               :to="props.download"
@@ -126,6 +167,7 @@
 import { auraOf, AURA_STILL, buttonAfter, easedLoudness, knownLength, loudnessOf, playAlone, playClock } from "../domain/player";
 import { useNarrow } from "../domain/screen";
 import { TAP_FFT, tapOf } from "../domain/sound-tap";
+import { useVolume } from "../domain/volume";
 import { barCount, loudnessAt, waveBars, waveformOf } from "../domain/waveform";
 
 import type { PlayerButton, PlayerSignal } from "../domain/player";
@@ -156,6 +198,12 @@ const WAVE_HEIGHT_PX = 24;
 const BAR_MIN_PX = 2;
 // How far an arrow key moves the place, in seconds.
 const KEY_STEP_S = 5;
+// How far an arrow key moves the volume, in hundredths.
+const VOLUME_STEP = 5;
+// The volume button's icon says how loud the players play: off, low below half, or up.
+const VOLUME_OFF_ICON = "i-material-symbols-volume-off-rounded";
+const VOLUME_DOWN_ICON = "i-material-symbols-volume-down-rounded";
+const VOLUME_UP_ICON = "i-material-symbols-volume-up-rounded";
 
 const root = useTemplateRef<HTMLElement>("root");
 const element = useTemplateRef<HTMLAudioElement>("element");
@@ -176,6 +224,38 @@ const scrub = ref<number | null>(null);
 const peaks = ref<number[] | null>(null);
 const decodedSeconds = ref<number | null>(null);
 const count = ref(0);
+
+const volume = useVolume();
+const volumeOpen = ref(false);
+const silent = computed<boolean>(() => volume.heard.value === 0);
+const volumeIcon = computed<string>(() => {
+  if (silent.value) {
+    return VOLUME_OFF_ICON;
+  }
+
+  return volume.heard.value < 0.5 ? VOLUME_DOWN_ICON : VOLUME_UP_ICON;
+});
+
+// The slider answers one value, in hundredths, or none while it is let go of.
+function slideTo(value: number | number[] | undefined): void {
+  const level = Array.isArray(value) ? value[0] : value;
+
+  if (level !== undefined) {
+    volume.slide(level / 100);
+  }
+}
+
+// The page's volume stands on the element as it mounts and whenever it moves.
+function standVolume(): void {
+  const audio = element.value;
+
+  if (audio !== null) {
+    audio.volume = volume.loudness.value.level;
+    audio.muted = volume.loudness.value.muted;
+  }
+}
+
+watch(volume.loudness, standVolume);
 
 // Whether the sound is heard: the pause button stands, the aura rings and the accent follows it.
 const playing = computed<boolean>(() => button.value === "pause");
@@ -445,6 +525,8 @@ let near: IntersectionObserver | null = null;
 let sized: ResizeObserver | null = null;
 
 onMounted(() => {
+  standVolume();
+
   if (props.autoplay) {
     toggle();
   }

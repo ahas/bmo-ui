@@ -47,7 +47,7 @@
     {
       "name": "AudioPlayer",
       "kind": "component",
-      "line": "A kept sound: a play and pause button, its waveform as its progress, and a download.",
+      "line": "A kept sound: a play and pause button, its waveform as its progress, a volume popover and a download.",
       "props": [
         {
           "name": "src",

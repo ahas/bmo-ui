@@ -29,7 +29,7 @@ wording keys listed here are the ones the layer's list holds.
 | Component | What it is |
 | --- | --- |
 | `ActionGroup` | The one group of actions on what a tab or a toolbar stands for, folding to a menu; the properties action last. |
-| `AudioPlayer` | A kept sound: a play and pause button, its waveform as its progress, and a download. |
+| `AudioPlayer` | A kept sound: a play and pause button, its waveform as its progress, a volume popover and a download. |
 | `ChooseAll` | The three-state checkbox that takes every row shown or gives the choice up. |
 | `ColumnResizeHandle` | The right edge of a column's name, dragged or moved with the arrow keys. |
 | `ContentSkeleton` | The placeholder region: busy status, a surface nothing presses through, the caller's piece repeated. |
@@ -129,6 +129,7 @@ Each is named with everything it exports.
 | `time` | `FOREVER_LABEL`, `formatClock`, `formatDay`, `formatShortDay`, `formatDayClock`, `clockUnder`, `formatDateClock`, `formatStamp`, `formatTime`, `dayKey`, `spanClock`, `elapsedText`, `timerClock`, `remainingText`, `useNowSeconds`, `toUnixSeconds` |
 | `tooltip` | `TOOLTIP_UI`, `TOOLTIP_PROVIDER` |
 | `translation` | `Reading`, `Translator`, `Untranslated`, `TRANSLATION_BATCH`, `TRANSLATION_ASKS_AT_ONCE`, `translatorOf`, `hasTranslator`, `translated` |
+| `volume` | `Loudness`, `Volume`, `VOLUME_KEY`, `FULL_VOLUME`, `UNMUTED_LEVEL`, `slid`, `muteToggled`, `createVolume`, `useVolume` |
 | `waveform` | `WAVE_DETAIL`, `WAVE_FETCH_LIMIT`, `WAVE_FLOOR`, `Waveform`, `peaksOf`, `waveBars`, `barCount`, `loudnessAt`, `waveformOf` |
 | `zoom` | `ZoomView`, `Point`, `Size`, `FIT`, `MIN_SCALE`, `MAX_SCALE`, `DOUBLE_SCALE`, `bounded`, `zoomedTo`, `wheeled`, `moved`, `pinched`, `toggled`, `fittedSize`, `swipeStep` |
 
@@ -216,13 +217,13 @@ What a coding harness takes the layer through (`docs/harness.md`).
 
 ## Wording keys
 
-The layer reads these 90 keys and no others. The `wording-keys` shared module lists them, the one
+The layer reads these 93 keys and no others. The `wording-keys` shared module lists them, the one
 list a host's pack is held to. Placeholders are named after each key.
 
 - **`common.action`:** `cancel`, `choose_all`, `choose_none`, `close`, `close_all_tabs`,
-  `close_other_tabs`, `close_right_tabs`, `copy`, `create_link`, `discard`, `fit_screen`, `more`,
-  `next_picture`, `pause`, `pin`, `play`, `previous_picture`, `save`, `unpin`, `unshare`, `zoom_in`,
-  `zoom_out`.
+  `close_other_tabs`, `close_right_tabs`, `copy`, `create_link`, `discard`, `fit_screen`, `more`, `mute`,
+  `next_picture`, `pause`, `pin`, `play`, `previous_picture`, `save`, `unmute`, `unpin`, `unshare`,
+  `zoom_in`, `zoom_out`.
 - **`common.aria`:** `close_named` `{name}`, `column_width` `{name}`, `decrease`, `download_named`
   `{name}`, `image_zoom` `{title}`, `increase`, `more_notices` `{n}`, `pinned_named` `{name}`,
   `share_address`.
@@ -235,7 +236,7 @@ list a host's pack is held to. Placeholders are named after each key.
   `palette_sea`, `palette_sunset`, `palette_teal`, `palette_violet`, `play_position`, `properties`,
   `seconds` `{n}`, `share_until` `{date}`, `short_day_format` (the short date format the time
   module's short day is written in, the year in two figures), `theme_forest`, `theme_sea`,
-  `theme_sunset`, `theme_teal`, `theme_violet`, `unplayable`.
+  `theme_sunset`, `theme_teal`, `theme_violet`, `unplayable`, `volume`.
 - **`common.message`:** `discard_confirm`, `link_copied`, and the theme preview's words:
   `preview_badge`, `preview_field`, `preview_link`, `preview_meta`, `preview_note`.
 - **`common.status`:** `copied`, `loading`, `picture_loading`, `share_loading`, `video_loading`.
@@ -246,7 +247,7 @@ list a host's pack is held to. Placeholders are named after each key.
 - **`files.message`:** `conflict`.
 - **`files.status`:** `uploading`.
 
-That is 22 actions, 9 accessible names, 7 errors, 32 labels, 7 messages, 5 statuses and 1 title
+That is 24 actions, 9 accessible names, 7 errors, 33 labels, 7 messages, 5 statuses and 1 title
 under `common`, and 7 keys under `files`.
 
 ## Tokens

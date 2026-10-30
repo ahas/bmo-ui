@@ -408,6 +408,19 @@ default; a screen supplies what it holds and what a press means there. Every exp
 - **`LoadingImage` and `LoadingVideo`** keep a picture's or a video's place while it loads and say
   when it failed; **`ImageViewer`** opens a picture whole, zoomed by wheel, pinch, double press or its
   buttons; **`AudioPlayer`** plays a sound over its own waveform.
+- **`AudioPlayer`'s volume stands beside its download:** a button whose icon says how loud the players
+  play opens a popover holding a mute toggle and a volume slider. The popover closes on a press away and
+  on Escape, the focus going back to the button, and the keyboard reaches all of it: the toggle by Tab,
+  the slider's steps by the arrows and its ends by Home and End. Both are named for a screen reader,
+  the toggle by what it does next, and both are drawn in the layer's tokens.
+  - Sliding to nothing mutes, and sliding up from it unmutes; the toggle mutes and unmutes, and
+    unmuting a volume of nothing brings it back to half. A muted player's slider stands at nothing.
+  - **The volume is the reader's, and one for the page.** Every player on a page plays at the same
+    volume, and a change on one moves all of them. It is kept in the browser's storage under the layer's
+    own name and stood on each player as it mounts; where storage cannot be read or written, the players
+    start at full and the reader's choice holds for the page alone.
+  - Where a browser holds the volume to the device's own, as a phone's may, the slider is not heard and
+    the mute still holds.
 
 ## Code and files
 
