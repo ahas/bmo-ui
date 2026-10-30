@@ -37,6 +37,8 @@ components and behaviours every screen is built from. It is a Nuxt layer, built 
 - `bun pm pack` packs the layer as a host installs it, preparing Nuxt's types first; the prepare
   step reaches the local Nuxt command line through `bun x`, since the package manager's lifecycle
   runs without the local binaries on its path.
+- `bun run elements` builds each custom element into one script under `dist/`, which git ignores;
+  `bun pm pack` runs it first, so the packed file carries the scripts.
 - `bun run typecheck` checks the layer, its tests and the harness plugin's code with the components'
   examples.
 - `bun run catalogue` writes the catalogue's data file again from the sources; a change to a
@@ -49,7 +51,7 @@ components and behaviours every screen is built from. It is a Nuxt layer, built 
 | Folder | What it holds |
 |---|---|
 | `.graph/` | The code dependency graph: the repository's settings, one node per feature with its files and the features it needs, and a boundary node for each API the layer offers. Its area files are generated in the checkout and untracked, so a fresh checkout builds them again, while `settings.toml` is the repository's configuration and stays tracked |
-| `app/` | The layer's app code: the stylesheet and the fonts with their licences under `assets/`, the components under `components/`, the domain modules under `domain/`, the app configuration holding the library's overrides and the host's setting with nothing in it, and the declaration typing templates by the host's i18n module |
+| `app/` | The layer's app code: the stylesheet and the fonts with their licences under `assets/`, the components under `components/`, the domain modules under `domain/`, the custom elements' entries under `elements/`, the app configuration holding the library's overrides and the host's setting with nothing in it, and the declaration typing templates by the host's i18n module |
 | `bin/` | The package's command |
 | `catalogue/` | The catalogue module with its data file, the generator writing that file, and every component's example under `examples/` |
 | `docs/` | The canonical documents: the design foundations, the wording contract, the components, the console plugin contract, the harness plugin, the personal data rule and the boundary |
@@ -61,8 +63,8 @@ components and behaviours every screen is built from. It is a Nuxt layer, built 
 | `tests/` | The tests, with the browser lane's files and their support under `tests/browser/` |
 
 At the root stand the package manifest, which holds the version and the licence, its lockfile, the
-Nuxt configuration, the TypeScript and Bun configurations, the testbed declaration, the Korean ledger
-the quick checks read, `CLAUDE.md`, and the MIT licence in `LICENSE`.
+Nuxt configuration, the custom elements' build configuration, the TypeScript and Bun configurations, the
+testbed declaration, the Korean ledger the quick checks read, `CLAUDE.md`, and the MIT licence in `LICENSE`.
 
 ## Licence
 

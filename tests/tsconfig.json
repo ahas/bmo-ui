@@ -2,11 +2,12 @@
   // The tests read the layer's code through the aliases Nuxt gives the app, and run under Bun, so
   // they take the app's config with Bun's types beside it. Bun maps an import through the tsconfig
   // nearest the file doing the importing, which for a test is this one. The app's own declarations
-  // come too, since the components a test reaches are typed by them.
+  // come too, since the components a test reaches are typed by them. The custom elements' build
+  // configuration runs under Bun as the tests do, so it is read here as well.
   "extends": "../.nuxt/tsconfig.app.json",
   "compilerOptions": {
     "types": ["bun"]
   },
-  "include": ["./**/*", "../.nuxt/nuxt.d.ts", "../app/**/*.d.ts"],
+  "include": ["./**/*", "../.nuxt/nuxt.d.ts", "../app/**/*.d.ts", "../elements.config.ts"],
   "exclude": []
 }

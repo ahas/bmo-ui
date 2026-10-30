@@ -1,0 +1,21 @@
+/* The element's sheet (`docs/components.md`, "The audio player as an element"): the layer's own
+   stylesheet with the utility classes the player and the library's parts it uses are drawn with,
+   carried inside the shadow root. The build reads what the root states as what the element's host
+   states, and leaves the faces out, since a face is loaded only from the page's own document; the
+   player takes the page's type. */
+@import "../assets/css/main.css";
+
+@source "../components/AudioPlayer.vue";
+@source "../components/ContentSkeleton.vue";
+@source "../components/SkeletonBar.vue";
+@source "./AudioPlayerElement.vue";
+
+:host {
+  display: block;
+  min-width: 0;
+  font-family: inherit;
+}
+
+.audio-element {
+  color: var(--ui-text);
+}

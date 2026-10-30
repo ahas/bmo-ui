@@ -199,6 +199,21 @@ Each runs in the browser alone, on every screen, from the moment the page is up.
 | `overlays` | What the library floats closes to the back gesture and to a finger's tap away from it. |
 | `painted` | The flag the skeletons wait for is raised once hydration ends. |
 
+## Custom elements
+
+Each is built into one script by `bun run elements`, into `dist/` under its own name, and the packed
+file carries it there; a page loads it by itself (`docs/components.md`, "The audio player as an
+element").
+
+| Script | Global | What it defines |
+| --- | --- | --- |
+| `dist/bmo-audio-player.js` | `BmoAudioPlayer`, holding `define` and `AUDIO_PLAYER_TAG` | `bmo-audio-player`, `AudioPlayer` as an element: the attributes `src`, `download`, `name`, `size` and `scheme`, and the methods `play` and `pause` |
+
+`define` takes `words`, the player's words keyed as a language pack keys them under Wording keys,
+`locale`, the language they are in, and `tag`, the element's name. The player reads `common.action`
+`play`, `pause`, `mute` and `unmute`, `common.label` `play_position`, `unplayable` and `volume`,
+`common.aria` `download_named` and `common.status` `loading`.
+
 ## The harness plugin
 
 What a coding harness takes the layer through (`docs/harness.md`).
