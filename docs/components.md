@@ -408,6 +408,23 @@ default; a screen supplies what it holds and what a press means there. Every exp
 - **`LoadingImage` and `LoadingVideo`** keep a picture's or a video's place while it loads and say
   when it failed; **`ImageViewer`** opens a picture whole, zoomed by wheel, pinch, double press or its
   buttons; **`AudioPlayer`** plays a sound over its own waveform.
+- **`AudioPlayer`'s waveform is the sound's own loudness,** read in the browser once the player comes
+  near the screen. The file is fetched once per address and read no further than the waveform's
+  fetch limit, whether or not the server says the length before it sends the bytes; the browser
+  decodes it, at a low rate first so a long sound stays small in memory and at an ordinary rate where
+  the low one is refused. The sound is cut into the waveform's even stretches, each standing at its
+  root-mean-square loudness against the loudest.
+  - Each bar is the mean of the stretches under it. The bars run from the sound's quiet end, the
+    loudness under which the quietest tenth of the bars stand, to its loudest bar, so a voice spoken
+    at an even loudness still shows its words and its pauses; no bar falls under the floor.
+  - A sound not read yet, or one the browser cannot fetch or decode, stands every bar at the floor.
+    In development the reason it was not read is logged once for its address.
+- **`AudioPlayer`'s button** shows the play mark at rest, a spinner from the press until the sound is
+  first heard — the element saying it plays, or its clock running on past where the press found it —
+  and the pause mark from then until it stops. A stall for bytes while it plays leaves the pause mark
+  standing, since a spinning button takes no press and the one press that must always work there is
+  the one that stops it. A press the browser refuses, the end, a failure and a stop from elsewhere
+  stand it at play again.
 - **`AudioPlayer`'s volume stands beside its download:** a button whose icon says how loud the players
   play opens a popover holding a mute toggle and a volume slider. The popover closes on a press away and
   on Escape, the focus going back to the button, and the keyboard reaches all of it: the toggle by Tab,

@@ -26,7 +26,7 @@ components and behaviours every screen is built from. It is a Nuxt layer, built 
 - Add the package and extend it from the host's Nuxt configuration.
 - Install `@nuxtjs/i18n` in the host and give it a pack answering every key the boundary document
   lists. The layer names it and its engine, `vue-i18n`, as peers.
-- Apply the patch in `patches/` to the same dependency in the host's own install.
+- Apply the patches in `patches/` to the same dependencies in the host's own install.
 - A console states its relay base in its app configuration, names its translator in its runtime
   configuration where it has one, and attaches each bundle by the contract.
 - A harness launches `bmo-ui mcp` from the host's install and loads the skill under `skills/`.
@@ -54,7 +54,7 @@ components and behaviours every screen is built from. It is a Nuxt layer, built 
 | `catalogue/` | The catalogue module with its data file, the generator writing that file, and every component's example under `examples/` |
 | `docs/` | The canonical documents: the design foundations, the wording contract, the components, the console plugin contract, the harness plugin, the personal data rule and the boundary |
 | `mcp/` | The MCP server the command starts |
-| `patches/` | The patch applied to a dependency on install |
+| `patches/` | The patches applied to dependencies on install |
 | `releases/` | The packed file of each version a host takes |
 | `shared/` | The shared modules, read by the layer's code and the host's alike |
 | `skills/` | The `bmo-ui` skill |
@@ -82,6 +82,6 @@ the quick checks read, `CLAUDE.md`, and the MIT licence in `LICENSE`.
 - **A version is one packed file,** kept under `releases/` by its version's name. It is packed with
   `bun pm pack` from a scratch export (`git archive`) of the committed tree, never from a checkout,
   and the manifest's file list names everything it holds: the layer's code, its stylesheet and fonts,
-  the patch, the command, the MCP server, the catalogue module and its data file, the skill, the Nuxt
+  the patches, the command, the MCP server, the catalogue module and its data file, the skill, the Nuxt
   configuration, the README, the licence and the documents. A host takes that one file, so
   every host of a version stands on the same bytes.

@@ -1,6 +1,6 @@
 {
   "name": "bmo-ui",
-  "version": "0.1.0-rev.12",
+  "version": "0.1.0-rev.13",
   "private": true,
   "license": "MIT",
   "type": "module",
@@ -62,6 +62,7 @@
     "vue-tsc": "^3.2.0"
   },
   "patchedDependencies": {
-    "reka-ui@2.10.4": "patches/reka-ui@2.10.4.patch"
+    "reka-ui@2.10.4": "patches/reka-ui@2.10.4.patch",
+    "@nuxt/icon@2.5.1": "patches/@nuxt%2Ficon@2.5.1.patch"
   }
 }

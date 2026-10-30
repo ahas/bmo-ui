@@ -42,6 +42,7 @@
   },
   "patchedDependencies": {
     "reka-ui@2.10.4": "patches/reka-ui@2.10.4.patch",
+    "@nuxt/icon@2.5.1": "patches/@nuxt%2Ficon@2.5.1.patch",
   },
   "packages": {
     "@alloc/quick-lru": ["@alloc/quick-lru@5.3.0", "", {}, "sha512-U4+70Pc5ZS9osnCBCE5Jha/ciHM+Yp+CNMNC/7HvYbNRk1Ldd+f7qO65W5qfhu/TCv+/ozljlXXe9Nj8419DMA=="],
