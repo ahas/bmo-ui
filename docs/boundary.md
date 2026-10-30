@@ -130,7 +130,7 @@ Each is named with everything it exports.
 | `tooltip` | `TOOLTIP_UI`, `TOOLTIP_PROVIDER` |
 | `translation` | `Reading`, `Translator`, `Untranslated`, `TRANSLATION_BATCH`, `TRANSLATION_ASKS_AT_ONCE`, `translatorOf`, `hasTranslator`, `translated` |
 | `volume` | `Loudness`, `Volume`, `VOLUME_KEY`, `FULL_VOLUME`, `UNMUTED_LEVEL`, `slid`, `muteToggled`, `createVolume`, `useVolume` |
-| `waveform` | `WAVE_DETAIL`, `WAVE_FETCH_LIMIT`, `WAVE_FLOOR`, `Waveform`, `peaksOf`, `waveBars`, `barCount`, `loudnessAt`, `waveformOf` |
+| `waveform` | `WAVE_DETAIL`, `WAVE_FETCH_LIMIT`, `WAVE_FLOOR`, `Waveform`, `levelsOf`, `waveBars`, `barCount`, `loudnessAt`, `waveformOf` |
 | `zoom` | `ZoomView`, `Point`, `Size`, `FIT`, `MIN_SCALE`, `MAX_SCALE`, `DOUBLE_SCALE`, `bounded`, `zoomedTo`, `wheeled`, `moved`, `pinched`, `toggled`, `fittedSize`, `swipeStep` |
 
 - **`player` takes a sound's address as given.** Where a sound is fetched from is the host's.
@@ -368,11 +368,16 @@ Every token is a custom property stated by the layer's stylesheet on the root un
   one a closing dialog or sheet hands back to its control — brings up no tooltip
   (`docs/components.md`, "Tooltips"). The layer's shared tooltip holds this on its own; the setting
   holds it for every other tooltip the library draws.
-- **The patch.** The patch under `patches/` is applied to the same `reka-ui` version in the host's own
-  install. It gives a collapsible region its own id from the region's root, so a button drawn before
-  its region already names it and no id stands twice, and it stops a closed tooltip answering the
-  keyboard, so the press that closes a dialog or a drawer is not taken by the tooltip that names a
-  control inside it.
+- **The patches.** Each patch under `patches/` is applied to the same version of the dependency it
+  names in the host's own install.
+  - The `reka-ui` patch gives a collapsible region its own id from the region's root, so a button
+    drawn before its region already names it and no id stands twice, and it stops a closed tooltip
+    answering the keyboard, so the press that closes a dialog or a drawer is not taken by the tooltip
+    that names a control inside it.
+  - The `@nuxt/icon` patch writes an icon drawn as a stylesheet rule under the name it was loaded
+    for. Without it, an icon whose name moves on while its drawing is still being fetched — a
+    button's spinner giving way to its mark — writes that drawing under the new name, and the new
+    icon shows the old one for as long as the page stands.
 - **The choice of theme and palette.** Where a reader's choice is kept, and stating its declarations
   in the page's head from the first frame, are the host's. Without a theme's declarations the
   library's own colours stand; the palette tokens stand only once a palette's declarations are

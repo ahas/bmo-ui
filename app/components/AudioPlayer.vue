@@ -221,7 +221,7 @@ const told = ref<number | null>(null);
 // Where the waveform is being dragged to; the sound moves there once the drag lets go, so the clock
 // follows the finger without the sound stuttering along behind it.
 const scrub = ref<number | null>(null);
-const peaks = ref<number[] | null>(null);
+const levels = ref<number[] | null>(null);
 const decodedSeconds = ref<number | null>(null);
 const count = ref(0);
 
@@ -264,7 +264,7 @@ const length = computed<number | null>(() => told.value ?? decodedSeconds.value)
 const shownAt = computed<number>(() => scrub.value ?? position.value);
 // Whether the sound has left its start: from then the meta line says where it stands.
 const moved = computed<boolean>(() => playing.value || shownAt.value > 0);
-const bars = computed<number[]>(() => waveBars(peaks.value, count.value));
+const bars = computed<number[]>(() => waveBars(levels.value, count.value));
 // Whether the waveform takes a press: only once the length it seeks across is known.
 const seekable = computed<boolean>(() => length.value !== null && !broken.value);
 
@@ -466,8 +466,8 @@ function heard(): number {
 
   const audio = element.value;
 
-  if (peaks.value !== null && audio !== null && length.value !== null) {
-    return loudnessAt(peaks.value, audio.currentTime / length.value);
+  if (levels.value !== null && audio !== null && length.value !== null) {
+    return loudnessAt(levels.value, audio.currentTime / length.value);
   }
 
   return AURA_STILL;
@@ -549,7 +549,7 @@ onMounted(() => {
         near = null;
         void waveformOf(props.src).then((read) => {
           if (read !== null) {
-            peaks.value = read.peaks;
+            levels.value = read.levels;
             decodedSeconds.value = knownLength(read.seconds);
           }
         });

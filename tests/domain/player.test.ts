@@ -137,6 +137,29 @@ describe("the play button through a sound's events", () => {
     ]);
   });
 
+  test("stands the pause button from the first playing on, while the clock runs and bytes are fetched behind it", () => {
+    expect(through(["pressed", "play", "playing", "moved", "moved", "moved"])).toEqual([
+      "starting",
+      "starting",
+      "pause",
+      "pause",
+      "pause",
+      "pause"
+    ]);
+  });
+
+  test("spins again only for a press after the sound stopped, and stands paused once it is heard again", () => {
+    expect(through(["pressed", "playing", "pause", "pressed", "play", "waiting", "moved"])).toEqual([
+      "starting",
+      "pause",
+      "play",
+      "starting",
+      "starting",
+      "starting",
+      "pause"
+    ]);
+  });
+
   test("takes no clock moved while it rests for a sound playing", () => {
     expect(buttonAfter("play", "moved")).toBe("play");
   });
