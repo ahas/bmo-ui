@@ -6,6 +6,8 @@ import { markPainted } from "../domain/loading";
 import AudioPlayerElement from "./AudioPlayerElement.vue";
 import sheet from "./audio-player.css?inline";
 
+import type { I18nOptions, Locale } from "vue-i18n";
+
 // The audio player as a custom element (`docs/components.md`, "The audio player as an element"), built
 // into one script that carries everything it draws with: a page that is no app of the layer's loads the
 // script and stands the player wherever it writes the element. The script defines nothing until the
@@ -51,8 +53,12 @@ export function define(options: AudioPlayerElementOptions): void {
     return;
   }
 
-  const locale = options.locale ?? "en";
-  const i18n = createI18n({ legacy: false, locale, messages: { [locale]: options.words }, missingWarn: false, fallbackWarn: false });
+  // A host's language pack narrows the engine's locale type to the languages the host carries, and the
+  // host's typecheck reads this file; the element's words are in whatever language the page names, so
+  // the locale and the words are handed over as the engine's own types.
+  const locale = (options.locale ?? "en") as Locale;
+  const messages = { [locale]: options.words } as I18nOptions["messages"];
+  const i18n = createI18n({ legacy: false, locale, messages, missingWarn: false, fallbackWarn: false });
   const Base = defineCustomElement(AudioPlayerElement, {
     styles: [sheet],
     configureApp(app) {
