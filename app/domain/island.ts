@@ -3,11 +3,11 @@ import { failureText } from "./errors";
 import type { Ref } from "vue";
 import type { Translate } from "../../shared/wording";
 
-// The one place a screen says anything to whoever is reading it (`docs/components.md`,
-// "Messages"). A notice of something that arrived, the word that an action went through or did
-// not, the question a press that cannot be taken back asks first — all of them come through here
-// and are drawn as one thing standing at the top of the screen, so a reader has one place to look
-// rather than a corner per kind of news.
+// The one place a screen tells anything to whoever is reading it (`docs/components.md`,
+// "Messages"). A notice of something that arrived and the word that an action went through or did
+// not both come through here and are drawn as one thing standing at the top of the screen, so a
+// reader has one place to look rather than a corner per kind of news. It tells and never asks: a
+// question the reader answers before an action is the question module's dialog.
 //
 // It stands as a pill: one narrow line while it has one line to say, widening into a card when it
 // carries a description or something to press, and shrinking away again when its time is up or it
@@ -40,17 +40,9 @@ export interface IslandMessage {
   // as a reader who presses the button that used to be the only way in.
   to: string | null;
   actions: IslandAction[];
-  // How long it stands, in milliseconds. Null stands until it is pressed or answered, which is
-  // what a question does and what a notice offering the only chance to undo something does.
+  // How long it stands, in milliseconds. Null stands until it is pressed, which is what a notice
+  // offering the only chance to undo something does.
   duration: number | null;
-  // A question holds the island until it is answered and is never pressed away by accident: its
-  // words are not a press, and only its two actions and the back gesture end it.
-  question: boolean;
-  // Whether the back gesture takes this question back. It does, except for a question asked while
-  // the page is already being left: such a question is holding a navigation, and an entry pushed
-  // for it would be moved at the same moment the navigation moves the history itself, leaving the
-  // address and the page saying different things.
-  back: boolean;
 }
 
 // What a caller writes. Everything but the words has a default, so the common case is one line.
@@ -63,16 +55,6 @@ export interface IslandSaid {
   to?: string | null;
   actions?: IslandAction[];
   duration?: number | null;
-}
-
-export interface IslandAsked {
-  title: string;
-  description?: string | null;
-  // The word on the button that goes through with it. It names the action alone.
-  confirm: string;
-  cancel?: string;
-  tone?: IslandTone;
-  back?: boolean;
 }
 
 export interface IslandState {
@@ -124,31 +106,7 @@ export function messageOf(said: IslandSaid): IslandMessage {
     description: said.description ?? null,
     to: said.to ?? null,
     actions,
-    duration: said.duration === undefined ? TONE_MS[tone] : said.duration,
-    question: false,
-    back: false
-  };
-}
-
-export function questionOf(t: Translate, asked: IslandAsked, answer: (taken: boolean) => void): IslandMessage {
-  const tone = asked.tone ?? "warning";
-
-  counted += 1;
-
-  return {
-    key: `island:${counted}`,
-    tone,
-    icon: TONE_ICONS[tone],
-    title: asked.title,
-    description: asked.description ?? null,
-    to: null,
-    actions: [
-      { label: asked.cancel ?? t("common.action.cancel"), tone: "neutral", press: () => answer(false) },
-      { label: asked.confirm, tone: tone === "error" || tone === "warning" ? "error" : "primary", press: () => answer(true) }
-    ],
-    duration: null,
-    question: true,
-    back: asked.back ?? true
+    duration: said.duration === undefined ? TONE_MS[tone] : said.duration
   };
 }
 
@@ -157,18 +115,6 @@ export function questionOf(t: Translate, asked: IslandAsked, answer: (taken: boo
 // here than a word".
 export function expands(message: IslandMessage): boolean {
   return message.description !== null || message.actions.length > 0;
-}
-
-// Whether pressing the words does anything. A question's words are not a press — an answer is
-// given with its buttons — and everything else either leads somewhere or is dismissed by the
-// press, so every notice answers a press one way or the other.
-export function pressable(message: IslandMessage): boolean {
-  return !message.question;
-}
-
-// Whether it ends only by its own doing — an answer given — rather than by a press on it.
-export function endsItself(message: IslandMessage): boolean {
-  return message.question;
 }
 
 function without(waiting: IslandMessage[], key: string): IslandMessage[] {
@@ -197,18 +143,12 @@ export function raise(state: IslandState, message: IslandMessage): IslandState {
     return { standing: message, waiting: state.waiting };
   }
 
-  // A question is asked by a press the reader has just made, so it takes the island at once and
-  // what it displaced goes to the head of the line rather than to the back of it.
-  if (message.question) {
-    return { standing: message, waiting: capped([state.standing, ...state.waiting]) };
-  }
-
   return { standing: state.standing, waiting: capped([...state.waiting, message]) };
 }
 
-// One message done with, however it ended — its time ran out, it was pressed, it was answered, or
-// the screen it belonged to asked for it back. The next in line takes the island straight away, so
-// the island morphs from one to the next rather than going away and coming back.
+// One message done with, however it ended — its time ran out, it was pressed, or the screen it
+// belonged to asked for it back. The next in line takes the island straight away, so the island
+// morphs from one to the next rather than going away and coming back.
 export function settle(state: IslandState, key: string): IslandState {
   if (state.standing?.key !== key) {
     return { standing: state.standing, waiting: without(state.waiting, key) };
@@ -225,7 +165,6 @@ export interface Island {
   say: (said: IslandSaid) => string;
   // A failure in the server's own words where it gave any, and the caller's wording otherwise.
   fail: (error: unknown, fallback: string) => string;
-  ask: (asked: IslandAsked) => Promise<boolean>;
   settle: (key: string) => void;
 }
 
@@ -235,7 +174,9 @@ export function islandState(): Ref<IslandState> {
   return useState<IslandState>(ISLAND_STATE, emptyIsland);
 }
 
-export function useIsland(t: Translate): Island {
+// It is handed the screen's translator as every domain module putting words on the screen is
+// (`docs/wording.md`); the words a notice carries arrive already read, so it keeps none of its own.
+export function useIsland(_t: Translate): Island {
   const state = islandState();
   const put = (message: IslandMessage): string => {
     state.value = raise(state.value, message);
@@ -246,15 +187,6 @@ export function useIsland(t: Translate): Island {
   return {
     say: (said) => put(messageOf(said)),
     fail: (error, fallback) => put(messageOf({ tone: "error", title: failureText(error, fallback) })),
-    ask: (asked) =>
-      new Promise<boolean>((resolve) => {
-        const message = questionOf(t, asked, (taken) => {
-          state.value = settle(state.value, message.key);
-          resolve(taken);
-        });
-
-        put(message);
-      }),
     settle: (key) => {
       state.value = settle(state.value, key);
     }

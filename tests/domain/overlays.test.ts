@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, test } from "bun:test";
 
-import { OVER_LAYERS, refuseHandedBackFocus, refuseStalePresses } from "~/domain/overlays";
+import { OFF_HISTORY, OVER_LAYERS, refuseHandedBackFocus, refuseStalePresses, standsAsLayer } from "~/domain/overlays";
 
 // A press outside what floats closes it only while it is the press being handled.
 //
@@ -136,8 +136,8 @@ describe("the focus a going layer hands back", () => {
   });
 });
 
-// A host's own region floats over every layer, and a question in it is asked from inside a dialog or
-// a drawer: pressing or focusing its answer is outside none of them.
+// A region floats over every layer, the message pill over a dialog or a drawer among them: pressing
+// or focusing what it offers is outside none of them.
 describe("what floats over every layer", () => {
   function over(): HTMLElement {
     const region = document.createElement("div");
@@ -174,5 +174,47 @@ describe("what floats over every layer", () => {
 describe("a focus the reader moves", () => {
   test("closes what it moved out of", () => {
     expect(tellFocusOutside(focusMove())).toBe(true);
+  });
+});
+
+// What floats while the page is being left holds that navigation, and an entry pushed for it would
+// move with the navigation's own move of the history (`docs/components.md`, "Floating things").
+describe("which floating things stand as layers of the back gesture", () => {
+  function floated(state: string, marked: "none" | "itself" | "around" = "none"): Element {
+    const around = document.createElement("div");
+    const layer = document.createElement("div");
+
+    layer.setAttribute("data-dismissable-layer", "");
+    layer.setAttribute("data-state", state);
+    if (marked === "itself") layer.setAttribute(OFF_HISTORY, "");
+    if (marked === "around") around.setAttribute(OFF_HISTORY, "");
+    around.append(layer);
+    document.body.append(around);
+
+    return layer;
+  }
+
+  test("an open one does, and a closed one or one taken off the page does not", () => {
+    const open = floated("open");
+    const closed = floated("closed");
+
+    expect(standsAsLayer(open)).toBe(true);
+    expect(standsAsLayer(closed)).toBe(false);
+
+    open.parentElement?.remove();
+    closed.parentElement?.remove();
+
+    expect(standsAsLayer(open)).toBe(false);
+  });
+
+  test("one standing while the page is left does not, the mark on it or around it", () => {
+    const itself = floated("open", "itself");
+    const around = floated("open", "around");
+
+    expect(standsAsLayer(itself)).toBe(false);
+    expect(standsAsLayer(around)).toBe(false);
+
+    itself.parentElement?.remove();
+    around.parentElement?.remove();
   });
 });

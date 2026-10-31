@@ -596,7 +596,7 @@
     {
       "name": "MessageIsland",
       "kind": "component",
-      "line": "The one pill every notice and question stands on.",
+      "line": "The one pill every notice stands on.",
       "props": [],
       "slots": [],
       "events": [],
@@ -683,6 +683,65 @@
       "slots": [],
       "events": [],
       "example": "<PropertyList :rows=\"rows\" :title=\"t('notes.title.details')\" />"
+    },
+    {
+      "name": "QuestionDialog",
+      "kind": "component",
+      "line": "The question asked before an action, opened through the question module: its way out first, its way through last.",
+      "props": [
+        {
+          "name": "title",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "item",
+          "type": "string | null | undefined",
+          "required": false
+        },
+        {
+          "name": "effect",
+          "type": "string | null | undefined",
+          "required": false
+        },
+        {
+          "name": "confirm",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "cancel",
+          "type": "string | undefined",
+          "required": false
+        },
+        {
+          "name": "leaving",
+          "type": "boolean | undefined",
+          "required": false
+        },
+        {
+          "name": "open",
+          "type": "boolean | undefined",
+          "required": false,
+          "default": "false"
+        }
+      ],
+      "slots": [],
+      "events": [
+        {
+          "name": "close",
+          "type": "[taken: boolean]"
+        },
+        {
+          "name": "update:open",
+          "type": "[value: boolean]"
+        },
+        {
+          "name": "after:leave",
+          "type": "[]"
+        }
+      ],
+      "example": "<QuestionDialog\n  v-model:open=\"asking\"\n  :title=\"t('notes.title.overwrite_confirm')\"\n  item=\"plan.md\"\n  :confirm=\"t('notes.action.overwrite')\"\n  @close=\"answer\"\n/>"
     },
     {
       "name": "RollingNumber",

@@ -1,7 +1,7 @@
 import { computed, inject, onScopeDispose, provide, ref, shallowRef } from "vue";
 import { onBeforeRouteLeave, onBeforeRouteUpdate } from "vue-router";
 
-import { useIsland } from "./island";
+import { askQuestion } from "./question";
 
 import type { ComputedRef, InjectionKey, Ref } from "vue";
 import type { RouteLocationNormalized } from "vue-router";
@@ -38,9 +38,10 @@ interface FormHold {
 
 const FORM: InjectionKey<FormHold> = Symbol("form-save");
 
-// The question asked before changes are thrown away, whichever way the reader is leaving.
+// The question asked before the unsaved changes are thrown away, whichever way the reader is
+// leaving: a dialog naming them, gone through only by discarding.
 export function askDiscard(t: Translate, leaving = false): Promise<boolean> {
-  return useIsland(t).ask({ title: t("common.message.discard_confirm"), confirm: t("common.action.discard"), tone: "warning", back: !leaving });
+  return askQuestion({ title: t("common.title.discard_changes"), confirm: t("common.action.discard"), leaving });
 }
 
 // What floats a form over the screen — a dialog, a sheet — closes through here. While the form

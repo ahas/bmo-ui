@@ -203,10 +203,24 @@ default; a screen supplies what it holds and what a press means there. Every exp
 
 ## Messages
 
-- **Everything said to the reader stands in one place:** a notice of something that arrived, the word
-  that an action went through or did not, and the question a press that cannot be taken back asks
-  first all stand on one pill at the top of the screen, centred (`MessageIsland`, driven by the island
-  module). The library's own toaster is not stood up and the browser's own dialogs are not used.
+- **Everything told to the reader stands in one place:** a notice of something that arrived and the
+  word that an action went through or did not stand on one pill at the top of the screen, centred
+  (`MessageIsland`, driven by the island module). It stands in place of the library's toaster, which
+  is not stood up, and the browser's own dialogs are not used.
+- **The pill tells and never asks.** A question the reader answers before an action — the one asked
+  before changes are thrown away included — is a small dialog in the middle of the screen
+  (`QuestionDialog`, opened through the question module), never the pill.
+  - Its title is the question, naming what the action is taken on or throws away; the item it is
+    taken on stands under it where the question does not name it, and what going through does stands
+    in its body where that is more than the question says.
+  - Its foot holds the way out first, cancel, and the way through last, in the error colour, under
+    the action's own verb rather than a bare yes.
+  - Only the way through answers yes. The way out, its close, Esc, a press outside and the back
+    gesture close it and answer no.
+  - A question asked while the page is being left is holding that navigation, so it takes no entry
+    of the back gesture (see Floating things); every other way out still answers it.
+  - The question asked before changes are thrown away is the key `common.title.discard_changes`,
+    gone through with `common.action.discard`.
 - **It is a pill of one radius at every size.** With a line to say it is a narrow line; with a
   description or something to press, it widens into a card of the same rounding. It is measured and
   given that size, so it moves between shapes instead of jumping.
@@ -218,11 +232,8 @@ default; a screen supplies what it holds and what a press means there. Every exp
 - **One stands and the rest wait.** The one standing carries how many are behind it, and the next
   takes its place the moment it goes, so the pill morphs from one to the next. The same thing said
   twice replaces itself where it stands. The line holds five, and drops its oldest end.
-- **A question holds the pill until it is answered.** It has no time of its own and takes the pill at
-  once from the notice standing, which goes to the head of the line. The back gesture takes it back;
-  a notice is not registered with back, since it goes on its own. A question asked while the page is
-  being left takes no history entry of its own. The discard question is the key
-  `common.message.discard_confirm`.
+- **Back does not take a notice.** A notice goes on its own, and a press of back spent on one is a
+  press the reader has to make twice, so the pill is not registered with the back gesture.
 - **Its surface is fixed dark in both modes,** its words and marks with it. The tone is carried by the
   mark alone — a note, success, a warning, a failure — never by the whole surface.
 - **Where it stands.** Over everything else, drawn into the page's body beside what the library floats
@@ -242,8 +253,9 @@ default; a screen supplies what it holds and what a press means there. Every exp
 - **A save that went through is what is saved from then on.** The form takes the answer as its new
   saved values, so it holds no change the moment the save is done.
 - **Leaving with changes asks first.** Closing a dialog whose form holds changes — its close, Esc, a
-  press outside, the back gesture — and leaving the page ask on the message pill whether to throw them
-  away: discard drops them and goes, cancel stays. With nothing changed it goes at once.
+  press outside, the back gesture — and leaving the page ask first, in the question dialog, whether to
+  throw the unsaved changes away: discard drops them and goes, and every way out of the question
+  stays. With nothing changed it goes at once.
 - **A refused save keeps every change as written,** with the reason under the field it names. A save
   made in several steps stops at the first refusal, and what went through before it stands as saved.
 - **A text box of a form grows with its text and never scrolls inside** (`GrowingTextarea`). It is
@@ -352,9 +364,13 @@ default; a screen supplies what it holds and what a press means there. Every exp
 - **The press that closes one is the press being handled.** An outside touch that has not become the
   press being handled closes nothing, so a button pressed inside a dialog does what it was pressed for
   rather than closing the dialog.
-- **What floats over every layer is under none.** A host's own region standing over whatever is open
-  — a question asked from inside a dialog — carries the overlays module's `OVER_LAYERS` mark; a press,
-  a tap or a focus there is outside no floating thing and closes nothing.
+- **What floats over every layer is under none.** A region standing over whatever is open — the
+  message pill over a dialog — carries the overlays module's `OVER_LAYERS` mark; a press, a tap or a
+  focus there is outside no floating thing and closes nothing.
+- **What floats while the page is being left takes no entry.** It is holding a navigation, and an
+  entry pushed for it would move at the same moment the navigation moves the history, leaving the
+  address and the page saying different things. It carries the overlays module's `OFF_HISTORY` mark
+  and is no layer of the back gesture; Esc and a press outside still close it.
 - **One context menu at a time.** A right click elsewhere closes it before opening the menu of the
   place pressed, and a tap elsewhere only closes it.
 - **Small dialogs stand in the middle; sheets are parts of the page.** On a narrow screen a sheet

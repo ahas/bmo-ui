@@ -21,11 +21,18 @@ const LAYER = "[data-dismissable-layer]";
 // pressed element and does not bubble, so it is caught on the way down instead.
 const OUTSIDE_PRESS = "dismissableLayer.pointerDownOutside";
 
-// What floats over every layer rather than standing in one carries this attribute: a host's own
-// region whose question stands over whatever dialog or drawer it was asked from (`docs/components.md`,
-// "Floating things"). A press or a focus there is outside no layer, so answering the question never
-// puts away what it was asked from.
+// What floats over every layer rather than standing in one carries this attribute: a region whose
+// words stand over whatever dialog or drawer is open, the message pill among them
+// (`docs/components.md`, "Floating things"). A press or a focus there is outside no layer, so
+// pressing it never puts away what stands under it.
 export const OVER_LAYERS = "data-over-layers";
+
+// What floats while the page is being left carries this attribute, on the element the library
+// marks as a layer or around it: it is holding a navigation, and an entry pushed for it would be
+// moved at the same moment the navigation moves the history itself, leaving the address and the
+// page saying different things. It is no layer of the back gesture; Esc and a press outside, the
+// library's own, still close it.
+export const OFF_HISTORY = "data-off-history";
 
 function overLayers(target: EventTarget | null | undefined): boolean {
   return target instanceof Element && target.closest(`[${OVER_LAYERS}]`) !== null;
@@ -50,6 +57,12 @@ export function isBackEscape(): boolean {
 
 function isOpen(element: Element): boolean {
   return element.isConnected && element.getAttribute("data-state") === "open";
+}
+
+// Whether a floating thing the library marks stands as a layer of the back gesture: it is open, and
+// it is not standing while the page is being left.
+export function standsAsLayer(element: Element): boolean {
+  return isOpen(element) && element.closest(`[${OFF_HISTORY}]`) === null;
 }
 
 function escape(): void {
@@ -83,7 +96,7 @@ async function dismiss(element: Element): Promise<void> {
 }
 
 function sweep(): void {
-  const found = Array.from(document.querySelectorAll(LAYER)).filter(isOpen);
+  const found = Array.from(document.querySelectorAll(LAYER)).filter(standsAsLayer);
 
   // Those gone first, the top one first, so each takes its own entry back rather than burying it.
   for (const [element, id] of Array.from(standing).reverse()) {

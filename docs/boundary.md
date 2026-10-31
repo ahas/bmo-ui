@@ -46,11 +46,12 @@ wording keys listed here are the ones the layer's list holds.
 | `LoadingImage` | A picture that keeps its place while it loads and says when it failed. |
 | `LoadingVideo` | A video that keeps its place while it loads and says when it failed. |
 | `MarqueeLine` | A line that slides when it is longer than its box. |
-| `MessageIsland` | The one pill every notice and question stands on. |
+| `MessageIsland` | The one pill every notice stands on. |
 | `MovingList` | A list whose items come, go and change places by position alone. |
 | `NumberInput` | The number box, as wide as its values, with its two step buttons. |
 | `PaletteSwatch` | A palette's two grounds as dots, in one mode. |
 | `PropertyList` | A file's or a document's details as a name and value list. |
+| `QuestionDialog` | The question asked before an action, opened through the question module: its way out first, its way through last. |
 | `RollingNumber` | A number that turns only its changed characters. |
 | `RollingSentence` | A sentence of the pack with turning figures in its placeholders. |
 | `ScreenFrame` | The frame of a screen that stands on no shell, pinned to the visible screen. |
@@ -100,7 +101,7 @@ Each is named with everything it exports.
 | `fullscreen` | `PutBack`, `TakePlace`, `keepPlace`, `holdThroughFullscreen` |
 | `holdmenu` | `HoldMenu`, `useHoldMenu` |
 | `icon-styles` | `IconStyleOptions`, `isIconStyle` |
-| `island` | `IslandTone`, `IslandAction`, `IslandMessage`, `IslandSaid`, `IslandAsked`, `IslandState`, `TONE_ICONS`, `TONE_MS`, `WAITING_MAX`, `emptyIsland`, `messageOf`, `questionOf`, `expands`, `pressable`, `endsItself`, `raise`, `settle`, `Island`, `ISLAND_STATE`, `islandState`, `useIsland` |
+| `island` | `IslandTone`, `IslandAction`, `IslandMessage`, `IslandSaid`, `IslandState`, `TONE_ICONS`, `TONE_MS`, `WAITING_MAX`, `emptyIsland`, `messageOf`, `expands`, `raise`, `settle`, `Island`, `ISLAND_STATE`, `islandState`, `useIsland` |
 | `layers` | `stepsLanded`, `layerCount`, `LayerHistory`, `holdHistory`, `openLayer`, `closeLayer`, `handlePop`, `listenForBack`, `useBackClose` |
 | `list-place` | `scrollable`, `reached`, `useListPlace` |
 | `list-preview` | `PREVIEW_ITEM`, `ListPreview`, `useListPreview` |
@@ -112,9 +113,10 @@ Each is named with everything it exports.
 | `moving-list` | `unfoldItem`, `settleItem`, `foldItem` |
 | `numbers` | `countLocale`, `countText`, `FigureLine`, `COUNT_BADGE`, `figurePlaces`, `turnOf`, `progressText` |
 | `openings` | `useOpenings` |
-| `overlays` | `OVER_LAYERS`, `isBackEscape`, `refuseStalePresses`, `refuseHandedBackFocus`, `watchOverlays` |
+| `overlays` | `OVER_LAYERS`, `OFF_HISTORY`, `standsAsLayer`, `isBackEscape`, `refuseStalePresses`, `refuseHandedBackFocus`, `watchOverlays` |
 | `player` | `Playing`, `playAlone`, `playClock`, `knownLength`, `loudnessOf`, `easedLoudness`, `AURA_STILL`, `auraOf`, `PlayerButton`, `PlayerSignal`, `buttonAfter` |
 | `prompt` | `TOUCH_QUERY`, `EnterKeys`, `enterKeys`, `PromptEnter`, `usePromptEnter`, `PROMPT_MAX_ROWS`, `PROMPT_TEXTAREA_UI`, `PROMPT_WORDS_WRAP` |
+| `question` | `QuestionAsked`, `askQuestion` |
 | `relay` | `relayAddress`, `relaySocketAddress`, `relayCall`, `RelayOptions` |
 | `scheme` | `provideBoxScheme`, `useDarkScheme`, `usePageScheme`, `usePreviewScheme` |
 | `screen` | `NARROW_MAX_PX`, `NARROW_QUERY`, `useNarrow`, `VisibleReading`, `VisibleFrame`, `visibleFrame`, `SCREEN_HEIGHT_PROPERTY`, `SCREEN_TOP_PROPERTY`, `SCREEN_FRAME`, `useVisibleScreen`, `STABLE_GUTTER`, `useWidth`, `useScrollGutter` |
@@ -252,17 +254,17 @@ list a host's pack is held to. Placeholders are named after each key.
   `seconds` `{n}`, `share_until` `{date}`, `short_day_format` (the short date format the time
   module's short day is written in, the year in two figures), `theme_forest`, `theme_sea`,
   `theme_sunset`, `theme_teal`, `theme_violet`, `unplayable`, `volume`.
-- **`common.message`:** `discard_confirm`, `link_copied`, and the theme preview's words:
+- **`common.message`:** `link_copied`, and the theme preview's words:
   `preview_badge`, `preview_field`, `preview_link`, `preview_meta`, `preview_note`.
 - **`common.status`:** `copied`, `loading`, `picture_loading`, `share_loading`, `video_loading`.
-- **`common.title`:** `share_link`.
+- **`common.title`:** `discard_changes`, `share_link`.
 - **`files.action`:** `keep_both`, `replace`, `skip`.
 - **`files.aria`:** `name_field`.
 - **`files.label`:** `progress` `{done}` `{all}` `{percent}`.
 - **`files.message`:** `conflict`.
 - **`files.status`:** `uploading`.
 
-That is 24 actions, 9 accessible names, 7 errors, 33 labels, 7 messages, 5 statuses and 1 title
+That is 24 actions, 9 accessible names, 7 errors, 33 labels, 6 messages, 5 statuses and 2 titles
 under `common`, and 7 keys under `files`.
 
 ## Tokens
@@ -378,6 +380,8 @@ Every token is a custom property stated by the layer's stylesheet on the root un
   one or more reads as its default.
 - **What a console owes a bundle,** where the host is a console: the contract's own list
   (`docs/console-bundles.md`, "What a console owes").
+- **The overlay.** The host's app root is the library's `UApp`, whose overlay provider draws what the
+  question module opens; a question asked with none standing is never drawn and never answered.
 - **The tooltip setting.** The host's app root, the library's `UApp`, is handed the tooltip
   module's `TOOLTIP_PROVIDER` as its tooltip setting, so a focus the keyboard did not bring — the
   one a closing dialog or sheet hands back to its control — brings up no tooltip

@@ -1,18 +1,7 @@
 import { describe, expect, test } from "bun:test";
 
-import {
-  emptyIsland,
-  endsItself,
-  expands,
-  messageOf,
-  pressable,
-  questionOf,
-  raise,
-  settle,
-  TONE_ICONS,
-  TONE_MS,
-  WAITING_MAX
-} from "~/domain/island";
+import * as islandModule from "~/domain/island";
+import { emptyIsland, expands, messageOf, raise, settle, TONE_ICONS, TONE_MS, WAITING_MAX } from "~/domain/island";
 
 import type { IslandMessage, IslandState } from "~/domain/island";
 import type { Translate } from "#shared/wording";
@@ -45,7 +34,6 @@ describe("what a caller's words are filled out into", () => {
     expect(one.description).toBeNull();
     expect(one.to).toBeNull();
     expect(one.actions).toEqual([]);
-    expect(one.question).toBe(false);
   });
 
   test("something gone wrong is given longer to be read than something gone through", () => {
@@ -62,46 +50,23 @@ describe("what a caller's words are filled out into", () => {
   });
 });
 
-describe("how wide it stands and whether its words are a press", () => {
+describe("how wide it stands", () => {
   test("a line on its own stands as a line; a description or something to press widens it", () => {
     expect(expands(said("One line"))).toBe(false);
     expect(expands(said("One line", { description: "More" }))).toBe(true);
     expect(expands(said("One line", { actions: [{ label: wording("common.action.cancel"), press: () => undefined }] }))).toBe(true);
   });
-
-  test("every notice answers a press; a question does not, since its answer is its buttons", () => {
-    expect(pressable(said("One line"))).toBe(true);
-    expect(pressable(said("One line", { to: "/elsewhere" }))).toBe(true);
-    expect(pressable(questionOf(wording, { title: "Delete it?", confirm: "Delete" }, () => undefined))).toBe(false);
-  });
 });
 
-describe("a question", () => {
-  test("stands until it is answered and carries the way out first and the way through last", () => {
-    const asked = questionOf(wording, { title: "Delete it?", confirm: "Delete" }, () => undefined);
+// The pill tells and never asks (`docs/components.md`, "Messages"): a question the reader answers
+// before an action is the question module's dialog, so the island offers no way of asking one.
+describe("the island tells and never asks", () => {
+  test("what a screen calls holds no question, and nothing it fills out is one", () => {
+    const keys = Object.keys(islandModule);
 
-    expect(asked.duration).toBeNull();
-    expect(asked.question).toBe(true);
-    expect(asked.actions.map((one) => one.label)).toEqual([wording("common.action.cancel"), "Delete"]);
-    expect(asked.back).toBe(true);
-    expect(endsItself(asked)).toBe(true);
-    expect(endsItself(said("One line"))).toBe(false);
-  });
-
-  test("hands back which of the two was pressed", () => {
-    const answers: boolean[] = [];
-    const asked = questionOf(wording, { title: "Delete it?", confirm: "Delete" }, (taken) => void answers.push(taken));
-
-    asked.actions[0]!.press();
-    asked.actions[1]!.press();
-
-    expect(answers).toEqual([false, true]);
-  });
-
-  // One asked while the page is already being left is holding that navigation, and an entry
-  // pushed for it would be moved at the same moment the navigation moves the history itself.
-  test("takes no entry of the back gesture where the caller says it must not", () => {
-    expect(questionOf(wording, { title: "Discard it?", confirm: "Discard", back: false }, () => undefined).back).toBe(false);
+    expect(keys).toContain("useIsland");
+    expect(keys.filter((key) => /question|ask/i.test(key))).toEqual([]);
+    expect(Object.keys(messageOf({ title: "Copied." })).sort()).toEqual(["actions", "description", "duration", "icon", "key", "title", "to", "tone"]);
   });
 });
 
@@ -160,31 +125,5 @@ describe("the same thing said twice", () => {
 
     expect(standing(state)).toBe("one");
     expect(line(state)).toEqual(["three"]);
-  });
-});
-
-describe("a question arriving while something else stands", () => {
-  // It was asked by a press the reader has just made, so waiting its turn behind a notice would
-  // leave the press they made unanswered for as long as that notice has left to stand.
-  test("takes the island at once and sends what it displaced to the head of the line", () => {
-    const state = raise(piled("one", "two"), questionOf(wording, { title: "Delete it?", confirm: "Delete" }, () => undefined));
-
-    expect(standing(state)).toBe("Delete it?");
-    expect(line(state)).toEqual(["one", "two"]);
-  });
-
-  test("and a notice arriving while a question stands waits, however it was toned", () => {
-    const asked = questionOf(wording, { title: "Delete it?", confirm: "Delete" }, () => undefined);
-    const state = raise(raise(emptyIsland(), asked), said("It did not go through.", { tone: "error" }));
-
-    expect(standing(state)).toBe("Delete it?");
-    expect(line(state)).toEqual(["It did not go through."]);
-  });
-
-  test("answered, what it displaced comes back to the island", () => {
-    const asked = questionOf(wording, { title: "Delete it?", confirm: "Delete" }, () => undefined);
-    const state = settle(raise(piled("one"), asked), asked.key);
-
-    expect(standing(state)).toBe("one");
   });
 });
