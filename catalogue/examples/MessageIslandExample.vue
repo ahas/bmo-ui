@@ -14,9 +14,7 @@ import { useIsland } from "../../app/domain/island";
 const { t } = useI18n();
 const island = useIsland(t);
 
-async function save(): Promise<void> {
-  if (!(await island.ask({ title: t("notes.message.overwrite_confirm"), confirm: t("notes.action.overwrite") }))) return;
-
+function save(): void {
   island.say({ tone: "success", title: t("notes.message.saved") });
 }
 </script>

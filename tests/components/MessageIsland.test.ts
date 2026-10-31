@@ -70,6 +70,16 @@ describe("where the island stands", () => {
   });
 });
 
+// It tells and never asks (`docs/components.md`, "Messages"): a notice goes on its own, so the pill
+// is announced as a status and takes no entry of the back gesture.
+describe("what it is to a reader", () => {
+  test("a status, never a dialog, and registered with nothing of the back gesture", () => {
+    expect(island).toContain('role="status"');
+    expect(island).not.toContain("alertdialog");
+    expect(island).not.toContain("openLayer");
+  });
+});
+
 describe("under a dialog", () => {
   // A dialog or a drawer hides everything outside it from assistive technology except what carries
   // aria-live when it opens; the region the pill stands in is there before any pill is.
@@ -117,18 +127,13 @@ describe("the shape it stands as", () => {
 
 describe("what pressing it does", () => {
   test("the whole of its words is the press, not a button standing beside them", () => {
-    expect(island).toContain(':is="canPress ? \'button\' : \'div\'"');
+    expect(island).toContain('<button\n                type="button"');
     expect(island).toContain("await navigateTo(now.to)");
   });
 
   test("and being pressable it carries a hover and a press colour, neither of them its resting one", () => {
     expect(island).toContain("hover:bg-white/10 active:bg-white/20");
     expect(island).toContain("focus-inset");
-  });
-
-  test("a question is not pressed away by accident, and the back gesture is what takes it back", () => {
-    expect(island).toContain("openLayer(() => asking.actions[0]?.press())");
-    expect(island).toContain("message.value.back");
   });
 
   test("how many are still behind it stands on it, in figures that do not shift as they change", () => {
@@ -144,8 +149,8 @@ describe("the presses it holds", () => {
     expect(island).toContain("? 'badge-ink min-h-11' : ''");
   });
 
-  test("a notice goes with the press taken on it; a question goes only with its answer", () => {
-    expect(island).toContain("if (!endsItself(now)) {\n    away(now.key);\n  }");
-    expect(island).toContain("if (now !== null && !endsItself(now)) {");
+  test("a notice goes with the press taken on it, on its words or on a press it offers", () => {
+    expect(island).toContain("  away(now.key);\n\n  if (now.to !== null) {");
+    expect(island).toContain("if (now !== null) {\n    away(now.key);\n  }\n\n  await action.press();");
   });
 });

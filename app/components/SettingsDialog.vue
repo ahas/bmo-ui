@@ -1,9 +1,9 @@
 <template>
-  <!-- A small dialog of its own — a form, a confirmation, a search: in the middle of the screen at
-       every width, since it is no part of the page lifted out. The body is the form; the actions
-       stand at the right of the foot. A form's dialog says whether it holds changes, and every way
-       of closing it — the foot's cancel among them, through the close the foot is handed — then
-       asks first whether to throw them away (`docs/components.md`, "Forms"). -->
+  <!-- A small dialog of its own — a form, a search: in the middle of the screen at every width,
+       since it is no part of the page lifted out. The body is the form; the actions stand at the
+       right of the foot. A form's dialog says whether it holds changes, and every way of closing it
+       — the foot's cancel among them, through the close the foot is handed — then asks first, in
+       the question dialog over it, whether to throw them away (`docs/components.md`, "Forms"). -->
   <UModal
     v-model:open="open"
     :title="props.title"

@@ -6,7 +6,7 @@
        The same holds for assistive technology. A dialog or a drawer opening hides everything outside
        itself from it except what carries `aria-live` at that moment, and the pill exists only while
        a message stands, so the region it stands in carries the attribute itself — turned off, since
-       the pill says for itself how it is to be announced. Without it a question asked from inside a
+       the pill says for itself how it is to be announced. Without it a notice raised from inside a
        drawer is on the screen and pressable and never read out. It is marked as standing over every
        layer, so a press on it is outside none of them (the overlays module). -->
   <ClientOnly>
@@ -22,17 +22,14 @@
             v-if="message !== null"
             class="bmo-island pointer-events-auto flex items-start justify-center overflow-hidden bg-zinc-900 shadow-lg shadow-black/40 ring-1 ring-white/15 dark:bg-zinc-800"
             :style="size === null ? undefined : { width: `${size.width}px`, height: `${size.height}px` }"
-            :role="message.question ? 'alertdialog' : 'status'"
-            :aria-live="message.question ? 'assertive' : 'polite'"
-            :aria-label="message.question ? message.title : undefined"
+            role="status"
+            aria-live="polite"
           >
             <div ref="body" class="bmo-island-content w-max max-w-[calc(100vw-2rem)] shrink-0" :class="wide ? 'min-w-[16rem]' : ''">
-              <component
-                :is="canPress ? 'button' : 'div'"
-                :type="canPress ? 'button' : undefined"
-                class="flex w-full items-start gap-3 p-4 text-start transition-colors"
-                :class="canPress ? 'cursor-pointer hover:bg-white/10 active:bg-white/20 focus-inset' : ''"
-                @click="canPress ? press() : undefined"
+              <button
+                type="button"
+                class="flex w-full cursor-pointer items-start gap-3 p-4 text-start transition-colors hover:bg-white/10 active:bg-white/20 focus-inset"
+                @click="press()"
               >
                 <UIcon :name="message.icon" class="size-5 shrink-0" :class="MARK_TONES[message.tone]" />
 
@@ -48,7 +45,7 @@
                   class="ms-2 shrink-0 rounded-full bg-white/15 px-2 py-0.5 text-sm tabular-nums text-white"
                   :aria-label="$t('common.aria.more_notices', { n: countText(waiting) })"
                 >+<RollingNumber :value="waiting" /></span>
-              </component>
+              </button>
 
               <div v-if="message.actions.length > 0" class="flex justify-end gap-2 whitespace-nowrap px-4 pb-4">
                 <UButton
@@ -72,15 +69,14 @@
 </template>
 
 <script setup lang="ts">
-import { endsItself, islandState, pressable, settle, expands, type IslandAction, type IslandTone } from "../domain/island";
-import { closeLayer, listenForBack, openLayer } from "../domain/layers";
+import { islandState, settle, expands, type IslandAction, type IslandTone } from "../domain/island";
 import { countText } from "../domain/numbers";
 import { SCREEN_TOP_PROPERTY } from "../domain/screen";
 
 // The one place for news, drawn (`docs/components.md`, "Messages"). What stands here is decided in
-// the island module; this is the pill it stands as, and the three things a pill has to do that a
+// the island module; this is the pill it stands as, and the two things a pill has to do that a
 // list of messages cannot say on its own: morph between one size and the next rather than jumping,
-// count itself down, and answer the back gesture while it is holding a question.
+// and count itself down.
 
 // The colour each tone's mark carries. The island's surface is fixed dark in both themes, so the
 // text and the marks on it are fixed with it rather than left to the theme's own colours.
@@ -95,7 +91,6 @@ const state = islandState();
 const message = computed(() => state.value.standing);
 const waiting = computed(() => state.value.waiting.length);
 const wide = computed(() => message.value !== null && expands(message.value));
-const canPress = computed(() => message.value !== null && pressable(message.value));
 
 const body = useTemplateRef<HTMLElement>("body");
 // The size the pill is held to, taken off what it holds. A box told to be as big as its content
@@ -141,8 +136,8 @@ function away(key: string): void {
   state.value = settle(state.value, key);
 }
 
-// Its time running out. A message with no time of its own stands until it is pressed or answered,
-// which is what a question does and what the only chance to undo something does.
+// Its time running out. A message with no time of its own stands until it is pressed, which is
+// what the only chance to undo something does.
 let timer: ReturnType<typeof setTimeout> | null = null;
 
 watch(
@@ -168,34 +163,6 @@ onScopeDispose(() => {
   }
 });
 
-// A question is a thing the reader has to get out of, so the back gesture takes it back the way it
-// takes back everything else drawn over the screen. A notice is not: it goes on its own, and a
-// press of back spent on one would be a press the reader has to make twice.
-let layer: number | null = null;
-
-watch(
-  () => (message.value?.question === true && message.value.back ? message.value : null),
-  (asking) => {
-    if (layer !== null) {
-      closeLayer(layer);
-      layer = null;
-    }
-
-    if (asking === null) {
-      return;
-    }
-
-    listenForBack();
-    layer = openLayer(() => asking.actions[0]?.press());
-  }
-);
-
-onScopeDispose(() => {
-  if (layer !== null) {
-    closeLayer(layer);
-  }
-});
-
 // Pressing the words. Where the notice leads somewhere that is where it goes, and where it leads
 // nowhere the press is how a reader is rid of it before its time is up.
 async function press(): Promise<void> {
@@ -205,9 +172,7 @@ async function press(): Promise<void> {
     return;
   }
 
-  if (!endsItself(now)) {
-    away(now.key);
-  }
+  away(now.key);
 
   if (now.to !== null) {
     await navigateTo(now.to);
@@ -215,11 +180,11 @@ async function press(): Promise<void> {
 }
 
 // A press inside the island. A notice's own action leaves the island with it, since the thing it
-// offered has been taken; a question's actions settle it themselves, in the answer.
+// offered has been taken.
 async function take(action: IslandAction): Promise<void> {
   const now = message.value;
 
-  if (now !== null && !endsItself(now)) {
+  if (now !== null) {
     away(now.key);
   }
 
