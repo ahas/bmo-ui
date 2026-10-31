@@ -347,8 +347,8 @@ Every token is a custom property stated by the layer's stylesheet on the root un
   width.
 - **The layer's Nuxt configuration** brings the library as its module with its semantic colours, the
   layer's stylesheet, the viewport meta (`viewport-fit=cover`, the keyboard resizing the content), the
-  screen mode (dark until a reader chooses another, kept in the cookie `screen-mode` names), and the
-  screen mode's ground painted from the first frame.
+  screen mode (dark until a reader chooses another, kept for a year in the cookie `screen-mode`
+  names), and the screen mode's ground painted from the first frame.
 
 ## What the host owes
 
