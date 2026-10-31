@@ -50,6 +50,7 @@ export const appConfig = (await evaluated("../../app/app.config.ts", "defineAppC
 
 export const nuxtConfig = (await evaluated("../../nuxt.config.ts", "defineNuxtConfig")) as {
   app: { head: { meta: { name?: string; content?: string }[] } };
+  colorMode: { storage: string; storageKey: string; cookieAttrs?: Record<string, unknown> };
 };
 
 // Every class the layer gives one slot of one library component, wherever in that component's entry
