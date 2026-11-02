@@ -42,6 +42,13 @@ const TOKEN_SEGMENT = "{token}";
 // camelCase name in braces matching any one segment.
 const SHARE_PATTERN = /^(?:\/(?:\{[a-z][A-Za-z0-9]*\}|(?!\.\.?(?:\/|$))[\w.~-]+))+$/;
 
+// A screen path: one or more kebab-case segments, each led by a slash.
+const SCREEN_PATH = /^(?:\/[a-z0-9]+(?:-[a-z0-9]+)*)+$/;
+
+function screenPath(holds: string) {
+  return z.string().regex(SCREEN_PATH, "a path of kebab-case segments, each led by a slash").describe(holds);
+}
+
 function segmentsOf(path: string): string[] {
   return path.split("/").slice(1);
 }
@@ -49,6 +56,16 @@ function segmentsOf(path: string): string[] {
 // Whether a path stands under an API prefix: the prefix itself or a path below it.
 function under(prefix: string, path: string): boolean {
   return prefix === "/" || path === prefix || path.startsWith(`${prefix}/`);
+}
+
+// Whether a path stands at or below a screen path.
+function atOrBelow(screen: string, path: string): boolean {
+  return path === screen || path.startsWith(`${screen}/`);
+}
+
+// Whether either of two screen paths stands at or below the other.
+function overlap(one: string, other: string): boolean {
+  return atOrBelow(one, other) || atOrBelow(other, one);
 }
 
 const manifest = z
@@ -59,10 +76,11 @@ const manifest = z
       .string()
       .regex(/^i-[a-z0-9]+(?:-[a-z0-9]+)+$/, "an icon as the component library names one")
       .describe("The icon drawn beside the screen's name."),
-    screenPath: z
-      .string()
-      .regex(/^(?:\/[a-z0-9]+(?:-[a-z0-9]+)*)+$/, "a path of kebab-case segments, each led by a slash")
-      .describe("The path the bundle's screens stand under."),
+    screenPath: screenPath("The path the bundle's screens stand under."),
+    formerScreenPaths: z
+      .array(screenPath("A path the bundle's screens stood under before."))
+      .default([])
+      .describe("The paths the bundle's screens stood under before; a console answers every address under one as moved to the screen path."),
     serviceName: z.string().regex(KEBAB, "a name in kebab-case").describe("The service's name, which the console relays it under."),
     bundle: apiPath("The path of the service's API the bundle's module is answered at."),
     stylesheet: apiPath("The path of the service's API the bundle's stylesheet is answered at.").optional(),
@@ -124,6 +142,14 @@ const manifest = z
   })
   .refine((one) => one.shareReads.every((pattern) => under(one.apiPrefix, pattern)), { path: ["shareReads"], message: "patterns under the API prefix" })
   .refine((one) => new Set(one.shareReads).size === one.shareReads.length, { path: ["shareReads"], message: "each pattern named once" })
+  .refine((one) => one.formerScreenPaths.every((former) => !overlap(former, one.screenPath)), {
+    path: ["formerScreenPaths"],
+    message: "paths neither the screen path nor under or over it"
+  })
+  .refine((one) => one.formerScreenPaths.every((former, at) => one.formerScreenPaths.every((other, there) => at === there || !overlap(former, other))), {
+    path: ["formerScreenPaths"],
+    message: "each path named once, none under or over another"
+  })
   .refine((one) => one.sidebarUnread === undefined || under(one.apiPrefix, one.sidebarUnread.path), {
     path: ["sidebarUnread"],
     message: "a path under the API prefix"
@@ -195,6 +221,18 @@ export function shareRead(manifest: ConsoleManifest, method: string, path: strin
       wanted.every((segment, at) => (segment.startsWith("{") ? placeholderMatches(segments[at]!) : segment === segments[at]))
     );
   });
+}
+
+// The address a path under one of the manifest's former screen paths moved to: the same path with that former screen
+// path replaced by the screen path, the query kept as it stands; null where the path stands under none of them. The
+// path is read as a console's own, from the app's base path, its query after a `?` where it carries one.
+export function movedScreenAddress(manifest: ConsoleManifest, address: string): string | null {
+  const split = address.indexOf("?");
+  const path = split === -1 ? address : address.slice(0, split);
+  const query = split === -1 ? "" : address.slice(split);
+  const former = manifest.formerScreenPaths.find((one) => atOrBelow(one, path));
+
+  return former === undefined ? null : `${manifest.screenPath}${path.slice(former.length)}${query}`;
 }
 
 // The bundle's words as the service answers them: each locale's tree under the locale's code, every
