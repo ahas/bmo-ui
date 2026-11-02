@@ -61,6 +61,7 @@ none of them a dot or two standing for a folder.
 | `title` | The key, in the bundle's words, of the name a console's menu gives the bundle's screen. It lies under the bundle's namespace. | yes |
 | `icon` | The icon a console draws beside that name, as the component library names an icon. | yes |
 | `screenPath` | The path the bundle's screens stand under: one or more kebab-case segments, each led by a slash. | yes |
+| `formerScreenPaths` | The paths the bundle's screens stood under before, each written as a screen path is; none the screen path, none standing under it or over it, none under or over another, and none twice. A console answers every address under one as moved to the same address under the screen path ("A screen that moved"). | no, none |
 | `serviceName` | The service's name, in kebab-case, which a console relays the service under. | yes |
 | `bundle` | The path of the service's API its module is answered at. | yes |
 | `stylesheet` | The path of the service's API its stylesheet is answered at. | no, none |
@@ -92,7 +93,8 @@ names them.
 - **A manifest that does not read leaves its service out** as well, and the console records the
   reading's fault, naming each field.
 - **Two manifests sharing a name, a screen path or a service name** leave both services out, rather
-  than either attached over the other.
+  than either attached over the other. A former screen path counts as a screen path here: one manifest's
+  screen path or former screen path that is another's screen path or former screen path is shared.
 - **A manifest that changed replaces the one before it.** A reader already on the screen keeps the
   module the browser loaded until the screen is opened again.
 - **The console reads each bundle's words** with its manifest, so its menu names a screen before the
@@ -148,6 +150,20 @@ names them.
   reader whose sidebar it draws, with its own credential and that reader's owner key and role, and draws
   a positive count on the bundle's sidebar entry. It reads the count again as it chooses; one that did
   not answer leaves the last count standing, and none is drawn before one has.
+
+## A screen that moved
+
+A bundle whose screens stood under another path names that path under `formerScreenPaths`, so every address
+a reader kept, a share link among them, still reaches its screen.
+
+- **A console answers it as moved.** An address under a former screen path, the path itself or a path below
+  it, is answered with a permanent redirect that keeps the method (308) to the same address with the former
+  screen path replaced by the screen path, and its query kept as it was. A browser keeps the fragment itself
+  across the redirect. The shared module answers the address a path moved to.
+- **For every visitor alike.** The redirect is answered before any sign-in is asked for, to a reader with a
+  session and to one with none, since what the moved address opens is decided at the address it moved to.
+- **It is the bundle's own.** A bundle names its own former paths, and a console reads them from the manifest
+  alone, keeping no list of its own.
 
 ## Share pages
 
@@ -265,6 +281,8 @@ under `calls`, and its screens hand the module texts and a language.
   foot bar until the reader moves it there.
 - **It draws the sidebar count a bundle declares** ("How a bundle mounts", the sidebar count), reading it for the
   reader whose sidebar it draws and leaving the last count where a read does not answer.
+- **It answers a moved screen's addresses** ("A screen that moved"): every address under a bundle's former
+  screen path, to every visitor, with a 308 to the same address under its screen path, its query kept.
 - **It sets the owner key and the role** on everything it relays but a share read, and replaces any the
   browser sent.
 - **It opens a bundle's share page to a reader with no session** ("Share pages"): the page's address, that
