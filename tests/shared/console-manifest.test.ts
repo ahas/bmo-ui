@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 
-import { CONSOLE_MANIFEST_ROUTE, CONSOLE_MANIFEST_SCHEMA, CONSOLE_ROLES, consoleManifest, relaysRoute, roleAllows, screensCall, shareRead } from "../../shared/console-manifest";
+import { CONSOLE_MANIFEST_ROUTE, CONSOLE_MANIFEST_SCHEMA, CONSOLE_ROLES, consoleManifest, movedScreenAddress, relaysRoute, roleAllows, screensCall, shareRead } from "../../shared/console-manifest";
 
 // The console plugin contract's manifest (`docs/console-bundles.md`, "The manifest").
 
@@ -34,6 +34,7 @@ describe("a service's manifest", () => {
     expect(consoleManifest(answered)).toEqual({
       ...answered,
       role: "member",
+      formerScreenPaths: [],
       apiPrefix: "/",
       ownerKey: false,
       events: false,
@@ -124,6 +125,21 @@ describe("a service's manifest", () => {
     expect(faultsOf({ ...answered, shareReads: ["/links/{token}", "/links/{token}"] })).toContain("shareReads: each pattern named once");
   });
 
+  test("keeps the paths its screens stood under before, and refuses one out of shape, the screen path, one under or over it, or one named twice or under another", () => {
+    expect(consoleManifest({ ...answered, formerScreenPaths: ["/memos", "/old-notes"] }).formerScreenPaths).toEqual(["/memos", "/old-notes"]);
+    expect(faultsOf({ ...answered, formerScreenPaths: ["memos/"] })).toContain("formerScreenPaths.0:");
+    expect(faultsOf({ ...answered, formerScreenPaths: ["/Memos"] })).toContain("formerScreenPaths.0:");
+
+    for (const former of ["/notes", "/notes/old"]) {
+      expect(faultsOf({ ...answered, formerScreenPaths: [former] })).toContain("formerScreenPaths: paths neither the screen path nor under or over it");
+    }
+
+    expect(faultsOf({ ...answered, screenPath: "/memos/notes", formerScreenPaths: ["/memos"] })).toContain("formerScreenPaths: paths neither the screen path nor under or over it");
+    expect(consoleManifest({ ...answered, formerScreenPaths: ["/notes-old"] }).formerScreenPaths).toEqual(["/notes-old"]);
+    expect(faultsOf({ ...answered, formerScreenPaths: ["/memos", "/memos"] })).toContain("formerScreenPaths: each path named once, none under or over another");
+    expect(faultsOf({ ...answered, formerScreenPaths: ["/memos", "/memos/old"] })).toContain("formerScreenPaths: each path named once, none under or over another");
+  });
+
   test("is refused where its title lies outside its namespace", () => {
     expect(faultsOf({ ...answered, title: "common.title.screen" })).toContain("title: a key under the bundle's namespace");
   });
@@ -191,12 +207,33 @@ describe("the share reads a manifest names", () => {
   });
 });
 
+describe("the address a moved screen's path moved to", () => {
+  const moved = consoleManifest({ ...answered, formerScreenPaths: ["/memos", "/old/notes"] });
+
+  test("is the same path under the screen path, its query kept, for the former path itself and every path below it", () => {
+    expect(movedScreenAddress(moved, "/memos")).toBe("/notes");
+    expect(movedScreenAddress(moved, "/memos/")).toBe("/notes/");
+    expect(movedScreenAddress(moved, "/memos/share/a1B2c3")).toBe("/notes/share/a1B2c3");
+    expect(movedScreenAddress(moved, "/memos/42?tab=sources&page=2")).toBe("/notes/42?tab=sources&page=2");
+    expect(movedScreenAddress(moved, "/memos?q=a%2Fb")).toBe("/notes?q=a%2Fb");
+    expect(movedScreenAddress(moved, "/old/notes/7")).toBe("/notes/7");
+  });
+
+  test("is none for a path under no former screen path, the screen path itself among them", () => {
+    for (const path of ["/notes", "/notes/42", "/memosx", "/memos-old/1", "/old", "/", "", "/x/memos"]) {
+      expect(movedScreenAddress(moved, path)).toBeNull();
+    }
+
+    expect(movedScreenAddress(consoleManifest(answered), "/memos")).toBeNull();
+  });
+});
+
 describe("the manifest's JSON Schema", () => {
   test("requires the fields a service states and closes the object", () => {
     expect(CONSOLE_MANIFEST_SCHEMA.required).toEqual(["name", "title", "icon", "screenPath", "serviceName", "bundle", "words", "role"]);
     expect(CONSOLE_MANIFEST_SCHEMA.additionalProperties).toBe(false);
     expect(Object.keys(CONSOLE_MANIFEST_SCHEMA.properties as object).toSorted()).toEqual(
-      [...Object.keys(answered), "stylesheet", "apiPrefix", "ownerKey", "events", "websocket", "pushKinds", "sidebarUnread", "calls", "relays", "shareReads"].toSorted()
+      [...Object.keys(answered), "formerScreenPaths", "stylesheet", "apiPrefix", "ownerKey", "events", "websocket", "pushKinds", "sidebarUnread", "calls", "relays", "shareReads"].toSorted()
     );
     expect((CONSOLE_MANIFEST_SCHEMA.properties as Record<string, { enum?: unknown }>).role!.enum).toEqual(["administrator", "member"]);
   });
