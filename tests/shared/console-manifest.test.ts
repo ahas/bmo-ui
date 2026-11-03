@@ -1,6 +1,19 @@
 import { describe, expect, test } from "bun:test";
 
-import { CONSOLE_MANIFEST_ROUTE, CONSOLE_MANIFEST_SCHEMA, CONSOLE_ROLES, consoleManifest, movedScreenAddress, relaysRoute, roleAllows, screensCall, shareRead } from "../../shared/console-manifest";
+import {
+  CONSOLE_MANIFEST_ROUTE,
+  CONSOLE_MANIFEST_SCHEMA,
+  CONSOLE_ROLES,
+  SHARE_HEAD_LANGUAGE_QUERY,
+  consoleManifest,
+  movedScreenAddress,
+  relaysRoute,
+  roleAllows,
+  screensCall,
+  shareHead,
+  shareHeadPath,
+  shareRead
+} from "../../shared/console-manifest";
 
 // The console plugin contract's manifest (`docs/console-bundles.md`, "The manifest").
 
@@ -46,6 +59,7 @@ describe("a service's manifest", () => {
     });
     expect(consoleManifest(answered).stylesheet).toBeUndefined();
     expect(consoleManifest(answered).sidebarUnread).toBeUndefined();
+    expect(consoleManifest(answered).shareHead).toBeUndefined();
   });
 
   test("keeps what it states of the optional fields", () => {
@@ -233,8 +247,72 @@ describe("the manifest's JSON Schema", () => {
     expect(CONSOLE_MANIFEST_SCHEMA.required).toEqual(["name", "title", "icon", "screenPath", "serviceName", "bundle", "words", "role"]);
     expect(CONSOLE_MANIFEST_SCHEMA.additionalProperties).toBe(false);
     expect(Object.keys(CONSOLE_MANIFEST_SCHEMA.properties as object).toSorted()).toEqual(
-      [...Object.keys(answered), "formerScreenPaths", "stylesheet", "apiPrefix", "ownerKey", "events", "websocket", "pushKinds", "sidebarUnread", "calls", "relays", "shareReads"].toSorted()
+      [...Object.keys(answered), "formerScreenPaths", "stylesheet", "apiPrefix", "ownerKey", "events", "websocket", "pushKinds", "sidebarUnread", "calls", "relays", "shareReads", "shareHead"].toSorted()
     );
     expect((CONSOLE_MANIFEST_SCHEMA.properties as Record<string, { enum?: unknown }>).role!.enum).toEqual(["administrator", "member"]);
+  });
+});
+
+describe("a share address's head", () => {
+  const head = {
+    title: "Plan <one>",
+    description: "What the plan holds",
+    image: "/links/Ab3_x/picture",
+    url: "https://console.example/notes/share/Ab3_x",
+    locale: "en_US",
+    siteName: "Notes",
+    type: "article",
+    kind: "Plan"
+  };
+
+  test("is named as a pattern under the API prefix holding the token once and no other placeholder", () => {
+    expect(consoleManifest({ ...answered, apiPrefix: "/api", shareHead: "/api/links/{token}/head" }).shareHead).toBe("/api/links/{token}/head");
+    expect(faultsOf({ ...answered, shareHead: "/links/head" })).toContain("shareHead: a pattern holding {token} once");
+    expect(faultsOf({ ...answered, shareHead: "/links/{token}/{token}" })).toContain("shareHead: a pattern holding {token} once");
+    expect(faultsOf({ ...answered, shareHead: "/links/{token}/{fileId}" })).toContain("shareHead:");
+    expect(faultsOf({ ...answered, shareHead: "/links/../{token}" })).toContain("shareHead:");
+    expect(faultsOf({ ...answered, apiPrefix: "/api", shareHead: "/links/{token}/head" })).toContain("shareHead: a pattern under the API prefix");
+  });
+
+  test("is asked at the pattern with the address's token in place, and nowhere for a manifest naming none", () => {
+    const read = consoleManifest({ ...answered, shareHead: "/links/{token}/head" });
+
+    expect(SHARE_HEAD_LANGUAGE_QUERY).toBe("language");
+    expect(shareHeadPath(read, "Ab3_x")).toBe("/links/Ab3_x/head");
+    expect(shareHeadPath(read, "a%20b")).toBe("/links/a%20b/head");
+    expect(shareHeadPath(consoleManifest(answered), "Ab3_x")).toBeNull();
+
+    for (const token of ["", ".", "..", "%2E", "%2e%2E", "a/b", "a?b", "a#b"]) {
+      expect(shareHeadPath(read, token)).toBeNull();
+    }
+  });
+
+  test("reads an answer of the shape, letting go of fields it does not name", () => {
+    expect(shareHead({ ...head, extra: 1 })).toEqual(head);
+
+    const { description: _description, image: _image, kind: _kind, ...bare } = head;
+
+    expect(shareHead(bare)).toEqual(bare);
+  });
+
+  test("refuses an answer out of the shape, naming each field at fault", () => {
+    const faults = (value: unknown) => {
+      try {
+        shareHead(value);
+      } catch (error) {
+        return String(error);
+      }
+
+      throw new Error("the head was read");
+    };
+
+    expect(faults({ ...head, title: "" })).toContain("title:");
+    expect(faults({ ...head, url: "/notes/share/Ab3_x" })).toContain("url: an absolute http or https address");
+    expect(faults({ ...head, url: "javascript:alert(1)" })).toContain("url:");
+    expect(faults({ ...head, image: "https://elsewhere.example/a.png" })).toContain("image:");
+    expect(faults({ ...head, locale: "en-US" })).toContain("locale:");
+    expect(faults({ ...head, type: "<script>" })).toContain("type:");
+    expect(faults({ ...head, siteName: undefined })).toContain("siteName:");
+    expect(faults("<meta>")).toContain("The share head does not keep the contract");
   });
 });

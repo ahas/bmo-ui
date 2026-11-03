@@ -42,6 +42,9 @@ const TOKEN_SEGMENT = "{token}";
 // camelCase name in braces matching any one segment.
 const SHARE_PATTERN = /^(?:\/(?:\{[a-z][A-Za-z0-9]*\}|(?!\.\.?(?:\/|$))[\w.~-]+))+$/;
 
+// The share head's pattern: a path of the service's API whose segments stand as written, but one that is `{token}`.
+const SHARE_HEAD_PATTERN = /^(?:\/(?:\{token\}|(?!\.\.?(?:\/|$))[\w.~-]+))+$/;
+
 // A screen path: one or more kebab-case segments, each led by a slash.
 const SCREEN_PATH = /^(?:\/[a-z0-9]+(?:-[a-z0-9]+)*)+$/;
 
@@ -130,7 +133,15 @@ const manifest = z
           })
       )
       .default([])
-      .describe("The reads a share token alone permits: path patterns under the API prefix, each holding {token} once.")
+      .describe("The reads a share token alone permits: path patterns under the API prefix, each holding {token} once."),
+    shareHead: z
+      .string()
+      .regex(SHARE_HEAD_PATTERN, "a path pattern of the service's API, its one placeholder {token}")
+      .refine((pattern) => segmentsOf(pattern).filter((segment) => segment === TOKEN_SEGMENT).length === 1, {
+        message: "a pattern holding {token} once"
+      })
+      .optional()
+      .describe("The read a console asks for what a share address reads as before it is opened: a path pattern under the API prefix holding {token} once.")
   })
   .strict()
   .refine((one) => one.title.startsWith(`${one.name}.`), { path: ["title"], message: "a key under the bundle's namespace" })
@@ -142,6 +153,7 @@ const manifest = z
   })
   .refine((one) => one.shareReads.every((pattern) => under(one.apiPrefix, pattern)), { path: ["shareReads"], message: "patterns under the API prefix" })
   .refine((one) => new Set(one.shareReads).size === one.shareReads.length, { path: ["shareReads"], message: "each pattern named once" })
+  .refine((one) => one.shareHead === undefined || under(one.apiPrefix, one.shareHead), { path: ["shareHead"], message: "a pattern under the API prefix" })
   .refine((one) => one.formerScreenPaths.every((former) => !overlap(former, one.screenPath)), {
     path: ["formerScreenPaths"],
     message: "paths neither the screen path nor under or over it"
@@ -221,6 +233,69 @@ export function shareRead(manifest: ConsoleManifest, method: string, path: strin
       wanted.every((segment, at) => (segment.startsWith("{") ? placeholderMatches(segments[at]!) : segment === segments[at]))
     );
   });
+}
+
+// The query naming the language a console asks a share head in: the primary language subtag of the language it shows
+// its pages in.
+export const SHARE_HEAD_LANGUAGE_QUERY = "language";
+
+// The path a console asks a manifest's share head at for a token, the token taken as the share address writes it, one
+// segment still escaped; null where the manifest names no share head, or the token is no segment a placeholder
+// matches.
+export function shareHeadPath(manifest: ConsoleManifest, token: string): string | null {
+  if (manifest.shareHead === undefined || /[/?#]/.test(token) || !placeholderMatches(token)) return null;
+
+  return segmentsOf(manifest.shareHead)
+    .map((segment) => `/${segment === TOKEN_SEGMENT ? token : segment}`)
+    .join("");
+}
+
+// An address a page is reached at from anywhere: an absolute http or https address.
+function publicAddress(value: string): boolean {
+  try {
+    const read = new URL(value);
+
+    return read.protocol === "https:" || read.protocol === "http:";
+  } catch {
+    return false;
+  }
+}
+
+// What a share address reads as before it is opened, as a service answers its share head: data a console writes
+// into the head of the page it serves there, never markup. Fields the shape does not name are let go.
+const head = z.object({
+  title: z.string().min(1).describe("What the page names its resource by."),
+  description: z.string().min(1).optional().describe("What a card says of the resource."),
+  image: z
+    .string()
+    .regex(API_PATH, "a path of the service's API from its root")
+    .optional()
+    .describe("The resource's picture, as the path of a share read the manifest names, carrying the token."),
+  url: z.string().refine(publicAddress, "an absolute http or https address").describe("The share address's whole public address."),
+  locale: z
+    .string()
+    .regex(/^[a-z]{2,3}_[A-Z]{2}$/, "a locale as Open Graph writes one: a language and a region joined by an underscore")
+    .describe("The locale of the language the page is shown in."),
+  siteName: z.string().min(1).describe("The name the card stands under."),
+  type: z
+    .string()
+    .regex(/^[a-z][a-z0-9_.:-]*$/, "an Open Graph type")
+    .describe("The Open Graph type of the resource."),
+  kind: z.string().min(1).optional().describe("The word the page names the resource's kind by.")
+});
+
+// A share head as a console reads it.
+export type ShareHead = z.output<typeof head>;
+
+// A share head's answer read, or refused with each field at fault named.
+export function shareHead(value: unknown): ShareHead {
+  const read = head.safeParse(value);
+
+  if (read.success) return read.data;
+
+  const faults = read.error.issues.map((issue) => `${issue.path.join(".") || "the head"}: ${issue.message}`);
+
+  throw new Error(`The share head does not keep the contract: ${faults.join("; ")}`);
 }
 
 // The address a path under one of the manifest's former screen paths moved to: the same path with that former screen
