@@ -76,6 +76,7 @@ none of them a dot or two standing for a folder.
 | `calls` | The other services the screens call through the console, each by the service name its own manifest gives it, in kebab-case; never the bundle's own service, and none twice. | no, none |
 | `relays` | The service's own routes outside the API prefix that a console relays as well, each its `method` (`GET`, `POST`, `PUT`, `PATCH` or `DELETE`) and its `path`, one whole path of the service's API; none twice. | no, none |
 | `shareReads` | The reads a share token alone permits, each a path pattern of the service's API under the API prefix: a path whose segments stand as written or as a placeholder, a name in camelCase in braces matching any one segment, with `{token}` among them once, standing for the token. A console relays a `GET` or a `HEAD` whose path a pattern matches with no session ("Share pages"); none twice. | no, none |
+| `shareHead` | The read a console asks for what a share address reads as before it is opened: a path pattern of the service's API under the API prefix, written as a share read's pattern is, holding `{token}` once and no other placeholder ("Share pages", the head). | no, none |
 
 Reading a manifest fills each optional field that states a default with it, so a console reads every
 field of every manifest but the stylesheet and the sidebar count, which stand only where a manifest
@@ -188,6 +189,33 @@ permission: the page reads only what its token opens, through the reads the mani
   token opens; a token that opens nothing is refused as absent. Where its manifest names a share read, its
   module and its stylesheet are answered with no owner key and no role, since a reader with no sign-in loads
   them, and they carry no reader's data.
+- **What it reads as before it is opened.** A chat app or a browser drawing a card for a share address reads the
+  page the console serves there and runs none of it, so a page whose head the module writes reads as nothing.
+  Where the manifest names a `shareHead`, the console asks it before it serves the page at a share address, and
+  writes what it answers into the head of the page it serves, so the card is drawn with no script run.
+  - **The ask.** A `GET` of the pattern with the address's token in place of `{token}`, its query `language`
+    the primary language subtag of the language the console shows its pages in. It is asked with the console's
+    own credential and, as every share read, with no owner key and no role, whoever is signed in.
+  - **The answer** is data, never markup: a 200 with a JSON object holding `title`, what the page names its
+    resource by; `url`, the share address's whole public address, its own canonical one; `locale`, the locale
+    of the language the page is shown in, as Open Graph writes one, a language and a region joined by an
+    underscore; `siteName`, the name the card stands under; and `type`, the Open Graph type of the resource.
+    Where they stand it holds `description`, what the card says of the resource; `image`, the resource's
+    picture as the path of a share read the manifest names, carrying the address's token; and `kind`, the word
+    the page names the resource's kind by, for a reader of the head that draws it. Each word is in the language
+    the ask named where the service holds its words in it.
+  - **What the console writes.** Into the head of the page it serves at that address, each value written as an
+    attribute's or an element's text and escaped, so no value closes its tag: the title as the page's title,
+    `og:title` and `twitter:title`; the description as the page's description, `og:description` and
+    `twitter:description`, none of the three where there is none; `og:type`, `og:site_name`, `og:locale`,
+    `og:url` and the canonical link from the answer; the image's whole public address, the address the console
+    relays that share read at on the origin of the answer's `url`, as `og:image` and `twitter:image`, neither
+    where there is none or where the path is no share read the manifest names; `twitter:card`, a large picture's
+    card with an image and a summary without; and a request that search engines not index or follow the page.
+    The module still writes its own head once it runs.
+  - **A head that does not answer leaves the page as it is.** A refusal, any answer but a 200, an answer that
+    does not keep the shape, a call nothing took or a manifest naming no `shareHead` leaves the page the console
+    serves at the address with no head of the resource's, and the reader is shown nothing of it.
 
 ## Translation
 
@@ -288,6 +316,9 @@ under `calls`, and its screens hand the module texts and a language.
 - **It opens a bundle's share page to a reader with no session** ("Share pages"): the page's address, that
   bundle's module, stylesheet and words, and the share reads its manifest names, each relayed with no owner
   key and no role; nothing else of any service without a session.
+- **It writes a share page's head where the manifest names a `shareHead`** ("Share pages", what it reads as
+  before it is opened): it asks the read for the address's token and writes the escaped tags of its answer into
+  the page it serves there, and leaves the page as it is where the read does not answer.
 - **It states its relay base** in its app configuration, under `bmoUi`, as `relayBase`: the path every
   service is relayed under, from the app's base path. Where none is stated, a service is called at its
   name from the app's base path.
@@ -307,6 +338,8 @@ under `calls`, and its screens hand the module texts and a language.
 - **It guards every route itself** by the console's credential, the role and the owner key, as the
   contract states, and each share read by its token.
 - **It names a share read** only for what its share page reads, each answering only what a live token opens.
+- **It names a `shareHead`** only where its share page has a head of its own, answering it for a live token alone,
+  as data in the shape the contract states, and refusing a token that opens nothing as absent.
 
 ## Who reads the contract
 

@@ -173,7 +173,7 @@ Each is named with everything it exports.
 | `files` | `FileConflict` |
 | `code-language` | `codeLanguage` |
 | `screen-mode` | `DocumentScheme`, `DEFAULT_SCHEME`, `SCHEME_COOKIE`, `isDocumentScheme` |
-| `console-manifest` | `CONSOLE_MANIFEST_ROUTE`, `OWNER_KEY_HEADER`, `OWNER_ROLE_HEADER`, `CONSOLE_ROLES`, `ConsoleRole`, `RELAY_METHODS`, `RelayMethod`, `ConsoleManifest`, `CONSOLE_MANIFEST_SCHEMA`, `consoleManifest`, `roleAllows`, `screensCall`, `relaysRoute`, `shareRead`, `movedScreenAddress`, `ConsoleWords`, `ConsoleBundleModule` |
+| `console-manifest` | `CONSOLE_MANIFEST_ROUTE`, `OWNER_KEY_HEADER`, `OWNER_ROLE_HEADER`, `CONSOLE_ROLES`, `ConsoleRole`, `RELAY_METHODS`, `RelayMethod`, `ConsoleManifest`, `CONSOLE_MANIFEST_SCHEMA`, `consoleManifest`, `roleAllows`, `screensCall`, `relaysRoute`, `shareRead`, `ShareHead`, `SHARE_HEAD_LANGUAGE_QUERY`, `shareHeadPath`, `shareHead`, `movedScreenAddress`, `ConsoleWords`, `ConsoleBundleModule` |
 
 - **`search` folds letter case in the locale each call is handed,** the runtime's own where none is.
   It reads no app configuration, so it runs alike in a browser and on a server; a host searching in
@@ -185,7 +185,9 @@ Each is named with everything it exports.
   whether a manifest names a route whose answer holds a sidebar unread count, whether a bundle's screens
   call a service (their own, or one named under `calls`), the methods a route under `relays` is named
   by and whether a manifest names a method and path there, whether a method and path are a share read a
-  manifest names under `shareReads`, the address a path under a former screen path moved to, and the
+  manifest names under `shareReads`, the path a console asks a manifest's `shareHead` at for a token and the query
+  naming the language it asks in, the head a service answers there as its type and its reading, which refuses
+  an answer out of the shape, the address a path under a former screen path moved to, and the
   types of a bundle's words and of its module's default export. A service and a console import it alike; it runs in a browser, on a server and in a test.
 
 ## Page plugins
