@@ -307,6 +307,8 @@ default; a screen supplies what it holds and what a press means there. Every exp
 - **A finger has no hover.** Where a tap does nothing else, a tap brings it up; where a tap acts, a
   finger rests on it instead, by the one held finger, and lifting presses nothing. The next touch
   anywhere puts it away.
+- **A tooltip switched off comes up for nothing:** no hover, no focus, no tap and no resting finger opens it, so
+  what it stands on is pressed as if no tooltip stood there.
 - **Its words wrap** inside a box no wider than a phone has room for.
 - **A cut name names itself only where it is actually cut,** measured as the tooltip is about to come
   up.
