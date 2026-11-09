@@ -44,9 +44,26 @@ function markOf(id: number): string {
 
 const stack: Layer[] = [];
 
-// Pops this module caused itself by taking an entry back. They are not the reader's press and
-// close nothing.
+// Whether a pop this module caused itself by taking an entry back is still on its way: one when it
+// is, nought otherwise. Such a pop is not the reader's press and closes nothing.
 let ignoring = 0;
+
+// Steps back asked for while one was still on its way. A browser is asked for one step at a time: a
+// second asked for before the first has landed is dropped by some, and where it does land the
+// router, told to let one pop pass, reads the other as the reader's own. So each waits its turn.
+let owed = 0;
+
+// Takes one step back, or leaves it owed while another is on its way.
+function step(): void {
+  if (ignoring > 0) {
+    owed += 1;
+
+    return;
+  }
+
+  ignoring = 1;
+  history().back();
+}
 
 // What waits for those pops to land. The browser lands a step back a moment after it is asked
 // for, and a navigation begun in that moment would be cancelled by it; so a navigation waits here
@@ -132,6 +149,7 @@ export function holdHistory(stand: LayerHistory | null): void {
   held = stand;
   stack.length = 0;
   ignoring = 0;
+  owed = 0;
   closing = false;
   landed();
 }
@@ -186,8 +204,7 @@ export function closeLayer(id: number): void {
     return;
   }
 
-  ignoring += 1;
-  now.back();
+  step();
 }
 
 // Whether the entry arrived at is one of this app's own whose layer no longer stands: one a
@@ -205,25 +222,30 @@ function stale(state: unknown): boolean {
 }
 
 function stepOver(): void {
-  ignoring += 1;
-  history().back();
+  step();
 }
 
 // What the back gesture means here: the top layer if one stands, and nothing at all otherwise —
 // in which case the press is the reader's own and the page it leads to is where they go.
 export function handlePop(state: unknown): void {
   if (ignoring > 0) {
-    ignoring -= 1;
+    ignoring = 0;
 
-    if (ignoring === 0) {
-      if (stale(state)) {
-        stepOver();
+    // The next step owed is taken now that this one has landed.
+    if (owed > 0) {
+      owed -= 1;
+      step();
 
-        return;
-      }
-
-      landed();
+      return;
     }
+
+    if (stale(state)) {
+      stepOver();
+
+      return;
+    }
+
+    landed();
 
     return;
   }

@@ -41,6 +41,8 @@ Object.assign(globalThis, {
 
 export interface BackPage {
   layerCount: () => number;
+  // The dialog and the drawer put up or taken down together, in the one turn a screen's own action does it in.
+  stand: (dialog: boolean, drawer: boolean) => void;
 }
 
 // A control named by a tooltip, as every icon button of a host's is.
@@ -116,5 +118,11 @@ export function mountBack(box: HTMLElement): BackPage {
 
   watchOverlays();
 
-  return { layerCount };
+  return {
+    layerCount,
+    stand: (dialog, drawer) => {
+      drawerOpen.value = drawer;
+      dialogOpen.value = dialog;
+    }
+  };
 }

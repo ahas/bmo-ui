@@ -335,6 +335,14 @@ default; a screen supplies what it holds and what a press means there. Every exp
   - A screen may register a state it entered as a layer too, so back leaves it the same way.
   - A choice that closes one floating thing and opens another in the same press pushes the new entry
     only once the old one's step back has landed.
+  - A press that follows another close at once still closes what it was meant for: the thing just closed is
+    still on the page while its leaving is drawn and takes the key for itself, so what stands under it is asked
+    again once that one has gone.
+  - Steps back are taken one at a time: where one press closes two floating things, the second step
+    is asked for only once the first has landed. A step asked for while another is on its way is
+    dropped by some browsers and read by the router as the reader's own press where it lands, and
+    either leaves a floating thing standing with no entry of its own, so back would leave the page
+    under it.
   - The focus handed back to the control a floating thing was opened from closes nothing.
   - A tooltip naming a control of what the press closes is put away in the same press: it is asked
     first, and the floating thing is asked again before the press is over.

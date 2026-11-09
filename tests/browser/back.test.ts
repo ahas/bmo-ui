@@ -51,6 +51,7 @@ afterAll(async () => {
 const PAGE = `
   @keyframes tooltip-out { to { opacity: 0 } }
   [data-tooltip][data-state="closed"] { animation: tooltip-out 150ms ease both; }
+  [data-sheet="dialog"][data-state="closed"] { animation: tooltip-out 300ms ease both; }
   body { margin: 0; font: 16px sans-serif; }
 `;
 
@@ -130,4 +131,77 @@ describe.skipIf(!ready)("the back gesture over a tooltip standing on the control
     expect(after.marked).toBe(false);
     await page.close();
   });
+
+  // One press of a screen's own that takes down a dialog and the drawer under it asks for two steps back. Asked for
+  // together, the browser takes one and the other is lost, and whatever floats next stands with no entry of its own.
+  test("two floating things taken down in one press leave the history as it was, and the next one is closed by back", async () => {
+    const page = await openPage();
+    const stand = (dialog: boolean, drawer: boolean): Promise<void> =>
+      page.evaluate(([one, other]) => (window as unknown as { back: { stand: (dialog: boolean, drawer: boolean) => void } }).back.stand(one!, other!), [dialog, drawer]);
+    // Whether the page stands on its own entry: an entry of a layer carries the page's state with the layer's mark.
+    const based = (): Promise<boolean> =>
+      page.evaluate(() => {
+        const state = history.state as Record<string, unknown> | null;
+
+        return state?.base === true && state.bmoLayer === undefined;
+      });
+    const settled = (layers: number, sheets: number): Promise<unknown> =>
+      page.waitForFunction(
+        ([count, open]) =>
+          (window as unknown as { back: { layerCount: () => number } }).back.layerCount() === count &&
+          document.querySelectorAll("[data-sheet][data-state=open]").length === open,
+        [layers, sheets],
+        { timeout: 3000 }
+      );
+
+    await page.evaluate(() => history.replaceState({ base: true }, ""));
+    await stand(false, true);
+    await settled(1, 1);
+    await stand(true, true);
+    await settled(2, 2);
+
+    expect(await based()).toBe(false);
+
+    await stand(false, false);
+    await settled(0, 0);
+    await page.waitForFunction(() => (history.state as Record<string, unknown> | null)?.bmoLayer === undefined, null, { timeout: 3000 });
+
+    expect(await based()).toBe(true);
+
+    // What floats next has an entry of its own, and one press of back closes it without leaving the page.
+    await stand(false, true);
+    await settled(1, 1);
+    await page.waitForFunction(() => (history.state as Record<string, unknown> | null)?.bmoLayer !== undefined, null, { timeout: 3000 });
+    await pressBack(page);
+
+    expect(await based()).toBe(true);
+    await page.close();
+  });
+
+  // A dialog's leaving is drawn, so it is still on the page a moment after it closed, and the library hands the key
+  // to it for that moment. A press of back made in it is the drawer's all the same.
+  test("a press made while a dialog just closed is still leaving closes the drawer under it", async () => {
+    const page = await openPage();
+    const stand = (dialog: boolean, drawer: boolean): Promise<void> =>
+      page.evaluate(([one, other]) => (window as unknown as { back: { stand: (dialog: boolean, drawer: boolean) => void } }).back.stand(one!, other!), [dialog, drawer]);
+
+    await stand(false, true);
+    await page.waitForSelector('[data-sheet="drawer"][data-state="open"]');
+    await stand(true, true);
+    await page.waitForSelector('[data-sheet="dialog"][data-state="open"]');
+    await page.waitForFunction(() => (window as unknown as { back: { layerCount: () => number } }).back.layerCount() === 2);
+
+    await stand(false, true);
+    // The dialog is leaving and its step back has landed: the press is made now.
+    await page.waitForSelector('[data-sheet="dialog"][data-state="closed"]');
+    await page.waitForFunction(() => (window as unknown as { back: { layerCount: () => number } }).back.layerCount() === 1);
+    await pressBack(page);
+
+    const after = await standing(page);
+
+    expect(after.open).toEqual([]);
+    expect(after.marked).toBe(false);
+    await page.close();
+  });
 });
+
