@@ -81,10 +81,42 @@ function settle(): Promise<void> {
   return nextTick().then(() => new Promise((resolve) => setTimeout(resolve, 0)));
 }
 
-async function dismiss(element: Element): Promise<void> {
+// Whether a floating thing that has closed is still on the page, drawing its leaving. The library hands the key
+// to it for as long as it is there, so what stands under it is not asked at all.
+function leaving(): boolean {
+  return Array.from(document.querySelectorAll(LAYER)).some((element) => element.getAttribute("data-state") === "closed");
+}
+
+// Resolves once nothing is drawing its leaving any more, looked at a frame at a time.
+function left(): Promise<void> {
+  return new Promise((resolve) => {
+    const look = (): void => {
+      if (leaving()) {
+        requestAnimationFrame(look);
+      } else {
+        resolve();
+      }
+    };
+
+    look();
+  });
+}
+
+async function ask(element: Element): Promise<void> {
   for (let tried = 0; tried < ESCAPE_TRIES && isOpen(element); tried += 1) {
     escape();
     await settle();
+  }
+}
+
+async function dismiss(element: Element): Promise<void> {
+  await ask(element);
+
+  // A press that follows another's close at once finds the thing just closed still leaving, and it took the key.
+  // The press is this layer's all the same, so it is asked again once that one has gone.
+  if (isOpen(element) && leaving()) {
+    await left();
+    await ask(element);
   }
 
   // One that refuses to close stands on, and so stands as a layer again with an entry of its own;

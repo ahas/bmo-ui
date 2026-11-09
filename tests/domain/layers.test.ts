@@ -262,6 +262,89 @@ describe("a step back taken by a close", () => {
   });
 });
 
+describe("one press that closes two layers", () => {
+  // A browser that takes one step at a time: a step asked for while another is on its way is dropped, as some
+  // browsers drop it.
+  function oneAtATime(): Browser & { land: () => void; asked: () => number; dropped: () => number } {
+    const now = browser() as Browser & { land: () => void; asked: () => number; dropped: () => number };
+    let pending = false;
+    let asked = 0;
+    let dropped = 0;
+
+    now.back = () => {
+      asked += 1;
+
+      if (pending) {
+        dropped += 1;
+
+        return;
+      }
+
+      pending = true;
+    };
+    now.land = () => {
+      while (pending) {
+        pending = false;
+        now.at -= 1;
+        handlePop(now.entries[now.at]?.state);
+      }
+    };
+    now.asked = () => asked;
+    now.dropped = () => dropped;
+
+    return now;
+  }
+
+  test("takes its steps back one at a time, so none is dropped and both entries go", () => {
+    const now = oneAtATime();
+    const sheet = openLayer(() => undefined);
+    const dialog = openLayer(() => undefined);
+
+    expect(now.at).toBe(2);
+
+    closeLayer(dialog);
+    closeLayer(sheet);
+
+    // One step is on its way; the second waits for it.
+    expect(now.asked()).toBe(1);
+
+    now.land();
+
+    expect(now.asked()).toBe(2);
+    expect(now.dropped()).toBe(0);
+    expect(now.at).toBe(0);
+    expect(layerCount()).toBe(0);
+  });
+
+  test("and a layer opened after it has an entry of its own, which the reader's press closes", () => {
+    const now = oneAtATime();
+    let open = true;
+
+    closeLayer(openLayer(() => undefined));
+
+    const sheet = openLayer(() => undefined);
+    const dialog = openLayer(() => undefined);
+
+    now.land();
+    closeLayer(dialog);
+    closeLayer(sheet);
+    now.land();
+
+    expect(now.at).toBe(0);
+
+    openLayer(() => (open = false));
+
+    expect(now.at).toBe(1);
+
+    now.back = () => now.press();
+    now.press();
+
+    expect(open).toBe(false);
+    expect(now.at).toBe(0);
+    expect(now.href).toBe("https://example.test/page/1");
+  });
+});
+
 describe("a layer opened in the press that closed another", () => {
   // A menu's choice that opens a dialog: the menu's step back is still on its way when the dialog
   // opens, and the dialog's entry must not be the one that step takes away.
