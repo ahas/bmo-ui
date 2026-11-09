@@ -16,6 +16,11 @@ describe("the shared tooltip", () => {
     expect(tip).toContain('{ once: true, capture: true }');
   });
 
+  test("switched off, it opens for nothing, a finger's tap included", () => {
+    expect(tip).toContain("if (value && props.disabled) return;");
+    expect(tip.indexOf("if (value && props.disabled) return;")).toBeLessThan(tip.indexOf('if (value) emit("ask");'));
+  });
+
   test("names a cut name only where its box actually cuts it", () => {
     expect(tip).toContain("box.scrollWidth > box.clientWidth");
     expect(tip).toContain("if (value && props.cut && !isCut()) return;");

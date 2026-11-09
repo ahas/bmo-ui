@@ -96,6 +96,8 @@ function isCut(): boolean {
 const shown = computed({
   get: () => open.value,
   set: (value: boolean) => {
+    // Switched off, it opens for nothing: a tap and a resting finger as little as a hover or a focus.
+    if (value && props.disabled) return;
     if (value && props.cut && !isCut()) return;
     if (value) emit("ask");
 
