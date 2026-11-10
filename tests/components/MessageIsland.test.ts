@@ -146,7 +146,14 @@ describe("the presses it holds", () => {
   // A white word on the light theme's fill shade reads at 2.4:1; the badges' darker step brings
   // it past 4.5:1, measured at 7.5:1 on the bench.
   test("a filled press on it takes the darker step every badge takes, so its word reads", () => {
-    expect(island).toContain("? 'badge-ink min-h-11' : ''");
+    expect(island).toContain("? 'badge-ink pointer-coarse:min-h-11' : ''");
+  });
+
+  // A notice of one line keeps its keys on that line, centred on it, at the small size a pointer reads.
+  test("a one-line notice holds its keys on its line, and a key is a finger's height on touch alone", () => {
+    expect(island).toContain("message.value.description === null && message.value.actions.length > 0");
+    expect(island).toContain("inline ? 'flex items-center' : ''");
+    expect(island).not.toContain("base: 'min-h-11");
   });
 
   test("a notice goes with the press taken on it, on its words or on a press it offers", () => {

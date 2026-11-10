@@ -228,7 +228,10 @@ default; a screen supplies what it holds and what a press means there. Every exp
   Only what it says fades. Its words are laid out at full width from the first frame and hidden past
   its edge until it is open. Where less movement was asked for, it stands and goes at once.
 - **The whole of it is the press.** Where a notice leads somewhere, pressing it goes there; where it
-  leads nowhere, the press puts it away. A further press it offers is a button of its own inside it.
+  leads nowhere, the press puts it away. A further press it offers is a button of its own inside it,
+  at the small size, as tall as a line of its words on a pointer and a finger's height on a touch
+  screen: at the line's end, centred on it, where the notice says one line, and under its words where
+  it says more.
 - **One stands and the rest wait.** The one standing carries how many are behind it, and the next
   takes its place the moment it goes, so the pill morphs from one to the next. The same thing said
   twice replaces itself where it stands. The line holds five, and drops its oldest end.
