@@ -135,12 +135,16 @@ names them.
   raw address alike.
 - **The title bar.** A console may draw one title bar over every screen, a bundle's among them. Where it
   does, it provides, under the injection key `bmo-console-title-bar`, an object naming in `screenActions`
-  the selector of the place in its bar a screen lays what acts on it as a whole. A route that asks for the
-  console's bar says so in its meta, `consoleTitleBar: true`, and the console draws the bar over it, named by
-  the manifest's title and icon. A screen whose route asks and that finds the key provided draws no bar of
-  its own, and teleports what acts on it as a whole into the place `screenActions` names, deferred, since the
-  bar stands before the screen does; found without the key — on its service's own page, or under a console
-  that draws no shared bar — it draws its own. A route that does not ask stands as its bundle draws it.
+  the selector of the place in its bar, after the name, a screen lays what acts on it as a whole, and in
+  `screenLead` the selector of the place before the name a screen lays its way back to the screen it was
+  opened from, since a way back leads the bar as it leads every head. A route that asks for the console's bar
+  says so in its meta, `consoleTitleBar: true`, and the console draws the bar over it, named by the
+  manifest's title and icon. A screen whose route asks and that finds the key provided draws no bar of its
+  own, and teleports what acts on it as a whole into the place `screenActions` names and its way back into
+  the place `screenLead` names, deferred, since the bar stands before the screen does; where the offer names
+  no `screenLead`, the way back stands first among its actions. Found without the key — on its service's own
+  page, or under a console that draws no shared bar — it draws its own. A route that does not ask stands as
+  its bundle draws it.
 - **The people directory.** A console that keeps accounts with names may offer a screen the people of the
   reader's organization, under the injection key `bmo-console-people`, as an object of three reads: `search`,
   given words, answers the people whose name, organization or job title holds them, at most twenty; `person`,
