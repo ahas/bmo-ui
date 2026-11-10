@@ -25,10 +25,17 @@
             role="status"
             aria-live="polite"
           >
-            <div ref="body" class="bmo-island-content w-max max-w-[calc(100vw-2rem)] shrink-0" :class="wide ? 'min-w-[16rem]' : ''">
+            <div
+              ref="body"
+              class="bmo-island-content w-max max-w-[calc(100vw-2rem)] shrink-0"
+              :class="[wide ? 'min-w-[16rem]' : '', inline ? 'flex items-center' : '']"
+            >
+              <!-- A notice of one line keeps its keys on that line, centred on it; one that says more
+                   lays them under its words. -->
               <button
                 type="button"
-                class="flex w-full cursor-pointer items-start gap-3 p-4 text-start transition-colors hover:bg-white/10 active:bg-white/20 focus-inset"
+                class="flex cursor-pointer items-start gap-3 p-4 text-start transition-colors hover:bg-white/10 active:bg-white/20 focus-inset"
+                :class="inline ? 'min-w-0 flex-1' : 'w-full'"
                 @click="press()"
               >
                 <UIcon :name="message.icon" class="size-5 shrink-0" :class="MARK_TONES[message.tone]" />
@@ -47,7 +54,7 @@
                 >+<RollingNumber :value="waiting" /></span>
               </button>
 
-              <div v-if="message.actions.length > 0" class="flex justify-end gap-2 whitespace-nowrap px-4 pb-4">
+              <div v-if="message.actions.length > 0" class="flex shrink-0 items-center justify-end gap-2 whitespace-nowrap" :class="inline ? 'pe-3' : 'px-4 pb-4'">
                 <UButton
                   v-for="action in message.actions"
                   :key="action.label"
@@ -55,8 +62,8 @@
                   size="sm"
                   :color="action.tone === 'error' ? 'error' : action.tone === 'primary' ? 'primary' : 'neutral'"
                   :variant="action.tone === 'error' || action.tone === 'primary' ? 'solid' : 'ghost'"
-                  :ui="action.tone === 'error' || action.tone === 'primary' ? undefined : { base: 'min-h-11 text-white hover:bg-white/15 active:bg-white/25' }"
-                  :class="action.tone === 'error' || action.tone === 'primary' ? 'badge-ink min-h-11' : ''"
+                  :ui="action.tone === 'error' || action.tone === 'primary' ? undefined : { base: 'text-white hover:bg-white/15 active:bg-white/25 pointer-coarse:min-h-11' }"
+                  :class="action.tone === 'error' || action.tone === 'primary' ? 'badge-ink pointer-coarse:min-h-11' : ''"
                   @click="take(action)"
                 />
               </div>
@@ -91,6 +98,9 @@ const state = islandState();
 const message = computed(() => state.value.standing);
 const waiting = computed(() => state.value.waiting.length);
 const wide = computed(() => message.value !== null && expands(message.value));
+
+// A notice that says one line and offers keys: its keys stand on that line rather than under it.
+const inline = computed(() => message.value !== null && message.value.description === null && message.value.actions.length > 0);
 
 const body = useTemplateRef<HTMLElement>("body");
 // The size the pill is held to, taken off what it holds. A box told to be as big as its content
