@@ -141,6 +141,13 @@ names them.
   its own, and teleports what acts on it as a whole into the place `screenActions` names, deferred, since the
   bar stands before the screen does; found without the key — on its service's own page, or under a console
   that draws no shared bar — it draws its own. A route that does not ask stands as its bundle draws it.
+- **The people directory.** A console that keeps accounts with names may offer a screen the people of the
+  reader's organization, under the injection key `bmo-console-people`, as an object of two reads: `search`,
+  given words, answers the people whose name, organization or job title holds them, at most twenty; `person`,
+  given an account key, answers that person or null where none stands. A person is `user` — the account key,
+  written as the console writes the owner key ("Roles and the owner key") —, `name`, `organization` and
+  `jobTitle`. A screen that names people — an assignee, an author — picks them through `search` and draws each
+  by the name `person` answers; found without the key, it stands each account as its key.
 - **The screen's foot.** A bar a screen stands at its foot for the reader to act from — an input bar, a row of
   keys — carries the attribute `data-screen-foot`. What a console floats over the page area of its own accord
   stands above every element so marked, so it never covers that bar until the reader moves it there.
@@ -304,6 +311,9 @@ under `calls`, and its screens hand the module texts and a language.
   and draws it over a bundle's route that asks for it in its meta ("How a bundle mounts", the title bar): the bar
   and its place stand before that route's screen mounts, on every way to it — the first load, from another of the
   console's screens, from another bundle's — and stay while the screen being left still stands.
+- **It offers its people directory, where it keeps named accounts,** under the key `bmo-console-people`
+  ("How a bundle mounts", the people directory), answering both reads for the signed-in reader alone, with no
+  contact detail in them.
 - **It keeps a screen's foot clear,** standing whatever it floats over the page area of its own accord above every
   element carrying `data-screen-foot` ("How a bundle mounts", the screen's foot), so it does not cover a screen's
   foot bar until the reader moves it there.
