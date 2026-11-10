@@ -142,9 +142,10 @@ names them.
   bar stands before the screen does; found without the key — on its service's own page, or under a console
   that draws no shared bar — it draws its own. A route that does not ask stands as its bundle draws it.
 - **The people directory.** A console that keeps accounts with names may offer a screen the people of the
-  reader's organization, under the injection key `bmo-console-people`, as an object of two reads: `search`,
+  reader's organization, under the injection key `bmo-console-people`, as an object of three reads: `search`,
   given words, answers the people whose name, organization or job title holds them, at most twenty; `person`,
-  given an account key, answers that person or null where none stands. A person is `user` — the account key,
+  given an account key, answers that person or null where none stands; `me` answers the signed-in reader, or
+  null where the login has no account. A person is `user` — the account key,
   written as the console writes the owner key ("Roles and the owner key") —, `name`, `organization` and
   `jobTitle`. A screen that names people — an assignee, an author — picks them through `search` and draws each
   by the name `person` answers; found without the key, it stands each account as its key.
@@ -312,7 +313,7 @@ under `calls`, and its screens hand the module texts and a language.
   and its place stand before that route's screen mounts, on every way to it — the first load, from another of the
   console's screens, from another bundle's — and stay while the screen being left still stands.
 - **It offers its people directory, where it keeps named accounts,** under the key `bmo-console-people`
-  ("How a bundle mounts", the people directory), answering both reads for the signed-in reader alone, with no
+  ("How a bundle mounts", the people directory), answering its reads for the signed-in reader alone, with no
   contact detail in them.
 - **It keeps a screen's foot clear,** standing whatever it floats over the page area of its own accord above every
   element carrying `data-screen-foot` ("How a bundle mounts", the screen's foot), so it does not cover a screen's
