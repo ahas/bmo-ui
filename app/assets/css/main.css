@@ -550,8 +550,8 @@
   top: 0.25rem;
   right: 0.25rem;
   display: inline-flex;
-  width: 2rem;
-  height: 2rem;
+  width: 1.75rem;
+  height: 1.75rem;
   align-items: center;
   justify-content: center;
   border-radius: var(--ui-radius);
@@ -667,7 +667,9 @@
 
 /* The zoom buttons the host's renderer stands beside a diagram: zoom out, zoom in and fit, in a row
    at the foot of the figure on its trailing side, always shown so a finger has them without
-   hovering. A button with nothing left to do stands dimmed. */
+   hovering. A button with nothing left to do stands dimmed. The host's renderer writes them as plain
+   buttons in the markup it draws, so each is drawn here at the size of the library's small square
+   icon button, its hover and press filling its own shape. */
 .markdown-diagram-tools {
   display: none;
 }
@@ -682,8 +684,8 @@
 .markdown-diagram-tools > button {
   position: relative;
   display: inline-flex;
-  width: 2rem;
-  height: 2rem;
+  width: 1.75rem;
+  height: 1.75rem;
   align-items: center;
   justify-content: center;
   border-radius: var(--ui-radius);
@@ -708,8 +710,8 @@
 }
 
 .markdown-diagram-tools svg {
-  width: 1.25rem;
-  height: 1.25rem;
+  width: 1rem;
+  height: 1rem;
 }
 
 /* A zoom button names itself over it on hover and on focus, as the copy button does beside it. */

@@ -93,14 +93,14 @@
     <template #footer>
       <div class="flex items-center gap-2">
         <UTooltip :text="$t('common.action.zoom_out')">
-          <UButton icon="i-material-symbols-zoom-out" color="neutral" variant="ghost" :aria-label="$t('common.action.zoom_out')" :disabled="view.scale <= MIN_SCALE" @click="zoomBy(1 / 1.5)" />
+          <UButton icon="i-material-symbols-zoom-out" size="sm" color="neutral" variant="ghost" :aria-label="$t('common.action.zoom_out')" :disabled="view.scale <= MIN_SCALE" @click="zoomBy(1 / 1.5)" />
         </UTooltip>
         <span class="w-14 text-center text-sm tabular-nums text-muted" aria-live="polite">{{ Math.round(view.scale * 100) }}%</span>
         <UTooltip :text="$t('common.action.zoom_in')">
-          <UButton icon="i-material-symbols-zoom-in" color="neutral" variant="ghost" :aria-label="$t('common.action.zoom_in')" :disabled="view.scale >= MAX_SCALE" @click="zoomBy(1.5)" />
+          <UButton icon="i-material-symbols-zoom-in" size="sm" color="neutral" variant="ghost" :aria-label="$t('common.action.zoom_in')" :disabled="view.scale >= MAX_SCALE" @click="zoomBy(1.5)" />
         </UTooltip>
         <UTooltip :text="$t('common.action.fit_screen')">
-          <UButton icon="i-material-symbols-fit-screen-outline" color="neutral" variant="ghost" :aria-label="$t('common.action.fit_screen')" :disabled="view.scale === 1" @click="fit" />
+          <UButton icon="i-material-symbols-fit-screen-outline" size="sm" color="neutral" variant="ghost" :aria-label="$t('common.action.fit_screen')" :disabled="view.scale === 1" @click="fit" />
         </UTooltip>
       </div>
     </template>

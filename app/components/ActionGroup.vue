@@ -97,7 +97,8 @@ interface Props {
   // Whether a group of three or fewer folds on a phone. A screen whose toolbar already holds the
   // phone's one menu keeps it standing.
   narrowFold?: boolean;
-  // The size of its buttons: a toolbar's small ones by default, the title bar's own where it stands there.
+  // The size of its buttons: a toolbar's small ones by default, a larger one where the group stands
+  // outside a toolbar or a tab bar.
   size?: ButtonProps["size"];
 }
 

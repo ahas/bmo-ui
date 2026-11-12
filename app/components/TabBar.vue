@@ -66,7 +66,7 @@
 
     <!-- How the open tab is read, then what can be done to it and last the details of it, which
          open over the screen rather than standing above the body. -->
-    <div v-if="$slots.switch" class="flex shrink-0 items-stretch">
+    <div v-if="$slots.switch" class="flex shrink-0 items-center border-l border-default px-1">
       <slot name="switch" />
     </div>
 

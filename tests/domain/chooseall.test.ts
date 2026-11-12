@@ -63,16 +63,15 @@ describe("what a press means", () => {
 
 describe("the line the choosing controls stand on", () => {
   // The one thing a reader takes in at a glance from a list being chosen is whether the marks
-  // stand straight. The control over the list holds its box to the cell's leading edge, so it
-  // lands wherever that cell's own leading room puts it — the same room a row gives its own mark —
-  // rather than half a cell further in.
-  test("holds the box to the leading edge of its cell", () => {
+  // stand straight. A row holds its box to the leading edge of its mark's cell, so it lands
+  // wherever the row's own leading room puts it — where the control over the list stands its box
+  // too — rather than half a cell further in.
+  test("a row holds the box to the leading edge of its cell", () => {
     expect(CHOOSE_CELL).toContain("justify-start");
     expect(CHOOSE_CELL).not.toContain("justify-center");
   });
 
-  // The cell stays a square of the toolbar's own height, so a finger has something to aim at.
-  test("keeps the cell a square of the bar's height", () => {
+  test("a row's mark cell is as wide as a row of one line is tall, on a finger too", () => {
     expect(CHOOSE_CELL).toContain("size-9");
     expect(CHOOSE_CELL).toContain("pointer-coarse:size-10");
   });
@@ -85,8 +84,11 @@ describe("the line the choosing controls stand on", () => {
 const control = await Bun.file(new URL("../../app/components/ChooseAll.vue", import.meta.url)).text();
 
 describe("the choose-all control", () => {
-  test("takes the cell's shape from the one place rather than writing it again", () => {
-    expect(control).toContain("CHOOSE_CELL");
-    expect(control).not.toContain("size-9 items-center justify-center");
+  // Its pressable shape keeps room inside round the box and reaches out before the box by exactly
+  // that room, so the box stays where the cell's own room puts it.
+  test("reaches out before its box by the room it keeps inside", () => {
+    expect(control).toContain("-ms-2 ");
+    expect(control).toContain(" px-2 ");
+    expect(control).not.toContain("CHOOSE_CELL");
   });
 });

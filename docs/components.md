@@ -87,8 +87,9 @@ default; a screen supplies what it holds and what a press means there. Every exp
   together. The full path stands on hover.
 - **A tab is the row's whole height.** The row's bottom line is drawn over the tabs' last pixel rather
   than as a border under them, so a tab stands exactly as tall as the row — 36 pixels, 40 under a
-  finger. The same holds for the library's own tab rows (`TAB_ROW_UI`). The actions at the row's
-  right end stand 4 pixels apart and 4 pixels from the row's edge.
+  finger. The same holds for the library's own tab rows (`TAB_ROW_UI`). A view switch and the actions
+  at the row's right end are small buttons centred in the row, each group parted from the tabs by a
+  line, its buttons 4 pixels apart and 4 pixels from the group's edges.
 - **A tab's menu under a finger.** A long press on a tab is a drag, so a finger opens a tab's menu by
   tapping the tab that already stands; it drops from the tab's bottom-left corner. A right click opens
   it wherever there is a mouse.
@@ -117,7 +118,10 @@ default; a screen supplies what it holds and what a press means there. Every exp
   action: a popover on the button on a wide screen, a sheet from the bottom on a narrow one, which
   the back gesture closes.
 - **View switching.** A view that is on or off is a toggle. A choice of ways of reading one thing is
-  a switch whose choices share its width equally (`TabSwitch`); on a phone it shows its icons alone.
+  a switch whose choices share its width equally (`TabSwitch`). Each choice is the library's small
+  button, the standing one outlined on the page's own ground and the rest ghost, so a hover and a
+  press fill only the choice's own rounded shape. The arrow keys, Home and End walk the choices, with
+  one of them in the keyboard's order. On a phone it shows its icons alone, each named on hover.
 - **Dropdowns** are never narrower than their longest item nor wider than the screen less a gutter
   each side, their items scrolling sideways together past that, and open against the edge of the
   control that opened them. A menu dropped from a button is exactly as wide as its longest item, and
@@ -128,18 +132,27 @@ default; a screen supplies what it holds and what a press means there. Every exp
   against it. It fills its container end to end, its borders continue the rows it touches, and its
   items are cells parted by dividers. What does not fit scrolls sideways within it. A cell pushed to
   the end stands at the right, with those after it.
-- **A toolbar's icon button is a square of the toolbar's height** — 36 pixels, 40 under a finger. The
-  toolbar decides it off what a button holds: one whose whole content is one mark is an icon button.
-- **A cell is as wide as what it holds.** A cell of words keeps the toolbar's own room on either side;
-  a cell of buttons keeps none. A button's word never breaks into two lines; the square is a floor,
-  not a fixed width.
+- **A toolbar's button is the library's small button at its own size,** centred in the row with room
+  above and below it; the row is 36 pixels tall, 40 under a finger, and no button is stretched to its
+  height or to a square cell. A button's hover and press colours fill its own rounded shape and nothing
+  round it, so a hovered button never paints its cell or the row. The toolbar sets the small size once
+  for every library button standing in it, so a button that names no size of its own stands small, and
+  an icon-only button is the library's small square icon button. A button's word never breaks into two
+  lines. The toolbar clips what stands past its edge, so a button in it draws its focus ring inside its
+  own edge.
+- **A cell is as wide as what it holds.** A cell of words keeps the toolbar's own room on either side.
+  A cell holding only buttons keeps none of that room, only the small room its buttons stand from the
+  row's top and bottom, at its ends and between them. The toolbar tells a button by its being the
+  library's button, whether it is drawn as a button or as a link, never by its element. A cell that is
+  a component of the library keeps the padding and gap that component comes with.
 - **A bar gathers by the room it has, not by the window's width.** The room is read off the bar
   itself. Short of it, the bar keeps what a hand reaches for first, in the order written, and folds
   the rest into one more-menu at the end. How much room is enough is one reading for every bar, the
   actionbar module's. The choose-all control and the way out of a choosing state never gather.
-- **A choosing control stands on the same vertical line as the marks it speaks for.** Its box is held
-  to the leading edge of its cell, so it lands where a row puts its own mark, and the bar keeps at its
-  trailing edge the room the scrolling body's scrollbar takes.
+- **A choosing control stands on the same vertical line as the marks it speaks for.** It stands in a
+  cell of words, and its pressable shape reaches out before its box by the room it keeps inside, so the
+  box lands where a row puts its own mark; the bar keeps at its trailing edge the room the scrolling
+  body's scrollbar takes.
 - **A row of the library's tabs keeps its whole height:** fixed, with no padding above or below, the
   tabs filling it, the active line on the row's bottom edge; a row wider than its place scrolls
   sideways and never vertically.

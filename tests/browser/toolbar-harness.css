@@ -1,0 +1,13 @@
+/* The harness page's sheet: the layer's own stylesheet with the utility classes the toolbar, the
+   pieces standing in it and the page itself are drawn with. */
+@import "../../app/assets/css/main.css";
+
+@source "../../app/components/ToolBar.vue";
+@source "../../app/components/ChooseAll.vue";
+@source "../../app/components/TabSwitch.vue";
+@source "../../app/components/ActionGroup.vue";
+@source "../../app/components/PropertyList.vue";
+@source "../../app/components/TabBar.vue";
+@source "../../app/components/ImageViewer.vue";
+@source "../../app/components/ShellClose.vue";
+@source "./toolbar-harness.ts";

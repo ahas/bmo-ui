@@ -96,10 +96,17 @@ describe("the tab bar", () => {
 });
 
 describe("the view switch and the toolbar", () => {
-  test("the switch fills the row it stands in and its choices share its width evenly", () => {
-    expect(switcher).toContain("grid h-full shrink-0 auto-cols-fr grid-flow-col");
-    expect(bar).toContain("flex h-9 shrink-0");
+  test("the switch's choices share its width evenly and are the library's small buttons", () => {
+    expect(switcher).toContain("grid! shrink-0 auto-cols-fr grid-flow-col");
     expect(switcher).toContain('role="tablist"');
+    expect(switcher).toContain('role="tab"');
+    expect(switcher).toContain('size="sm"');
+    expect(switcher).not.toContain("h-full");
+    expect(bar).toContain("flex h-9 shrink-0");
+  });
+
+  test("the switch stands in the tab bar centred, parted from the tabs by a line", () => {
+    expect(barTemplate).toContain('<div v-if="$slots.switch" class="flex shrink-0 items-center border-l border-default px-1">');
   });
 
   test("the toolbar runs edge to edge with cells divided by lines, at the same height", () => {
@@ -107,7 +114,6 @@ describe("the view switch and the toolbar", () => {
     expect(toolbar).toContain("flex h-9 shrink-0");
     expect(toolbar).toContain("divide-x divide-default");
     expect(toolbar).toContain("shadow-[inset_0_-1px_0_var(--ui-border)]");
-    expect(switcher).toContain("bg-default font-medium text-highlighted shadow-[inset_0_-1px_0_var(--ui-border)]");
     expect(toolbar).not.toMatch(/\sp[xy]?-\d/);
   });
 });
