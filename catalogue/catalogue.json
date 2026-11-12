@@ -413,6 +413,12 @@
           "default": "false"
         },
         {
+          "name": "keyboardFocus",
+          "type": "((event: FocusEvent) => boolean) | undefined",
+          "required": false,
+          "default": "undefined"
+        },
+        {
           "name": "disabled",
           "type": "boolean | undefined",
           "required": false,
@@ -448,6 +454,336 @@
         }
       ],
       "example": "<HintTip :text=\"t('notes.label.word_count', { n: 1472 })\" cut>\n  <span class=\"truncate\">{{ t(\"notes.label.words_short\", { n: \"1.4k\" }) }}</span>\n</HintTip>"
+    },
+    {
+      "name": "IconButton",
+      "kind": "component",
+      "line": "A button drawn as its icon alone, its one name heard and shown in the shared tooltip, a held finger included.",
+      "props": [
+        {
+          "name": "label",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "keyboardFocus",
+          "type": "((event: FocusEvent) => boolean) | undefined",
+          "required": false,
+          "default": "undefined"
+        },
+        {
+          "name": "size",
+          "type": "\"sm\" | \"xs\" | \"md\" | \"lg\" | \"xl\" | undefined",
+          "required": false
+        },
+        {
+          "name": "to",
+          "type": "string | it | et | undefined",
+          "required": false,
+          "description": "Route Location the link should navigate to when clicked on."
+        },
+        {
+          "name": "activeClass",
+          "type": "string | undefined",
+          "required": false,
+          "description": "Class to apply when the link is active"
+        },
+        {
+          "name": "exactActiveClass",
+          "type": "string | undefined",
+          "required": false,
+          "description": "Class to apply when the link is exact active"
+        },
+        {
+          "name": "ariaCurrentValue",
+          "type": "\"page\" | \"step\" | \"true\" | \"false\" | \"location\" | \"date\" | \"time\" | undefined",
+          "required": false,
+          "description": "Value passed to the attribute `aria-current` when the link is exact active."
+        },
+        {
+          "name": "viewTransition",
+          "type": "boolean | undefined",
+          "required": false,
+          "description": "Pass the returned promise of `router.push()` to `document.startViewTransition()` if supported."
+        },
+        {
+          "name": "replace",
+          "type": "boolean | undefined",
+          "required": false,
+          "description": "Calls `router.replace` instead of `router.push`."
+        },
+        {
+          "name": "autofocus",
+          "type": "Booleanish | undefined",
+          "required": false
+        },
+        {
+          "name": "disabled",
+          "type": "boolean | undefined",
+          "required": false
+        },
+        {
+          "name": "form",
+          "type": "string | undefined",
+          "required": false
+        },
+        {
+          "name": "formaction",
+          "type": "string | undefined",
+          "required": false
+        },
+        {
+          "name": "formenctype",
+          "type": "string | undefined",
+          "required": false
+        },
+        {
+          "name": "formmethod",
+          "type": "string | undefined",
+          "required": false
+        },
+        {
+          "name": "formnovalidate",
+          "type": "Booleanish | undefined",
+          "required": false
+        },
+        {
+          "name": "formtarget",
+          "type": "string | undefined",
+          "required": false
+        },
+        {
+          "name": "name",
+          "type": "string | undefined",
+          "required": false
+        },
+        {
+          "name": "type",
+          "type": "\"button\" | \"submit\" | \"reset\" | undefined",
+          "required": false,
+          "description": "The type of the button when not a link."
+        },
+        {
+          "name": "download",
+          "type": "any",
+          "required": false
+        },
+        {
+          "name": "href",
+          "type": "string | it | et | undefined",
+          "required": false,
+          "description": "An alias for `to`. If used with `to`, `href` will be ignored"
+        },
+        {
+          "name": "hreflang",
+          "type": "string | undefined",
+          "required": false
+        },
+        {
+          "name": "media",
+          "type": "string | undefined",
+          "required": false
+        },
+        {
+          "name": "ping",
+          "type": "string | undefined",
+          "required": false
+        },
+        {
+          "name": "rel",
+          "type": "(string & {}) | \"noopener\" | \"noreferrer\" | \"nofollow\" | \"sponsored\" | \"ugc\" | null | undefined",
+          "required": false,
+          "description": "A rel attribute value to apply on the link. Defaults to \"noopener noreferrer\" for external links."
+        },
+        {
+          "name": "target",
+          "type": "(string & {}) | \"_blank\" | \"_parent\" | \"_self\" | \"_top\" | null | undefined",
+          "required": false,
+          "description": "Where to display the linked URL, as the name for a browsing context."
+        },
+        {
+          "name": "referrerpolicy",
+          "type": "HTMLAttributeReferrerPolicy | undefined",
+          "required": false
+        },
+        {
+          "name": "onClick",
+          "type": "((event: MouseEvent) => void) | ((event: MouseEvent) => void)[] | undefined",
+          "required": false
+        },
+        {
+          "name": "as",
+          "type": "any",
+          "required": false,
+          "description": "The element or component this component should render as when not a link."
+        },
+        {
+          "name": "active",
+          "type": "boolean | undefined",
+          "required": false,
+          "description": "Force the link to be active independent of the current route."
+        },
+        {
+          "name": "exact",
+          "type": "boolean | undefined",
+          "required": false,
+          "description": "Will only be active if the current route is an exact match."
+        },
+        {
+          "name": "exactQuery",
+          "type": "boolean | \"partial\" | undefined",
+          "required": false,
+          "description": "Allows controlling how the current route query sets the link as active."
+        },
+        {
+          "name": "exactHash",
+          "type": "boolean | undefined",
+          "required": false,
+          "description": "Will only be active if the current route hash is an exact match."
+        },
+        {
+          "name": "inactiveClass",
+          "type": "string | undefined",
+          "required": false,
+          "description": "The class to apply when the link is inactive."
+        },
+        {
+          "name": "locale",
+          "type": "string | boolean | undefined",
+          "required": false,
+          "description": "Control i18n auto-localization when `@nuxtjs/i18n` is installed.\n- `undefined` / `true` (default): auto-localizes to the current locale using `$localePath`.\n  Paths already carrying a locale prefix (from e.g. `switchLocalePath()`) are detected\n  and left untouched to prevent double-prefixing.\n- `false`: explicitly disables auto-localization.\n- `string`: localizes to a specific locale (e.g. `'fr'`)."
+        },
+        {
+          "name": "external",
+          "type": "boolean | undefined",
+          "required": false,
+          "description": "Forces the link to be considered as external (true) or internal (false). This is helpful to handle edge-cases"
+        },
+        {
+          "name": "noRel",
+          "type": "boolean | undefined",
+          "required": false,
+          "description": "If set to true, no rel attribute will be added to the link"
+        },
+        {
+          "name": "prefetchedClass",
+          "type": "string | undefined",
+          "required": false,
+          "description": "A class to apply to links that have been prefetched."
+        },
+        {
+          "name": "prefetch",
+          "type": "boolean | undefined",
+          "required": false,
+          "description": "When enabled will prefetch middleware, layouts and payloads of links in the viewport."
+        },
+        {
+          "name": "prefetchOn",
+          "type": "\"visibility\" | \"interaction\" | Partial<{ visibility: boolean; interaction: boolean; }> | undefined",
+          "required": false,
+          "description": "Allows controlling when to prefetch links. By default, prefetch is triggered only on visibility."
+        },
+        {
+          "name": "noPrefetch",
+          "type": "boolean | undefined",
+          "required": false,
+          "description": "Escape hatch to disable `prefetch` attribute."
+        },
+        {
+          "name": "trailingSlash",
+          "type": "\"append\" | \"remove\" | undefined",
+          "required": false,
+          "description": "An option to either add or remove trailing slashes in the `href` for this specific link.\nOverrides the global `trailingSlash` option if provided."
+        },
+        {
+          "name": "loading",
+          "type": "boolean | undefined",
+          "required": false,
+          "description": "When `true`, the loading icon will be displayed."
+        },
+        {
+          "name": "trailing",
+          "type": "boolean | undefined",
+          "required": false,
+          "description": "When `true`, the icon will be displayed on the right side."
+        },
+        {
+          "name": "color",
+          "type": "\"primary\" | \"secondary\" | \"success\" | \"info\" | \"warning\" | \"error\" | \"neutral\" | undefined",
+          "required": false
+        },
+        {
+          "name": "ui",
+          "type": "{ base?: SlotClass; label?: SlotClass; leadingIcon?: SlotClass; leadingAvatar?: SlotClass; leadingAvatarSize?: SlotClass; trailingIcon?: SlotClass; } | undefined",
+          "required": false
+        },
+        {
+          "name": "avatar",
+          "type": "AvatarProps | undefined",
+          "required": false,
+          "description": "Display an avatar on the left side."
+        },
+        {
+          "name": "variant",
+          "type": "\"solid\" | \"outline\" | \"soft\" | \"subtle\" | \"ghost\" | \"link\" | undefined",
+          "required": false
+        },
+        {
+          "name": "leading",
+          "type": "boolean | undefined",
+          "required": false,
+          "description": "When `true`, the icon will be displayed on the left side."
+        },
+        {
+          "name": "block",
+          "type": "boolean | undefined",
+          "required": false,
+          "description": "Render the button full width."
+        },
+        {
+          "name": "icon",
+          "type": "any",
+          "required": false,
+          "description": "Display an icon based on the `leading` and `trailing` props."
+        },
+        {
+          "name": "leadingIcon",
+          "type": "any",
+          "required": false,
+          "description": "Display an icon on the left side."
+        },
+        {
+          "name": "trailingIcon",
+          "type": "any",
+          "required": false,
+          "description": "Display an icon on the right side."
+        },
+        {
+          "name": "activeColor",
+          "type": "\"primary\" | \"secondary\" | \"success\" | \"info\" | \"warning\" | \"error\" | \"neutral\" | undefined",
+          "required": false
+        },
+        {
+          "name": "activeVariant",
+          "type": "\"solid\" | \"outline\" | \"soft\" | \"subtle\" | \"ghost\" | \"link\" | undefined",
+          "required": false
+        },
+        {
+          "name": "loadingAuto",
+          "type": "boolean | undefined",
+          "required": false,
+          "description": "Set loading state automatically based on the `@click` promise state"
+        },
+        {
+          "name": "loadingIcon",
+          "type": "any",
+          "required": false,
+          "description": "The icon when the `loading` prop is `true`."
+        }
+      ],
+      "slots": [],
+      "events": [],
+      "example": "<IconButton :label=\"t('notes.action.download')\" icon=\"i-material-symbols-download\" @click=\"downloaded += 1\" />"
     },
     {
       "name": "ImageViewer",

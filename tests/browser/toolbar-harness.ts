@@ -9,6 +9,8 @@ import UTooltip from "@nuxt/ui/components/Tooltip.vue";
 import ActionGroup from "../../app/components/ActionGroup.vue";
 import ChooseAll from "../../app/components/ChooseAll.vue";
 import HintTip from "../../app/components/HintTip.vue";
+import IconButton from "../../app/components/IconButton.vue";
+import NumberInput from "../../app/components/NumberInput.vue";
 import ImageViewer from "../../app/components/ImageViewer.vue";
 import TabBar from "../../app/components/TabBar.vue";
 import TabSwitch from "../../app/components/TabSwitch.vue";
@@ -20,14 +22,17 @@ import sheet from "./toolbar-harness.css?inline";
 // holds the way back at its left end, given a route as a screen gives it, the control that chooses
 // every row, a view switch, a cell of words, a cell of buttons given routes, which the library draws as
 // links, a cell of buttons the shared tooltip names, a cell of named words beside a named button, and
-// the group of actions at its right end. Under it stand a tab bar with its view switch and
-// actions, and a diagram's zoom buttons as the host's renderer writes them. Opened with `?viewer`, the
-// page holds the picture viewer instead, open, with its zoom buttons at its foot. The page stands
-// outside Nuxt, so the library is installed as a Vue plugin and the words are handed over here.
+// the group of actions at its right end. Under it stand a tab bar with its view switch and actions,
+// and a diagram's zoom buttons as the host's renderer writes them. Opened with `?viewer`, the page
+// holds the picture viewer instead, open, with its zoom buttons at its foot; opened with `?icons`, it
+// holds the layer's icon button, a group of standing actions, a view switch showing its icons alone
+// and a number box, each press counted. The page stands outside Nuxt, so the library is installed as a Vue
+// plugin and the words are handed over here.
 
 const WORDS = {
   common: {
     action: { choose_all: "Choose all", choose_none: "Choose none", more: "More", zoom_in: "Zoom in", zoom_out: "Zoom out", fit_screen: "Fit" },
+    aria: { increase: "Increase", decrease: "Decrease" },
     label: { properties: "Properties" }
   }
 };
@@ -68,6 +73,24 @@ const Page = defineComponent(() => {
 
   const open = ref(true);
   const active = ref("plan");
+
+  if (new URLSearchParams(location.search).has("icons")) {
+    const pressed: string[] = [];
+
+    (window as unknown as { pressed: string[] }).pressed = pressed;
+    const press = (id: string) => () => pressed.push(id);
+    const standing = ["edit", "share"].map((id) => ({ id, label: id, icon: "i-material-symbols-refresh", onSelect: press(id) }));
+
+    return () =>
+      h(UApp, null, () =>
+        h("div", { class: "flex items-center gap-4 p-4" }, [
+          h(IconButton, { id: "alone", label: "Refresh", icon: "i-material-symbols-refresh", onClick: press("alone") }),
+          h(ActionGroup, { id: "standing", actions: standing, narrowFold: false }),
+          h(TabSwitch, { id: "icons-switch", items: VIEWS, modelValue: view.value, label: "View", compact: true, "onUpdate:modelValue": (value: string) => (view.value = value) }),
+          h("div", { id: "number" }, [h(NumberInput, { modelValue: 3, digits: 2 })])
+        ])
+      );
+  }
 
   if (new URLSearchParams(location.search).has("viewer")) {
     return () => h(UApp, null, () => h(ImageViewer, { open: open.value, "onUpdate:open": (value: boolean) => (open.value = value), src: picture(), title: "Picture" }));

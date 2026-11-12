@@ -27,19 +27,17 @@
     <!-- The aura stands behind the button, so only the ring of it past the button's edge shows. -->
     <span class="relative grid shrink-0 place-items-center">
       <span ref="aura" aria-hidden="true" class="audio-aura absolute inset-0 rounded-full" :data-on="playing ? '' : undefined" />
-      <UTooltip :text="playing ? $t('common.action.pause') : $t('common.action.play')">
-        <UButton
-          :icon="playing ? 'i-material-symbols-pause-rounded' : 'i-material-symbols-play-arrow-rounded'"
-          color="primary"
-          size="xl"
-          square
-          class="relative rounded-full"
-          :loading="button === 'starting'"
-          :disabled="broken"
-          :aria-label="playing ? $t('common.action.pause') : $t('common.action.play')"
-          @click="toggle"
-        />
-      </UTooltip>
+      <IconButton
+        :label="playing ? $t('common.action.pause') : $t('common.action.play')"
+        :icon="playing ? 'i-material-symbols-pause-rounded' : 'i-material-symbols-play-arrow-rounded'"
+        color="primary"
+        variant="solid"
+        size="xl"
+        class="relative rounded-full"
+        :loading="button === 'starting'"
+        :disabled="broken"
+        @click="toggle"
+      />
     </span>
 
     <div class="flex min-w-0 flex-1 flex-col gap-1">
@@ -106,29 +104,16 @@
              the page's one volume, so moving it here moves every player. -->
         <span class="ms-auto flex h-5 items-center">
           <UPopover v-model:open="volumeOpen" :content="{ align: 'end' }">
-            <UTooltip :text="$t('common.label.volume')">
-              <UButton
-                data-volume
-                size="xs"
-                color="neutral"
-                :variant="volumeOpen ? 'soft' : 'ghost'"
-                :icon="volumeIcon"
-                :aria-label="$t('common.label.volume')"
-              />
-            </UTooltip>
+            <IconButton data-volume :label="$t('common.label.volume')" size="xs" :variant="volumeOpen ? 'soft' : 'ghost'" :icon="volumeIcon" />
 
             <template #content>
               <div class="flex items-center gap-2 p-2">
-                <UTooltip :text="silent ? $t('common.action.unmute') : $t('common.action.mute')">
-                  <UButton
-                    size="sm"
-                    color="neutral"
-                    variant="ghost"
-                    :icon="silent ? VOLUME_OFF_ICON : VOLUME_UP_ICON"
-                    :aria-label="silent ? $t('common.action.unmute') : $t('common.action.mute')"
-                    @click="volume.toggleMute()"
-                  />
-                </UTooltip>
+                <IconButton
+                  :label="silent ? $t('common.action.unmute') : $t('common.action.mute')"
+                  size="sm"
+                  :icon="silent ? VOLUME_OFF_ICON : VOLUME_UP_ICON"
+                  @click="volume.toggleMute()"
+                />
                 <USlider
                   class="w-32"
                   size="sm"
@@ -143,18 +128,14 @@
             </template>
           </UPopover>
 
-          <UTooltip :text="$t('common.aria.download_named', { name: props.name })">
-            <UButton
-              :to="props.download"
-              external
-              download
-              size="xs"
-              color="neutral"
-              variant="ghost"
-              icon="i-material-symbols-download"
-              :aria-label="$t('common.aria.download_named', { name: props.name })"
-            />
-          </UTooltip>
+          <IconButton
+            :label="$t('common.aria.download_named', { name: props.name })"
+            :to="props.download"
+            external
+            download
+            size="xs"
+            icon="i-material-symbols-download"
+          />
         </span>
 
         <span v-if="props.trailRoom !== null" data-trail-room class="shrink-0" :style="{ width: `${props.trailRoom}px` }" aria-hidden="true" />

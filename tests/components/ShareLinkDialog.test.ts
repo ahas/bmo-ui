@@ -67,8 +67,8 @@ describe("with no link", () => {
 });
 
 describe("with a link", () => {
-  test("copying is an icon button named on hover, and says on the pill whether it worked", () => {
-    expect(template).toContain(`<UTooltip :text="$t('common.action.copy')">`);
+  test("copying is the layer's icon button, named by its tooltip, and says on the pill whether it worked", () => {
+    expect(template).toContain(`<IconButton :label="$t('common.action.copy')"`);
     expect(source).toContain("common.message.link_copied");
     expect(source).toContain("common.error.link_copy_failed");
   });

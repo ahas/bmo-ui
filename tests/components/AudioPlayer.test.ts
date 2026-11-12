@@ -14,11 +14,11 @@ describe("the player's volume", () => {
     expect(popover).toBeGreaterThan(-1);
     expect(popover).toBeLessThan(download);
     expect(player).toContain('<UPopover v-model:open="volumeOpen"');
-    expect(player.slice(popover, player.indexOf("</UPopover>"))).toContain(":aria-label=\"$t('common.label.volume')\"");
+    expect(player.slice(popover, player.indexOf("</UPopover>"))).toContain("<IconButton data-volume :label=\"$t('common.label.volume')\"");
   });
 
   test("holds a mute toggle named by what it does next, and a slider named for the volume", () => {
-    expect(player).toContain(":aria-label=\"silent ? $t('common.action.unmute') : $t('common.action.mute')\"");
+    expect(player).toContain(":label=\"silent ? $t('common.action.unmute') : $t('common.action.mute')\"");
     expect(player).toContain('@click="volume.toggleMute()"');
     expect(player).toContain("<USlider");
     expect(player).toContain(':model-value="Math.round(volume.heard.value * 100)"');

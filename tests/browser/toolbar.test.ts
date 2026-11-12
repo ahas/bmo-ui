@@ -5,7 +5,10 @@ import { join } from "node:path";
 
 import { chromium } from "playwright-core";
 
-import { BROWSER_HOOK_MS, touchReady } from "./touch";
+import { HOLD_MS } from "../../app/domain/longpress";
+import { BROWSER_HOOK_MS, centreOf, openTouch, touchReady } from "./touch";
+
+import type { TouchSession } from "./touch";
 
 import type { Browser, BrowserContext, Page } from "playwright-core";
 
@@ -413,5 +416,95 @@ describe.skipIf(!ready)("a toolbar drawn in a browser", () => {
         });
       });
     }
+  }
+});
+
+// An icon button under a real finger (`docs/components.md`, "Actions and the toolbar" and
+// "Tooltips"). A tap presses it; a finger held past the layer's one long press names it in the shared
+// tooltip and, lifting, presses nothing; the next touch anywhere puts the name away. Held for as long
+// as a reader who waits to see what a control is would hold, as the layer's own icon button, a
+// standing action of the group of actions and a view switch's choice showing its icon alone.
+describe.skipIf(!ready)("an icon button under a finger", () => {
+  // Long enough past the long press that the browser's own reading of the finger cannot fall short.
+  const HELD_MS = HOLD_MS + 400;
+  let touch: TouchSession;
+
+  beforeAll(async () => {
+    touch = await openTouch();
+    await touch.page.route(`${ORIGIN}/**`, (route) => {
+      const path = new URL(route.request().url()).pathname;
+
+      if (path === "/toolbar-harness.js") return route.fulfill({ contentType: "text/javascript", body: script });
+      if (path === "/") return route.fulfill({ contentType: "text/html; charset=utf-8", body: PAGE });
+
+      return route.fulfill({ status: 404, body: "" });
+    });
+  }, BROWSER_HOOK_MS);
+
+  afterAll(async () => {
+    await touch?.close();
+  });
+
+  async function tips(): Promise<string[]> {
+    return await touch.page.$$eval("[role=tooltip]", (found) => found.map((tip) => tip.textContent ?? ""));
+  }
+
+  async function pressed(): Promise<string[]> {
+    return await touch.page.evaluate(() => [...(window as unknown as { pressed: string[] }).pressed]);
+  }
+
+  async function view(): Promise<string | null> {
+    return await touch.page.$eval("#icons-switch [aria-selected=true]", (element) => element.getAttribute("aria-label"));
+  }
+
+  const BUTTONS = [
+    { name: "the layer's icon button", selector: "#alone", label: "Refresh" },
+    { name: "a standing action of the group", selector: "#standing [aria-label=share]", label: "share" },
+    { name: "a view switch's choice shown as its icon", selector: "#icons-switch [aria-label=Source]", label: "Source" }
+  ];
+
+  // Each step button stands 2 pixels in from the number box's edge and, laid out apart under a
+  // finger, fills the box's whole height less that, through the tooltip's box round it.
+  test("stands a number box's step buttons the box's height, inside the tooltip's box round each", async () => {
+    const { page } = touch;
+
+    await page.goto(`${ORIGIN}/?icons`);
+    await page.waitForSelector("#number [aria-label=Increase]");
+
+    const heights = await page.evaluate(() => {
+      const field = document.querySelector("#number input")!.getBoundingClientRect().height;
+      const steps = ["Increase", "Decrease"].map((name) => document.querySelector(`#number [aria-label=${name}]`)!.getBoundingClientRect().height);
+
+      return { field, steps };
+    });
+
+    expect(heights.steps).toEqual([heights.field - 4, heights.field - 4]);
+  });
+
+  for (const button of BUTTONS) {
+    test(`names ${button.name} under a held finger and presses it on a tap alone`, async () => {
+      const { page } = touch;
+
+      await page.goto(`${ORIGIN}/?icons`);
+      await page.waitForSelector(button.selector);
+
+      const at = await centreOf(page, button.selector);
+      const before = { pressed: await pressed(), view: await view() };
+
+      await touch.press(at, { holdMs: HELD_MS });
+      await page.waitForFunction((label) => [...document.querySelectorAll("[role=tooltip]")].some((tip) => tip.textContent === label), button.label, { timeout: 3_000 });
+      expect({ pressed: await pressed(), view: await view() }).toEqual(before);
+
+      await touch.tap({ x: 2, y: page.viewportSize()!.height - 2 });
+      await page.waitForFunction((label) => ![...document.querySelectorAll("[role=tooltip]")].some((tip) => tip.textContent === label), button.label, { timeout: 3_000 });
+
+      await touch.tap(at);
+      await page.waitForFunction(
+        (seen) => JSON.stringify([...(window as unknown as { pressed: string[] }).pressed]) !== seen[0] || document.querySelector("#icons-switch [aria-selected=true]")?.getAttribute("aria-label") !== seen[1],
+        [JSON.stringify(before.pressed), before.view],
+        { timeout: 3_000 }
+      );
+      expect(await tips()).not.toContain(button.label);
+    });
   }
 });

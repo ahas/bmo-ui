@@ -110,10 +110,16 @@ default; a screen supplies what it holds and what a press means there. Every exp
 
 - **Actions are one group** (`ActionGroup`): work on what the standing tab shows is gathered at the
   right end of the toolbar, or of the tab bar's line where no toolbar stands. Three or fewer stand as
-  icon buttons, each named on hover, a toggle standing pressed while on; four or more fold into one
-  menu, where a toggle carries its check. A screen never shows two such menus at once.
-- **Every icon button has a tooltip,** with the same words as its accessible name. `ShellClose` is
-  the close of a modal or a side sheet, named that way.
+  icon buttons, each named by its tooltip, a toggle standing pressed while on; four or more fold
+  into one menu, where a toggle carries its check. A screen never shows two such menus at once.
+- **Every icon button is the layer's icon button** (`IconButton`): the library's button drawn as its
+  icon alone, named by one set of words that is both its accessible name and its shared tooltip, so
+  the two never part. A tap presses it, so a finger held on it names it and lifting presses nothing.
+  It stands neutral and ghost unless it is told otherwise, and takes everything else the library's
+  button takes: its icon, size, colour and variant, a press, a route, and what a menu or a popover it
+  opens puts on its trigger. A screen of the host's or of a console bundle draws an icon button this
+  way, never as the library's button inside the library's own tooltip, which no finger reaches.
+  `ShellClose` is the close of a modal or a side sheet, named that way.
 - **Properties are the last of the group.** What a file or a document is opens from the properties
   action: a popover on the button on a wide screen, a sheet from the bottom on a narrow one, which
   the back gesture closes.
@@ -121,7 +127,7 @@ default; a screen supplies what it holds and what a press means there. Every exp
   a switch whose choices share its width equally (`TabSwitch`). Each choice is the library's small
   button, the standing one outlined on the page's own ground and the rest ghost, so a hover and a
   press fill only the choice's own rounded shape. The arrow keys, Home and End walk the choices, with
-  one of them in the keyboard's order. On a phone it shows its icons alone, each named on hover.
+  one of them in the keyboard's order. On a phone it shows its icons alone, each named by its tooltip.
 - **Dropdowns** are never narrower than their longest item nor wider than the screen less a gutter
   each side, their items scrolling sideways together past that, and open against the edge of the
   control that opened them. A menu dropped from a button is exactly as wide as its longest item, and
@@ -321,17 +327,22 @@ default; a screen supplies what it holds and what a press means there. Every exp
   dialog takes up on its own close as it opens. The first would leave that control's name standing
   over what the reader returned to; the second would stand a name over the open dialog and spend the
   reader's first Esc closing the name rather than the dialog. The shared tooltip and the library's
-  dialog close (`ShellClose`) hold this themselves, and the tooltip module's provider setting holds
-  it for every other tooltip the library draws, once the host hands it to the library's app root
-  (`docs/boundary.md`, "What the host owes"). The dialog close names itself on focus only where the
-  page's own modality mark (`docs/design.md`, "Focus") names the keyboard and the focus came to it
-  from a control of its own dialog. The browser's visible-focus tell cannot stand in, since it
+  dialog close (`ShellClose`) hold this themselves, the close by telling the shared tooltip which
+  focus is the keyboard's where the browser's own tell cannot, and the tooltip module's provider
+  setting holds it for every other tooltip the library draws, once the host hands it to the
+  library's app root (`docs/boundary.md`, "What the host owes"). The dialog close names itself on
+  focus only where the page's own modality mark (`docs/design.md`, "Focus") names the keyboard and
+  the focus came to it from a control of its own dialog. The browser's visible-focus tell cannot stand in, since it
   carries over from whatever the page last showed focused, and a dialog opened by a key is no more
   named by its opening focus than one opened by a press. The keyboard moving round the dialog onto
   that close, or a pointer hovering it, brings its name up as it does for any other control.
 - **A finger has no hover.** Where a tap does nothing else, a tap brings it up; where a tap acts, a
   finger rests on it instead, by the one held finger, and lifting presses nothing. The next touch
   anywhere puts it away.
+- **What a tap acts on is named the shared tooltip's way too:** an icon button through the layer's
+  icon button, and a choice of the view switch shown as its icon alone through the shared tooltip
+  marked as standing on a press. The library's own tooltip comes up for a pointer and a focus alone,
+  so nothing the layer draws, and nothing a host draws, names a control with it.
 - **A tooltip switched off comes up for nothing:** no hover, no focus, no tap and no resting finger opens it, so
   what it stands on is pressed as if no tooltip stood there.
 - **Its words wrap** inside a box no wider than a phone has room for.

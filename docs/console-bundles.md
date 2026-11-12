@@ -26,6 +26,12 @@ which service translates and how it lists their screens. A service supplies its 
   everything else itself. The console resolves each of those paths to the one copy its app runs, so
   every bundle draws with the console's components, reads the console's app and runtime configuration
   and calls through the console's fetcher.
+- **Its screens draw a control the layer has a component for with that component,** so the control
+  behaves on a bundle's screen as on the console's own: an icon button is the layer's `IconButton`,
+  whose one name is its accessible name and its tooltip and which a held finger names, and words that
+  say more than what they stand on go through the shared `HintTip` (`docs/components.md`, "Actions
+  and the toolbar" and "Tooltips"). The library's button inside the library's own tooltip is no icon
+  button of a bundle's: a finger never brings that tooltip up.
 - **It is built on one release of this layer,** the one its console runs, and names that release in
   its manifest ("The layer a bundle is built on").
 - **Its stylesheet** is the styles and utility classes its screens use beyond the layer's own, built

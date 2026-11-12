@@ -45,6 +45,7 @@ wording keys listed here are the ones the layer's list holds.
 | `FilesText` | A text file in the read-only code viewer, coloured by its name's language. |
 | `GrowingTextarea` | A form's text box that grows with its text and never scrolls inside. |
 | `HintTip` | The shared tooltip for words that say more than what they stand on. |
+| `IconButton` | A button drawn as its icon alone, its one name heard and shown in the shared tooltip, a held finger included. |
 | `ImageViewer` | A picture opened whole, zoomed and moved by wheel, drag, pinch, double press and buttons. |
 | `LoadingImage` | A picture that keeps its place while it loads and says when it failed. |
 | `LoadingVideo` | A video that keeps its place while it loads and says when it failed. |
@@ -414,8 +415,8 @@ Every token is a custom property stated by the layer's stylesheet on the root un
   module's `TOOLTIP_PROVIDER` as its tooltip setting, so a focus the keyboard did not bring — the
   one a closing dialog or sheet hands back to its control, or the one an opening dialog takes up on
   its own close — brings up no tooltip (`docs/components.md`, "Tooltips"). The layer's shared
-  tooltip and its dialog close (`ShellClose`) hold this on their own; the setting holds it for every
-  other tooltip the library draws.
+  tooltip, its icon button and its dialog close (`ShellClose`) hold this on their own; the setting
+  holds it for every other tooltip the library draws.
 - **The patches.** Each patch under `patches/` is applied to the same version of the dependency it
   names in the host's own install.
   - The `reka-ui` patch gives a collapsible region its own id from the region's root, so a button
