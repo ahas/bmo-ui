@@ -390,6 +390,10 @@ whole in `docs/boundary.md`; this document says what each is for and how the lay
     draws the ring inside its own edge instead, with the `focus-inset` utility, at the same width.
   - It is set on the stylesheet's base for every element, and over the colour and width the library
     gives its own controls, so no component names either.
+  - An outline on a screen is the ring alone, so every element's outline is the accent at rest as
+    well. The library rests a control's outline in a quarter of the control's own colour and fades its
+    colours as they change; with the accent already there the ring has nothing to fade from, and it
+    stands in the accent from the frame the keyboard reaches the control.
   - A library control that redraws its own edge on focus keeps the edge it rests with: the ring alone
     says it has focus.
 - **A field shows focus on its own edge, with no ring.** A text box, a number box and a select take

@@ -289,6 +289,49 @@ describe.skipIf(!ready)("a toolbar drawn in a browser", () => {
           expect(await page.evaluate(() => [document.activeElement?.getAttribute("aria-label"), document.activeElement?.getAttribute("aria-selected")])).toEqual(["Rendered", "true"]);
         });
 
+        // The library rests a neutral button's outline in a quarter of the inverted colour and fades its
+        // colours as they change, so the ring is read in the frame the key moves focus there.
+        test("rings every button the keyboard reaches in the accent from its first frame, none fading in", async () => {
+          await page.mouse.click(width.width - 2, width.height - 2);
+
+          const reached: { label: string | null; color: string; accent: string; fading: boolean }[] = [];
+
+          for (let step = 0; step < 12; step += 1) {
+            await page.keyboard.press("Tab");
+
+            const one = await page.evaluate(() => {
+              const element = document.activeElement as HTMLElement;
+
+              if (!element.matches(":is(button,a)[data-slot=base]")) return null;
+
+              const probe = document.createElement("i");
+
+              probe.style.color = "var(--bmo-focus)";
+              element.append(probe);
+
+              const accent = getComputedStyle(probe).color;
+
+              probe.remove();
+
+              return {
+                label: element.getAttribute("aria-label"),
+                color: getComputedStyle(element).outlineColor,
+                accent,
+                fading: element.getAnimations().some((animation) => (animation as CSSTransition).transitionProperty === "outline-color")
+              };
+            });
+
+            if (one !== null) reached.push(one);
+            if (await page.evaluate(() => document.activeElement?.closest("#actions") !== null)) break;
+          }
+
+          // The way back and the action group, whose actions fold behind one button at a phone's width.
+          expect(reached.map((one) => one.label)).toContain("Back");
+          expect(await page.evaluate(() => document.activeElement?.closest("#actions") !== null)).toBe(true);
+
+          for (const one of reached) expect(one).toEqual({ ...one, color: one.accent, fading: false });
+        });
+
         // A button given a route is drawn as a link and is still the library's button: its cell keeps
         // the small room a cell of buttons keeps, never the room of a cell of words.
         test("keeps no room of words round a cell of buttons drawn as links", async () => {
