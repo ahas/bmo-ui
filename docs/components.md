@@ -321,10 +321,12 @@ default; a screen supplies what it holds and what a press means there. Every exp
   reader's first Esc closing the name rather than the dialog. The shared tooltip and the library's
   dialog close (`ShellClose`) hold this themselves, and the tooltip module's provider setting holds
   it for every other tooltip the library draws, once the host hands it to the library's app root
-  (`docs/boundary.md`, "What the host owes"). For the dialog close the hand is read off the page's
-  own modality mark (`docs/design.md`, "Focus") rather than the browser's visible-focus tell, which
-  an opening dialog can fool; the keyboard reaching that close — Tab or arrow — or a pointer
-  hovering it brings its name up as it does for any other control.
+  (`docs/boundary.md`, "What the host owes"). The dialog close names itself on focus only where the
+  page's own modality mark (`docs/design.md`, "Focus") names the keyboard and the focus came to it
+  from a control of its own dialog. The browser's visible-focus tell cannot stand in, since it
+  carries over from whatever the page last showed focused, and a dialog opened by a key is no more
+  named by its opening focus than one opened by a press. The keyboard moving round the dialog onto
+  that close, or a pointer hovering it, brings its name up as it does for any other control.
 - **A finger has no hover.** Where a tap does nothing else, a tap brings it up; where a tap acts, a
   finger rests on it instead, by the one held finger, and lifting presses nothing. The next touch
   anywhere puts it away.

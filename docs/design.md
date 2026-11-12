@@ -373,7 +373,10 @@ whole in `docs/boundary.md`; this document says what each is for and how the lay
 - **Focus is shown only where the keyboard put it.** A control focused by a press of the mouse or a
   finger draws nothing; one the keyboard reached — Tab, an arrow along a list, a dialog handing focus
   back after a key closed it — draws the ring. The browser's own `:focus-visible` tells the two
-  apart, and nothing in the layer draws a ring on `:focus` alone.
+  apart, and nothing in the layer draws a ring on `:focus` alone. The dialog close (`ShellClose`) is
+  where that tell falls short: a dialog opened by a press on a control the keyboard had reached
+  inherits the visible focus on its own close, so the close draws no ring for a focus no key moved,
+  read off the page's modality mark, until that focus leaves it.
 - **The ring is one style for every screen,** three tokens on the root.
 
   | Token | Value | For |
