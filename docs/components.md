@@ -514,8 +514,9 @@ on a screen.
 
 - **Code is coloured and viewed through the monaco module:** the language a name or a fence names,
   coloured runs for a block, a read-only code view and a source view. A fenced block in the host's
-  rendered text stands in its own box that scrolls sideways, its copy button over its top right
-  corner, and its language at its top left where its fence names one (the code-copy and code-colour
+  rendered text stands in its own box that scrolls sideways, its copy button, at the size of the
+  library's small square icon button, over its top right corner, and its language at its top left,
+  centred on the button's line, where its fence names one (the code-copy and code-colour
   modules). A diagram fence is drawn as a figure (the diagram module), the source standing until it
   is drawn and where it cannot be. The figure stands whole in the column, never wider than it, and is
   zoomed and moved as a picture opened whole is: the wheel over it zooms around the pointer, two

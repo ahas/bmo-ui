@@ -66,8 +66,9 @@ describe.skipIf(!ready)("the copy button on a fenced block", () => {
     expect(where.top).toBeLessThanOrEqual(8);
     expect(where.right).toBeGreaterThanOrEqual(0);
     expect(where.right).toBeLessThanOrEqual(8);
-    expect(where.width).toBeGreaterThanOrEqual(32);
-    expect(where.height).toBeGreaterThanOrEqual(32);
+    // At the size of the library's small square icon button (`docs/components.md`, "Code and files").
+    expect(where.width).toBe(28);
+    expect(where.height).toBe(28);
   });
 
   test("copies the lines inside the fence, and says so for a moment", async () => {
