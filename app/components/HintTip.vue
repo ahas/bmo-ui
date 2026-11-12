@@ -5,7 +5,9 @@
        keyboard did not bring, as one handed back by a closing dialog, brings up nothing. A finger has
        no hover, so it brings it up with a tap where a tap does nothing else, and by resting on what
        it stands on where a tap acts there; the next touch anywhere puts it away. Its words wrap
-       inside a box no wider than a phone has room for, so a long name is read whole. -->
+       inside a box no wider than a phone has room for, so a long name is read whole. Its own box
+       around what it stands on is marked where it holds one element and no words, so a row that
+       lays out its controls reads the box as the control inside it. -->
   <UTooltip
     v-model:open="shown"
     :text="props.text"
@@ -23,6 +25,7 @@
       :is="props.as"
       ref="trigger"
       v-bind="$attrs"
+      :data-hint-single="single ? '' : undefined"
       :class="props.press && !props.disabled ? 'select-none [-webkit-touch-callout:none]' : ''"
       @pointerenter="onPointerEnter"
       @pointerdown="pointer = $event.pointerType"
@@ -86,6 +89,19 @@ function element(): HTMLElement | null {
 
   return (found?.$el as HTMLElement | undefined) ?? null;
 }
+
+// Whether its box holds one element and no words of its own, read off what was drawn each time it is
+// drawn again.
+const single = ref(false);
+
+function readSingle(): void {
+  const box = element();
+
+  single.value = box !== null && box.childElementCount === 1 && [...box.childNodes].every((node) => node.nodeType !== Node.TEXT_NODE || node.textContent?.trim() === "");
+}
+
+onMounted(readSingle);
+onUpdated(readSingle);
 
 function isCut(): boolean {
   const box = element();

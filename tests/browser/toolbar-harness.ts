@@ -8,6 +8,7 @@ import UTooltip from "@nuxt/ui/components/Tooltip.vue";
 
 import ActionGroup from "../../app/components/ActionGroup.vue";
 import ChooseAll from "../../app/components/ChooseAll.vue";
+import HintTip from "../../app/components/HintTip.vue";
 import ImageViewer from "../../app/components/ImageViewer.vue";
 import TabBar from "../../app/components/TabBar.vue";
 import TabSwitch from "../../app/components/TabSwitch.vue";
@@ -18,7 +19,8 @@ import sheet from "./toolbar-harness.css?inline";
 // components and the library's own buttons (`docs/components.md`, "Tab bar and toolbar"). The toolbar
 // holds the way back at its left end, given a route as a screen gives it, the control that chooses
 // every row, a view switch, a cell of words, a cell of buttons given routes, which the library draws as
-// links, and the group of actions at its right end. Under it stand a tab bar with its view switch and
+// links, a cell of buttons the shared tooltip names, a cell of named words beside a named button, and
+// the group of actions at its right end. Under it stand a tab bar with its view switch and
 // actions, and a diagram's zoom buttons as the host's renderer writes them. Opened with `?viewer`, the
 // page holds the picture viewer instead, open, with its zoom buttons at its foot. The page stands
 // outside Nuxt, so the library is installed as a Vue plugin and the words are handed over here.
@@ -90,6 +92,14 @@ const Page = defineComponent(() => {
         h("div", { id: "links" }, [
           h(UTooltip, { text: "Previous" }, () => h(UButton, { to: "#previous", icon: "i-material-symbols-chevron-left", color: "neutral", variant: "ghost", square: true, "aria-label": "Previous" })),
           h(UTooltip, { text: "Next" }, () => h(UButton, { to: "#next", icon: "i-material-symbols-chevron-right", color: "neutral", variant: "ghost", square: true, "aria-label": "Next" }))
+        ]),
+        h("div", { id: "named" }, [
+          h(HintTip, { text: "Earlier" }, () => h(UButton, { icon: "i-material-symbols-chevron-left", color: "neutral", variant: "ghost", square: true, "aria-label": "Earlier" })),
+          h(HintTip, { text: "Later" }, () => h(UButton, { icon: "i-material-symbols-chevron-right", color: "neutral", variant: "ghost", square: true, "aria-label": "Later" }))
+        ]),
+        h("div", { id: "named-words" }, [
+          h(HintTip, { text: "Words named" }, () => "Named"),
+          h(HintTip, { text: "Again" }, () => h(UButton, { icon: "i-material-symbols-refresh", color: "neutral", variant: "ghost", square: true, "aria-label": "Again" }))
         ]),
         h(ActionGroup, { id: "actions", class: "ms-auto", actions })
       ]),

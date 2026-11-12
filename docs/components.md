@@ -143,8 +143,10 @@ default; a screen supplies what it holds and what a press means there. Every exp
 - **A cell is as wide as what it holds.** A cell of words keeps the toolbar's own room on either side.
   A cell holding only buttons keeps none of that room, only the small room its buttons stand from the
   row's top and bottom, at its ends and between them. The toolbar tells a button by its being the
-  library's button, whether it is drawn as a button or as a link, never by its element. A cell that is
-  a component of the library keeps the padding and gap that component comes with.
+  library's button, whether it is drawn as a button or as a link, never by its element. A button the
+  shared tooltip names is a button too: the tooltip's own box, holding that button and nothing else,
+  counts as the button it holds, so a cell of named buttons keeps no room of words. A cell that is a
+  component of the library keeps the padding and gap that component comes with.
 - **A bar gathers by the room it has, not by the window's width.** The room is read off the bar
   itself. Short of it, the bar keeps what a hand reaches for first, in the order written, and folds
   the rest into one more-menu at the end. How much room is enough is one reading for every bar, the
@@ -335,6 +337,9 @@ default; a screen supplies what it holds and what a press means there. Every exp
 - **Its words wrap** inside a box no wider than a phone has room for.
 - **A cut name names itself only where it is actually cut,** measured as the tooltip is about to come
   up.
+- **It stands on what it names through a box of its own,** and marks that box each time it is drawn
+  where the box holds one element and no words, so a row that lays out the controls it holds, as the
+  toolbar does, reads the box as the control inside it.
 - **Every line cut with an ellipsis shows whole, with nothing written for it** (`CutLineTip`, driven
   by the cut-lines module). One layer over the whole page finds the line itself: under the pointer,
   the line whose box ends its words in an ellipsis or clamps them to a count of lines and actually

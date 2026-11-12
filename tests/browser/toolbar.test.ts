@@ -14,10 +14,10 @@ import type { Browser, BrowserContext, Page } from "playwright-core";
 // `docs/console-bundles.md`, "How a bundle mounts"): the way back stands at the toolbar's left end and
 // the actions at its right; every button in the toolbar and the tab bar is the library's small one,
 // centred in the row with room above and below it, and its hover fills its own rounded shape and
-// nothing round it; a cell of buttons the library draws as links keeps no room of words; the control
-// that chooses every row is one pressable control whose hover is its own; the view switch's choices are
-// small buttons sharing its width, walked by the arrow keys; and the zoom buttons beside a diagram and
-// at the picture viewer's foot are small too. The page is built as the layer's custom elements are,
+// nothing round it; a cell of buttons the library draws as links or the shared tooltip names keeps no
+// room of words; the control that chooses every row is one pressable control whose hover is its own;
+// the view switch's choices are small buttons sharing its width, walked by the arrow keys; and the zoom
+// buttons beside a diagram and at the picture viewer's foot are small too. The page is built as the layer's custom elements are,
 // from the components that ship. Skipped where the browser build is not on the machine.
 
 const ready = touchReady();
@@ -343,8 +343,26 @@ describe.skipIf(!ready)("a toolbar drawn in a browser", () => {
           expect(words).toBe("12px");
         });
 
+        // The shared tooltip stands on a button through a box of its own; a cell of such named buttons is
+        // still a cell of buttons, while named words beside a named button keep the room of words.
+        test("keeps no room of words round a cell of buttons the shared tooltip names", async () => {
+          const room = async (selector: string) => await page.$eval(selector, (cell) => [getComputedStyle(cell).paddingLeft, getComputedStyle(cell).columnGap]);
+
+          expect(await page.$$eval("#named > *", (found) => found.map((element) => [element.tagName, element.firstElementChild?.tagName]))).toEqual([
+            ["SPAN", "BUTTON"],
+            ["SPAN", "BUTTON"]
+          ]);
+          expect(await room("#named")).toEqual(["4px", "4px"]);
+          expect(await room("#named-words")).toEqual(["12px", "8px"]);
+        });
+
         test("stands the choose-all control as one small pressable shape whose hover and press are its own", async () => {
           const shape = "#choose [data-slot=root]";
+
+          // A row wider than a phone flows sideways, and the keyboard may have left it scrolled past the
+          // control, so the control is brought into view before it is measured.
+          await page.$eval(shape, (element) => element.scrollIntoView({ block: "nearest", inline: "nearest" }));
+
           const row = await box(page, "[role=toolbar]");
           const control = await box(page, shape);
           const word = await box(page, "#choose label");

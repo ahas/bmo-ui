@@ -22,12 +22,15 @@
        the more button that folds them, a view switch — keeps none of it, only the small room its
        buttons stand from the row's top and bottom, at its ends and between them. A library button is
        told by the slot name the library marks it with, which it carries whether it is drawn as a
-       button or as a link, so a button given a route is a button here too. A component of the
-       library, which marks its root with a slot name, keeps the padding and gap it comes with. -->
+       button or as a link, so a button given a route is a button here too. The shared tooltip stands
+       on what it names through a box of its own, which it marks where that box holds one element
+       and no words; such a box holding a library button is that button here, so a named button is
+       a button too. A component of the library, which marks its root with a slot name, keeps the
+       padding and gap it comes with. -->
   <div
     role="toolbar"
     :aria-label="props.label"
-    class="flex h-9 shrink-0 items-stretch divide-x divide-default overflow-x-auto shadow-[inset_0_-1px_0_var(--ui-border)] text-sm [scrollbar-width:none] pointer-coarse:h-10 [&>*]:flex [&>*]:shrink-0 [&>*]:items-center [&>:not([data-slot]):not(:has(>:is(button,a)[data-slot=base]):not(:has(>:not(:is(button,a)[data-slot=base]))))]:gap-2 [&>:not([data-slot]):not(:has(>:is(button,a)[data-slot=base]):not(:has(>:not(:is(button,a)[data-slot=base]))))]:px-3 [&>:not([data-slot]):has(>:is(button,a)[data-slot=base]):not(:has(>:not(:is(button,a)[data-slot=base])))]:gap-1 [&>:not([data-slot]):has(>:is(button,a)[data-slot=base]):not(:has(>:not(:is(button,a)[data-slot=base])))]:px-1 [&_:is(button,a)]:whitespace-nowrap [&_:is(button,a)[data-slot=base]]:focus-inset"
+    class="flex h-9 shrink-0 items-stretch divide-x divide-default overflow-x-auto shadow-[inset_0_-1px_0_var(--ui-border)] text-sm [scrollbar-width:none] pointer-coarse:h-10 [&>*]:flex [&>*]:shrink-0 [&>*]:items-center [&>:not([data-slot]):not(:has(>:is(button,a)[data-slot=base],>[data-hint-single]>:is(button,a)[data-slot=base]):not(:has(>:not(:is(button,a)[data-slot=base],[data-hint-single]),>[data-hint-single]>:not(:is(button,a)[data-slot=base]))))]:gap-2 [&>:not([data-slot]):not(:has(>:is(button,a)[data-slot=base],>[data-hint-single]>:is(button,a)[data-slot=base]):not(:has(>:not(:is(button,a)[data-slot=base],[data-hint-single]),>[data-hint-single]>:not(:is(button,a)[data-slot=base]))))]:px-3 [&>:not([data-slot]):has(>:is(button,a)[data-slot=base],>[data-hint-single]>:is(button,a)[data-slot=base]):not(:has(>:not(:is(button,a)[data-slot=base],[data-hint-single]),>[data-hint-single]>:not(:is(button,a)[data-slot=base])))]:gap-1 [&>:not([data-slot]):has(>:is(button,a)[data-slot=base],>[data-hint-single]>:is(button,a)[data-slot=base]):not(:has(>:not(:is(button,a)[data-slot=base],[data-hint-single]),>[data-hint-single]>:not(:is(button,a)[data-slot=base])))]:px-1 [&_:is(button,a)]:whitespace-nowrap [&_:is(button,a)[data-slot=base]]:focus-inset"
   >
     <UTheme :props="SMALL">
       <slot />
