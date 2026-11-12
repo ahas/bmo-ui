@@ -916,6 +916,15 @@
       "example": "<LoadingVideo src=\"https://example.com/videos/walk.mp4\" />"
     },
     {
+      "name": "MarkupButtonTip",
+      "kind": "component",
+      "line": "The one layer that names any button a host writes as markup carrying data-tooltip, in the shared tooltip.",
+      "props": [],
+      "slots": [],
+      "events": [],
+      "example": "<UApp>\n  <NuxtPage />\n  <CutLineTip />\n  <MarkupButtonTip />\n</UApp>"
+    },
+    {
       "name": "MarqueeLine",
       "kind": "component",
       "line": "A line that slides when it is longer than its box.",

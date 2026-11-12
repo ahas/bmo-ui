@@ -518,9 +518,8 @@
 
 /* A fenced block stands in a box with its copy button over the top right corner (the code-copy
    module). The box carries the block's spacing, and the block keeps clear of the button on its
-   right. The button is always shown, so a finger has it without hovering, and it names itself
-   beside it on hover and on focus the way every icon button does; after a press it says it copied
-   and shows a check for a moment. */
+   right. The button is always shown, so a finger has it without hovering; the markup button layer
+   names it, and after a press it says it copied and shows a check for a moment. */
 .markdown .markdown-code {
   position: relative;
   margin: 0.85em 0;
@@ -604,44 +603,6 @@
   color: var(--ui-success);
 }
 
-.markdown-copy::after {
-  content: attr(data-tooltip);
-  position: absolute;
-  top: 50%;
-  right: calc(100% + 0.25rem);
-  padding: 0.25rem 0.5rem;
-  border-radius: var(--ui-radius);
-  box-shadow: 0 0 0 1px var(--ui-border);
-  background-color: var(--ui-bg);
-  color: var(--ui-text-highlighted);
-  font-family: var(--font-sans);
-  font-size: 0.875rem;
-  line-height: 1.25rem;
-  white-space: nowrap;
-  opacity: 0;
-  pointer-events: none;
-  transform: translateY(-50%);
-  /* It grows out of the button it names, as every tooltip does. */
-  transform-origin: right center;
-  scale: 0.95;
-  transition:
-    opacity var(--bmo-motion-quick) var(--bmo-ease-enter),
-    scale var(--bmo-motion-quick) var(--bmo-ease-enter);
-}
-
-.markdown-copy:hover::after,
-.markdown-copy:focus-visible::after,
-.markdown-copy[data-copied]::after {
-  opacity: 1;
-  scale: 1;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .markdown-copy::after {
-    transition: none;
-  }
-}
-
 /* A diagram (the diagram module) stands on a line of its own, centred in the column at the size it
    was laid out at, and shrinks to the column whole where it is wider, so neither the page nor its
    own box moves sideways. Its figure is the stage it is zoomed on: what a zoom carries past the
@@ -697,7 +658,6 @@
 }
 
 .markdown-diagram-tools > button {
-  position: relative;
   display: inline-flex;
   width: 1.75rem;
   height: 1.75rem;
@@ -727,42 +687,6 @@
 .markdown-diagram-tools svg {
   width: 1rem;
   height: 1rem;
-}
-
-/* A zoom button names itself over it on hover and on focus, as the copy button does beside it. */
-.markdown-diagram-tools > button::after {
-  content: attr(data-tooltip);
-  position: absolute;
-  right: 0;
-  bottom: calc(100% + 0.25rem);
-  padding: 0.25rem 0.5rem;
-  border-radius: var(--ui-radius);
-  box-shadow: 0 0 0 1px var(--ui-border);
-  background-color: var(--ui-bg);
-  color: var(--ui-text-highlighted);
-  font-family: var(--font-sans);
-  font-size: 0.875rem;
-  line-height: 1.25rem;
-  white-space: nowrap;
-  opacity: 0;
-  pointer-events: none;
-  transform-origin: right bottom;
-  scale: 0.95;
-  transition:
-    opacity var(--bmo-motion-quick) var(--bmo-ease-enter),
-    scale var(--bmo-motion-quick) var(--bmo-ease-enter);
-}
-
-.markdown-diagram-tools > button:hover::after,
-.markdown-diagram-tools > button:focus-visible::after {
-  opacity: 1;
-  scale: 1;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .markdown-diagram-tools > button::after {
-    transition: none;
-  }
 }
 
 /* The mark for work in progress always turns, wherever it stands — a chip, a row, a tab — so it
