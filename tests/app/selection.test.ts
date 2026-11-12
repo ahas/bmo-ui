@@ -1,6 +1,5 @@
 import { describe, expect, test } from "bun:test";
 
-import { CHOOSE_CELL } from "~/domain/chooseall";
 import { HOLD_MS } from "~/domain/longpress";
 
 import { attribute, elements, source, template } from "./sources";
@@ -43,23 +42,21 @@ describe("the control that chooses every row", () => {
     expect(chooseAll).toContain("chooseAllState(props.selected, props.keys)");
   });
 
-  test("stands in a cell a finger can aim at, which carries the hover and the press", () => {
-    // The cell's shape is the choosing module's, so the control over a list and the mark on its rows
-    // are given it from one place and stand on one vertical line.
-    expect(chooseAll).toContain("CHOOSE_CELL");
-    expect(CHOOSE_CELL).toContain("size-9");
-    expect(CHOOSE_CELL).toContain("pointer-coarse:size-10");
-    expect(chooseAll).toContain("hover:bg-elevated active:bg-elevated");
-    // A press that landed on the box is the box's own; the cell takes only what missed it.
-    expect(chooseAll).toContain(`closest("[role='checkbox']") !== null`);
-  });
-
-  test("names itself the end a press would take it to, in its tooltip and its accessible name", () => {
-    const tip = nodes.find((node) => node.tag === "UTooltip");
+  test("is one pressable control with its words, whose hover fills its own rounded shape", () => {
     const box = nodes.find((node) => node.tag === "UCheckbox");
 
-    expect(attribute(tip!, "text")?.exp?.content).toBe("label");
-    expect(attribute(box!, "aria-label")?.exp?.content).toBe("label");
+    expect(attribute(box!, "ui")?.exp?.content).toBe("CONTROL_UI");
+    expect(chooseAll).toMatch(/root: "[^"]*rounded-md[^"]*hover:bg-elevated active:bg-elevated/);
+    expect(chooseAll).toContain('@click="aroundBox"');
+    // A press on the box or on its words is the checkbox's own; the shape takes only what missed both.
+    expect(chooseAll).toContain(`closest("[role='checkbox'], label") !== null`);
+  });
+
+  test("shows the end a press would take it to as its words, which are its accessible name", () => {
+    const box = nodes.find((node) => node.tag === "UCheckbox");
+
+    expect(attribute(box!, "label")?.exp?.content).toBe("label");
+    expect(nodes.some((node) => node.tag === "UTooltip")).toBe(false);
     expect(chooseAll).toContain("chooseAllLabel(t, state.value)");
   });
 });

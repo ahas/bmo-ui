@@ -134,17 +134,17 @@ names them.
   an address already under the app's base path as it is, so the same address serves a call and a
   raw address alike.
 - **The title bar.** A console may draw one title bar over every screen, a bundle's among them. Where it
-  does, it provides, under the injection key `bmo-console-title-bar`, an object naming in `screenActions`
-  the selector of the place in its bar, after the name, a screen lays what acts on it as a whole, and in
-  `screenLead` the selector of the place before the name a screen lays its way back to the screen it was
-  opened from, since a way back leads the bar as it leads every head. A route that asks for the console's bar
-  says so in its meta, `consoleTitleBar: true`, and the console draws the bar over it, named by the
-  manifest's title and icon. A screen whose route asks and that finds the key provided draws no bar of its
-  own, and teleports what acts on it as a whole into the place `screenActions` names and its way back into
-  the place `screenLead` names, deferred, since the bar stands before the screen does; where the offer names
-  no `screenLead`, the way back stands first among its actions. Found without the key — on its service's own
-  page, or under a console that draws no shared bar — it draws its own. A route that does not ask stands as
-  its bundle draws it.
+  does, it provides an object under the injection key `bmo-console-title-bar`, and the object names the bar
+  alone: beside the title the bar holds the screen's name and mark and nothing a screen lays into it. A route
+  that asks for the console's bar says so in its meta, `consoleTitleBar: true`, and the console draws the bar
+  over it, named by the manifest's title and icon. A screen whose route asks and that finds the key provided
+  draws no bar of its own. Found without the key — on its service's own page, or under a console that draws
+  no shared bar — it draws its own bar with its name and mark alone. A route that does not ask stands as its
+  bundle draws it.
+- **The screen's own row.** What acts on a screen as a whole stands at the right end of the screen's own row
+  directly under the title bar, and its way back to the screen it was opened from at that row's left end,
+  under the console's bar and its own alike. Where the screen already has a row there, its tab bar or its
+  toolbar, that row holds them; otherwise the screen draws one, and never a second.
 - **The people directory.** A console that keeps accounts with names may offer a screen the people of the
   reader's organization, under the injection key `bmo-console-people`, as an object of three reads: `search`,
   given words, answers the people whose name, organization or job title holds them, at most twenty; `person`,
@@ -314,7 +314,7 @@ under `calls`, and its screens hand the module texts and a language.
   carries and how many asks a tab holds out at once (`docs/boundary.md`, "What the host owes").
 - **It offers its title bar, where it draws one over every screen,** under the key `bmo-console-title-bar`,
   and draws it over a bundle's route that asks for it in its meta ("How a bundle mounts", the title bar): the bar
-  and its place stand before that route's screen mounts, on every way to it — the first load, from another of the
+  stands before that route's screen mounts, on every way to it — the first load, from another of the
   console's screens, from another bundle's — and stay while the screen being left still stands.
 - **It offers its people directory, where it keeps named accounts,** under the key `bmo-console-people`
   ("How a bundle mounts", the people directory), answering its reads for the signed-in reader alone, with no

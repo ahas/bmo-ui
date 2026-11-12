@@ -124,13 +124,16 @@ whole in `docs/boundary.md`; this document says what each is for and how the lay
   from the moment the state is entered — never folded into a menu.
   - It is `ChooseAll`, a checkbox at the three states the choice can be in: none of the rows shown,
     some of them as the checkbox's own indeterminate state, all of them. A press takes the choice to
-    whichever end it is not at, and the name it carries — the keys `common.action.choose_all` and
-    `common.action.choose_none` — is that end, so the tooltip and the accessible name say what
-    pressing would do.
+    whichever end it is not at, and the words it shows beside the box — the keys
+    `common.action.choose_all` and `common.action.choose_none` — name that end, so its words and its
+    accessible name say what pressing would do.
   - A row of such a list marks itself chosen with a checkbox's own square, so one list is not read as
     two ways of choosing.
-  - The box is smaller than a finger, so it stands in a cell as wide as a toolbar is tall and the
-    whole cell is pressed, with the hover and press colours a toolbar's other cells carry.
+  - The box is smaller than a finger, so the box and its words stand as one pressable control of the
+    library's checkbox: a press on the box, on the words or on the room round them is one press, and
+    the hover and press colours fill that control's own rounded shape, as a small button's do, never
+    the toolbar's cell or row. The keyboard's ring goes round that whole shape, inside its edge, and
+    the box draws none of its own.
   - What the states mean and what a press means are decided once, in the chooseall module. The list
     supplies the rows it is showing and what was chosen, and receives which of the two ends the press
     asked for.
