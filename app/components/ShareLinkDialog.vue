@@ -15,9 +15,7 @@
         <div class="flex items-center gap-2">
           <UInput :model-value="address" readonly class="min-w-0 flex-1" :ui="{ base: 'font-mono' }" :aria-label="$t('common.aria.share_address')" @focus="selectAll" />
 
-          <UTooltip :text="$t('common.action.copy')">
-            <UButton color="neutral" variant="ghost" square icon="i-material-symbols-content-copy-outline" :aria-label="$t('common.action.copy')" @click="copy" />
-          </UTooltip>
+          <IconButton :label="$t('common.action.copy')" icon="i-material-symbols-content-copy-outline" @click="copy" />
         </div>
       </UFormField>
 

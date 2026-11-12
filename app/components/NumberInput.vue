@@ -14,15 +14,11 @@
       :ui="LOOKS[orientation]"
     >
       <template #increment>
-        <UTooltip :text="$t('common.aria.increase')">
-          <UButton :key="icons.increment" v-bind="STEP" :icon="icons.increment" :aria-label="$t('common.aria.increase')" />
-        </UTooltip>
+        <IconButton :key="icons.increment" v-bind="STEP" :label="$t('common.aria.increase')" :icon="icons.increment" />
       </template>
 
       <template #decrement>
-        <UTooltip :text="$t('common.aria.decrease')">
-          <UButton :key="icons.decrement" v-bind="STEP" :icon="icons.decrement" :aria-label="$t('common.aria.decrease')" />
-        </UTooltip>
+        <IconButton :key="icons.decrement" v-bind="STEP" :label="$t('common.aria.decrease')" :icon="icons.decrement" />
       </template>
     </UInputNumber>
 
@@ -60,19 +56,20 @@ const icons = computed(() =>
 
 // The box keeps its words clear of the buttons, and is the words' width, its own room and the
 // buttons' wide. Each button stands 2px in from the box's edge so its corners follow the box's:
-// stacked, the two each fill half the column's height; apart, each the box's whole height.
+// stacked, the two each fill half the column's height; apart, each the box's whole height. The
+// tooltip's box round each button fills its place, so the button's height has one to fill.
 const LOOKS = {
   vertical: {
     root: "w-[calc(var(--number-digits)*1ch+var(--step-width)+1rem)]",
     base: "pe-[calc(var(--step-width)+0.25rem)] tabular-nums pointer-coarse:h-13",
-    increment: "top-0.5 bottom-1/2 end-0.5 pe-0 scale-100",
-    decrement: "top-1/2 bottom-0.5 end-0.5 pe-0 scale-100"
+    increment: "top-0.5 bottom-1/2 end-0.5 pe-0 scale-100 *:h-full",
+    decrement: "top-1/2 bottom-0.5 end-0.5 pe-0 scale-100 *:h-full"
   },
   horizontal: {
     root: "w-[calc(var(--number-digits)*1ch+2*var(--step-width)+1rem)]",
     base: "ps-[calc(var(--step-width)+0.25rem)] pe-[calc(var(--step-width)+0.25rem)] tabular-nums pointer-coarse:h-13",
-    increment: "inset-y-0.5 end-0.5 pe-0",
-    decrement: "inset-y-0.5 start-0.5 ps-0"
+    increment: "inset-y-0.5 end-0.5 pe-0 *:h-full",
+    decrement: "inset-y-0.5 start-0.5 ps-0 *:h-full"
   }
 } as const;
 

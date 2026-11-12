@@ -4,13 +4,14 @@
        action area, and its choices share its width evenly. Each choice is the library's small
        button, the standing one outlined on the page's own ground and the rest ghost, so a hover and
        a press fill only the choice's own rounded shape and never the row the switch stands in. Short
-       of room each choice shows its icon alone and is named on hover.
+       of room each choice shows its icon alone and is named by the shared tooltip, which a finger
+       held on it brings up as a hover does.
 
        The even share is a grid of equal columns, which the switch holds against the toolbar laying
        each of its cells out as a row: a row would give each choice the width of its word. -->
   <div role="tablist" :aria-label="props.label" class="grid! shrink-0 auto-cols-fr grid-flow-col items-center gap-1">
     <template v-for="(item, index) in props.items" :key="item.value">
-      <UTooltip :text="item.label" :disabled="!shortened(item)">
+      <HintTip class="flex min-w-0" :text="item.label" :disabled="!shortened(item)" press>
         <UButton
           :ref="(button) => keep(index, button)"
           role="tab"
@@ -23,11 +24,11 @@
           :tabindex="item.value === props.modelValue ? 0 : -1"
           :aria-selected="item.value === props.modelValue"
           :aria-label="item.label"
-          class="min-w-0 justify-center"
+          class="min-w-0 flex-1 justify-center"
           @click="emit('update:modelValue', item.value)"
           @keydown="onKey(index, $event)"
         />
-      </UTooltip>
+      </HintTip>
     </template>
   </div>
 </template>

@@ -55,6 +55,9 @@ interface Props {
   cut?: boolean;
   // What it stands on acts on a tap, so a finger rests on it to read it instead.
   press?: boolean;
+  // Whether a focus arriving on what it stands on is the keyboard's, where the browser's visible-focus
+  // tell cannot say so for it; that tell by default.
+  keyboardFocus?: (event: FocusEvent) => boolean;
   disabled?: boolean;
   as?: string | Component;
   // Which side of what it stands on it comes up on, where the library's own side would cover
@@ -64,7 +67,7 @@ interface Props {
 
 defineOptions({ inheritAttrs: false });
 
-const props = withDefaults(defineProps<Props>(), { text: undefined, label: undefined, cut: false, press: false, disabled: false, as: "span", side: undefined });
+const props = withDefaults(defineProps<Props>(), { text: undefined, label: undefined, cut: false, press: false, keyboardFocus: undefined, disabled: false, as: "span", side: undefined });
 
 // What the library is told of the tooltip's own box: the name a screen reader hears, and the side.
 const tipContent = computed(() => {
@@ -128,7 +131,11 @@ function onPointerEnter(event: PointerEvent): void {
 // The library opens on its own trigger's focus; a focus landing on something inside is the same
 // question asked of the same words.
 function onFocusIn(event: FocusEvent): void {
-  if (event.target instanceof Element && event.target.matches(":focus-visible")) shown.value = true;
+  if (props.keyboardFocus === undefined ? visibleFocus(event) : props.keyboardFocus(event)) shown.value = true;
+}
+
+function visibleFocus(event: FocusEvent): boolean {
+  return event.target instanceof Element && event.target.matches(":focus-visible");
 }
 
 // The next touch anywhere puts it away, as a tap outside puts away anything floating. A touch on

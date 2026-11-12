@@ -62,46 +62,39 @@
           >
         </div>
 
-        <!-- The arrows stand on a screen with a pointer; a finger strokes the picture instead. -->
+        <!-- The arrows stand on a screen with a pointer; a finger strokes the picture instead. Each
+             stands in a holder of its own at the edge, so its tooltip stands on it there. -->
         <template v-if="props.canPrevious || props.canNext">
-          <UTooltip :text="$t('common.action.previous_picture')">
-            <UButton
+          <div class="absolute inset-y-0 start-4 my-auto flex h-fit max-sm:hidden">
+            <IconButton
+              :label="$t('common.action.previous_picture')"
               icon="i-material-symbols-chevron-left"
-              color="neutral"
               variant="outline"
-              class="absolute inset-y-0 start-4 my-auto h-fit rounded-full max-sm:hidden"
-              :aria-label="$t('common.action.previous_picture')"
+              class="rounded-full"
               :disabled="!props.canPrevious"
               @click="go('previous')"
             />
-          </UTooltip>
-          <UTooltip :text="$t('common.action.next_picture')">
-            <UButton
+          </div>
+          <div class="absolute inset-y-0 end-4 my-auto flex h-fit max-sm:hidden">
+            <IconButton
+              :label="$t('common.action.next_picture')"
               icon="i-material-symbols-chevron-right"
-              color="neutral"
               variant="outline"
-              class="absolute inset-y-0 end-4 my-auto h-fit rounded-full max-sm:hidden"
-              :aria-label="$t('common.action.next_picture')"
+              class="rounded-full"
               :disabled="!props.canNext"
               @click="go('next')"
             />
-          </UTooltip>
+          </div>
         </template>
       </div>
     </template>
 
     <template #footer>
       <div class="flex items-center gap-2">
-        <UTooltip :text="$t('common.action.zoom_out')">
-          <UButton icon="i-material-symbols-zoom-out" size="sm" color="neutral" variant="ghost" :aria-label="$t('common.action.zoom_out')" :disabled="view.scale <= MIN_SCALE" @click="zoomBy(1 / 1.5)" />
-        </UTooltip>
+        <IconButton :label="$t('common.action.zoom_out')" icon="i-material-symbols-zoom-out" size="sm" :disabled="view.scale <= MIN_SCALE" @click="zoomBy(1 / 1.5)" />
         <span class="w-14 text-center text-sm tabular-nums text-muted" aria-live="polite">{{ Math.round(view.scale * 100) }}%</span>
-        <UTooltip :text="$t('common.action.zoom_in')">
-          <UButton icon="i-material-symbols-zoom-in" size="sm" color="neutral" variant="ghost" :aria-label="$t('common.action.zoom_in')" :disabled="view.scale >= MAX_SCALE" @click="zoomBy(1.5)" />
-        </UTooltip>
-        <UTooltip :text="$t('common.action.fit_screen')">
-          <UButton icon="i-material-symbols-fit-screen-outline" size="sm" color="neutral" variant="ghost" :aria-label="$t('common.action.fit_screen')" :disabled="view.scale === 1" @click="fit" />
-        </UTooltip>
+        <IconButton :label="$t('common.action.zoom_in')" icon="i-material-symbols-zoom-in" size="sm" :disabled="view.scale >= MAX_SCALE" @click="zoomBy(1.5)" />
+        <IconButton :label="$t('common.action.fit_screen')" icon="i-material-symbols-fit-screen-outline" size="sm" :disabled="view.scale === 1" @click="fit" />
       </div>
     </template>
   </UModal>

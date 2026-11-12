@@ -102,9 +102,10 @@ async function ring(page: Page): Promise<string> {
   return page.$eval(CLOSE, (element) => getComputedStyle(element).outlineStyle);
 }
 
-// How the close names itself: the state its tooltip holds it in.
+// How the close names itself: the state its tooltip holds it in, read off the tooltip's own box
+// round it.
 async function closeState(page: Page): Promise<string | null> {
-  return page.$eval(CLOSE, (element) => element.getAttribute("data-state"));
+  return page.$eval(CLOSE, (element) => element.closest("[data-hint-single]")?.getAttribute("data-state") ?? null);
 }
 
 describe.skipIf(!ready)("the question standing on its own close", () => {
