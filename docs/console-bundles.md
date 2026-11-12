@@ -21,12 +21,13 @@ which service translates and how it lists their screens. A service supplies its 
   holds the routes of its screens, each under the manifest's screen path; the shared module
   `console-manifest` states that export's type.
 - **It shares the console's libraries.** The bundle leaves unbundled every import of `vue`,
-  `vue-router`, `vue-i18n`, `nuxt/app`, `@nuxt/ui` and this layer, written as the package's own path
-  of what it imports, and carries everything else itself. The console resolves each of those paths to
-  the one copy its app runs, so every bundle draws with the console's components, reads the console's
-  app and runtime configuration and calls through the console's fetcher. A bundle is built against the
-  layer version its console runs; one built against a version whose boundary differs is rebuilt by its
-  service.
+  `vue-router`, `vue-i18n`, `nuxt/app`, `@nuxt/ui` and this layer, the libraries the shared module
+  `console-manifest` lists, written as the package's own path of what it imports, and carries
+  everything else itself. The console resolves each of those paths to the one copy its app runs, so
+  every bundle draws with the console's components, reads the console's app and runtime configuration
+  and calls through the console's fetcher.
+- **It is built on one release of this layer,** the one its console runs, and names that release in
+  its manifest ("The layer a bundle is built on").
 - **Its stylesheet** is the styles and utility classes its screens use beyond the layer's own, built
   on the layer's tokens and answered at the path the manifest names, where the bundle has one. The
   layer's stylesheet and tokens are the console's copy.
@@ -63,6 +64,7 @@ none of them a dot or two standing for a folder.
 | `screenPath` | The path the bundle's screens stand under: one or more kebab-case segments, each led by a slash. | yes |
 | `formerScreenPaths` | The paths the bundle's screens stood under before, each written as a screen path is; none the screen path, none standing under it or over it, none under or over another, and none twice. A console answers every address under one as moved to the same address under the screen path ("A screen that moved"). | no, none |
 | `serviceName` | The service's name, in kebab-case, which a console relays the service under. | yes |
+| `layer` | The version of this layer the bundle was built on, as the bundle build wrote it beside the module ("The layer a bundle is built on"). | yes |
 | `bundle` | The path of the service's API its module is answered at. | yes |
 | `stylesheet` | The path of the service's API its stylesheet is answered at. | no, none |
 | `words` | The path of the service's API its words are answered at. | yes |
@@ -82,6 +84,36 @@ Reading a manifest fills each optional field that states a default with it, so a
 field of every manifest but the stylesheet and the sidebar count, which stand only where a manifest
 names them.
 
+## The layer a bundle is built on
+
+A bundle runs on the console's own copies of the shared libraries, this layer among them, so a
+bundle and its console stand on the same release of the layer or the bundle is not attached.
+
+- **One file per version.** The layer is taken as the one packed file its release verb writes for a
+  version, kept under the layer's `releases/` by the version's name, beside a ledger of each file's
+  sha256 (the README, "Version"). A service and a console vendor that file as it stands, checked
+  against the ledger, and never pack the layer from its source; so one version names one set of bytes
+  wherever it runs.
+- **The bundle build names the layer.** A bundle is built with the layer's bundle build
+  (`docs/boundary.md`, "The bundle build"), which leaves the shared libraries unbundled and writes
+  the layer's version into `layer.json` beside the module. The service answers that version as the
+  manifest's `layer`, never one written by hand.
+- **A layer taken from its source is no release.** Installed from its source rather than from a
+  release's file, the layer names its version marked `+source`, so a bundle built on it names a layer
+  no console runs.
+- **A console leaves out a bundle on another layer.** A manifest whose `layer` is not the version of
+  the layer the console runs, which the shared module answers, leaves its service out as a manifest
+  that does not read does: no menu entry, no relay and no notices. The console records why, naming
+  the manifest's layer and its own, where its administrator reads what it left out, so a bundle
+  missing from the menu is explained there.
+- **Why the versions must be equal.** A bundle imports the layer's components and modules, and the
+  libraries' own, as the release it was built on has them, and finds the console's in their place.
+  Where the two releases' boundaries differ it fails while a reader uses the screen, after its
+  manifest has read clean, and nothing the console reads beforehand shows which difference will
+  break which screen. Equal versions are the one test that needs no such knowledge.
+- **A new release moves everything together.** The console and every bundle are built on the new
+  release; a bundle not yet rebuilt stays out of the console's menu until its service rebuilds it.
+
 ## How a console finds the services
 
 - **Its settings list the services it asks,** each by the base address it reaches the service at and
@@ -93,6 +125,8 @@ names them.
   and nothing a reader is shown as a fault. The first manifest it answers again attaches it again.
 - **A manifest that does not read leaves its service out** as well, and the console records the
   reading's fault, naming each field.
+- **A manifest built on another layer leaves its service out,** and the console records both layers
+  ("The layer a bundle is built on").
 - **Two manifests sharing a name, a screen path or a service name** leave both services out, rather
   than either attached over the other. A former screen path counts as a screen path here: one manifest's
   screen path or former screen path that is another's screen path or former screen path is shared.
@@ -294,10 +328,13 @@ under `calls`, and its screens hand the module texts and a language.
 
 ## What a console owes
 
-- **It shares its libraries** with every bundle it loads: each path of `vue`, `vue-router`,
-  `vue-i18n`, `nuxt/app`, `@nuxt/ui` and this layer a bundle imports resolves in the browser to the
-  copy its app runs. It extends this layer and owes it what the layer asks of a host
-  (`docs/boundary.md`, "What the host owes").
+- **It shares its libraries** with every bundle it loads: each path of the shared libraries the
+  shared module lists that a bundle imports resolves in the browser to the copy its app runs. It
+  extends this layer and owes it what the layer asks of a host (`docs/boundary.md`, "What the host
+  owes").
+- **It runs one release of the layer,** vendored as its file stands, and leaves out every bundle
+  whose manifest names another, recording both versions where its administrator reads them ("The
+  layer a bundle is built on").
 - **It finds the services** as the contract states: its own list, every manifest read through the
   shared module, the absent left out and the conflicting refused.
 - **It attaches each bundle by its manifest alone:** an entry under its title and icon leading to its
@@ -344,8 +381,10 @@ under `calls`, and its screens hand the module texts and a language.
 
 ## What a service owes
 
-- **It answers its manifest** at the route, by the schema, and reads it in its own test through the
-  shared module's reading, so a manifest that breaks the contract fails there first.
+- **It answers its manifest** at the route, by the schema, read in a test through the shared
+  module's reading, so a manifest that breaks the contract fails there first.
+- **It builds its bundle on the console's release of the layer,** vendored as its file stands, with
+  the layer's bundle build, and answers the layer that build wrote as the manifest's `layer`.
 - **It answers its module, its stylesheet and its words** at the paths the manifest names.
 - **It names a route of its own under `relays`** only where a console's screens need it as the
   service's other callers have it, so no route of the service stands twice, once for a console and
@@ -358,5 +397,15 @@ under `calls`, and its screens hand the module texts and a language.
 
 ## Who reads the contract
 
-A coding harness building a bundle reads the contract through the layer's MCP server, which answers
-the manifest's route, its JSON Schema and this document whole (`docs/harness.md`).
+- **This document is the contract's one statement.** A repository whose service has a bundle, and a
+  console, name this document in their own documents with the parts of it they use (a share page, a
+  sidebar count, the people directory, a translator) and what they add of their own. They do not copy
+  its rules, its fields or its headers: a copy trails this document as soon as it changes.
+- **Conformance is held by shared checks,** never by a repository's own prose: the console face of
+  the base library the services build on, which serves the manifest, the module, the stylesheet, the
+  words and the guard as this document states them, with tests that read the served manifest through
+  the shared module's reading, which every service using it inherits; and the checks a service passes
+  before it goes live, which hold every vendored copy of the layer to the one release the console
+  runs and probe the service's console face once it has started.
+- **A coding harness** building a bundle reads the contract through the layer's MCP server, which
+  answers the manifest's route, its JSON Schema and this document whole (`docs/harness.md`).

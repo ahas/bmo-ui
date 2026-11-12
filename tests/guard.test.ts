@@ -74,12 +74,16 @@ function programsOf(path: string, source: string): Program[] {
   return codes.filter((one): one is string => one !== undefined).map(program);
 }
 
-// The layer's own code: everything a host takes when it extends the layer, and the harness plugin's
-// code beside it. The components' examples stand for a host's screen and keep a host's words, so they
-// are read as a host's code is: by the typecheck, not by these rules.
+// The layer's own code: everything a host takes when it extends the layer, the bundle build a service
+// builds with, and the harness plugin's code beside it. The components' examples stand for a host's
+// screen and keep a host's words, so they are read as a host's code is: by the typecheck, not by
+// these rules.
 const layerCode: CodeFile[] = await Promise.all(
   repositoryPaths
-    .filter((path) => path === "nuxt.config.ts" || /^(app|shared|bin|mcp)\/.+\.(ts|vue)$/.test(path) || /^catalogue\/[^/]+\.ts$/.test(path))
+    .filter(
+      (path) =>
+        path === "nuxt.config.ts" || /^(app|shared|bin|mcp)\/.+\.(ts|vue)$/.test(path) || /^catalogue\/[^/]+\.ts$/.test(path) || /^bundle\/[^/]+\.js$/.test(path)
+    )
     .map(async (path) => ({ path, programs: programsOf(path, await text(path)) }))
 );
 
@@ -486,12 +490,12 @@ function exportsOf(file: CodeFile): string[] {
   return [...names].sort();
 }
 
-// The modules in one folder, each with what it exports.
-function modulesIn(folder: string): Record<string, string[]> {
+// The modules in one folder written with one ending, each with what it exports.
+function modulesIn(folder: string, ending = ".ts"): Record<string, string[]> {
   return Object.fromEntries(
     layerCode
-      .filter((file) => file.path.startsWith(folder) && !file.path.slice(folder.length).includes("/") && file.path.endsWith(".ts"))
-      .map((file) => [file.path.slice(folder.length, -".ts".length), exportsOf(file)])
+      .filter((file) => file.path.startsWith(folder) && !file.path.slice(folder.length).includes("/") && file.path.endsWith(ending))
+      .map((file) => [file.path.slice(folder.length, -ending.length), exportsOf(file)])
   );
 }
 
@@ -520,6 +524,10 @@ describe("the boundary document", () => {
 
   test("names every shared module with everything it exports", () => {
     expect(namedModules("Shared modules")).toEqual(modulesIn("shared/"));
+  });
+
+  test("names the bundle build with everything it exports", () => {
+    expect(namedModules("The bundle build")).toEqual(modulesIn("bundle/", ".js"));
   });
 
   test("names the catalogue module with everything it exports", () => {

@@ -2,6 +2,8 @@ import { z } from "zod";
 
 import type { RouteRecordRaw } from "vue-router";
 
+import layer from "./layer.json" with { type: "json" };
+
 // The console plugin contract's manifest (`docs/console-bundles.md`, "The manifest"). One shape states
 // the type, the reading and the JSON Schema a harness is handed, so the three never part. A service
 // answers it, a console reads it, and both import it from here.
@@ -24,6 +26,14 @@ export type ConsoleRole = (typeof CONSOLE_ROLES)[number];
 export const RELAY_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE"] as const;
 
 export type RelayMethod = (typeof RELAY_METHODS)[number];
+
+// The version of the layer this module is part of (`docs/console-bundles.md`, "The layer a bundle is
+// built on"): a release's version where the layer was installed from the file its release verb wrote,
+// the package's version marked `+source` where it was installed from its source.
+export const LAYER_VERSION: string = layer.layer;
+
+// The libraries a bundle leaves unbundled and finds as its console's copy, each by its package's path.
+export const CONSOLE_SHARED_LIBRARIES: readonly string[] = layer.sharedLibraries;
 
 const KEBAB = /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/;
 
@@ -85,6 +95,7 @@ const manifest = z
       .default([])
       .describe("The paths the bundle's screens stood under before; a console answers every address under one as moved to the screen path."),
     serviceName: z.string().regex(KEBAB, "a name in kebab-case").describe("The service's name, which the console relays it under."),
+    layer: z.string().min(1, "the layer's version the bundle build wrote").describe("The version of the layer the bundle was built on, as the bundle build wrote it."),
     bundle: apiPath("The path of the service's API the bundle's module is answered at."),
     stylesheet: apiPath("The path of the service's API the bundle's stylesheet is answered at.").optional(),
     words: apiPath("The path of the service's API the bundle's words are answered at."),
@@ -182,6 +193,11 @@ export function consoleManifest(value: unknown): ConsoleManifest {
   const faults = read.error.issues.map((issue) => `${issue.path.join(".") || "the manifest"}: ${issue.message}`);
 
   throw new Error(`The console manifest does not keep the contract: ${faults.join("; ")}`);
+}
+
+// Whether a bundle was built on the layer this module is part of, the one a console attaches it by.
+export function onThisLayer(manifest: ConsoleManifest): boolean {
+  return manifest.layer === LAYER_VERSION;
 }
 
 // Whether a reader holding one role may open a screen needing another.

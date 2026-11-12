@@ -56,7 +56,14 @@ branch for one unit, and no data or test fixture only the asker uses.
 Whoever holds this repository's work reviews the pull request and merges it or sends it back with the reason
 on it; a review service may assist. A merge moves no version: a version moves only at a release the owner
 declares. The repository that asked builds against the merged main through its path dependency and resumes
-the part it stopped.
+the part it stopped; what it puts live vendors the release that carries the change, since the layer a path
+dependency installs names its version marked `+source` and no console takes a bundle built on it.
+
+## Releases
+
+- A packed file comes to exist only through `bun run release`, once per version, written under `releases/`
+  with its sha256 in the ledger beside it; the README's "Version" states the verb and the version line.
+- Nobody packs the layer by hand or from a checkout, and no file under `releases/` is written again.
 
 ## Code and tests
 

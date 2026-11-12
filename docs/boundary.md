@@ -11,6 +11,9 @@ wording keys listed here are the ones the layer's list holds.
 
 ## How a host takes it
 
+- **The host vendors a release's file** as it stands, the one the release verb wrote under
+  `releases/` for the version, checked against the sha256 the ledger beside it names, and installs
+  that file; it never packs the layer from its source (the README, "Version").
 - **The host extends the layer** from its Nuxt configuration. The layer brings Nuxt UI as its module,
   its stylesheet, fonts and overrides, its components, its page plugins and its head.
 - **Components are registered by name** through the layer, and a host uses them as its own.
@@ -173,15 +176,17 @@ Each is named with everything it exports.
 | `files` | `FileConflict` |
 | `code-language` | `codeLanguage` |
 | `screen-mode` | `DocumentScheme`, `DEFAULT_SCHEME`, `SCHEME_COOKIE`, `isDocumentScheme` |
-| `console-manifest` | `CONSOLE_MANIFEST_ROUTE`, `OWNER_KEY_HEADER`, `OWNER_ROLE_HEADER`, `CONSOLE_ROLES`, `ConsoleRole`, `RELAY_METHODS`, `RelayMethod`, `ConsoleManifest`, `CONSOLE_MANIFEST_SCHEMA`, `consoleManifest`, `roleAllows`, `screensCall`, `relaysRoute`, `shareRead`, `ShareHead`, `SHARE_HEAD_LANGUAGE_QUERY`, `shareHeadPath`, `shareHead`, `movedScreenAddress`, `ConsoleWords`, `ConsoleBundleModule` |
+| `console-manifest` | `CONSOLE_MANIFEST_ROUTE`, `OWNER_KEY_HEADER`, `OWNER_ROLE_HEADER`, `CONSOLE_ROLES`, `ConsoleRole`, `RELAY_METHODS`, `RelayMethod`, `LAYER_VERSION`, `CONSOLE_SHARED_LIBRARIES`, `ConsoleManifest`, `CONSOLE_MANIFEST_SCHEMA`, `consoleManifest`, `onThisLayer`, `roleAllows`, `screensCall`, `relaysRoute`, `shareRead`, `ShareHead`, `SHARE_HEAD_LANGUAGE_QUERY`, `shareHeadPath`, `shareHead`, `movedScreenAddress`, `ConsoleWords`, `ConsoleBundleModule` |
 
 - **`search` folds letter case in the locale each call is handed,** the runtime's own where none is.
   It reads no app configuration, so it runs alike in a browser and on a server; a host searching in
   the app hands it `countLocale`'s answer, as the layer's own components do.
 - **`console-manifest` is the contract's manifest** (`docs/console-bundles.md`): the route a service
   answers it at, the two headers a console relays the owner key and the role in, the roles and whether
-  one held allows one needed, the manifest's JSON Schema, its type with each optional field that states
-  a default filled, the reading that fills them or refuses a manifest naming each field at fault,
+  one held allows one needed, the version of the layer it is part of and whether a manifest was built
+  on that version, the libraries a bundle shares with its console, the manifest's JSON Schema, its type
+  with each optional field that states a default filled, the reading that fills them or refuses a
+  manifest naming each field at fault,
   whether a manifest names a route whose answer holds a sidebar unread count, whether a bundle's screens
   call a service (their own, or one named under `calls`), the methods a route under `relays` is named
   by and whether a manifest names a method and path there, whether a method and path are a share read a
@@ -189,6 +194,10 @@ Each is named with everything it exports.
   naming the language it asks in, the head a service answers there as its type and its reading, which refuses
   an answer out of the shape, the address a path under a former screen path moved to, and the
   types of a bundle's words and of its module's default export. A service and a console import it alike; it runs in a browser, on a server and in a test.
+- **`LAYER_VERSION` names the release the layer was installed from.** The release verb writes the
+  version into the file it packs; read from the layer's source, it is the package manifest's version
+  marked `+source`, which names no release. Both are read from `shared/layer.json`, which the bundle
+  build reads too.
 
 ## Page plugins
 
@@ -217,6 +226,22 @@ element").
 `locale`, the language they are in, and `tag`, the element's name. The player reads `common.action`
 `play`, `pause`, `mute` and `unmute`, `common.label` `play_position`, `unplayable` and `volume`,
 `common.aria` `download_named` and `common.status` `loading`.
+
+## The bundle build
+
+What a service builds its console bundle with (`docs/console-bundles.md`, "The layer a bundle is
+built on"). It is written in JavaScript with its declarations beside it, so a build configuration
+loads it from the installed package under Node, which reads no TypeScript there.
+
+| Module | Exports |
+| --- | --- |
+| `console-bundle` | `consoleBundle` |
+
+`consoleBundle` is a Vite plugin, imported by path from the package's `bundle/` folder. It leaves
+unbundled every import of the libraries a bundle shares with its console, whatever external modules
+the build names besides, and writes `layer.json` beside the module, a JSON object holding `layer`,
+the layer's version as `LAYER_VERSION` names it. A service answers that value as its manifest's
+`layer`.
 
 ## The harness plugin
 
@@ -416,6 +441,10 @@ Every token is a custom property stated by the layer's stylesheet on the root un
 - **It stands on registry packages alone;** no other repository is a dependency.
 - **One version for the whole repository,** the manifest's; the README states what may change at
   which release.
+- **One packed file per version,** written by the release verb alone under `releases/`, its sha256
+  in the ledger `releases/sha256.json`: a JSON object holding, under each packed file's name, its
+  sha256 written in lowercase hexadecimal. Every packed file there is named in it, and it names no
+  other.
 - **The packed files under the earlier numbering** stay under `releases/` by their own names:
   `bmo-ui-0.2.0.tgz` holds revision `0.1.0-rev.1` and `bmo-ui-0.3.0.tgz` holds revision
   `0.1.0-rev.2`, each under its earlier number. The base `0.1.0` has no packed file.
