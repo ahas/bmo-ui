@@ -49,6 +49,7 @@ wording keys listed here are the ones the layer's list holds.
 | `ImageViewer` | A picture opened whole, zoomed and moved by wheel, drag, pinch, double press and buttons. |
 | `LoadingImage` | A picture that keeps its place while it loads and says when it failed. |
 | `LoadingVideo` | A video that keeps its place while it loads and says when it failed. |
+| `MarkupButtonTip` | The one layer that names any button a host writes as markup carrying `data-tooltip`, in the shared tooltip. |
 | `MarqueeLine` | A line that slides when it is longer than its box. |
 | `MessageIsland` | The one pill every notice stands on. |
 | `MovingList` | A list whose items come, go and change places by position alone. |
@@ -111,6 +112,7 @@ Each is named with everything it exports.
 | `list-preview` | `PREVIEW_ITEM`, `ListPreview`, `useListPreview` |
 | `loading` | `useInitialRead`, `useLastRead`, `markPainted`, `usePainted` |
 | `longpress` | `HOLD_MS`, `TouchPoint`, `pressTravelled`, `stillGliding`, `LongPress`, `useLongPress`, `followSurface` |
+| `markup-buttons` | `MARKUP_BUTTON`, `markupButtonAt`, `markupButtonIn`, `markupButtonWords` |
 | `marquee` | `MARQUEE_SLACK_PX`, `MARQUEE_SPEED_PX_PER_SECOND`, `MARQUEE_TRAVEL_SHARE`, `MARQUEE_MIN_SECONDS`, `MarqueeVars`, `MarqueeMotion`, `marqueeDistance`, `marqueeSeconds`, `marqueeVars`, `useMarquee` |
 | `modality` | `InputModality`, `MODALITY_ATTRIBUTE`, `modalityOfKey`, `watchInputModality` |
 | `monaco` | `languageOf`, `fenceLanguage`, `colourised`, `CodeView`, `openCodeView`, `SourceSelection`, `SourceView`, `openSourceView` |
@@ -118,6 +120,7 @@ Each is named with everything it exports.
 | `numbers` | `countLocale`, `countText`, `FigureLine`, `COUNT_BADGE`, `figurePlaces`, `turnOf`, `progressText` |
 | `openings` | `useOpenings` |
 | `overlays` | `OVER_LAYERS`, `OFF_HISTORY`, `standsAsLayer`, `isBackEscape`, `refuseStalePresses`, `refuseHandedBackFocus`, `watchOverlays` |
+| `page-tip` | `PAGE_TIP_UI`, `PageTipBy`, `PageTipFinder`, `PageTip`, `usePageTip` |
 | `player` | `Playing`, `playAlone`, `playClock`, `knownLength`, `loudnessOf`, `easedLoudness`, `AURA_STILL`, `auraOf`, `PlayerButton`, `PlayerSignal`, `buttonAfter` |
 | `prompt` | `TOUCH_QUERY`, `EnterKeys`, `enterKeys`, `PromptEnter`, `usePromptEnter`, `PROMPT_MAX_ROWS`, `PROMPT_TEXTAREA_UI`, `PROMPT_WORDS_WRAP` |
 | `question` | `QuestionAsked`, `askQuestion` |
@@ -339,13 +342,18 @@ Every token is a custom property stated by the layer's stylesheet on the root un
 - **A fenced block as the host's renderer stands it,** for the code-copy, code-colour and diagram
   modules to read: a `markdown-code` box holding the block's `pre` and `code`, the box carrying
   `data-language` with its fence's word where the fence names one, and its copy button a `button`
-  carrying `data-copy` beside the `pre`; a diagram's fence a `div` carrying `data-diagram` and
+  carrying `data-copy` beside the `pre`, named in the host's words by `aria-label` and
+  `data-tooltip`; a diagram's fence a `div` carrying `data-diagram` and
   holding its source as a `pre` and `code`, and after it, where the host gives a diagram zoom
   buttons, a `markdown-diagram-tools` row of `button`s each carrying `data-diagram-zoom` as `out`,
   `in` or `fit`, named in the host's words by `aria-label` and `data-tooltip`. The modules mark what they did on the same elements:
   `data-coloured` on a coloured `code`, `data-copied` on a button that has just copied,
   `data-drawn` or `data-failed` on a diagram's place, `data-zoomed` on a place whose diagram stands
   zoomed, and `disabled` on a zoom button with nothing left to do.
+- **A button a host writes as markup,** inside rendered text or anywhere else on the page, is named
+  by carrying its name in `data-tooltip` beside its `aria-label`: the markup button layer
+  (`MarkupButtonTip`) names every `button` that carries it in the shared tooltip, and the
+  stylesheet draws no name of its own for it.
 - **The work-in-progress mark** — an icon of the progress-activity kind — always turns, and stands
   still where less movement was asked for.
 - **Keyframes:** `bmo-dialog-in`, `bmo-dialog-out`, `marquee-slide`.
@@ -411,6 +419,9 @@ Every token is a custom property stated by the layer's stylesheet on the root un
   (`docs/console-bundles.md`, "What a console owes").
 - **The overlay.** The host's app root is the library's `UApp`, whose overlay provider draws what the
   question module opens; a question asked with none standing is never drawn and never answered.
+- **The page layers.** The host stands `CutLineTip` and `MarkupButtonTip` once each inside its app
+  root, beside its pages; a cut line shows whole and a button written as markup is named only where
+  its layer stands.
 - **The tooltip setting.** The host's app root, the library's `UApp`, is handed the tooltip
   module's `TOOLTIP_PROVIDER` as its tooltip setting, so a focus the keyboard did not bring — the
   one a closing dialog or sheet hands back to its control, or the one an opening dialog takes up on

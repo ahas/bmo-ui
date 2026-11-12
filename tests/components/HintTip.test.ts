@@ -1,12 +1,13 @@
 import { describe, expect, test } from "bun:test";
 
+import { PAGE_TIP_UI } from "~/domain/page-tip";
 import { TOOLTIP_PROVIDER, TOOLTIP_UI } from "~/domain/tooltip";
 
 // The layer's one tooltip for words that say more than what they stand on. Read off the file that
 // ships: what a rendered screen would not name is how a finger, which has no hover, brings it up.
 
 const tip = await Bun.file(new URL("../../app/components/HintTip.vue", import.meta.url)).text();
-const cutLine = await Bun.file(new URL("../../app/components/CutLineTip.vue", import.meta.url)).text();
+const layers = await Promise.all(["CutLineTip", "MarkupButtonTip"].map((name) => Bun.file(new URL(`../../app/components/${name}.vue`, import.meta.url)).text()));
 
 describe("the shared tooltip", () => {
   test("rests on the layer's one long press where a tap acts, and puts itself away on the next touch", () => {
@@ -34,9 +35,12 @@ describe("the shared tooltip", () => {
     expect(tip).toContain('event.target.matches(":focus-visible")');
   });
 
-  test("wraps long words rather than cutting them, as the cut-line tooltip does", () => {
+  test("wraps long words rather than cutting them, as every page layer's tooltip does", () => {
     expect(TOOLTIP_UI.text).toBe("whitespace-normal break-words");
     expect(tip).toContain(':ui="TOOLTIP_UI"');
-    expect(cutLine).toContain("const ui = { ...TOOLTIP_UI,");
+    expect(PAGE_TIP_UI.text).toBe(TOOLTIP_UI.text);
+    expect(PAGE_TIP_UI.content.startsWith(TOOLTIP_UI.content)).toBe(true);
+
+    for (const layer of layers) expect(layer).toContain(':ui="PAGE_TIP_UI"');
   });
 });

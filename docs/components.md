@@ -340,9 +340,11 @@ default; a screen supplies what it holds and what a press means there. Every exp
   finger rests on it instead, by the one held finger, and lifting presses nothing. The next touch
   anywhere puts it away.
 - **What a tap acts on is named the shared tooltip's way too:** an icon button through the layer's
-  icon button, and a choice of the view switch shown as its icon alone through the shared tooltip
-  marked as standing on a press. The library's own tooltip comes up for a pointer and a focus alone,
-  so nothing the layer draws, and nothing a host draws, names a control with it.
+  icon button, a choice of the view switch shown as its icon alone through the shared tooltip
+  marked as standing on a press, and a button a host writes as markup through the markup button
+  layer. The library's own tooltip comes up for a pointer and a focus alone, so nothing the layer
+  draws, and nothing a host draws, names a control with it, and the stylesheet draws no name of its
+  own over any control.
 - **A tooltip switched off comes up for nothing:** no hover, no focus, no tap and no resting finger opens it, so
   what it stands on is pressed as if no tooltip stood there.
 - **Its words wrap** inside a box no wider than a phone has room for.
@@ -351,17 +353,39 @@ default; a screen supplies what it holds and what a press means there. Every exp
 - **It stands on what it names through a box of its own,** and marks that box each time it is drawn
   where the box holds one element and no words, so a row that lays out the controls it holds, as the
   toolbar does, reads the box as the control inside it.
+- **A page layer names what it finds itself** (the page-tip module). Where what is named carries no
+  component of the layer's to stand a tooltip on, one layer over the whole page finds it under the
+  pointer, a keyboard focus or a held finger, and brings up the shared tooltip over it, standing in
+  front of every dialog and notice. Each layer says only what it finds and what its words are; how
+  the tooltip answers is the page tooltip's, the same for every layer, and a screen reader hears its
+  words as they now read, however often they change while it stands:
+  - A pointer waits the tooltip's usual moment, and moving on to another thing the layer names while
+    one stands brings that one up at once. Leaving it, pressing anywhere or scrolling what holds it
+    puts it away. Whether the layer still names it is asked again as the wait ends.
+  - A keyboard focus brings it up at once and takes it away as the focus leaves.
+  - A finger held on it brings it up by the layer's one held finger, beside whatever a row's own
+    hold does, and lifting that finger presses nothing. What it holds selects no words, and the
+    phone's own long-press menu over it is turned away. Sliding the finger, or the next touch
+    anywhere, puts it away.
+  - The host stands each layer once inside its app root, beside its pages (`docs/boundary.md`, "What
+    the host owes").
 - **Every line cut with an ellipsis shows whole, with nothing written for it** (`CutLineTip`, driven
-  by the cut-lines module). One layer over the whole page finds the line itself: under the pointer,
-  the line whose box ends its words in an ellipsis or clamps them to a count of lines and actually
-  cuts them; under a keyboard focus, that line or the first such line inside what took the focus;
-  under a finger, the line it holds. It brings up the shared tooltip over that line with its whole
-  words.
-  - A pointer waits the tooltip's usual moment, and moving on to another cut line while one stands
-    brings that one up at once. Leaving the line, pressing anywhere or scrolling puts it away.
-  - A finger holds the line; a row that answers a hold of its own still does, with the tooltip beside
-    it. The held line selects no words.
+  by the cut-lines module), a page layer: under the pointer, the line whose box ends its words in an
+  ellipsis or clamps them to a count of lines and actually cuts them; under a keyboard focus, that
+  line or the first such line inside what took the focus; under a finger, the line it holds. Its
+  words are the line's whole words.
   - A line already inside a tooltip of its own is left to it, and a line that slides has none.
+- **Every button a host writes as markup is named by its words alone** (`MarkupButtonTip`, driven by
+  the markup-buttons module), a page layer. A button the layer draws no component for, such as a
+  fenced block's copy button or a diagram's zoom buttons that the host's renderer writes into the
+  text it draws, carries its name in `data-tooltip` beside its `aria-label` (`docs/boundary.md`,
+  "Classes and keyframes"). The layer finds such a button under the pointer, under a keyboard focus
+  landing on it, or under a finger held on it, and its words are that name.
+  - A tap presses the button and names nothing; a finger held on it names it instead.
+  - The words follow the button's own: a name that changes while its tooltip stands is shown as it
+    now reads, and a name a press changes, as the copy button saying it has copied, comes up over the
+    button at once, by whatever pressed it. It goes as a tooltip brought up that way goes: a pointer
+    leaving the button, the keyboard's focus leaving it, or the next touch anywhere.
 
 ## Floating things
 

@@ -12,9 +12,11 @@ import HintTip from "../../app/components/HintTip.vue";
 import IconButton from "../../app/components/IconButton.vue";
 import NumberInput from "../../app/components/NumberInput.vue";
 import ImageViewer from "../../app/components/ImageViewer.vue";
+import MarkupButtonTip from "../../app/components/MarkupButtonTip.vue";
 import TabBar from "../../app/components/TabBar.vue";
 import TabSwitch from "../../app/components/TabSwitch.vue";
 import ToolBar from "../../app/components/ToolBar.vue";
+import { copyFromPress } from "../../app/domain/code-copy";
 import sheet from "./toolbar-harness.css?inline";
 
 // The rows a screen lays under the title bar, as a screen builds them, drawn by the layer's own
@@ -26,8 +28,10 @@ import sheet from "./toolbar-harness.css?inline";
 // and a diagram's zoom buttons as the host's renderer writes them. Opened with `?viewer`, the page
 // holds the picture viewer instead, open, with its zoom buttons at its foot; opened with `?icons`, it
 // holds the layer's icon button, a group of standing actions, a view switch showing its icons alone
-// and a number box, each press counted. The page stands outside Nuxt, so the library is installed as a Vue
-// plugin and the words are handed over here.
+// and a number box, each press counted; opened with `?markup`, it holds a fenced block's copy button
+// and a diagram's zoom buttons as the host's renderer writes them, named by the markup button layer,
+// the copy button copying through the code-copy module and each press counted. The page stands
+// outside Nuxt, so the library is installed as a Vue plugin and the words are handed over here.
 
 const WORDS = {
   common: {
@@ -59,11 +63,19 @@ function picture(): string {
 }
 
 // The zoom buttons a host's renderer writes beside a drawn diagram, by the markup the layer's
-// stylesheet reads (`docs/boundary.md`, "What the host owes").
+// stylesheet reads (`docs/boundary.md`, "Classes and keyframes"), named for the markup button layer
+// where it is asked to be.
 const MARK = '<svg viewBox="0 0 24 24"><path d="M4 11h16v2H4z"/></svg>';
-const DIAGRAM = `<div class="markdown-diagram" data-drawn><div class="markdown-diagram-figure"></div><div class="markdown-diagram-tools">${["out", "in", "fit"]
-  .map((zoom) => `<button type="button" data-diagram-zoom="${zoom}" aria-label="${zoom}">${MARK}</button>`)
-  .join("")}</div></div>`;
+
+function diagram(named: boolean): string {
+  const tools = ["out", "in", "fit"].map((zoom) => `<button type="button" data-diagram-zoom="${zoom}" aria-label="${zoom}"${named ? ` data-tooltip="${zoom}"` : ""}>${MARK}</button>`);
+
+  return `<div class="markdown-diagram" data-drawn><div class="markdown-diagram-figure"></div><div class="markdown-diagram-tools">${tools.join("")}</div></div>`;
+}
+
+// The words the code-copy module names its button with, as a host's language pack would hand them.
+const COPY_WORDS: Record<string, string> = { "common.action.copy": "Copy", "common.status.copied": "Copied" };
+const MARKUP = `<div class="markdown-code"><pre><code>one\ntwo\nthree</code></pre><button type="button" class="markdown-copy" data-copy aria-label="Copy" data-tooltip="Copy">${MARK}</button></div>${diagram(true)}`;
 
 const Page = defineComponent(() => {
   const chosen = ref(new Set<string>());
@@ -90,6 +102,22 @@ const Page = defineComponent(() => {
           h("div", { id: "number" }, [h(NumberInput, { modelValue: 3, digits: 2 })])
         ])
       );
+  }
+
+  if (new URLSearchParams(location.search).has("markup")) {
+    const pressed: string[] = [];
+
+    (window as unknown as { pressed: string[] }).pressed = pressed;
+
+    const onClick = (event: MouseEvent): void => {
+      const button = (event.target as Element).closest("button");
+
+      copyFromPress((key) => COPY_WORDS[key] ?? key, event, async () => true);
+
+      if (button !== null) pressed.push(button.getAttribute("data-diagram-zoom") ?? "copy");
+    };
+
+    return () => h(UApp, null, () => [h("div", { class: "markdown p-4 pt-16", innerHTML: MARKUP, onClick }), h(MarkupButtonTip)]);
   }
 
   if (new URLSearchParams(location.search).has("viewer")) {
@@ -133,7 +161,7 @@ const Page = defineComponent(() => {
           switch: () => h(TabSwitch, { id: "tab-switch", items: VIEWS, modelValue: view.value, label: "Tab view", compact: narrow, "onUpdate:modelValue": (value: string) => (view.value = value) })
         }
       ),
-      h("div", { class: "markdown p-4", innerHTML: DIAGRAM })
+      h("div", { class: "markdown p-4", innerHTML: diagram(false) })
     ]);
 });
 

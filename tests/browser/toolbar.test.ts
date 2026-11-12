@@ -508,3 +508,110 @@ describe.skipIf(!ready)("an icon button under a finger", () => {
     });
   }
 });
+
+// A button the host writes as markup, named by the markup button layer (`docs/components.md`,
+// "Tooltips"), under a real finger, a pointer and the keyboard: a finger held on it names it in the
+// shared tooltip and, lifting, presses nothing; the next touch anywhere puts the name away; a tap
+// presses it, and the name the copy button's press changes comes up over it at once. The keyboard's
+// focus names it as it lands, and a key's press that changes its name is heard as it changes; a
+// resting pointer names it and a click's changed name comes up over it. The stylesheet draws no name
+// of its own over it.
+describe.skipIf(!ready)("a button written as markup under a finger, a pointer and the keyboard", () => {
+  const HELD_MS = HOLD_MS + 400;
+  let touch: TouchSession;
+
+  beforeAll(async () => {
+    touch = await openTouch();
+    await touch.page.route(`${ORIGIN}/**`, (route) => {
+      const path = new URL(route.request().url()).pathname;
+
+      if (path === "/toolbar-harness.js") return route.fulfill({ contentType: "text/javascript", body: script });
+      if (path === "/") return route.fulfill({ contentType: "text/html; charset=utf-8", body: PAGE });
+
+      return route.fulfill({ status: 404, body: "" });
+    });
+  }, BROWSER_HOOK_MS);
+
+  afterAll(async () => {
+    await touch?.close();
+  });
+
+  async function named(label: string, standing: boolean): Promise<void> {
+    await touch.page.waitForFunction(
+      ([words, wanted]) => [...document.querySelectorAll("[role=tooltip]")].some((tip) => tip.textContent === words) === wanted,
+      [label, standing] as const,
+      { timeout: 3_000 }
+    );
+  }
+
+  async function pressed(): Promise<string[]> {
+    return await touch.page.evaluate(() => [...(window as unknown as { pressed: string[] }).pressed]);
+  }
+
+  const BUTTONS = [
+    { name: "a fenced block's copy button", selector: "button[data-copy]", label: "Copy", press: "copy", answer: "Copied" },
+    { name: "a diagram's zoom button", selector: "[data-diagram-zoom=in]", label: "in", press: "in", answer: null }
+  ];
+
+  for (const button of BUTTONS) {
+    test(`names ${button.name} under a held finger and presses it on a tap alone`, async () => {
+      const { page } = touch;
+
+      await page.goto(`${ORIGIN}/?markup`);
+      await page.waitForSelector(button.selector);
+      expect(await page.$eval(button.selector, (element) => getComputedStyle(element, "::after").content)).toBe("none");
+
+      const at = await centreOf(page, button.selector);
+
+      await touch.press(at, { holdMs: HELD_MS });
+      await named(button.label, true);
+      expect(await pressed()).toEqual([]);
+
+      await touch.tap({ x: 2, y: page.viewportSize()!.height - 2 });
+      await named(button.label, false);
+
+      await touch.tap(at);
+      await page.waitForFunction((one) => (window as unknown as { pressed: string[] }).pressed.includes(one), button.press, { timeout: 3_000 });
+
+      if (button.answer !== null) await named(button.answer, true);
+      else expect(await page.$$eval("[role=tooltip]", (found) => found.map((tip) => tip.textContent))).not.toContain(button.label);
+    });
+  }
+
+  test("names a markup button under a resting pointer, puts the name away as it leaves, and brings a click's answer up", async () => {
+    const { page } = touch;
+
+    await page.goto(`${ORIGIN}/?markup`);
+    await page.waitForSelector("button[data-copy]");
+
+    const at = await centreOf(page, "button[data-copy]");
+
+    await page.mouse.move(at.x, at.y);
+    await named("Copy", true);
+
+    await page.mouse.move(2, page.viewportSize()!.height - 2);
+    await named("Copy", false);
+
+    await page.mouse.click(at.x, at.y);
+    await named("Copied", true);
+  });
+
+  // The name a screen reader hears is read off the tooltip's own box, so it is the one checked as
+  // the words change under a tooltip that stands.
+  test("names each markup button the keyboard's focus lands on, and says what a key's press changed it to", async () => {
+    const { page } = touch;
+
+    await page.goto(`${ORIGIN}/?markup`);
+    await page.waitForSelector("button[data-copy]");
+
+    await page.keyboard.press("Tab");
+    await named("Copy", true);
+
+    await page.keyboard.press("Enter");
+    await named("Copied", true);
+
+    await page.keyboard.press("Tab");
+    await named("out", true);
+    expect(await page.$$eval("[role=tooltip]", (found) => found.map((tip) => tip.textContent))).toEqual(["out"]);
+  });
+});
