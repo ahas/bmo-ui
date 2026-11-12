@@ -275,17 +275,25 @@
 }
 
 /* The component library rings its controls in their own colour at three pixels, which for a neutral
-   control is the inverted one — a thick white line in the dark mode. Its colour and width are set
-   aside here, above every class, for the element itself, for a container the library rings when what
-   it holds has focus, and for a pseudo-element a link rings in its place; whether a ring is drawn at
-   all and how far out it stands stay with the class that asked for it. A control that also redraws
-   its own edge in that inverted colour keeps the edge it rests with: the ring alone says it has
-   focus. */
+   control is the inverted one — a thick white line in the dark mode — and rests their outline in a
+   quarter of that colour, fading between the two as focus comes. An outline on a screen is the ring
+   alone, so its colour is the accent on every element and pseudo-element, at rest as on focus and
+   above every class: the ring has nothing to fade from and stands in the accent from its first frame.
+   Its width is set aside the same way for the element that has focus, for a container the library
+   rings when what it holds has focus, and for a pseudo-element a link rings in its place; whether a
+   ring is drawn at all and how far out it stands stay with the class that asked for it. A control
+   that also redraws its own edge in that inverted colour keeps the edge it rests with: the ring alone
+   says it has focus. */
+*,
+::before,
+::after {
+  outline-color: var(--bmo-focus);
+}
+
 :focus-visible,
 :focus-visible::before,
 :focus-visible::after,
 [data-slot]:has(:focus-visible) {
-  outline-color: var(--bmo-focus);
   outline-width: var(--bmo-focus-width);
 }
 

@@ -50,12 +50,14 @@ function tokens(): string {
       --ui-border-accented: var(--ui-color-neutral-700); --ui-border-inverted: #fff; }`;
 }
 
-// A neutral control of the library: its edge at rest, and on focus a three-pixel ring a quarter of
-// the inverted colour with the edge redrawn in the inverted colour itself.
+// A neutral control of the library: its edge at rest, its outline resting in a quarter of the inverted
+// colour and fading as its colours change, and on focus a three-pixel ring with the edge redrawn in the
+// inverted colour itself. The fade is drawn out long here, so a colour read as focus arrives is the one
+// it fades from.
 const library = `@layer theme, base, components, utilities;
   @layer utilities {
     .edged { --tw-ring-color: var(--ui-border-accented); box-shadow: inset 0 0 0 1px var(--tw-ring-color); }
-    .neutral { outline-color: color-mix(in oklab, var(--ui-border-inverted) 25%, transparent); }
+    .neutral { outline-color: color-mix(in oklab, var(--ui-border-inverted) 25%, transparent); transition: outline-color 60s linear; }
     .neutral:focus-visible { outline-style: solid; outline-width: 3px; --tw-ring-color: var(--ui-border-inverted); }
     .bar { background: color-mix(in oklab, var(--ui-bg-elevated) 50%, transparent); outline-color: color-mix(in oklab, var(--ui-border-inverted) 25%, transparent); }
     .bar:has(textarea:focus-visible) { outline-style: solid; outline-width: 3px; --tw-ring-color: var(--ui-border-inverted); }
@@ -133,6 +135,8 @@ async function drawn(selector: string): Promise<Drawn> {
 async function mode(name: "light" | "dark"): Promise<void> {
   await page.evaluate((dark) => document.documentElement.classList.toggle("dark", dark), name === "dark");
   await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+  // The change of mode is no part of what is read, so whatever it set fading has ended.
+  await page.evaluate(() => document.getAnimations().forEach((animation) => animation.finish()));
 }
 
 describe("the focus section", () => {
@@ -145,7 +149,7 @@ describe("the focus section", () => {
 
 describe.skipIf(!ready)("the focus ring", () => {
   for (const name of ["light", "dark"] as const) {
-    test(`is the accent, thin and outside the control, when the keyboard reaches it in the ${name} mode`, async () => {
+    test(`is the accent from its first frame, thin and outside the control, when the keyboard reaches it in the ${name} mode`, async () => {
       await mode(name);
       await page.focus("[data-start]");
       await page.keyboard.press("Tab");

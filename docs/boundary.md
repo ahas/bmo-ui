@@ -318,7 +318,8 @@ Every token is a custom property stated by the layer's stylesheet on the root un
   `--bmo-ease-move` `cubic-bezier(0.4, 0, 0.2, 1)`. Tailwind's default transition is `quick` and
   `move`.
 - **Focus:** `--bmo-focus`, primary's 600 in the light mode and its 400 in the dark; `--bmo-focus-width`
-  2px; `--bmo-focus-gap` 2px.
+  2px; `--bmo-focus-gap` 2px. The stylesheet colours every element's outline with `--bmo-focus`, at
+  rest as on focus and over every class, so an outline on a screen is the focus ring alone.
 - **Type:** `--text-xs` is 0.875rem. `--font-sans` is Apple SD Gothic Neo, Pretendard, then the
   system's sans serif; `--font-mono` is CaskaydiaCove NFM, Apple SD Gothic Neo, Pretendard, then the
   system's monospace.
