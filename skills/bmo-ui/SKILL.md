@@ -41,9 +41,11 @@ anything of your own, since what the layer already has is the one a screen is me
    manifest's JSON Schema and the contract's whole document. Follow the document.
 2. **Vendor the layer's release** the console runs: the file under the layer's `releases/` as it
    stands, checked against the sha256 its ledger names. Never pack the layer from its source.
-3. **Build the bundle with the layer's `consoleBundle` plugin,** from the package's `bundle/` folder:
-   a browser module whose default export is the routes of its screens. The plugin leaves the
-   console's libraries unbundled and writes `layer.json`, the layer the bundle was built on.
+3. **Build the bundle with the layer's `consoleBundle` plugin,** from the package's `bundle/` folder,
+   handing it the bundle's name and its words: a browser module whose default export is the routes
+   of its screens. The plugin leaves the console's libraries unbundled, writes `layer.json`, the layer
+   the bundle was built on, and refuses a screen asking for a key its words do not answer or a
+   `common` or `files` key the layer does not read.
 4. **Answer the manifest** at that route from the service, by the schema, its `layer` the one the
    build wrote, and read it in a test through the layer's `consoleManifest` reading. Where the
    service's base library serves the console face, use it rather than writing one. Answer the

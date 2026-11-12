@@ -104,6 +104,10 @@ bundle and its console stand on the same release of the layer or the bundle is n
   (`docs/boundary.md`, "The bundle build"), which leaves the shared libraries unbundled and writes
   the layer's version into `layer.json` beside the module. The service answers that version as the
   manifest's `layer`, never one written by hand.
+- **The bundle build holds the words.** It is handed the bundle's name and its words, and refuses a
+  bundle whose screens ask for a key under the layer's domains that the `wording-keys` list lacks, a
+  key under the bundle's namespace a locale's words do not answer, or a key of any other domain, and
+  words holding a tree beside the namespace ("How a bundle mounts", the words).
 - **A layer taken from its source is no release.** Installed from its source rather than from a
   release's file, the layer names its version marked `+source`, so a bundle built on it names a layer
   no console runs.
@@ -149,9 +153,11 @@ bundle and its console stand on the same release of the layer or the bundle is n
 - **Components.** A bundle imports its own components and the layer's, and the console registers
   none of them for it.
 - **Words.** Every word a screen shows is a key under the bundle's namespace in its own words, beside
-  the layer's own `common.*` and `files.*` keys that the console answers. The words a screen draws
-  belong to the bundle that draws it, so a console carries none of them: it merges each bundle's words
-  into its pack.
+  the layer's own `common.*` and `files.*` keys that the console answers, which are the keys the
+  `wording-keys` list holds and no others. A key the console's own pack happens to hold besides is
+  not the bundle's to ask for. The words a screen draws belong to the bundle that draws it, so a
+  console carries none of them: it merges each bundle's words into its pack. The bundle build refuses
+  a bundle that asks for any other key ("The layer a bundle is built on").
 - **Calls.** A screen calls its service at the address the `relay` domain module answers for the
   service's name and a path: the base path the console app is served under, the console's relay
   base, the service's name, then the path as the service's own API writes it. The console relays
@@ -390,7 +396,8 @@ under `calls`, and its screens hand the module texts and a language.
 - **It answers its manifest** at the route, by the schema, read in a test through the shared
   module's reading, so a manifest that breaks the contract fails there first.
 - **It builds its bundle on the console's release of the layer,** vendored as its file stands, with
-  the layer's bundle build, and answers the layer that build wrote as the manifest's `layer`.
+  the layer's bundle build handed the bundle's name and the words it answers, and answers the layer
+  that build wrote as the manifest's `layer`.
 - **It answers its module, its stylesheet and its words** at the paths the manifest names.
 - **It names a route of its own under `relays`** only where a console's screens need it as the
   service's other callers have it, so no route of the service stands twice, once for a console and
@@ -410,8 +417,9 @@ under `calls`, and its screens hand the module texts and a language.
 - **Conformance is held by shared checks,** never by a repository's own prose: the console face of
   the base library the services build on, which serves the manifest, the module, the stylesheet, the
   words and the guard as this document states them, with tests that read the served manifest through
-  the shared module's reading, which every service using it inherits; and the checks a service passes
-  before it goes live, which hold every vendored copy of the layer to the one release the console
-  runs and probe the service's console face once it has started.
+  the shared module's reading, which every service using it inherits; the layer's bundle build, which
+  holds every bundle's screens to its words and the layer's keys as it builds; and the checks a
+  service passes before it goes live, which hold every vendored copy of the layer to the one release
+  the console runs and probe the service's console face once it has started.
 - **A coding harness** building a bundle reads the contract through the layer's MCP server, which
   answers the manifest's route, its JSON Schema and this document whole (`docs/harness.md`).

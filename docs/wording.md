@@ -66,3 +66,6 @@ list; `docs/boundary.md` names every one of them.
   and fails on a key asked for that the list lacks, on a key the list holds that nothing asks for, on
   a key built out of pieces, and on a key not named by the rule above. A host's own test holds its
   pack to the list, so every key the layer reads is answered.
+- **A console bundle is held to the list as it is built.** The bundle build reads the screens' code
+  the same way and refuses a key under the layer's domains the list lacks, beside a key its own words
+  do not answer (`docs/boundary.md`, "The bundle build").

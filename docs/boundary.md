@@ -241,11 +241,27 @@ loads it from the installed package under Node, which reads no TypeScript there.
 | --- | --- |
 | `console-bundle` | `consoleBundle` |
 
-`consoleBundle` is a Vite plugin, imported by path from the package's `bundle/` folder. It leaves
-unbundled every import of the libraries a bundle shares with its console, whatever external modules
-the build names besides, and writes `layer.json` beside the module, a JSON object holding `layer`,
-the layer's version as `LAYER_VERSION` names it. A service answers that value as its manifest's
-`layer`.
+`consoleBundle` is a Vite plugin, imported by path from the package's `bundle/` folder. It takes
+`name`, the bundle's name in kebab-case as its manifest names it, which is its words' namespace, and
+`words`, the bundle's words as its service answers them, each locale's tree under the locale's code;
+it refuses to be made without either. It leaves unbundled every import of the libraries a bundle
+shares with its console, whatever external modules the build names besides, and writes `layer.json`
+beside the module, a JSON object holding `layer`, the layer's version as `LAYER_VERSION` names it. A
+service answers that value as its manifest's `layer`.
+
+It holds the screens to their words, and fails the build naming each fault with the file it stands
+in. It reads every file of the bundle's own sources the build carries, none under `node_modules`: a
+component as its scripts and its template compiled to the render function it ships as, each script
+by the parser Vue's compiler uses. Every string written whole there, with no space and no slash and
+of two parts or more joined by dots, is read as a key by its first part:
+
+- **Under `common` or `files`,** it is a key the `wording-keys` list holds, or a fault.
+- **Under the bundle's name,** every locale's tree answers it with a string, or a fault.
+- **Under any other first part,** a string of the shape `<domain>.<role>.<key>` the wording rules
+  name (`docs/wording.md`, "The key") is a key outside the bundle's namespace and the layer's, and a
+  fault; any other string is not read as a key.
+
+A locale's tree holding anything beside the bundle's namespace at its root is a fault as well.
 
 ## The harness plugin
 
