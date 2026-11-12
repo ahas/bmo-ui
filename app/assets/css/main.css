@@ -294,6 +294,13 @@
   --ui-border-inverted: var(--ui-border-accented);
 }
 
+/* A dialog close holding a focus no key moved (`ShellClose`): the browser can carry its visible
+   focus over from a control the keyboard had reached, and the close marks the arrival so that it
+   draws no ring. */
+[data-pressed-focus]:focus-visible {
+  outline-style: none;
+}
+
 /* A field — a place a value is typed or chosen in — wears its focus on its own edge, which takes the
    accent, and draws no ring around it; one drawn with no edge takes the elevated background by its
    own class instead. A text box holds the caret however it was focused, so the browser counts every
