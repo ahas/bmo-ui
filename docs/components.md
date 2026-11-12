@@ -314,12 +314,17 @@ default; a screen supplies what it holds and what a press means there. Every exp
   goes are the tooltip's, stated once in the tooltip module.
 - **A pointer brings it up on hover and the keyboard on focus,** including a focus landing on a
   control inside what it stands on. It grows out of what it stands on at `quick`.
-- **A focus the keyboard did not bring brings up no tooltip.** A dialog or a sheet that closes — by
-  the back gesture as much as by a press — hands the focus back to the control it was opened from,
-  and on a phone that control's name would otherwise stand over what the reader returned to. The
-  shared tooltip holds this itself, and the tooltip module's provider setting holds it for every
-  tooltip the library draws, once the host hands it to the library's app root (`docs/boundary.md`,
-  "What the host owes").
+- **A focus the keyboard did not bring brings up no tooltip.** Two arrivals are not the keyboard's:
+  the focus a closing dialog or sheet hands back to the control it was opened from, and the focus a
+  dialog takes up on its own close as it opens. The first would leave that control's name standing
+  over what the reader returned to; the second would stand a name over the open dialog and spend the
+  reader's first Esc closing the name rather than the dialog. The shared tooltip and the library's
+  dialog close (`ShellClose`) hold this themselves, and the tooltip module's provider setting holds
+  it for every other tooltip the library draws, once the host hands it to the library's app root
+  (`docs/boundary.md`, "What the host owes"). For the dialog close the hand is read off the page's
+  own modality mark (`docs/design.md`, "Focus") rather than the browser's visible-focus tell, which
+  an opening dialog can fool; the keyboard reaching that close — Tab or arrow — or a pointer
+  hovering it brings its name up as it does for any other control.
 - **A finger has no hover.** Where a tap does nothing else, a tap brings it up; where a tap acts, a
   finger rests on it instead, by the one held finger, and lifting presses nothing. The next touch
   anywhere puts it away.
