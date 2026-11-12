@@ -4,9 +4,11 @@ import {
   CONSOLE_MANIFEST_ROUTE,
   CONSOLE_MANIFEST_SCHEMA,
   CONSOLE_ROLES,
+  LAYER_VERSION,
   SHARE_HEAD_LANGUAGE_QUERY,
   consoleManifest,
   movedScreenAddress,
+  onThisLayer,
   relaysRoute,
   roleAllows,
   screensCall,
@@ -23,6 +25,7 @@ const answered = {
   icon: "i-material-symbols-note-stack-outline",
   screenPath: "/notes",
   serviceName: "notes",
+  layer: "0.4.0-rev.2",
   bundle: "/console/bundle-4f2a.js",
   words: "/console/words",
   role: "member"
@@ -242,9 +245,24 @@ describe("the address a moved screen's path moved to", () => {
   });
 });
 
+describe("the layer a manifest names", () => {
+  test("is required, as the bundle build wrote it", () => {
+    const { layer: _layer, ...unnamed } = answered;
+
+    expect(faultsOf(unnamed)).toContain("layer");
+    expect(faultsOf({ ...answered, layer: "" })).toContain("layer");
+  });
+
+  test("attaches the bundle only where it is the layer this module is part of", () => {
+    expect(onThisLayer(consoleManifest({ ...answered, layer: LAYER_VERSION }))).toBe(true);
+    expect(onThisLayer(consoleManifest(answered))).toBe(false);
+    expect(onThisLayer(consoleManifest({ ...answered, layer: `${LAYER_VERSION}.1` }))).toBe(false);
+  });
+});
+
 describe("the manifest's JSON Schema", () => {
   test("requires the fields a service states and closes the object", () => {
-    expect(CONSOLE_MANIFEST_SCHEMA.required).toEqual(["name", "title", "icon", "screenPath", "serviceName", "bundle", "words", "role"]);
+    expect(CONSOLE_MANIFEST_SCHEMA.required).toEqual(["name", "title", "icon", "screenPath", "serviceName", "layer", "bundle", "words", "role"]);
     expect(CONSOLE_MANIFEST_SCHEMA.additionalProperties).toBe(false);
     expect(Object.keys(CONSOLE_MANIFEST_SCHEMA.properties as object).toSorted()).toEqual(
       [...Object.keys(answered), "formerScreenPaths", "stylesheet", "apiPrefix", "ownerKey", "events", "websocket", "pushKinds", "sidebarUnread", "calls", "relays", "shareReads", "shareHead"].toSorted()

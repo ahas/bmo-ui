@@ -23,7 +23,8 @@ components and behaviours every screen is built from. It is a Nuxt layer, built 
 
 ## Using it
 
-- Add the package and extend it from the host's Nuxt configuration.
+- Vendor a release's file from `releases/` as it stands, add the package from it and extend it from
+  the host's Nuxt configuration.
 - Install `@nuxtjs/i18n` in the host and give it a pack answering every key the boundary document
   lists. The layer names it and its engine, `vue-i18n`, as peers.
 - Apply the patches in `patches/` to the same dependencies in the host's own install.
@@ -33,12 +34,13 @@ components and behaviours every screen is built from. It is a Nuxt layer, built 
 
 ## Working on it
 
-- `bun install` installs the dependencies and prepares Nuxt's types.
-- `bun pm pack` packs the layer as a host installs it, preparing Nuxt's types first; the prepare
-  step reaches the local Nuxt command line through `bun x`, since the package manager's lifecycle
-  runs without the local binaries on its path.
+- `bun install` installs the dependencies and prepares Nuxt's types; the prepare step reaches the
+  local Nuxt command line through `bun x`, since the package manager's lifecycle runs without the
+  local binaries on its path.
+- `bun run release` writes the packed file of the manifest's version under `releases/` and its sha256
+  into the ledger beside it ("Version"); it is the one way a packed file comes to exist.
 - `bun run elements` builds each custom element into one script under `dist/`, which git ignores;
-  `bun pm pack` runs it first, so the packed file carries the scripts.
+  packing runs it first, so the packed file carries the scripts.
 - `bun run typecheck` checks the layer, its tests and the harness plugin's code with the components'
   examples.
 - `bun run catalogue` writes the catalogue's data file again from the sources; a change to a
@@ -53,11 +55,13 @@ components and behaviours every screen is built from. It is a Nuxt layer, built 
 | `.graph/` | The code dependency graph: the repository's settings, one node per feature with its files and the features it needs, and a boundary node for each API the layer offers. Its area files are generated in the checkout and untracked, so a fresh checkout builds them again, while `settings.toml` is the repository's configuration and stays tracked |
 | `app/` | The layer's app code: the stylesheet and the fonts with their licences under `assets/`, the components under `components/`, the domain modules under `domain/`, the custom elements' entries under `elements/`, the app configuration holding the library's overrides and the host's setting with nothing in it, and the declaration typing templates by the host's i18n module |
 | `bin/` | The package's command |
+| `bundle/` | The bundle build a service builds its console bundle with |
 | `catalogue/` | The catalogue module with its data file, the generator writing that file, and every component's example under `examples/` |
 | `docs/` | The canonical documents: the design foundations, the wording contract, the components, the console plugin contract, the harness plugin, the personal data rule and the boundary |
 | `mcp/` | The MCP server the command starts |
 | `patches/` | The patches applied to dependencies on install |
-| `releases/` | The packed file of each version a host takes |
+| `releases/` | The packed file of each version a host takes, with the ledger of their sha256 |
+| `scripts/` | The release verb and the check packing runs first |
 | `shared/` | The shared modules, read by the layer's code and the host's alike |
 | `skills/` | The `bmo-ui` skill |
 | `tests/` | The tests, with the browser lane's files and their support under `tests/browser/` |
@@ -75,15 +79,28 @@ testbed declaration, the Korean ledger the quick checks read, `CLAUDE.md`, and t
 
 - **One version for the whole repository,** the manifest's, following semantic versioning over the
   boundary that `docs/boundary.md` states.
-- **Until the first release the base stays 0.1.0,** and each later version carries a `-rev.N`
-  suffix. The first 0.1.0 is the base and no revision; each version after it is one revision, N
-  counting them from 1. Any revision may change the boundary.
-  `docs/boundary.md` names the revision each packed file under an earlier numbering holds.
-- **From the first release,** while the major is 0, a minor release may change the boundary; from 1
-  on, only a major may.
-- **A version is one packed file,** kept under `releases/` by its version's name. It is packed with
-  `bun pm pack` from a scratch export (`git archive`) of the committed tree, never from a checkout,
-  and the manifest's file list names everything it holds: the layer's code, its stylesheet and fonts,
-  the patches, the command, the MCP server, the catalogue module and its data file, the skill, the Nuxt
-  configuration, the README, the licence and the documents. A host takes that one file, so
-  every host of a version stands on the same bytes.
+- **Until the owner declares the first stable release the base stays 0.1.0,** and each later
+  version carries a `-rev.N` suffix. The first 0.1.0 is the base and no revision; each version after
+  it is one revision, N counting them from 1. Any revision may change the boundary, which changes
+  nearly every week; the revision count says so, where a minor number would promise a boundary held
+  between minors. `docs/boundary.md` names the revision each packed file under an earlier numbering
+  holds; a host pins a version by its exact name and sha256, never by its order.
+- **From the first stable release,** while the major is 0, a minor release may change the boundary;
+  from 1 on, only a major may.
+- **A version is one packed file,** written once by the release verb, `bun run release`. The verb
+  refuses a working tree with changes and a version that already has a file or a ledger line; it
+  exports the committed tree (`git archive`) into a scratch folder, installs it, writes the version
+  into the layer's version file there, packs it once into `releases/` under the version's name, and
+  adds the file's sha256 to the ledger `releases/sha256.json`. A version's file is never written
+  again.
+- **Packing runs inside the verb alone.** Packing first checks that the layer's version file names
+  the manifest's version, which only the verb writes, so `bun pm pack` in a checkout is refused. The
+  suite holds `releases/` and its ledger to each other, so a file the verb did not write fails it.
+- **The file holds** what the manifest's file list names: the layer's code, its stylesheet and
+  fonts, the patches, the command, the MCP server, the bundle build, the catalogue module and its
+  data file, the skill, the Nuxt configuration, the README, the licence and the documents.
+- **A host vendors that file as it stands,** checked against the ledger, so every host of a version
+  stands on the same bytes. It never packs the layer from its source, renames a file or packs one
+  again. A path dependency on a checkout serves a repository's own work and tests while a change
+  waits for a release; the layer it installs names its version marked `+source`, so no console
+  takes a bundle built on it.
