@@ -84,8 +84,8 @@ afterAll(async () => {
   if (out !== "") rmSync(out, { recursive: true, force: true });
 });
 
-async function open(width: (typeof WIDTHS)[number], scheme: (typeof SCHEMES)[number], query = ""): Promise<{ context: BrowserContext; page: Page }> {
-  const context = await browser.newContext({ viewport: { width: width.width, height: width.height }, hasTouch: width.touch, isMobile: width.touch, colorScheme: scheme });
+async function open(width: (typeof WIDTHS)[number], scheme: (typeof SCHEMES)[number], query = "", on: Browser = browser): Promise<{ context: BrowserContext; page: Page }> {
+  const context = await on.newContext({ viewport: { width: width.width, height: width.height }, hasTouch: width.touch, isMobile: width.touch, colorScheme: scheme });
   const page = await context.newPage();
 
   await page.route(`${ORIGIN}/**`, (route) => {
@@ -99,6 +99,9 @@ async function open(width: (typeof WIDTHS)[number], scheme: (typeof SCHEMES)[num
   await page.goto(`${ORIGIN}/${query}`);
   await page.evaluate((dark) => document.documentElement.classList.toggle("dark", dark), scheme === "dark");
   await page.waitForSelector(query === "" ? "[role=toolbar] #actions [data-slot=base]" : query === "?create" ? "#create" : "[role=dialog] [data-slot=footer] [data-slot=base]");
+  // The page eases into the scheme set as it opens, so nothing is read before its colours have settled;
+  // what moves for ever, as a spinner does, is no easing and is not waited on.
+  await page.evaluate(() => Promise.all(document.getAnimations().filter((animation) => animation instanceof CSSTransition).map((animation) => animation.finished.catch(() => undefined))));
 
   return { context, page };
 }
@@ -623,6 +626,17 @@ describe.skipIf(!ready)("a button written as markup under a finger, a pointer an
 // nothing while a field holds the typing or something floats over the screen.
 describe.skipIf(!ready)("the create button drawn in a browser", () => {
   const LABEL = "New thing";
+  // A browser of its own, started and taken down here, as each finger's session has its own: the one
+  // the toolbar's checks share is not left standing for it after those sessions have come and gone.
+  let own: Browser;
+
+  beforeAll(async () => {
+    own = await chromium.launch();
+  }, BROWSER_HOOK_MS);
+
+  afterAll(async () => {
+    await own?.close();
+  });
   // The library's largest icon-only button, and its room from the screen's edges.
   const FLOATING_PX = 40;
   const EDGE_PX = 16;
@@ -631,13 +645,14 @@ describe.skipIf(!ready)("the create button drawn in a browser", () => {
     return await page.evaluate(() => [...(window as unknown as { pressed: string[] }).pressed]);
   }
 
-  // The colour the accent paints a ground with, read off the page's own tokens.
+  // The colour the accent paints a ground with where the floating button stands, read off the page's
+  // own tokens at the step that place takes.
   async function accent(page: Page): Promise<string> {
     return await page.evaluate(() => {
       const probe = document.createElement("div");
 
       probe.style.background = "var(--ui-primary)";
-      document.body.append(probe);
+      document.querySelector("[data-screen-foot]")!.append(probe);
 
       const colour = getComputedStyle(probe).backgroundColor;
 
@@ -648,6 +663,32 @@ describe.skipIf(!ready)("the create button drawn in a browser", () => {
   }
 
   // Read once its colours have settled: the scheme is set as the page opens, and the button eases into it.
+  // The contrast of the button's mark on its own fill, each colour resolved by the browser.
+  async function markContrast(page: Page): Promise<number> {
+    await ground(page);
+
+    return await page.$eval("#create", (element) => {
+      const rgb = (colour: string): number[] => {
+        const canvas = document.createElement("canvas");
+        const context = canvas.getContext("2d")!;
+
+        canvas.width = canvas.height = 1;
+        context.fillStyle = colour;
+        context.fillRect(0, 0, 1, 1);
+
+        return [...context.getImageData(0, 0, 1, 1).data].slice(0, 3);
+      };
+      const luminance = (colour: string): number =>
+        rgb(colour)
+          .map((value) => value / 255)
+          .map((value) => (value <= 0.03928 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4))
+          .reduce((sum, value, index) => sum + value * [0.2126, 0.7152, 0.0722][index]!, 0);
+      const [light, dark] = [luminance(getComputedStyle(element.querySelector("[data-slot=leadingIcon]")!).color), luminance(getComputedStyle(element).backgroundColor)].sort((a, b) => b - a);
+
+      return (light! + 0.05) / (dark! + 0.05);
+    });
+  }
+
   async function ground(page: Page): Promise<string> {
     return await page.$eval("#create", async (element) => {
       await Promise.all(element.getAnimations().map((animation) => animation.finished));
@@ -662,7 +703,7 @@ describe.skipIf(!ready)("the create button drawn in a browser", () => {
       let page: Page;
 
       beforeAll(async () => {
-        ({ context, page } = await open(WIDTHS[0]!, scheme, "?create"));
+        ({ context, page } = await open(WIDTHS[0]!, scheme, "?create", own));
       }, BROWSER_HOOK_MS);
 
       afterAll(async () => {
@@ -717,7 +758,7 @@ describe.skipIf(!ready)("the create button drawn in a browser", () => {
       let page: Page;
 
       beforeAll(async () => {
-        ({ context, page } = await open(WIDTHS[1]!, scheme, "?create"));
+        ({ context, page } = await open(WIDTHS[1]!, scheme, "?create", own));
       }, BROWSER_HOOK_MS);
 
       afterAll(async () => {
@@ -736,6 +777,10 @@ describe.skipIf(!ready)("the create button drawn in a browser", () => {
         expect(button.right).toBe(viewport.width - EDGE_PX);
         expect(button.bottom).toBe(viewport.height - EDGE_PX);
         expect(await ground(page)).toBe(await accent(page));
+      });
+
+      test("draws its mark on its fill at 3:1 or better", async () => {
+        expect(await markContrast(page)).toBeGreaterThanOrEqual(3);
       });
 
       test("keeps the last row of the list under it clear of it, scrolled to its end", async () => {
