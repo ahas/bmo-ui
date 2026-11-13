@@ -4,18 +4,36 @@
       <div>
         <span>{{ t("notes.label.notes") }}</span>
       </div>
-      <CreateButton class="ms-auto" :label="t('notes.action.new')" @click="created += 1" />
+      <UDropdownMenu :items="kinds" :content="createMenu">
+        <CreateButton ref="create" class="ms-auto" :label="t('notes.action.new')" />
+      </UDropdownMenu>
     </ToolBar>
     <ul class="pb-(--bmo-create-room)">
-      <li v-for="index in created" :key="index">{{ index }}</li>
+      <li v-for="(kind, index) in created" :key="index">{{ kind }}</li>
     </ul>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { computed, ref, useTemplateRef } from "vue";
 import { useI18n } from "vue-i18n";
 
+import { menuContent } from "../../app/domain/create-button";
+
+import type { DropdownMenuItem } from "@nuxt/ui";
+import type { CreateButtonHandle } from "../../app/domain/create-button";
+
 const { t } = useI18n();
-const created = ref(0);
+const created = ref<string[]>([]);
+
+// The menu stands on the button wherever it is drawn, from settings made once as the screen is set up.
+const create = useTemplateRef<CreateButtonHandle>("create");
+const createMenu = menuContent(create);
+
+const kinds = computed((): DropdownMenuItem[][] => [
+  [
+    { label: t("notes.action.new_note"), onSelect: () => created.value.push(t("notes.label.note")) },
+    { label: t("notes.action.new_folder"), onSelect: () => created.value.push(t("notes.label.folder")) }
+  ]
+]);
 </script>

@@ -96,6 +96,7 @@ Each is named with everything it exports.
 | `code-copy` | `blockText`, `copyFromPress` |
 | `code-themes` | `CODE_THEMES` |
 | `column-widths` | `MIN_COLUMN_PX`, `RESIZE_STEP_PX`, `ColumnWidths`, `tableHeaders`, `setColumnWidth`, `useColumnWidths` |
+| `create-button` | `CreateButtonHandle`, `CreateAnchor`, `CreateMenuContent`, `menuContent` |
 | `cut-lines` | `LineBox`, `boxCuts`, `cutLineAt`, `cutLineIn`, `lineWords` |
 | `diagram` | `isDiagram`, `drawDiagrams` |
 | `dialog-origin` | `Press`, `originOf`, `watchDialogOrigins` |

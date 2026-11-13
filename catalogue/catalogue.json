@@ -165,7 +165,7 @@
       ],
       "slots": [],
       "events": [],
-      "example": "<div class=\"flex flex-col\">\n  <ToolBar :label=\"t('notes.aria.list_tools')\">\n    <div>\n      <span>{{ t(\"notes.label.notes\") }}</span>\n    </div>\n    <CreateButton class=\"ms-auto\" :label=\"t('notes.action.new')\" @click=\"created += 1\" />\n  </ToolBar>\n  <ul class=\"pb-(--bmo-create-room)\">\n    <li v-for=\"index in created\" :key=\"index\">{{ index }}</li>\n  </ul>\n</div>"
+      "example": "<div class=\"flex flex-col\">\n  <ToolBar :label=\"t('notes.aria.list_tools')\">\n    <div>\n      <span>{{ t(\"notes.label.notes\") }}</span>\n    </div>\n    <UDropdownMenu :items=\"kinds\" :content=\"createMenu\">\n      <CreateButton ref=\"create\" class=\"ms-auto\" :label=\"t('notes.action.new')\" />\n    </UDropdownMenu>\n  </ToolBar>\n  <ul class=\"pb-(--bmo-create-room)\">\n    <li v-for=\"(kind, index) in created\" :key=\"index\">{{ kind }}</li>\n  </ul>\n</div>"
     },
     {
       "name": "ContentSkeleton",

@@ -192,6 +192,16 @@ default; a screen supplies what it holds and what a press means there. Every exp
   device's bottom inset together, and nought on a wide screen. A screen standing the button pads the
   scrolling end of its list by that token, so the last item, scrolled to its end, stands clear of the
   button.
+- **A menu wrapped round it stands on the button.** A menu or popover the host wraps round it takes
+  for its content the settings the `create-button` module's `menuContent` makes from the button the
+  component exposes, made once as the screen is set up and handed over from the menu's first drawing
+  on, since the library passes on to a menu's content only the settings present as the content is
+  first set up. On a phone the button is drawn elsewhere in the page and the menu finds nothing of it
+  in its own place, and on a wide screen what the menu finds is the button's cell, which takes no
+  focus; so the settings place the menu against the button's own box wherever it stands as the menu
+  opens, align the menu to the button's end edge, and hand the focus the menu held back to the button
+  as the menu closes; a focus the reader moved out of the menu as it closed, a press on a field
+  outside it, stays where it went. The host lays its own content settings over them.
 - **Its key presses it.** It answers one key, `n` unless the host names another or none, and a
   press of that key does what a press of the button does. The key acts only while the button stands
   enabled, while no field holds the typing and while nothing floats over the screen, so a key typed
