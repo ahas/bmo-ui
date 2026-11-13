@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, describe, expect, test } from "bun:test";
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, test } from "bun:test";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -26,8 +26,9 @@ import type { Browser, BrowserContext, Page } from "playwright-core";
 const ready = touchReady();
 const ROOT = new URL("../../", import.meta.url).pathname;
 const ORIGIN = "http://page.test";
+// The page's root is an isolated stacking context, as the component library makes a Nuxt app's root.
 const PAGE = `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<script src="/toolbar-harness.js" defer></script></head><body><div id="page"></div></body></html>`;
+<script src="/toolbar-harness.js" defer></script></head><body><div id="page" style="isolation:isolate"></div></body></html>`;
 
 // The library's small icon-only button is a 28-pixel square; one carrying a word stands on the
 // layer's caption line and is 32 pixels tall.
@@ -868,6 +869,123 @@ describe.skipIf(!ready)("a menu wrapped round the create button, drawn in a brow
           expect(await page.evaluate(() => document.activeElement?.id)).toBe("create");
         });
       }
+    });
+  }
+});
+
+// The create button inside containers that are no screen (`docs/components.md`, "Creating"): a
+// sidebar's and a drawer's, each marked as contained, stand as their row's grey icon at every width and
+// are pressed where they stand, the sidebar's leaving nothing on a phone where the sidebar is hidden,
+// and the screen's own button, floating or in its row, is drawn under a dialog's overlay.
+describe.skipIf(!ready)("the create button inside a container that is no screen, drawn in a browser", () => {
+  let own: Browser;
+
+  beforeAll(async () => {
+    own = await chromium.launch();
+  }, BROWSER_HOOK_MS);
+
+  afterAll(async () => {
+    await own?.close();
+  });
+
+  async function pressed(page: Page): Promise<string[]> {
+    return await page.evaluate(() => [...(window as unknown as { pressed: string[] }).pressed]);
+  }
+
+  // Whether a contained button stands as its row's grey icon: the layer's icon button as it stands in
+  // that row, the one beside it, ghost, floating nowhere and answering no key.
+  async function inRow(page: Page, selector: string): Promise<void> {
+    const button = await box(page, selector);
+    const beside = await box(page, `${selector}-beside`);
+
+    expect(button.width).toBe(beside.width);
+    expect(button.height).toBe(beside.height);
+    expect(button.top).toBe(beside.top);
+    expect(await page.$eval(selector, (element) => element.closest("[data-screen-foot]"))).toBeNull();
+    expect(await page.$eval(selector, (element) => getComputedStyle(element).backgroundColor)).toBe("rgba(0, 0, 0, 0)");
+    expect(await page.$eval(selector, (element) => element.getAttribute("aria-keyshortcuts"))).toBeNull();
+  }
+
+  // The element a press at the middle of an element lands on.
+  async function landsOn(page: Page, selector: string): Promise<boolean> {
+    return await page.$eval(selector, (element) => {
+      const rect = element.getBoundingClientRect();
+
+      return element.contains(document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2));
+    });
+  }
+
+  // What a button paints inside its edge, clear of its rounded corners, where an overlay drawn above
+  // it changes every pixel and one drawn under it changes none.
+  async function insideOf(page: Page, selector: string): Promise<{ x: number; y: number; width: number; height: number }> {
+    const button = await box(page, selector);
+    const INSET_PX = 6;
+
+    return { x: button.left + INSET_PX, y: button.top + INSET_PX, width: button.width - 2 * INSET_PX, height: button.height - 2 * INSET_PX };
+  }
+
+  async function settled(page: Page): Promise<void> {
+    await page.evaluate(() => Promise.all(document.getAnimations().map((animation) => animation.finished.catch(() => undefined))));
+  }
+
+  for (const width of WIDTHS) {
+    describe(`at ${width.name}`, () => {
+      let context: BrowserContext;
+      let page: Page;
+
+      beforeEach(async () => {
+        ({ context, page } = await open(width, "light", "?create-contained", own));
+      }, BROWSER_HOOK_MS);
+
+      afterEach(async () => {
+        await context?.close();
+      });
+
+      test(width.touch ? "leaves nothing of the hidden sidebar's button, the screen's alone floating" : "stands the sidebar's button as its row's grey icon, pressed where it stands", async () => {
+        expect(await page.$$eval("[data-screen-foot]", (found) => found.length)).toBe(width.touch ? 1 : 0);
+
+        if (width.touch) {
+          expect(await page.isVisible("#room-create")).toBe(false);
+          expect(await page.$eval("[data-screen-foot]", (element) => element.querySelector("#create") !== null)).toBe(true);
+        } else {
+          await inRow(page, "#room-create");
+          expect(await page.$eval("#room-create", (element) => element.closest("#sidebar") !== null)).toBe(true);
+          await page.click("#room-create");
+          expect(await pressed(page)).toEqual(["room-create"]);
+        }
+      });
+
+      test("stands a drawer's button as its row's grey icon, pressed there by a tap or a click", async () => {
+        await page.evaluate(() => (window as unknown as { openDrawer: () => void }).openDrawer());
+        await page.waitForSelector("[role=dialog] #drawer-create");
+        await settled(page);
+
+        await inRow(page, "#drawer-create");
+        expect(await page.$$eval("[data-screen-foot]", (found) => found.length)).toBe(width.touch ? 1 : 0);
+        expect(await landsOn(page, "#drawer-create")).toBe(true);
+
+        await (width.touch ? page.tap("#drawer-create") : page.click("#drawer-create"));
+        expect(await pressed(page)).toEqual(["drawer-create"]);
+      });
+
+      test("answers the screen's key with the screen's button alone", async () => {
+        await page.keyboard.press("n");
+        expect(await pressed(page)).toEqual(["create"]);
+      });
+
+      test("draws the screen's button under a dialog's overlay", async () => {
+        const inside = await insideOf(page, "#create");
+        const before = await page.screenshot({ clip: inside });
+
+        expect(await landsOn(page, "#create")).toBe(true);
+
+        await page.evaluate(() => (window as unknown as { openDialog: () => void }).openDialog());
+        await page.waitForSelector("[role=dialog]");
+        await settled(page);
+
+        expect((await page.screenshot({ clip: inside })).equals(before)).toBe(false);
+        expect(await landsOn(page, "#create")).toBe(false);
+      });
     });
   }
 });

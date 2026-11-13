@@ -1,10 +1,12 @@
 import ui from "@nuxt/ui/vue-plugin";
-import { createApp, defineComponent, h, ref, shallowRef } from "vue";
+import { createApp, defineComponent, h, onMounted, ref, shallowRef } from "vue";
 import { createI18n } from "vue-i18n";
 
 import UApp from "@nuxt/ui/components/App.vue";
 import UButton from "@nuxt/ui/components/Button.vue";
 import UDropdownMenu from "@nuxt/ui/components/DropdownMenu.vue";
+import UModal from "@nuxt/ui/components/Modal.vue";
+import USlideover from "@nuxt/ui/components/Slideover.vue";
 import UTooltip from "@nuxt/ui/components/Tooltip.vue";
 
 import ActionGroup from "../../app/components/ActionGroup.vue";
@@ -41,7 +43,11 @@ import type { CreateButtonHandle } from "../../app/domain/create-button";
 // room the button takes on a phone, each press of the button counted and a layer opened and closed on
 // the page's word, standing for something floating over the screen; opened with `?create-menu`, it
 // holds a toolbar with the create button wrapped in a menu of two kinds, placed through the create
-// button module's settings. The page stands
+// button module's settings; opened with `?create-contained`, it holds the screen's create button
+// beside three containers that are no screen: a sidebar shown on a wide screen alone, a drawer and a
+// dialog, the first two each holding a create button marked as contained beside an icon button, and
+// the dialog set up in the page's frame before the screen comes in under it, as an app's frame sets up
+// the dialogs it opens over any screen. The page stands
 // outside Nuxt, so the library is installed as a Vue plugin and the words are handed over here.
 
 const WORDS = {
@@ -155,6 +161,46 @@ const Page = defineComponent(() => {
           ])
         ])
       );
+  }
+
+  if (new URLSearchParams(location.search).has("create-contained")) {
+    const pressed: string[] = [];
+    const drawer = ref(false);
+    const dialog = ref(false);
+    const screen = ref(false);
+    const press = (id: string) => () => pressed.push(id);
+
+    Object.assign(window, {
+      pressed,
+      openDrawer: () => (drawer.value = true),
+      openDialog: () => (dialog.value = true)
+    });
+
+    const heading = (words: string, id: string, label: string) =>
+      h("div", { class: "flex h-12 items-center gap-2 border-b border-default px-4" }, [
+        h("span", words),
+        h(CreateButton, { id, label, contained: true, class: "ms-auto", onClick: press(id) }),
+        h(IconButton, { id: `${id}-beside`, label: "Refresh", icon: "i-material-symbols-refresh" })
+      ]);
+
+    // The screen comes in once the frame's dialog has been set up.
+    onMounted(() => requestAnimationFrame(() => (screen.value = true)));
+
+    return () =>
+      h(UApp, null, () => [
+        h(UModal, { open: dialog.value, "onUpdate:open": (value: boolean) => (dialog.value = value), title: "Dialog" }, { body: () => h("p", "Words") }),
+        screen.value && h("div", { class: "flex h-dvh" }, [
+          h("aside", { id: "sidebar", class: "hidden w-60 shrink-0 flex-col border-e border-default sm:flex" }, [heading("Rooms", "room-create", "New room")]),
+          h("div", { class: "flex min-w-0 flex-1 flex-col" }, [
+            h(ToolBar, { label: "Toolbar" }, () => [
+              h("div", { id: "words" }, [h("span", "Things")]),
+              h(CreateButton, { id: "create", label: "New thing", class: "ms-auto", onClick: press("create") })
+            ]),
+            h("div", { id: "list", class: "min-h-0 flex-1 overflow-y-auto pb-(--bmo-create-room)" })
+          ])
+        ]),
+        h(USlideover, { open: drawer.value, "onUpdate:open": (value: boolean) => (drawer.value = value), side: "left", title: "Drawer" }, { content: () => heading("Items", "drawer-create", "New item") })
+      ]);
   }
 
   if (new URLSearchParams(location.search).has("markup")) {

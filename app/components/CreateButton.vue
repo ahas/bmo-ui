@@ -5,14 +5,21 @@
        presses it. On a phone the same button floats instead, primary and solid at the library's
        largest size, its fill at the darker step a coloured badge takes so its white mark reads, at
        the screen's bottom right above the device's inset, marked as the screen's foot so what a
-       console floats stands above it, and nothing is left of it in the row.
+       console floats stands above it, and nothing is left of it in the row. It floats from the end of
+       the app's root element rather than from the page's body: the root is an isolated stacking
+       context, so the button stands above everything the screen draws and under every overlay the
+       library draws in the body, whenever that overlay's dialog was set up.
+
+       Marked as contained, it stands in a sidebar, a dialog, a drawer or a sheet rather than a screen,
+       and is the row's grey icon at every width: it shows and is pressed only where its container
+       does, and answers no key, since the screen's key is its own button's.
 
        Where it stands is the host's: a class or a style it is handed lands on its cell. What it does
        is the host's too: a press, or the menu or popover the host wraps round it, lands on the
        button, and such a menu stands against the button through the content settings the create
        button module makes from what this exposes. Its colour, variant, size and mark are its own and
        nothing handed to it changes them. -->
-  <div v-if="!narrow" :class="['flex shrink-0 items-center', $attrs.class]" :style="$attrs.style as StyleValue">
+  <div v-if="!floating" :class="['flex shrink-0 items-center', $attrs.class]" :style="$attrs.style as StyleValue">
     <IconButton
       ref="button"
       v-bind="forButton()"
@@ -25,8 +32,8 @@
       :aria-keyshortcuts="key ?? undefined"
     />
   </div>
-  <Teleport v-else to="body">
-    <div data-screen-foot class="badge-ink fixed end-4 bottom-[calc(1rem+var(--bmo-safe-bottom))]">
+  <Teleport v-else :to="root">
+    <div data-screen-foot class="badge-ink fixed end-4 z-50 bottom-[calc(1rem+var(--bmo-safe-bottom))]">
       <IconButton
         ref="button"
         v-bind="forButton()"
@@ -57,20 +64,26 @@ interface Props {
   // The key that presses it; null for none.
   shortcut?: string | null;
   disabled?: boolean;
+  // Whether it stands in a container that is no screen: a sidebar, a dialog, a drawer or a sheet.
+  contained?: boolean;
 }
 
 defineOptions({ inheritAttrs: false });
 
-const props = withDefaults(defineProps<Props>(), { shortcut: "n", disabled: false });
+const props = withDefaults(defineProps<Props>(), { shortcut: "n", disabled: false, contained: false });
 
 const ADD_ICON = "i-material-symbols-add";
 
 const attrs = useAttrs();
 const narrow = useNarrow();
+const floating = computed(() => narrow.value && !props.contained);
+// The app's root element, which the floating button is drawn at the end of; the page's body where the
+// app was mounted on none.
+const root = getCurrentInstance()?.appContext.app._container ?? "body";
 const button = useTemplateRef<CreateButtonHandle>("button");
 
-// The key is named once, as the button is set up.
-const key = props.shortcut;
+// The key is named once, as the button is set up; a contained button has none.
+const key = props.contained ? null : props.shortcut;
 const kbds = key === null ? undefined : [key];
 
 // What is handed to it for the button: everything but where its cell stands.
