@@ -66,7 +66,7 @@ wording keys listed here are the ones the layer's list holds.
 | `SettingsGroup` | A group of settings rows under a small heading. |
 | `SettingsRow` | One setting: its name, a muted line, its control. |
 | `SettingsSegment` | A choice of two or three as one segmented control. |
-| `ShareLinkDialog` | The one dialog a share link is made, shown, copied and ended in, over the road the host hands it. |
+| `ShareDialog` | The one dialog a thing is shared in: its link made, shown, copied and ended, and the members it is shared with found, listed and taken off, over the roads the host hands it. |
 | `ShellClose` | The close of a modal or a side sheet. |
 | `SkeletonBar` | The one shimmering bar. |
 | `SkeletonLine` | One line of text not yet arrived. |
@@ -129,6 +129,7 @@ Each is named with everything it exports.
 | `screen` | `NARROW_MAX_PX`, `NARROW_QUERY`, `useNarrow`, `VisibleReading`, `VisibleFrame`, `visibleFrame`, `SCREEN_HEIGHT_PROPERTY`, `SCREEN_TOP_PROPERTY`, `SCREEN_FRAME`, `useVisibleScreen`, `STABLE_GUTTER`, `useWidth`, `useScrollGutter` |
 | `scroll-within` | `offsetFor`, `scrollWithin` |
 | `share-links` | `ShareLink`, `ShareSpan`, `ShareRoad`, `ShareMark`, `shareEnded`, `shareUntilText` |
+| `share-members` | `SharePerson`, `SHARE_PERMISSIONS`, `SharePermission`, `MEMBER_PERMISSION`, `ShareMember`, `ShareMemberRoad`, `MEMBER_SEARCH_PAUSE_MS`, `PermissionItem`, `permissionItems`, `ShareMembers`, `ShareMembersOptions`, `useShareMembers` |
 | `side-parts` | `SPLIT_HANDLE`, `FULL_SHEET` |
 | `sound-tap` | `TAP_FFT`, `Tap`, `tapOf` |
 | `tab-slide` | `SlideDirection`, `slideDirection`, `useSlideDirection` |
@@ -146,6 +147,9 @@ Each is named with everything it exports.
 - **`share-links` takes a link's road as given.** How a link is read, made and ended, the page it
   opens and the spans offered are the host's; the module holds their shapes and the one reading of a
   link's end, as the date it stands until.
+- **`share-members` takes a member's road as given.** Who may be found, where who a thing is shared
+  with is kept and what a permission opens are the host's; the module holds their shapes, the two
+  permissions and the one a member is given, and the member part's state over the road.
 - **`monaco` opens code and source views only.** Any other view over the editor is the host's.
 - **`relay` makes an address, and calls only where a screen asks it to.** It answers where a screen
   calls a service, under the app's base path and the host's relay base (see What the host owes),
@@ -281,30 +285,34 @@ What a coding harness takes the layer through (`docs/harness.md`).
 
 ## Wording keys
 
-The layer reads these 93 keys and no others. The `wording-keys` shared module lists them, the one
+The layer reads these 105 keys and no others. The `wording-keys` shared module lists them, the one
 list a host's pack is held to. Placeholders are named after each key.
 
 - **`common.action`:** `cancel`, `choose_all`, `choose_none`, `close`, `close_all_tabs`,
   `close_other_tabs`, `close_right_tabs`, `copy`, `create_link`, `discard`, `fit_screen`, `more`, `mute`,
-  `next_picture`, `pause`, `pin`, `play`, `previous_picture`, `save`, `unmute`, `unpin`, `unshare`,
-  `zoom_in`, `zoom_out`.
+  `next_picture`, `pause`, `pin`, `play`, `previous_picture`, `save`, `share`, `unmute`, `unpin`,
+  `unshare`, `zoom_in`, `zoom_out`.
 - **`common.aria`:** `close_named` `{name}`, `column_width` `{name}`, `decrease`, `download_named`
-  `{name}`, `image_zoom` `{title}`, `increase`, `more_notices` `{n}`, `pinned_named` `{name}`,
-  `share_address`.
-- **`common.error`:** `editor_failed`, `link_copy_failed`, `picture_failed`, `share_create_failed`,
-  `share_read_failed`, `unshare_failed`, `video_failed`.
+  `{name}`, `image_zoom` `{title}`, `increase`, `member_permission` `{name}`, `more_notices` `{n}`,
+  `pinned_named` `{name}`, `share_address`.
+- **`common.error`:** `editor_failed`, `link_copy_failed`, `member_change_failed`,
+  `member_search_failed`, `member_share_failed`, `members_read_failed`, `picture_failed`,
+  `share_create_failed`, `share_read_failed`, `unshare_failed`, `video_failed`.
 - **`common.label`:** `day_format` (a date format the time module's day is written in), `days`
   `{d}`, `days_hours` `{d}` `{h}`, `expired`, `expiry`, `forever`, `hours` `{h}`, `hours_minutes`
   `{h}` `{m}`, `left_days` `{n}`, `left_hours` `{n}`, `left_minutes` `{n}`, `left_under_minute`,
-  `link`, `minutes` `{m}`, `minutes_seconds` `{m}` `{s}`, `palette_forest`, `palette_lemon`,
-  `palette_sea`, `palette_sunset`, `palette_teal`, `palette_violet`, `play_position`, `properties`,
+  `link`, `members`, `minutes` `{m}`, `minutes_seconds` `{m}` `{s}`, `palette_forest`, `palette_lemon`,
+  `palette_sea`, `palette_sunset`, `palette_teal`, `palette_violet`, `permission_edit`,
+  `permission_read`, `play_position`, `properties`,
   `seconds` `{n}`, `share_until` `{date}`, `short_day_format` (the short date format the time
   module's short day is written in, the year in two figures), `theme_forest`, `theme_sea`,
   `theme_sunset`, `theme_teal`, `theme_violet`, `unplayable`, `volume`.
 - **`common.message`:** `link_copied`, and the theme preview's words:
   `preview_badge`, `preview_field`, `preview_link`, `preview_meta`, `preview_note`.
-- **`common.status`:** `copied`, `loading`, `picture_loading`, `share_loading`, `video_loading`.
-- **`common.title`:** `discard_changes`, `share_link`.
+- **`common.placeholder`:** `member_search`.
+- **`common.status`:** `copied`, `loading`, `members_loading`, `no_members`, `picture_loading`,
+  `share_loading`, `video_loading`.
+- **`common.title`:** `discard_changes`, `share`.
 - **`files.action`:** `keep_both`, `replace`, `skip`.
 - **`files.aria`:** `name_field`.
 - **`files.label`:** `progress` `{done}` `{all}` `{percent}`.

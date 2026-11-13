@@ -192,13 +192,21 @@ bundle and its console stand on the same release of the layer or the bundle is n
   under the console's bar and its own alike. Where the screen already has a row there, its tab bar or its
   toolbar, that row holds them; otherwise the screen draws one, and never a second.
 - **The people directory.** A console that keeps accounts with names may offer a screen the people of the
-  reader's organization, under the injection key `bmo-console-people`, as an object of three reads: `search`,
+  reader's company, every account standing anywhere under the top-level organization unit the reader's own
+  unit belongs to, under the injection key `bmo-console-people`, as an object of three reads: `search`,
   given words, answers the people whose name, organization or job title holds them, at most twenty; `person`,
   given an account key, answers that person or null where none stands; `me` answers the signed-in reader, or
   null where the login has no account. A person is `user` — the account key,
   written as the console writes the owner key ("Roles and the owner key") —, `name`, `organization` and
   `jobTitle`. A screen that names people — an assignee, an author — picks them through `search` and draws each
   by the name `person` answers; found without the key, it stands each account as its key.
+- **Sharing.** A screen that shares what it shows opens the layer's share dialog (`docs/components.md`,
+  "Sharing") and hands it its roads. The link road is the bundle's own service: the link read, made and
+  ended there, and the share page it opens ("Share pages"). The member road is handed only where the screen
+  finds the people directory: its search is the directory's `search`, whose person is the dialog's person as
+  it stands, and reading, granting, changing and taking back who the thing is shared with are calls to the
+  bundle's own service, each member named by the account key and given a permission, `read` or `edit`.
+  Found without the key, the screen hands no member road and the dialog shares by link alone.
 - **The screen's foot.** A bar a screen stands at its foot for the reader to act from — an input bar, a row of
   keys — carries the attribute `data-screen-foot`. What a console floats over the page area of its own accord
   stands above every element so marked, so it never covers that bar until the reader moves it there.
@@ -329,8 +337,10 @@ under `calls`, and its screens hand the module texts and a language.
   a 401, and a call whose `Owner-Role` is missing or does not allow the manifest's role, or, where
   the manifest asks for the owner key, whose `Owner-Key` is missing, with a 403. A share read is held to
   its token instead of the role and the owner key, and the module and the stylesheet of a manifest that
-  names one are answered with no owner key and no role ("Share pages"). It answers a call with the owner's own data and
-  never another's. A route that needs more than the screen's role refuses on its own terms; the
+  names one are answered with no owner key and no role ("Share pages"). It answers a call with the owner's own data,
+  and with what another account has shared with the owner as a member ("How a bundle mounts", sharing) as far as the
+  permission given opens it: a member given `read` its reads, one given `edit` its writes as well, and nothing of
+  another's beyond that. A route that needs more than the screen's role refuses on its own terms; the
   manifest's role is the floor of every route, not the whole of the service's guard.
 - **A relayed route serves the service's other callers too.** A route under `relays` is the
   service's own, which callers other than a console reach on their own terms; a call to it that
@@ -404,6 +414,9 @@ under `calls`, and its screens hand the module texts and a language.
   once for the rest.
 - **It guards every route itself** by the console's credential, the role and the owner key, as the
   contract states, and each share read by its token.
+- **It keeps who a thing is shared with,** where its screens share with members: each member by the account key,
+  with the permission given, which only the thing's owner grants, changes and takes back. It holds a member's calls
+  to what that permission opens, and answers a member's reads of what is shared with them as it answers the owner's.
 - **It names a share read** only for what its share page reads, each answering only what a live token opens.
 - **It names a `shareHead`** only where its share page has a head of its own, answering it for a live token alone,
   as data in the shape the contract states, and refusing a token that opens nothing as absent.
@@ -412,7 +425,7 @@ under `calls`, and its screens hand the module texts and a language.
 
 - **This document is the contract's one statement.** A repository whose service has a bundle, and a
   console, name this document in their own documents with the parts of it they use (a share page, a
-  sidebar count, the people directory, a translator) and what they add of their own. They do not copy
+  sidebar count, the people directory, sharing with members, a translator) and what they add of their own. They do not copy
   its rules, its fields or its headers: a copy trails this document as soon as it changes.
 - **Conformance is held by shared checks,** never by a repository's own prose: the console face of
   the base library the services build on, which serves the manifest, the module, the stylesheet, the

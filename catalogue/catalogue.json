@@ -1332,9 +1332,9 @@
       "example": "<SettingsRow :label=\"t('notes.label.sort_by')\">\n  <SettingsSegment v-model=\"sort\" :items=\"items\" :label=\"t('notes.label.sort_by')\" />\n</SettingsRow>"
     },
     {
-      "name": "ShareLinkDialog",
+      "name": "ShareDialog",
       "kind": "component",
-      "line": "The one dialog a share link is made, shown, copied and ended in, over the road the host hands it.",
+      "line": "The one dialog a thing is shared in: its link made, shown, copied and ended, and the members it is shared with found, listed and taken off, over the roads the host hands it.",
       "props": [
         {
           "name": "road",
@@ -1349,6 +1349,12 @@
         {
           "name": "span",
           "type": "string | undefined",
+          "required": false,
+          "default": "undefined"
+        },
+        {
+          "name": "members",
+          "type": "ShareMemberRoad | undefined",
           "required": false,
           "default": "undefined"
         },
@@ -1378,11 +1384,15 @@
           "type": "[value: boolean]"
         },
         {
+          "name": "members",
+          "type": "[count: number]"
+        },
+        {
           "name": "shared",
           "type": "[mark: ShareMark | null]"
         }
       ],
-      "example": "<ShareLinkDialog v-model:open=\"open\" :road=\"road\" :spans=\"spans\" span=\"7\" :subject=\"'plan.md'\" @shared=\"markShared\" />"
+      "example": "<ShareDialog v-model:open=\"open\" :road=\"road\" :spans=\"spans\" span=\"7\" :members=\"members\" :subject=\"'plan.md'\" @shared=\"markShared\" @members=\"countMembers\" />"
     },
     {
       "name": "ShellClose",
