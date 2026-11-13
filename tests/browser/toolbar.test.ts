@@ -98,7 +98,7 @@ async function open(width: (typeof WIDTHS)[number], scheme: (typeof SCHEMES)[num
   });
   await page.goto(`${ORIGIN}/${query}`);
   await page.evaluate((dark) => document.documentElement.classList.toggle("dark", dark), scheme === "dark");
-  await page.waitForSelector(query === "" ? "[role=toolbar] #actions [data-slot=base]" : "[role=dialog] [data-slot=footer] [data-slot=base]");
+  await page.waitForSelector(query === "" ? "[role=toolbar] #actions [data-slot=base]" : query === "?create" ? "#create" : "[role=dialog] [data-slot=footer] [data-slot=base]");
 
   return { context, page };
 }
@@ -614,4 +614,144 @@ describe.skipIf(!ready)("a button written as markup under a finger, a pointer an
     await named("out", true);
     expect(await page.$$eval("[role=tooltip]", (found) => found.map((tip) => tip.textContent))).toEqual(["out"]);
   });
+});
+
+// The one button a screen creates from, in a toolbar a screen builds (`docs/components.md`,
+// "Creating"): at a desktop's width a grey icon standing as the row's last cells' first, its tooltip
+// naming what it creates and its key; at a phone's a primary icon floating at the screen's bottom
+// right, gone from the row, with the list under it keeping room for it. Its key presses it, and does
+// nothing while a field holds the typing or something floats over the screen.
+describe.skipIf(!ready)("the create button drawn in a browser", () => {
+  const LABEL = "New thing";
+  // The library's largest icon-only button, and its room from the screen's edges.
+  const FLOATING_PX = 40;
+  const EDGE_PX = 16;
+
+  async function pressed(page: Page): Promise<string[]> {
+    return await page.evaluate(() => [...(window as unknown as { pressed: string[] }).pressed]);
+  }
+
+  // The colour the accent paints a ground with, read off the page's own tokens.
+  async function accent(page: Page): Promise<string> {
+    return await page.evaluate(() => {
+      const probe = document.createElement("div");
+
+      probe.style.background = "var(--ui-primary)";
+      document.body.append(probe);
+
+      const colour = getComputedStyle(probe).backgroundColor;
+
+      probe.remove();
+
+      return colour;
+    });
+  }
+
+  // Read once its colours have settled: the scheme is set as the page opens, and the button eases into it.
+  async function ground(page: Page): Promise<string> {
+    return await page.$eval("#create", async (element) => {
+      await Promise.all(element.getAnimations().map((animation) => animation.finished));
+
+      return getComputedStyle(element).backgroundColor;
+    });
+  }
+
+  for (const scheme of SCHEMES) {
+    describe(`at a desktop's width, ${scheme}`, () => {
+      let context: BrowserContext;
+      let page: Page;
+
+      beforeAll(async () => {
+        ({ context, page } = await open(WIDTHS[0]!, scheme, "?create"));
+      }, BROWSER_HOOK_MS);
+
+      afterAll(async () => {
+        await context?.close();
+      });
+
+      test("stands in the toolbar as a cell of its own, the library's small square, grey and ghost", async () => {
+        expect(await page.$eval("#create", (element) => element.closest("[role=toolbar]") !== null && element.closest("[role=toolbar] > *")?.parentElement?.getAttribute("role") === "toolbar")).toBe(true);
+        expect(await page.$eval("#create", (element) => element.closest("[role=toolbar] > *")?.querySelectorAll("[data-slot=base]").length)).toBe(1);
+
+        const button = await box(page, "#create");
+
+        expect(button.width).toBe(SMALL_PX);
+        expect(button.height).toBe(SMALL_PX);
+        expect(await ground(page)).toBe("rgba(0, 0, 0, 0)");
+        expect(await page.$eval("#create", (element) => element.getAttribute("aria-keyshortcuts"))).toBe("n");
+      });
+
+      test("names what it creates and the key that presses it in its tooltip", async () => {
+        await page.hover("#create");
+        await page.waitForSelector("[data-slot=kbds]");
+
+        expect(await page.$eval("[data-slot=content]", (element) => element.textContent)).toContain(LABEL);
+        expect((await page.$eval("[data-slot=kbds]", (element) => element.textContent ?? "")).trim().toLowerCase()).toBe("n");
+
+        await page.mouse.move(0, 0);
+      });
+
+      test("is pressed by its key, and not while a field holds the typing or something floats over the screen", async () => {
+        await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+        await page.keyboard.press("n");
+        expect(await pressed(page)).toEqual(["create"]);
+
+        await page.focus("#field");
+        await page.keyboard.press("n");
+        expect(await page.$eval("#field", (element) => (element as HTMLInputElement).value)).toBe("n");
+        expect(await pressed(page)).toEqual(["create"]);
+
+        await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+        await page.evaluate(() => (window as unknown as { float: () => void }).float());
+        await page.keyboard.press("n");
+        expect(await pressed(page)).toEqual(["create"]);
+
+        await page.evaluate(() => (window as unknown as { land: () => void }).land());
+        await page.keyboard.press("n");
+        expect(await pressed(page)).toEqual(["create", "create"]);
+      });
+    });
+
+    describe(`at a phone's width, ${scheme}`, () => {
+      let context: BrowserContext;
+      let page: Page;
+
+      beforeAll(async () => {
+        ({ context, page } = await open(WIDTHS[1]!, scheme, "?create"));
+      }, BROWSER_HOOK_MS);
+
+      afterAll(async () => {
+        await context?.close();
+      });
+
+      test("floats at the screen's bottom right as a primary icon, nothing of it left in the row", async () => {
+        expect(await page.$$eval("[role=toolbar] [aria-label='New thing']", (found) => found.length)).toBe(0);
+        expect(await page.$eval("#create", (element) => element.closest("[data-screen-foot]") !== null && getComputedStyle(element.closest("[data-screen-foot]")!).position === "fixed")).toBe(true);
+
+        const button = await box(page, "#create");
+        const viewport = page.viewportSize()!;
+
+        expect(button.width).toBe(FLOATING_PX);
+        expect(button.height).toBe(FLOATING_PX);
+        expect(button.right).toBe(viewport.width - EDGE_PX);
+        expect(button.bottom).toBe(viewport.height - EDGE_PX);
+        expect(await ground(page)).toBe(await accent(page));
+      });
+
+      test("keeps the last row of the list under it clear of it, scrolled to its end", async () => {
+        await page.$eval("#list", (element) => element.scrollTo({ top: element.scrollHeight }));
+
+        const last = await box(page, "#list .row:last-child");
+        const button = await box(page, "#create");
+
+        expect(last.bottom).toBeLessThanOrEqual(button.top);
+        expect(await page.$eval("#list", (element) => getComputedStyle(element).paddingBottom)).toBe(`${FLOATING_PX + EDGE_PX}px`);
+      });
+
+      test("is pressed by a tap", async () => {
+        await page.tap("#create");
+        expect(await pressed(page)).toEqual(["create"]);
+      });
+    });
+  }
 });

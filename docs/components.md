@@ -165,6 +165,36 @@ default; a screen supplies what it holds and what a press means there. Every exp
   tabs filling it, the active line on the row's bottom edge; a row wider than its place scrolls
   sideways and never vertically.
 
+### Creating
+
+- **Creating is one button** (`CreateButton`). A screen that makes a new thing of what it shows
+  makes it from this button and from no other: no create button of a screen's own, no primary icon
+  button standing in a row and no create button carrying an icon and a word. One screen stands one
+  of it. What it creates is the host's word, handed in as its name; what a press does is the host's
+  too, whether it makes the thing at once or opens the menu or popover the host wraps round it. Where
+  its cell stands is the host's, through a class or a style handed to it; everything else handed to
+  it lands on the button, and nothing handed to it changes its colour, variant, size or mark.
+- **On a wide screen it is a grey icon in the row.** It is the layer's icon button, neutral and
+  ghost, with the add mark, standing as a cell of its own at the right end of the row the screen's
+  own actions stand in: its toolbar, or its tab bar's action area where no toolbar stands. Its
+  tooltip names what it creates and the key that presses it.
+- **On a phone it floats.** The same button is drawn instead as a primary solid icon button with
+  the add mark, at the library's largest size, fixed at the screen's bottom right, 16 pixels from
+  the right edge and 16 pixels above the device's bottom inset, and nothing stands for it in the
+  row. Its medium corner is a button's, since nothing but a face and a dot is round. It carries
+  `data-screen-foot`, so what a console floats of its own accord stands above it
+  (`docs/console-bundles.md`, "How a bundle mounts"). A finger held on it names it, as on every icon
+  button; its key is not shown, since a phone has none.
+- **A list under the floating button keeps room for it.** The layer's `--bmo-create-room` token is
+  the room the button takes from a list's foot on a phone, the button, its gap from the edge and the
+  device's bottom inset together, and nought on a wide screen. A screen standing the button pads the
+  scrolling end of its list by that token, so the last item, scrolled to its end, stands clear of the
+  button.
+- **Its key presses it.** It answers one key, `n` unless the host names another or none, and a
+  press of that key does what a press of the button does. The key acts only while the button stands
+  enabled, while no field holds the typing and while nothing floats over the screen, so a key typed
+  into a form or under a dialog makes nothing. The key is named once, as the button is set up.
+
 ## Settings
 
 - **Settings are a list of sections and the open section beside it.** The list stands in a column at
@@ -387,6 +417,8 @@ default; a screen supplies what it holds and what a press means there. Every exp
   layer. The library's own tooltip comes up for a pointer and a focus alone, so nothing the layer
   draws, and nothing a host draws, names a control with it, and the stylesheet draws no name of its
   own over any control.
+- **A control a key presses names that key in its tooltip,** after its words, in the library's key
+  marks; the shared tooltip and the layer's icon button take the keys to show beside the name.
 - **A tooltip switched off comes up for nothing:** no hover, no focus, no tap and no resting finger opens it, so
   what it stands on is pressed as if no tooltip stood there.
 - **Its words wrap** inside a box no wider than a phone has room for.

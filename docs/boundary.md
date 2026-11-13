@@ -35,6 +35,7 @@ wording keys listed here are the ones the layer's list holds.
 | `AudioPlayer` | A kept sound: a play and pause button, its waveform as its progress, a volume popover and a download. |
 | `ChooseAll` | The three-state checkbox that takes every row shown or gives the choice up. |
 | `ColumnResizeHandle` | The right edge of a column's name, dragged or moved with the arrow keys. |
+| `CreateButton` | The one button a screen creates from: a grey icon in its row on a wide screen, a floating primary icon on a phone, its key named in its tooltip. |
 | `ContentSkeleton` | The placeholder region: busy status, a surface nothing presses through, the caller's piece repeated. |
 | `CutLineTip` | The one layer that shows any line cut with an ellipsis whole, in the shared tooltip. |
 | `DataTable` | The shared table: sideways scroll, stuck names, movable widths, labelled parts, three layouts. |
@@ -45,7 +46,7 @@ wording keys listed here are the ones the layer's list holds.
 | `FilesText` | A text file in the read-only code viewer, coloured by its name's language. |
 | `GrowingTextarea` | A form's text box that grows with its text and never scrolls inside. |
 | `HintTip` | The shared tooltip for words that say more than what they stand on. |
-| `IconButton` | A button drawn as its icon alone, its one name heard and shown in the shared tooltip, a held finger included. |
+| `IconButton` | A button drawn as its icon alone, its one name heard and shown in the shared tooltip with the keys that press it, a held finger included. |
 | `ImageViewer` | A picture opened whole, zoomed and moved by wheel, drag, pinch, double press and buttons. |
 | `LoadingImage` | A picture that keeps its place while it loads and says when it failed. |
 | `LoadingVideo` | A video that keeps its place while it loads and says when it failed. |
@@ -341,6 +342,9 @@ Every token is a custom property stated by the layer's stylesheet on the root un
   where the visible screen starts, `0px` while nothing overlays.
 - **Safe area:** `--bmo-safe-top` and `--bmo-safe-bottom`, the device's insets, nought where it
   reports none.
+- **Create room:** `--bmo-create-room`, the room the create button floating on a phone takes from a
+  list's foot, its height, its gap from the edge and `--bmo-safe-bottom` together; nought on a wide
+  screen.
 - **Motion:** `--bmo-motion-quick` 150ms, `--bmo-motion-pop` 200ms, `--bmo-motion-unfold` 320ms;
   `--bmo-ease-enter` `cubic-bezier(0.2, 0.8, 0.2, 1)`, `--bmo-ease-exit` `cubic-bezier(0.4, 0, 1, 1)`,
   `--bmo-ease-move` `cubic-bezier(0.4, 0, 0.2, 1)`. Tailwind's default transition is `quick` and

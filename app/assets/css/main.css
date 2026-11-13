@@ -29,6 +29,20 @@
   --bmo-safe-bottom: env(safe-area-inset-bottom, 0px);
 }
 
+/* The room the create button floating on a phone takes from the foot of a list it stands over
+   (`docs/components.md`, "Creating"): the library's largest icon-only button, 2.5rem square, the
+   1rem it stands from the bottom edge and the device's bottom inset. A wide screen stands the button
+   in its row, so the room is nought there; the width is the screen module's narrow width. */
+:root {
+  --bmo-create-room: 0px;
+}
+
+@media (max-width: 639px) {
+  :root {
+    --bmo-create-room: calc(3.5rem + var(--bmo-safe-bottom));
+  }
+}
+
 /* Every scrollbar is the thin one, in the colour the borders are, on no track of its own
    (`docs/design.md`, "Scrollbars"): panes read side by side are parted by their edges, and a wide
    bar between them is a wall. It is set here for everything at once — the standard properties for

@@ -11,6 +11,7 @@
   <UTooltip
     v-model:open="shown"
     :text="props.text"
+    :kbds="props.kbds"
     :disabled="props.disabled"
     disable-closing-trigger
     :ignore-non-keyboard-focus="TOOLTIP_PROVIDER.ignoreNonKeyboardFocus"
@@ -63,11 +64,13 @@ interface Props {
   // Which side of what it stands on it comes up on, where the library's own side would cover
   // something that must stay read — a chip lying over a picture's foot.
   side?: "top" | "right" | "bottom" | "left";
+  // The keys that press what it stands on, shown after its words in the library's key marks.
+  kbds?: string[];
 }
 
 defineOptions({ inheritAttrs: false });
 
-const props = withDefaults(defineProps<Props>(), { text: undefined, label: undefined, cut: false, press: false, keyboardFocus: undefined, disabled: false, as: "span", side: undefined });
+const props = withDefaults(defineProps<Props>(), { text: undefined, label: undefined, cut: false, press: false, keyboardFocus: undefined, disabled: false, as: "span", side: undefined, kbds: undefined });
 
 // What the library is told of the tooltip's own box: the name a screen reader hears, and the side.
 const tipContent = computed(() => {

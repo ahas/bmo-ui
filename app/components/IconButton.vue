@@ -4,8 +4,9 @@
        toolbar" and "Tooltips"). A pointer names it on hover and the keyboard on focus; a tap presses
        it, so a finger held on it names it instead and lifting that finger presses nothing. Everything
        else it is handed is the library button's: its icon, size, colour, variant, a press, a route,
-       and what a menu or a popover it opens puts on its trigger. -->
-  <HintTip class="inline-flex" :text="props.label" press :keyboard-focus="props.keyboardFocus">
+       and what a menu or a popover it opens puts on its trigger. The keys that press it, where
+       it has any, stand in its tooltip after its name. -->
+  <HintTip class="inline-flex" :text="props.label" :kbds="props.kbds" press :keyboard-focus="props.keyboardFocus">
     <UButton ref="button" color="neutral" variant="ghost" square v-bind="$attrs" :aria-label="props.label" />
   </HintTip>
 </template>
@@ -20,11 +21,13 @@ interface Props extends /* @vue-ignore */ Omit<ButtonProps, "label" | "square"> 
   // Whether a focus arriving on it is the keyboard's, where the browser's visible-focus tell cannot
   // say so for it.
   keyboardFocus?: (event: FocusEvent) => boolean;
+  // The keys that press it, shown in its tooltip after its name.
+  kbds?: string[];
 }
 
 defineOptions({ inheritAttrs: false });
 
-const props = withDefaults(defineProps<Props>(), { keyboardFocus: undefined });
+const props = withDefaults(defineProps<Props>(), { keyboardFocus: undefined, kbds: undefined });
 
 const button = useTemplateRef<ComponentPublicInstance>("button");
 
