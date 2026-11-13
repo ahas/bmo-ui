@@ -170,8 +170,9 @@ default; a screen supplies what it holds and what a press means there. Every exp
 - **Creating is one button** (`CreateButton`). A screen that makes a new thing of what it shows
   makes it from this button and from no other: no create button of a screen's own, no primary icon
   button standing in a row and no create button carrying an icon and a word. One screen stands one
-  of it. What it creates is the host's word, handed in as its name; what a press does is the host's
-  too, whether it makes the thing at once or opens the menu or popover the host wraps round it. Where
+  of it as its own, and a container that is no screen stands its own, contained (below). What it
+  creates is the host's word, handed in as its name; what a press does is the host's too, whether it
+  makes the thing at once or opens the menu or popover the host wraps round it. Where
   its cell stands is the host's, through a class or a style handed to it; everything else handed to
   it lands on the button, and nothing handed to it changes its colour, variant, size or mark.
 - **On a wide screen it is a grey icon in the row.** It is the layer's icon button, neutral and
@@ -181,12 +182,22 @@ default; a screen supplies what it holds and what a press means there. Every exp
 - **On a phone it floats.** The same button is drawn instead as a primary solid icon button with
   the add mark, at the library's largest size, fixed at the screen's bottom right, 16 pixels from
   the right edge and 16 pixels above the device's bottom inset, and nothing stands for it in the
-  row. Its fill takes the darker step a coloured badge takes (`badge-ink`, `docs/design.md`), so
+  row. It is drawn at the end of the app's root element, above everything the screen draws and under
+  everything the library floats over the page: the app's root is an isolated stacking context, as the
+  component library makes it, and a dialog's or a drawer's overlay, a menu and a tooltip are drawn
+  outside it, so an overlay covers the button however early or late its dialog was set up. Its fill takes the darker step a coloured badge takes (`badge-ink`, `docs/design.md`), so
   its white mark reads at 3:1 or better in both modes. Its medium corner is a button's, since
   nothing but a face and a dot is round. It carries
   `data-screen-foot`, so what a console floats of its own accord stands above it
   (`docs/console-bundles.md`, "How a bundle mounts"). A finger held on it names it, as on every icon
   button; its key is not shown, since a phone has none.
+- **In a container that is no screen it stays in its row.** A create button standing in a sidebar,
+  a dialog, a drawer or a sheet is marked as contained (`contained`) and is then the grey icon in its
+  container's row at every width, the layer's icon button as it stands in that row: it never floats,
+  so it shows and is pressed only where its container shows and inside it, and a sidebar hidden on a
+  phone leaves nothing of it over the screen. It answers no key and its tooltip names none, since the
+  screen's key presses the screen's own button. A screen may stand any number of contained create
+  buttons in its containers beside its own one, and none of them takes room from a list's foot.
 - **A list under the floating button keeps room for it.** The layer's `--bmo-create-room` token is
   the room the button takes from a list's foot on a phone, the button, its gap from the edge and the
   device's bottom inset together, and nought on a wide screen. A screen standing the button pads the
@@ -202,14 +213,14 @@ default; a screen supplies what it holds and what a press means there. Every exp
   opens, align the menu to the button's end edge, and hand the focus the menu held back to the button
   as the menu closes; a focus the reader moved out of the menu as it closed, a press on a field
   outside it, stays where it went. The host lays its own content settings over them.
-- **Its key presses it.** It answers one key, `n` unless the host names another or none, and a press
-  of that key does what a press of the button does: it clicks the button itself. A menu or popover the
-  host wraps round it lands its trigger's handling on the button, as everything handed to it does, and
-  the library's menu and popover triggers open on a click of the button, so such a menu opens on the
-  key as on a press, in both shapes, with no handler of the host's own. The key acts only while the
-  button stands enabled, while no field holds the typing and while nothing floats over the screen, so
-  a key typed into a form or under a dialog makes nothing. The key is named once, as the button is set
-  up.
+- **Its key presses it.** A create button that is not contained answers one key, `n` unless the host
+  names another or none, and a press of that key does what a press of the button does: it clicks the
+  button itself. A menu or popover the host wraps round it lands its trigger's handling on the button,
+  as everything handed to it does, and the library's menu and popover triggers open on a click of the
+  button, so such a menu opens on the key as on a press, in both shapes, with no handler of the host's
+  own. The key acts only while the button stands enabled, while no field holds the typing and while
+  nothing floats over the screen, so a key typed into a form or under a dialog makes nothing. The key
+  is named once, as the button is set up.
 
 ## Settings
 
