@@ -69,7 +69,7 @@ none of them a dot or two standing for a folder.
 | `icon` | The icon a console draws beside that name, as the component library names an icon. | yes |
 | `screenPath` | The path the bundle's screens stand under: one or more kebab-case segments, each led by a slash. | yes |
 | `formerScreenPaths` | The paths the bundle's screens stood under before, each written as a screen path is; none the screen path, none standing under it or over it, none under or over another, and none twice. A console answers every address under one as moved to the same address under the screen path ("A screen that moved"). | no, none |
-| `serviceName` | The service's name, in kebab-case, which a console relays the service under. | yes |
+| `serviceName` | The service's name, in kebab-case, which a console relays the service under; never `people`, the name a console answers the company's members under itself ("How a console finds the services"). | yes |
 | `layer` | The version of this layer the bundle was built on, as the bundle build wrote it beside the module ("The layer a bundle is built on"). | yes |
 | `bundle` | The path of the service's API its module is answered at. | yes |
 | `stylesheet` | The path of the service's API its stylesheet is answered at. | no, none |

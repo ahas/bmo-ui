@@ -94,7 +94,7 @@ const manifest = z
       .array(screenPath("A path the bundle's screens stood under before."))
       .default([])
       .describe("The paths the bundle's screens stood under before; a console answers every address under one as moved to the screen path."),
-    serviceName: z.string().regex(KEBAB, "a name in kebab-case").describe("The service's name, which the console relays it under."),
+    serviceName: z.string().regex(KEBAB, "a name in kebab-case").describe("The service's name, which the console relays it under; never people, the name the console answers the company's members under itself."),
     layer: z.string().min(1, "the layer's version the bundle build wrote").describe("The version of the layer the bundle was built on, as the bundle build wrote it."),
     bundle: apiPath("The path of the service's API the bundle's module is answered at."),
     stylesheet: apiPath("The path of the service's API the bundle's stylesheet is answered at.").optional(),
@@ -122,7 +122,7 @@ const manifest = z
     calls: z
       .array(z.string().regex(KEBAB, "a name in kebab-case"))
       .default([])
-      .describe("The other services the screens call through the console, each by the service name its own manifest gives it."),
+      .describe("The other services the screens call through the console, each by the service name its own manifest gives it, or people, the company's members the console answers itself."),
     relays: z
       .array(
         z
