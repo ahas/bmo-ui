@@ -4,6 +4,7 @@
 
 @source "../../app/components/ToolBar.vue";
 @source "../../app/components/ChooseAll.vue";
+@source "../../app/components/CreateButton.vue";
 @source "../../app/components/TabSwitch.vue";
 @source "../../app/components/ActionGroup.vue";
 @source "../../app/components/PropertyList.vue";

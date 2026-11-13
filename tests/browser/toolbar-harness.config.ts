@@ -26,7 +26,8 @@ const HARNESS_ICONS = [
   "i-material-symbols-arrow-back",
   "i-material-symbols-zoom-in",
   "i-material-symbols-zoom-out",
-  "i-material-symbols-fit-screen-outline"
+  "i-material-symbols-fit-screen-outline",
+  "i-material-symbols-add"
 ];
 
 export default defineConfig({

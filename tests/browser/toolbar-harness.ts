@@ -8,6 +8,7 @@ import UTooltip from "@nuxt/ui/components/Tooltip.vue";
 
 import ActionGroup from "../../app/components/ActionGroup.vue";
 import ChooseAll from "../../app/components/ChooseAll.vue";
+import CreateButton from "../../app/components/CreateButton.vue";
 import HintTip from "../../app/components/HintTip.vue";
 import IconButton from "../../app/components/IconButton.vue";
 import NumberInput from "../../app/components/NumberInput.vue";
@@ -17,6 +18,7 @@ import TabBar from "../../app/components/TabBar.vue";
 import TabSwitch from "../../app/components/TabSwitch.vue";
 import ToolBar from "../../app/components/ToolBar.vue";
 import { copyFromPress } from "../../app/domain/code-copy";
+import { closeLayer, openLayer } from "../../app/domain/layers";
 import sheet from "./toolbar-harness.css?inline";
 
 // The rows a screen lays under the title bar, as a screen builds them, drawn by the layer's own
@@ -30,7 +32,10 @@ import sheet from "./toolbar-harness.css?inline";
 // holds the layer's icon button, a group of standing actions, a view switch showing its icons alone
 // and a number box, each press counted; opened with `?markup`, it holds a fenced block's copy button
 // and a diagram's zoom buttons as the host's renderer writes them, named by the markup button layer,
-// the copy button copying through the code-copy module and each press counted. The page stands
+// the copy button copying through the code-copy module and each press counted; opened with `?create`,
+// it holds a toolbar with the create button at its right end, a field and a long list padded by the
+// room the button takes on a phone, each press of the button counted and a layer opened and closed on
+// the page's word, standing for something floating over the screen. The page stands
 // outside Nuxt, so the library is installed as a Vue plugin and the words are handed over here.
 
 const WORDS = {
@@ -100,6 +105,32 @@ const Page = defineComponent(() => {
           h(ActionGroup, { id: "standing", actions: standing, narrowFold: false }),
           h(TabSwitch, { id: "icons-switch", items: VIEWS, modelValue: view.value, label: "View", compact: true, "onUpdate:modelValue": (value: string) => (view.value = value) }),
           h("div", { id: "number" }, [h(NumberInput, { modelValue: 3, digits: 2 })])
+        ])
+      );
+  }
+
+  if (new URLSearchParams(location.search).has("create")) {
+    const pressed: string[] = [];
+    let layer: number | null = null;
+
+    Object.assign(window, {
+      pressed,
+      float: () => (layer = openLayer(() => undefined)),
+      land: () => layer !== null && closeLayer(layer)
+    });
+
+    const rows = Array.from({ length: 40 }, (_, index) => h("div", { class: "row h-10 border-b border-default px-4 py-2" }, `Row ${index + 1}`));
+
+    return () =>
+      h(UApp, null, () =>
+        h("div", { class: "flex h-dvh flex-col" }, [
+          h(ToolBar, { label: "Toolbar" }, () => [
+            h("div", { id: "words" }, [h("span", "Things")]),
+            h(CreateButton, { id: "create", label: "New thing", class: "ms-auto", onClick: () => pressed.push("create") }),
+            h("div", { id: "after" }, [h(IconButton, { label: "Refresh", icon: "i-material-symbols-refresh" })])
+          ]),
+          h("input", { id: "field", "aria-label": "Field", class: "m-4 border border-default px-2" }),
+          h("div", { id: "list", class: "min-h-0 flex-1 overflow-y-auto pb-(--bmo-create-room)" }, rows)
         ])
       );
   }

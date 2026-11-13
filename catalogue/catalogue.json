@@ -141,6 +141,33 @@
       "example": "<table>\n  <thead>\n    <tr ref=\"head\">\n      <th v-for=\"name in names\" :key=\"name\" class=\"relative\" :style=\"{ width: `${widths[name] ?? 0}px` }\">\n        {{ name }}\n        <ColumnResizeHandle :label=\"name\" :width=\"widths[name]\" @start=\"startResize($event, name)\" @nudge=\"nudge(name, $event)\" />\n      </th>\n    </tr>\n  </thead>\n</table>"
     },
     {
+      "name": "CreateButton",
+      "kind": "component",
+      "line": "The one button a screen creates from: a grey icon in its row on a wide screen, a floating primary icon on a phone, its key named in its tooltip.",
+      "props": [
+        {
+          "name": "label",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "shortcut",
+          "type": "string | null | undefined",
+          "required": false,
+          "default": "\"n\""
+        },
+        {
+          "name": "disabled",
+          "type": "boolean | undefined",
+          "required": false,
+          "default": "false"
+        }
+      ],
+      "slots": [],
+      "events": [],
+      "example": "<div class=\"flex flex-col\">\n  <ToolBar :label=\"t('notes.aria.list_tools')\">\n    <div>\n      <span>{{ t(\"notes.label.notes\") }}</span>\n    </div>\n    <CreateButton class=\"ms-auto\" :label=\"t('notes.action.new')\" @click=\"created += 1\" />\n  </ToolBar>\n  <ul class=\"pb-(--bmo-create-room)\">\n    <li v-for=\"index in created\" :key=\"index\">{{ index }}</li>\n  </ul>\n</div>"
+    },
+    {
       "name": "ContentSkeleton",
       "kind": "component",
       "line": "The placeholder region: busy status, a surface nothing presses through, the caller's piece repeated.",
@@ -435,6 +462,12 @@
           "type": "\"left\" | \"right\" | \"top\" | \"bottom\" | undefined",
           "required": false,
           "default": "undefined"
+        },
+        {
+          "name": "kbds",
+          "type": "string[] | undefined",
+          "required": false,
+          "default": "undefined"
         }
       ],
       "slots": [
@@ -458,7 +491,7 @@
     {
       "name": "IconButton",
       "kind": "component",
-      "line": "A button drawn as its icon alone, its one name heard and shown in the shared tooltip, a held finger included.",
+      "line": "A button drawn as its icon alone, its one name heard and shown in the shared tooltip with the keys that press it, a held finger included.",
       "props": [
         {
           "name": "label",
@@ -468,6 +501,12 @@
         {
           "name": "keyboardFocus",
           "type": "((event: FocusEvent) => boolean) | undefined",
+          "required": false,
+          "default": "undefined"
+        },
+        {
+          "name": "kbds",
+          "type": "string[] | undefined",
           "required": false,
           "default": "undefined"
         },
@@ -1759,6 +1798,12 @@
     }
   ],
   "tokens": {
+    "--bmo-create-room": {
+      "group": "create",
+      "light": "0px",
+      "dark": "0px",
+      "source": "layer"
+    },
     "--bmo-ease-enter": {
       "group": "ease",
       "light": "cubic-bezier(0.2, 0.8, 0.2, 1)",
