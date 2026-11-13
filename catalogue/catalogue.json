@@ -143,7 +143,7 @@
     {
       "name": "CreateButton",
       "kind": "component",
-      "line": "The one button a screen creates from: a grey icon in its row on a wide screen, a floating primary icon on a phone drawn under every overlay, its key named in its tooltip; marked contained, the grey icon of a sidebar's, a dialog's or a drawer's row at every width, answering no key.",
+      "line": "The one button a screen creates from: a grey icon in its row on a wide screen, a floating primary icon on a phone drawn under every overlay, its key named in its tooltip; marked contained, an add that belongs to a row, a sidebar's or a list's head, a tab bar or a dialog's or a drawer's row, is that row's grey icon at every width, answering no key.",
       "props": [
         {
           "name": "label",

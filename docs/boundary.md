@@ -35,7 +35,7 @@ wording keys listed here are the ones the layer's list holds.
 | `AudioPlayer` | A kept sound: a play and pause button, its waveform as its progress, a volume popover and a download. |
 | `ChooseAll` | The three-state checkbox that takes every row shown or gives the choice up. |
 | `ColumnResizeHandle` | The right edge of a column's name, dragged or moved with the arrow keys. |
-| `CreateButton` | The one button a screen creates from: a grey icon in its row on a wide screen, a floating primary icon on a phone drawn under every overlay, its key named in its tooltip; marked `contained`, the grey icon of a sidebar's, a dialog's or a drawer's row at every width, answering no key. |
+| `CreateButton` | The one button a screen creates from: a grey icon in its row on a wide screen, a floating primary icon on a phone drawn under every overlay, its key named in its tooltip; marked `contained`, an add that belongs to a row, a sidebar's or a list's head, a tab bar or a dialog's or a drawer's row, is that row's grey icon at every width, answering no key. |
 | `ContentSkeleton` | The placeholder region: busy status, a surface nothing presses through, the caller's piece repeated. |
 | `CutLineTip` | The one layer that shows any line cut with an ellipsis whole, in the shared tooltip. |
 | `DataTable` | The shared table: sideways scroll, stuck names, movable widths, labelled parts, three layouts. |
