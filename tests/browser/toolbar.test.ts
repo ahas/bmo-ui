@@ -98,7 +98,7 @@ async function open(width: (typeof WIDTHS)[number], scheme: (typeof SCHEMES)[num
   });
   await page.goto(`${ORIGIN}/${query}`);
   await page.evaluate((dark) => document.documentElement.classList.toggle("dark", dark), scheme === "dark");
-  await page.waitForSelector(query === "" ? "[role=toolbar] #actions [data-slot=base]" : query === "?create" ? "#create" : "[role=dialog] [data-slot=footer] [data-slot=base]");
+  await page.waitForSelector(query === "" ? "[role=toolbar] #actions [data-slot=base]" : query.startsWith("?create") ? "#create" : "[role=dialog] [data-slot=footer] [data-slot=base]");
   // The page eases into the scheme set as it opens, so nothing is read before its colours have settled;
   // what moves for ever, as a spinner does, is no easing and is not waited on.
   await page.evaluate(() => Promise.all(document.getAnimations().filter((animation) => animation instanceof CSSTransition).map((animation) => animation.finished.catch(() => undefined))));
@@ -796,6 +796,67 @@ describe.skipIf(!ready)("the create button drawn in a browser", () => {
       test("is pressed by a tap", async () => {
         await page.tap("#create");
         expect(await pressed(page)).toEqual(["create"]);
+      });
+    });
+  }
+});
+
+// A menu wrapped round the create button, handed the create button module's settings
+// (`docs/components.md`, "Creating"): it opens against the button itself, at its end edge and inside
+// the screen, at a desktop's width where the button stands in the row and at a phone's where it floats,
+// and it hands the focus back to the button as it closes.
+describe.skipIf(!ready)("a menu wrapped round the create button, drawn in a browser", () => {
+  // The room the library's menu keeps from the screen's edges, which may move it in from the button's
+  // end edge where the button stands closer to the edge than that.
+  const COLLISION_PX = 8;
+  let own: Browser;
+
+  beforeAll(async () => {
+    own = await chromium.launch();
+  }, BROWSER_HOOK_MS);
+
+  afterAll(async () => {
+    await own?.close();
+  });
+
+  for (const width of WIDTHS) {
+    describe(`at ${width.name}`, () => {
+      let context: BrowserContext;
+      let page: Page;
+
+      beforeAll(async () => {
+        ({ context, page } = await open(width, "light", "?create-menu", own));
+      }, BROWSER_HOOK_MS);
+
+      afterAll(async () => {
+        await context?.close();
+      });
+
+      test("opens against the button at its end edge, inside the screen, and gives the focus back as it closes", async () => {
+        await (width.touch ? page.tap("#create") : page.click("#create"));
+        await page.waitForSelector("[role=menu]");
+        await page.evaluate(() => Promise.all(document.getAnimations().map((animation) => animation.finished.catch(() => undefined))));
+
+        const menu = await box(page, "[role=menu]");
+        const button = await box(page, "#create");
+        const viewport = page.viewportSize()!;
+
+        expect(menu.right).toBeLessThanOrEqual(button.right + 0.5);
+        expect(menu.right).toBeGreaterThanOrEqual(button.right - COLLISION_PX);
+        expect(menu.left).toBeGreaterThanOrEqual(0);
+        expect(menu.top).toBeGreaterThanOrEqual(0);
+        expect(menu.bottom).toBeLessThanOrEqual(viewport.height);
+
+        if (width.touch) {
+          expect(menu.bottom).toBeLessThanOrEqual(button.top);
+        } else {
+          expect(menu.top).toBeGreaterThanOrEqual(button.bottom);
+        }
+
+        await page.keyboard.press("Escape");
+        await page.waitForSelector("[role=menu]", { state: "detached" });
+
+        expect(await page.evaluate(() => document.activeElement?.id)).toBe("create");
       });
     });
   }

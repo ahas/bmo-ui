@@ -1,9 +1,10 @@
 import ui from "@nuxt/ui/vue-plugin";
-import { createApp, defineComponent, h, ref } from "vue";
+import { createApp, defineComponent, h, ref, shallowRef } from "vue";
 import { createI18n } from "vue-i18n";
 
 import UApp from "@nuxt/ui/components/App.vue";
 import UButton from "@nuxt/ui/components/Button.vue";
+import UDropdownMenu from "@nuxt/ui/components/DropdownMenu.vue";
 import UTooltip from "@nuxt/ui/components/Tooltip.vue";
 
 import ActionGroup from "../../app/components/ActionGroup.vue";
@@ -18,8 +19,11 @@ import TabBar from "../../app/components/TabBar.vue";
 import TabSwitch from "../../app/components/TabSwitch.vue";
 import ToolBar from "../../app/components/ToolBar.vue";
 import { copyFromPress } from "../../app/domain/code-copy";
+import { menuContent } from "../../app/domain/create-button";
 import { closeLayer, openLayer } from "../../app/domain/layers";
 import sheet from "./toolbar-harness.css?inline";
+
+import type { CreateButtonHandle } from "../../app/domain/create-button";
 
 // The rows a screen lays under the title bar, as a screen builds them, drawn by the layer's own
 // components and the library's own buttons (`docs/components.md`, "Tab bar and toolbar"). The toolbar
@@ -35,7 +39,9 @@ import sheet from "./toolbar-harness.css?inline";
 // the copy button copying through the code-copy module and each press counted; opened with `?create`,
 // it holds a toolbar with the create button at its right end, a field and a long list padded by the
 // room the button takes on a phone, each press of the button counted and a layer opened and closed on
-// the page's word, standing for something floating over the screen. The page stands
+// the page's word, standing for something floating over the screen; opened with `?create-menu`, it
+// holds a toolbar with the create button wrapped in a menu of two kinds, placed through the create
+// button module's settings. The page stands
 // outside Nuxt, so the library is installed as a Vue plugin and the words are handed over here.
 
 const WORDS = {
@@ -131,6 +137,22 @@ const Page = defineComponent(() => {
           ]),
           h("input", { id: "field", "aria-label": "Field", class: "m-4 border border-default px-2" }),
           h("div", { id: "list", class: "min-h-0 flex-1 overflow-y-auto pb-(--bmo-create-room)" }, rows)
+        ])
+      );
+  }
+
+  if (new URLSearchParams(location.search).has("create-menu")) {
+    const create = shallowRef<CreateButtonHandle | null>(null);
+    const content = menuContent(create);
+    const kinds = [[{ label: "Note" }, { label: "Folder" }]];
+
+    return () =>
+      h(UApp, null, () =>
+        h("div", { class: "flex h-dvh flex-col" }, [
+          h(ToolBar, { label: "Toolbar" }, () => [
+            h("div", { id: "words" }, [h("span", "Things")]),
+            h(UDropdownMenu, { items: kinds, content }, () => h(CreateButton, { ref: create, id: "create", label: "New thing", class: "ms-auto" }))
+          ])
         ])
       );
   }

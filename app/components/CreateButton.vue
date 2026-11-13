@@ -9,7 +9,9 @@
 
        Where it stands is the host's: a class or a style it is handed lands on its cell. What it does
        is the host's too: a press, or the menu or popover the host wraps round it, lands on the
-       button. Its colour, variant, size and mark are its own and nothing handed to it changes them. -->
+       button, and such a menu stands against the button through the content settings the create
+       button module makes from what this exposes. Its colour, variant, size and mark are its own and
+       nothing handed to it changes them. -->
   <div v-if="!narrow" :class="['flex shrink-0 items-center', $attrs.class]" :style="$attrs.style as StyleValue">
     <IconButton
       ref="button"
@@ -47,6 +49,7 @@ import { layerCount } from "../domain/layers";
 import { useNarrow } from "../domain/screen";
 
 import type { StyleValue } from "vue";
+import type { CreateButtonHandle } from "../domain/create-button";
 
 interface Props {
   // What it creates, in the host's words: its name, heard and shown alike.
@@ -64,7 +67,7 @@ const ADD_ICON = "i-material-symbols-add";
 
 const attrs = useAttrs();
 const narrow = useNarrow();
-const button = useTemplateRef<{ element: () => HTMLElement | null }>("button");
+const button = useTemplateRef<CreateButtonHandle>("button");
 
 // The key is named once, as the button is set up.
 const key = props.shortcut;
@@ -91,5 +94,5 @@ function pressByKey(): void {
 
 if (key !== null) defineShortcuts({ [key]: pressByKey });
 
-defineExpose({ element });
+defineExpose<CreateButtonHandle>({ element });
 </script>
