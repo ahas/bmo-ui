@@ -181,7 +181,9 @@ default; a screen supplies what it holds and what a press means there. Every exp
 - **On a phone it floats.** The same button is drawn instead as a primary solid icon button with
   the add mark, at the library's largest size, fixed at the screen's bottom right, 16 pixels from
   the right edge and 16 pixels above the device's bottom inset, and nothing stands for it in the
-  row. Its medium corner is a button's, since nothing but a face and a dot is round. It carries
+  row. Its fill takes the darker step a coloured badge takes (`badge-ink`, `docs/design.md`), so
+  its white mark reads at 3:1 or better in both modes. Its medium corner is a button's, since
+  nothing but a face and a dot is round. It carries
   `data-screen-foot`, so what a console floats of its own accord stands above it
   (`docs/console-bundles.md`, "How a bundle mounts"). A finger held on it names it, as on every icon
   button; its key is not shown, since a phone has none.

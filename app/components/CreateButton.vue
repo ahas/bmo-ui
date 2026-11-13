@@ -3,8 +3,9 @@
        the layer's icon button, neutral and ghost with the add mark, standing as a cell of its own in
        the row the screen's actions stand in, its tooltip naming what it creates and the key that
        presses it. On a phone the same button floats instead, primary and solid at the library's
-       largest size, at the screen's bottom right above the device's inset, marked as the screen's
-       foot so what a console floats stands above it, and nothing is left of it in the row.
+       largest size, its fill at the darker step a coloured badge takes so its white mark reads, at
+       the screen's bottom right above the device's inset, marked as the screen's foot so what a
+       console floats stands above it, and nothing is left of it in the row.
 
        Where it stands is the host's: a class or a style it is handed lands on its cell. What it does
        is the host's too: a press, or the menu or popover the host wraps round it, lands on the
@@ -23,7 +24,7 @@
     />
   </div>
   <Teleport v-else to="body">
-    <div data-screen-foot class="fixed end-4 bottom-[calc(1rem+var(--bmo-safe-bottom))]">
+    <div data-screen-foot class="badge-ink fixed end-4 bottom-[calc(1rem+var(--bmo-safe-bottom))]">
       <IconButton
         ref="button"
         v-bind="forButton()"
