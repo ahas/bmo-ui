@@ -81,7 +81,7 @@ none of them a dot or two standing for a folder.
 | `websocket` | Whether the screens open a WebSocket to the service through the console. | no, false |
 | `pushKinds` | The service's event kinds a console may raise as a notice to a reader who is not on the screen, each written as the stream names it, a resource and its change. | no, none |
 | `sidebarUnread` | The route a console reads a sidebar unread count from: `path`, a path of the service's API under the API prefix, whose JSON answer holds the count at its root under `field`, a camelCase name, as a whole number nought or more. A console draws a positive count on the bundle's sidebar entry. | no, none |
-| `calls` | The other services the screens call through the console, each by the service name its own manifest gives it, in kebab-case; never the bundle's own service, and none twice. | no, none |
+| `calls` | The other services the screens call through the console, each by the service name its own manifest gives it, or `people`, the company's members a console answers itself ("How a bundle mounts", the company's members), in kebab-case; never the bundle's own service, and none twice. | no, none |
 | `relays` | The service's own routes outside the API prefix that a console relays as well, each its `method` (`GET`, `POST`, `PUT`, `PATCH` or `DELETE`) and its `path`, one whole path of the service's API; none twice. | no, none |
 | `shareReads` | The reads a share token alone permits, each a path pattern of the service's API under the API prefix: a path whose segments stand as written or as a placeholder, a name in camelCase in braces matching any one segment, with `{token}` among them once, standing for the token. A console relays a `GET` or a `HEAD` whose path a pattern matches with no session ("Share pages"); none twice. | no, none |
 | `shareHead` | The read a console asks for what a share address reads as before it is opened: a path pattern of the service's API under the API prefix, written as a share read's pattern is, holding `{token}` once and no other placeholder ("Share pages", the head). | no, none |
@@ -140,6 +140,8 @@ bundle and its console stand on the same release of the layer or the bundle is n
 - **Two manifests sharing a name, a screen path or a service name** leave both services out, rather
   than either attached over the other. A former screen path counts as a screen path here: one manifest's
   screen path or former screen path that is another's screen path or former screen path is shared.
+- **A manifest whose service is named `people`** leaves its service out, since that name is the console's own
+  ("How a bundle mounts", the company's members), and the console records why.
 - **A manifest that changed replaces the one before it.** A reader already on the screen keeps the
   module the browser loaded until the screen is opened again.
 - **The console reads each bundle's words** with its manifest, so its menu names a screen before the
@@ -170,8 +172,9 @@ bundle and its console stand on the same release of the layer or the bundle is n
   same kind of address, under that service's name, and the `relay` module's call makes it through the
   app's fetcher. The console relays it on the called service's own terms: only the paths that
   service's own manifest lets through, and only for a reader whose role and owner key allow that
-  service's manifest. A call from a bundle's page to a service another manifest names, which is neither
-  the bundle's own nor one it names under `calls`, is refused with a 403. The console knows the page a
+  service's manifest; the company's members, which no manifest names, are relayed on the console's own
+  terms (below). A call from a bundle's page to a service another manifest names, or to `people`, which is
+  neither the bundle's own nor one it names under `calls`, is refused with a 403. The console knows the page a
   call comes from by the page address the browser sends with it; reading another bundle's module, its
   stylesheet or a file beside its module is never refused, so a screen opened from another stands.
 - **An address is complete as given.** Whatever a screen hands the browser — a call through the
@@ -200,6 +203,24 @@ bundle and its console stand on the same release of the layer or the bundle is n
   written as the console writes the owner key ("Roles and the owner key") —, `name`, `organization` and
   `jobTitle`. A screen that names people — an assignee, an author — picks them through `search` and draws each
   by the name `person` answers; found without the key, it stands each account as its key.
+- **The company's members.** A console that keeps accounts with names may answer the members of the reader's
+  company itself, as a service under the name `people` that no manifest gives. A screen that needs the whole
+  company at hand asks `GET` at the address the `relay` module answers for `people` and `/members`, the one read
+  the contract gives the name: a screen asks nothing else under it, and whatever else a console answers there is
+  its own. The answer is a 200 with a JSON object holding
+  `members`: every person of the reader's company who has not left it, in the people directory's order, each
+  with `user`, the account key written as the console writes the owner key ("Roles and the owner key"), and
+  `name`, and nothing more. A screen knows the name and the path alone; where the console reads the members
+  from is its own.
+  - **It is read by a reader signed in.** A call with no session is refused with a 401. An administrator reads
+    it always; a member reads it where the console's own permissions let them read its people, and is answered
+    as absent otherwise. A login with no account reads an empty list.
+  - **A bundle's page reaches it only where its manifest names `people` under `calls`,** the page told by the
+    page address the browser sends with the call, as for every service; a call from any other bundle's page is
+    refused with a 403. A page of the console's own reaches it.
+  - **The name is the console's.** A manifest whose service is named `people` is left out ("How a console finds
+    the services").
+  - **Under a console that answers no members,** the call is refused and the screen stands without the list.
 - **Sharing.** A screen that shares what it shows opens the layer's share dialog (`docs/components.md`,
   "Sharing") and hands it its roads. The link road is the bundle's own service: the link read, made and
   ended there, and the share page it opens ("Share pages"). The member road is handed only where the screen
@@ -378,6 +399,11 @@ under `calls`, and its screens hand the module texts and a language.
 - **It offers its people directory, where it keeps named accounts,** under the key `bmo-console-people`
   ("How a bundle mounts", the people directory), answering its reads for the signed-in reader alone, with no
   contact detail in them.
+- **It answers the company's members, where it keeps named accounts,** under the service name `people`
+  ("How a bundle mounts", the company's members): a `GET` of `/members`, each member's `user` and `name`
+  and nothing more, to a reader signed in as its own permissions let them read its people, the administrator
+  always; to a bundle's page only where its manifest names `people` under `calls`, any other bundle's page
+  refused with a 403. It leaves out a manifest whose service is named `people`, recording why.
 - **It keeps a screen's foot clear,** standing whatever it floats over the page area of its own accord above every
   element carrying `data-screen-foot` ("How a bundle mounts", the screen's foot), so it does not cover a screen's
   foot bar until the reader moves it there.
@@ -409,6 +435,8 @@ under `calls`, and its screens hand the module texts and a language.
   the layer's bundle build handed the bundle's name and the words it answers, and answers the layer
   that build wrote as the manifest's `layer`.
 - **It answers its module, its stylesheet and its words** at the paths the manifest names.
+- **It leaves the name `people` to the console:** its manifest never gives it as the service's name, and names it
+  under `calls` where its screens read the company's members ("How a bundle mounts", the company's members).
 - **It names a route of its own under `relays`** only where a console's screens need it as the
   service's other callers have it, so no route of the service stands twice, once for a console and
   once for the rest.
@@ -425,7 +453,7 @@ under `calls`, and its screens hand the module texts and a language.
 
 - **This document is the contract's one statement.** A repository whose service has a bundle, and a
   console, name this document in their own documents with the parts of it they use (a share page, a
-  sidebar count, the people directory, sharing with members, a translator) and what they add of their own. They do not copy
+  sidebar count, the people directory, the company's members, sharing with members, a translator) and what they add of their own. They do not copy
   its rules, its fields or its headers: a copy trails this document as soon as it changes.
 - **Conformance is held by shared checks,** never by a repository's own prose: the console face of
   the base library the services build on, which serves the manifest, the module, the stylesheet, the
