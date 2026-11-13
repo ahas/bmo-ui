@@ -42,7 +42,8 @@ import type { CreateButtonHandle } from "../../app/domain/create-button";
 // it holds a toolbar with the create button at its right end, a field and a long list padded by the
 // room the button takes on a phone, each press of the button counted and a layer opened and closed on
 // the page's word, standing for something floating over the screen; opened with `?create-menu`, it
-// holds a toolbar with the create button wrapped in a menu of two kinds, placed through the create
+// holds a toolbar with the create button wrapped in a menu of two kinds and, in a row under it, a
+// create button marked as contained wrapped in a menu of its own, each placed through the create
 // button module's settings; opened with `?create-contained`, it holds the screen's create button
 // beside three containers that are no screen: a sidebar shown on a wide screen alone, a drawer and a
 // dialog, the first two each holding a create button marked as contained beside an icon button, and
@@ -150,6 +151,8 @@ const Page = defineComponent(() => {
   if (new URLSearchParams(location.search).has("create-menu")) {
     const create = shallowRef<CreateButtonHandle | null>(null);
     const content = menuContent(create);
+    const containedCreate = shallowRef<CreateButtonHandle | null>(null);
+    const containedContent = menuContent(containedCreate);
     const kinds = [[{ label: "Note" }, { label: "Folder" }]];
 
     return () =>
@@ -158,6 +161,12 @@ const Page = defineComponent(() => {
           h(ToolBar, { label: "Toolbar" }, () => [
             h("div", { id: "words" }, [h("span", "Things")]),
             h(UDropdownMenu, { items: kinds, content }, () => h(CreateButton, { ref: create, id: "create", label: "New thing", class: "ms-auto" }))
+          ]),
+          h("div", { class: "flex h-12 items-center gap-2 border-b border-default px-4" }, [
+            h("span", "Panel"),
+            h(UDropdownMenu, { items: kinds, content: containedContent }, () =>
+              h(CreateButton, { ref: containedCreate, id: "contained-create", label: "New panel thing", contained: true, class: "ms-auto" })
+            )
           ])
         ])
       );

@@ -2,10 +2,11 @@ import type { Ref } from "vue";
 
 // A menu or popover wrapped round the create button (`docs/components.md`, "Creating"). The library
 // takes its trigger's element for the place the menu stands and for the focus it hands back as it
-// closes. The create button's own element is neither of those: on a wide screen it is the button's
-// cell, which takes no focus, and on a phone the button floats elsewhere in the page and nothing of it
-// stands in the menu's own place. So the menu is handed the button itself, read through what the
-// create button exposes, wherever the button stands at the moment the menu places itself.
+// closes. The create button's own element is neither of those: where the button stands in its row, on
+// a wide screen and marked as contained at every width, it is the button's cell, which takes no focus,
+// and where it floats, on a phone, the button is drawn elsewhere in the page and nothing of it stands
+// in the menu's own place. So the menu is handed the button itself, read through what the create
+// button exposes, wherever the button stands at the moment the menu places itself.
 //
 // The settings are made once, as the screen is set up, and handed to the menu's content from its first
 // drawing on: the library passes on to the content only the settings present as the content is first
