@@ -10,8 +10,9 @@
        context, so the button stands above everything the screen draws and under every overlay the
        library draws in the body, whenever that overlay's dialog was set up.
 
-       Marked as contained, it stands in a sidebar, a dialog, a drawer or a sheet rather than a screen,
-       and is the row's grey icon at every width: it shows and is pressed only where its container
+       Only the screen's main new thing floats. Marked as contained, it is an add that belongs to a
+       row, a sidebar's or a list's head, a tab bar's tab add, or the row of a dialog, a drawer or a
+       sheet, and is that row's grey icon at every width: it shows and is pressed only where its row
        does, and answers no key, since the screen's key is its own button's.
 
        Where it stands is the host's: a class or a style it is handed lands on its cell. What it does
@@ -64,7 +65,8 @@ interface Props {
   // The key that presses it; null for none.
   shortcut?: string | null;
   disabled?: boolean;
-  // Whether it stands in a container that is no screen: a sidebar, a dialog, a drawer or a sheet.
+  // Whether it is an add that belongs to a row rather than the screen's main new thing: a sidebar's
+  // or a list's head, a tab bar, or the row of a dialog, a drawer or a sheet.
   contained?: boolean;
 }
 
