@@ -806,7 +806,8 @@ describe.skipIf(!ready)("the create button drawn in a browser", () => {
 // (`docs/components.md`, "Creating"): it opens against the button itself, at its end edge and inside
 // the screen, at a desktop's width where the button stands in the row and at a phone's where it floats,
 // opened by a press of the button and by its key alike, and it hands the focus back to the button as it
-// closes.
+// closes. A menu round a create button marked as contained does the same against the row's grey icon
+// at both widths, opened by a press alone, since a contained button answers no key.
 describe.skipIf(!ready)("a menu wrapped round the create button, drawn in a browser", () => {
   // The room the library's menu keeps from the screen's edges, which may move it in from the button's
   // end edge where the button stands closer to the edge than that.
@@ -834,21 +835,26 @@ describe.skipIf(!ready)("a menu wrapped round the create button, drawn in a brow
         await context?.close();
       });
 
+      const press = (selector: string) => () => (width.touch ? page.tap(selector) : page.click(selector));
+
       // Each opening starts with the focus nowhere, so the focus the menu hands back is the menu's doing.
+      // The screen's button floats at a phone's foot, so its menu opens above it there; a button in a row
+      // near the screen's top has its menu open below it.
       const OPENINGS = [
-        { name: "a press", open: () => (width.touch ? page.tap("#create") : page.click("#create")) },
-        { name: "its key", open: () => page.keyboard.press("n") }
+        { name: "a press", button: "the screen's button", id: "create", above: width.touch, open: press("#create") },
+        { name: "its key", button: "the screen's button", id: "create", above: width.touch, open: () => page.keyboard.press("n") },
+        { name: "a press", button: "a contained button", id: "contained-create", above: false, open: press("#contained-create") }
       ];
 
       for (const opening of OPENINGS) {
-        test(`opens on ${opening.name} against the button at its end edge, inside the screen, and gives the focus back as it closes`, async () => {
+        test(`opens on ${opening.name} against ${opening.button} at its end edge, inside the screen, and gives the focus back as it closes`, async () => {
           await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
           await opening.open();
           await page.waitForSelector("[role=menu]");
           await page.evaluate(() => Promise.all(document.getAnimations().map((animation) => animation.finished.catch(() => undefined))));
 
           const menu = await box(page, "[role=menu]");
-          const button = await box(page, "#create");
+          const button = await box(page, `#${opening.id}`);
           const viewport = page.viewportSize()!;
 
           expect(menu.right).toBeLessThanOrEqual(button.right + 0.5);
@@ -857,7 +863,7 @@ describe.skipIf(!ready)("a menu wrapped round the create button, drawn in a brow
           expect(menu.top).toBeGreaterThanOrEqual(0);
           expect(menu.bottom).toBeLessThanOrEqual(viewport.height);
 
-          if (width.touch) {
+          if (opening.above) {
             expect(menu.bottom).toBeLessThanOrEqual(button.top);
           } else {
             expect(menu.top).toBeGreaterThanOrEqual(button.bottom);
@@ -866,7 +872,7 @@ describe.skipIf(!ready)("a menu wrapped round the create button, drawn in a brow
           await page.keyboard.press("Escape");
           await page.waitForSelector("[role=menu]", { state: "detached" });
 
-          expect(await page.evaluate(() => document.activeElement?.id)).toBe("create");
+          expect(await page.evaluate(() => document.activeElement?.id)).toBe(opening.id);
         });
       }
     });

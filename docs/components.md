@@ -210,12 +210,13 @@ default; a screen supplies what it holds and what a press means there. Every exp
   for its content the settings the `create-button` module's `menuContent` makes from the button the
   component exposes, made once as the screen is set up and handed over from the menu's first drawing
   on, since the library passes on to a menu's content only the settings present as the content is
-  first set up. On a phone the button is drawn elsewhere in the page and the menu finds nothing of it
-  in its own place, and on a wide screen what the menu finds is the button's cell, which takes no
-  focus; so the settings place the menu against the button's own box wherever it stands as the menu
-  opens, align the menu to the button's end edge, and hand the focus the menu held back to the button
-  as the menu closes; a focus the reader moved out of the menu as it closed, a press on a field
-  outside it, stays where it went. The host lays its own content settings over them.
+  first set up. Where the button floats, on a phone, it is drawn elsewhere in the page and the menu
+  finds nothing of it in its own place, and where it stands in its row, on a wide screen and marked as
+  contained at every width, what the menu finds is the button's cell, which takes no focus; so the
+  settings place the menu against the button's own box wherever it stands as the menu opens, align
+  the menu to the button's end edge, and hand the focus the menu held back to the button as the menu
+  closes; a focus the reader moved out of the menu as it closed, a press on a field outside it, stays
+  where it went. The host lays its own content settings over them.
 - **Its key presses it.** A create button that is not contained answers one key, `n` unless the host
   names another or none, and a press of that key does what a press of the button does: it clicks the
   button itself. A menu or popover the host wraps round it lands its trigger's handling on the button,
