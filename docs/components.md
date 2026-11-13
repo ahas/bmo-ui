@@ -202,10 +202,14 @@ default; a screen supplies what it holds and what a press means there. Every exp
   opens, align the menu to the button's end edge, and hand the focus the menu held back to the button
   as the menu closes; a focus the reader moved out of the menu as it closed, a press on a field
   outside it, stays where it went. The host lays its own content settings over them.
-- **Its key presses it.** It answers one key, `n` unless the host names another or none, and a
-  press of that key does what a press of the button does. The key acts only while the button stands
-  enabled, while no field holds the typing and while nothing floats over the screen, so a key typed
-  into a form or under a dialog makes nothing. The key is named once, as the button is set up.
+- **Its key presses it.** It answers one key, `n` unless the host names another or none, and a press
+  of that key does what a press of the button does: it clicks the button itself. A menu or popover the
+  host wraps round it lands its trigger's handling on the button, as everything handed to it does, and
+  the library's menu and popover triggers open on a click of the button, so such a menu opens on the
+  key as on a press, in both shapes, with no handler of the host's own. The key acts only while the
+  button stands enabled, while no field holds the typing and while nothing floats over the screen, so
+  a key typed into a form or under a dialog makes nothing. The key is named once, as the button is set
+  up.
 
 ## Settings
 

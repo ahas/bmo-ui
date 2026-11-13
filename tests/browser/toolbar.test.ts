@@ -804,7 +804,8 @@ describe.skipIf(!ready)("the create button drawn in a browser", () => {
 // A menu wrapped round the create button, handed the create button module's settings
 // (`docs/components.md`, "Creating"): it opens against the button itself, at its end edge and inside
 // the screen, at a desktop's width where the button stands in the row and at a phone's where it floats,
-// and it hands the focus back to the button as it closes.
+// opened by a press of the button and by its key alike, and it hands the focus back to the button as it
+// closes.
 describe.skipIf(!ready)("a menu wrapped round the create button, drawn in a browser", () => {
   // The room the library's menu keeps from the screen's edges, which may move it in from the button's
   // end edge where the button stands closer to the edge than that.
@@ -832,32 +833,41 @@ describe.skipIf(!ready)("a menu wrapped round the create button, drawn in a brow
         await context?.close();
       });
 
-      test("opens against the button at its end edge, inside the screen, and gives the focus back as it closes", async () => {
-        await (width.touch ? page.tap("#create") : page.click("#create"));
-        await page.waitForSelector("[role=menu]");
-        await page.evaluate(() => Promise.all(document.getAnimations().map((animation) => animation.finished.catch(() => undefined))));
+      // Each opening starts with the focus nowhere, so the focus the menu hands back is the menu's doing.
+      const OPENINGS = [
+        { name: "a press", open: () => (width.touch ? page.tap("#create") : page.click("#create")) },
+        { name: "its key", open: () => page.keyboard.press("n") }
+      ];
 
-        const menu = await box(page, "[role=menu]");
-        const button = await box(page, "#create");
-        const viewport = page.viewportSize()!;
+      for (const opening of OPENINGS) {
+        test(`opens on ${opening.name} against the button at its end edge, inside the screen, and gives the focus back as it closes`, async () => {
+          await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+          await opening.open();
+          await page.waitForSelector("[role=menu]");
+          await page.evaluate(() => Promise.all(document.getAnimations().map((animation) => animation.finished.catch(() => undefined))));
 
-        expect(menu.right).toBeLessThanOrEqual(button.right + 0.5);
-        expect(menu.right).toBeGreaterThanOrEqual(button.right - COLLISION_PX);
-        expect(menu.left).toBeGreaterThanOrEqual(0);
-        expect(menu.top).toBeGreaterThanOrEqual(0);
-        expect(menu.bottom).toBeLessThanOrEqual(viewport.height);
+          const menu = await box(page, "[role=menu]");
+          const button = await box(page, "#create");
+          const viewport = page.viewportSize()!;
 
-        if (width.touch) {
-          expect(menu.bottom).toBeLessThanOrEqual(button.top);
-        } else {
-          expect(menu.top).toBeGreaterThanOrEqual(button.bottom);
-        }
+          expect(menu.right).toBeLessThanOrEqual(button.right + 0.5);
+          expect(menu.right).toBeGreaterThanOrEqual(button.right - COLLISION_PX);
+          expect(menu.left).toBeGreaterThanOrEqual(0);
+          expect(menu.top).toBeGreaterThanOrEqual(0);
+          expect(menu.bottom).toBeLessThanOrEqual(viewport.height);
 
-        await page.keyboard.press("Escape");
-        await page.waitForSelector("[role=menu]", { state: "detached" });
+          if (width.touch) {
+            expect(menu.bottom).toBeLessThanOrEqual(button.top);
+          } else {
+            expect(menu.top).toBeGreaterThanOrEqual(button.bottom);
+          }
 
-        expect(await page.evaluate(() => document.activeElement?.id)).toBe("create");
-      });
+          await page.keyboard.press("Escape");
+          await page.waitForSelector("[role=menu]", { state: "detached" });
+
+          expect(await page.evaluate(() => document.activeElement?.id)).toBe("create");
+        });
+      }
     });
   }
 });
