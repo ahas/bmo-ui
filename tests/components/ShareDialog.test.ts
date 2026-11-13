@@ -1,12 +1,13 @@
 import { describe, expect, test } from "bun:test";
 
-// The one share link dialog (`docs/components.md`, "Share links"), read off the file that ships:
-// which of its two faces stands when, and what a rendered screen would show as nothing at all —
-// that it is the shared centred dialog, that it calls only the road it is handed, that the address
-// is one somebody outside can open, that a link's end is a day, and that nothing is emptied on the
-// way out. How the end reads is the share-links module's own test.
+// The one share dialog (`docs/components.md`, "Sharing"), read off the file that ships: which of
+// its link part's two faces stands when, where its member part stands and what it is wired to, and
+// what a rendered screen would show as nothing at all — that it is the shared centred dialog, that it
+// calls only the roads it is handed, that the address is one somebody outside can open, that a link's
+// end is a day, and that nothing is emptied on the way out. How the end reads is the share-links
+// module's own test, and how the member part acts over its road the share-members module's.
 
-const source = await Bun.file(new URL("../../app/components/ShareLinkDialog.vue", import.meta.url)).text();
+const source = await Bun.file(new URL("../../app/components/ShareDialog.vue", import.meta.url)).text();
 const template = source.slice(0, source.indexOf("<script"));
 
 // The one element a mark stands in, with its attributes and nothing of what it holds.
@@ -22,7 +23,7 @@ function tagOf(mark: string): string {
 
 describe("where it stands", () => {
   test("it is the shared dialog, titled by what it is, the subject under the title", () => {
-    expect(tagOf("<SettingsDialog")).toContain(`:title="$t('common.title.share_link')"`);
+    expect(tagOf("<SettingsDialog")).toContain(`:title="$t('common.title.share')"`);
     expect(tagOf("<SettingsDialog")).toContain(':description="props.subject"');
     expect(template).not.toContain("UDrawer");
     expect(template).not.toContain("USlideover");
@@ -82,7 +83,7 @@ describe("with a link", () => {
   });
 
   test("ending it is the footer's action, in the colour of removing", () => {
-    expect(tagOf(`:label="$t('common.action.unshare')"`)).toContain('color="error"');
+    expect(tagOf(`<UButton v-else :label="$t('common.action.unshare')"`)).toContain('color="error"');
   });
 });
 
@@ -95,5 +96,52 @@ describe("what it tells the screen behind", () => {
   test("what stands is read afresh on opening and left standing as it closes", () => {
     expect(source).toContain("void read();");
     expect(source).toContain("if (!standing) {\n      return;\n    }");
+  });
+});
+
+describe("the member part", () => {
+  const part = template.slice(template.indexOf("<section"), template.indexOf("</section>"));
+
+  test("stands only where the host hands a member road, and calls nothing of its own", () => {
+    expect(tagOf("<section")).toContain('v-if="props.members !== undefined"');
+    expect(source).toContain("road: () => props.members");
+    expect(part).not.toContain("props.road");
+  });
+
+  test("searches in one field that picks one or more, the typed words marked in each person offered", () => {
+    const field = tagOf("<UInputMenu");
+
+    expect(field).toContain('v-model="chosen"');
+    expect(field).toContain('v-model:search-term="words"');
+    expect(field).toContain(':open="menuStands"');
+    expect(field).toContain(':items="menuItems ?? []"');
+    expect(source).toContain('useHeldWhileClosing(() => (menuStands.value ? offered.value : null))');
+    expect(field).toContain("multiple");
+    expect(field).toContain("ignore-filter");
+    expect(field).toContain('by="user"');
+    expect(part.match(/<SearchText [^>]*:query="words"/g)?.length).toBe(2);
+  });
+
+  test("the share action stands beside the field and waits for somebody picked", () => {
+    expect(tagOf(`:label="$t('common.action.share')"`)).toContain(':disabled="chosen.length === 0"');
+    expect(tagOf(`:label="$t('common.action.share')"`)).toContain('@click="share"');
+  });
+
+  test("each member's row offers the permissions and an icon button that takes them off", () => {
+    expect(tagOf("<li")).toContain('v-for="member in members"');
+    expect(tagOf("<USelect\n")).toContain(':items="permissions"');
+    expect(tagOf("<USelect\n")).toContain('@update:model-value="change(member.person.user, $event)"');
+    expect(tagOf("<IconButton\n")).toContain('@click="remove(member.person.user)"');
+    expect(tagOf("<IconButton\n")).toContain(":label=\"$t('common.action.unshare')\"");
+  });
+
+  test("its rows are a skeleton while they are read, and nobody shared with is said in one line", () => {
+    expect(part).toContain('<ContentSkeleton v-if="membersLoading"');
+    expect(tagOf("<p")).toContain('v-else-if="members.length === 0"');
+  });
+
+  test("is read afresh on opening, the search empty, and tells the screen how many it is shared with", () => {
+    expect(source).toContain("clearMembers();\n    void read();\n    void readMembers();");
+    expect(source).toContain('told: (count) => emit("members", count)');
   });
 });

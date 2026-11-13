@@ -2,8 +2,8 @@ import { FOREVER_LABEL, formatShortDay } from "./time";
 
 import type { Translate } from "../../shared/wording";
 
-// A share link as the one dialog that makes and ends links reads it, whatever it hands out
-// (`docs/components.md`, "Share links"). The dialog keeps the mechanism — the form, the address,
+// A share link as the one share dialog reads it, whatever it hands out
+// (`docs/components.md`, "Sharing", The link). The dialog keeps the mechanism — the form, the address,
 // the link's end, the copy — and the host hands it the road its links are read, made and ended by,
 // with the spans it offers.
 

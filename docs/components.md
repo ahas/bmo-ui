@@ -189,11 +189,19 @@ default; a screen supplies what it holds and what a press means there. Every exp
 - **The theme and palette pictures** — `ThemePreview`, `ThemeSwatch` and `PaletteSwatch` — draw an
   entry in one mode on their own box, as a row's choices.
 
-## Share links
+## Sharing
 
-- **One dialog makes, shows and ends a share link** (`ShareLinkDialog`), whatever is shared. It is a
-  small form, so it is the settings dialog in the middle of the screen at every width, titled by
-  what it is, the name of what is shared under the title where the screen behind does not say it.
+- **One dialog shares a thing** (`ShareDialog`), whatever is shared: by a link anyone holding it opens,
+  and with members of the reader's company where the host offers them. It is a small form, so it is
+  the settings dialog in the middle of the screen at every width, titled by what it is, the name of
+  what is shared under the title where the screen behind does not say it. The link part stands first;
+  the member part stands under it only where the host hands a member road, and a host that hands none
+  gets the link part alone.
+
+### The link
+
+- **The dialog makes, shows and ends one share link.** The link's action is the footer's; the
+  member part's actions stand beside what they act on.
 - **The host hands it the road its links go by** (the share-links module): how the one standing link
   is read, how one is made for a span, how it is ended, and the page a link opens, as a path or a
   whole address. The dialog calls no server and knows nothing of what a link opens. The host also
@@ -219,7 +227,41 @@ default; a screen supplies what it holds and what a press means there. Every exp
   the dialog, in the host's words for the failure where it hands the dialog its own reading of one,
   and the server's message otherwise.
 - **The screen is told what it is shared by.** Each read, make and end tells the screen behind the
-  link's end as it now stands, or that nothing is shared, so the screen need not ask the server again.
+  link's end as it now stands, or that nothing is shared by link, so the screen need not ask the
+  server again.
+
+### Members
+
+- **The host hands it the road members go by** (the share-members module): a search of the people
+  the thing may be shared with, given words; who it is shared with now, each a person and a
+  permission; sharing with one or more people at a permission; changing one member's permission; and
+  taking one member off. A person is the account key, the name, the organization and the job title.
+  Who the people are, and where who is shared with is kept, are the host's; the dialog calls no
+  server.
+- **The permission is `read` or `edit`, and a member is given `read`.** Each member's row offers both
+  in one dropdown, read first, and edit is chosen there.
+- **Members are found by a search** in one field under the part's label: it asks the road once typing
+  stops, drops an answer to words already typed past, and offers each person by name with the
+  organization and job title under it, the words typed marked where they stand. The people found
+  stand in a menu only while words are typed, and the menu keeps them while it closes. Whoever it is already
+  shared with is not offered again. One or more are picked, each standing as a chip in the field, and
+  the share action beside the field shares with all of them at once and empties the field.
+- **Each member stands on a row** under the field: the name with the organization and job title
+  under it, the permission dropdown, and an icon button that takes the member off, named in its
+  tooltip.
+  With nobody shared with, one line says so.
+- **Every change takes effect as it is made.** Sharing, changing a permission and taking a member
+  off are each stored on their own, so nothing waits for a save; the control that made a change
+  spins until it stands.
+- **It opens on who it is shared with.** Each time the dialog opens the member part reads afresh, its
+  rows a skeleton while it reads, the field and the label drawn at once. A refused read, search,
+  share, change or removal says why inside the member part, in the host's words for the failure where
+  it hands the dialog its own reading of one.
+- **The screen is told how many it is shared with.** Each read, share and removal tells the screen
+  behind the count of members as it now stands.
+
+### Both parts
+
 - **What stands is kept while the dialog closes,** so its body does not blink on the way out.
 
 ## Messages
