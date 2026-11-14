@@ -87,12 +87,18 @@ testbed declaration, the Korean ledger the quick checks read, `CLAUDE.md`, and t
   holds; a host pins a version by its exact name and sha256, never by its order.
 - **From the first stable release,** while the major is 0, a minor release may change the boundary;
   from 1 on, only a major may.
-- **A version is one packed file,** written once by the release verb, `bun run release`. The verb
-  refuses a working tree with changes and a version that already has a file or a ledger line; it
-  exports the committed tree (`git archive`) into a scratch folder, installs it, writes the version
-  into the layer's version file there, packs it once into `releases/` under the version's name, and
-  adds the file's sha256 to the ledger `releases/sha256.json`. A version's file is never written
-  again.
+- **A version is one packed file,** written once by the release verb, `bun run release --bound
+  <version> --why <reason>`. The verb refuses a release that names no bound or no reason, a bound the
+  ledger does not name at or before this version or that is earlier than the last release's, a
+  working tree with changes and a version that already has a file or a ledger line; it exports the
+  committed tree (`git archive`) into a scratch folder, installs it, writes the version, the bound and
+  the releases from the bound up to this one into the layer's version file there, packs it once into
+  `releases/` under the version's name, and adds the file's sha256, its bound and the reason to the
+  ledger `releases/sha256.json`, saying all three. A version's file is never written again.
+- **Every release names its bound:** the oldest release whose bundles still run on it unchanged. A
+  release that only adds keeps the bound before it; one that takes away or changes what an earlier
+  bundle reads raises the bound to itself. A console attaches a bundle built on any release from its
+  bound up to its own (`docs/console-bundles.md`, "The layer a bundle is built on").
 - **Packing runs inside the verb alone.** Packing first checks that the layer's version file names
   the manifest's version, which only the verb writes, so `bun pm pack` in a checkout is refused. The
   suite holds `releases/` and its ledger to each other, so a file the verb did not write fails it.
