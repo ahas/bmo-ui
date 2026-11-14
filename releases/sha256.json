@@ -128,5 +128,10 @@
     "sha256": "ff2898116d22590edd60aca5e5376853fa2d3c7300d87b9873fea06855edae49",
     "bound": "0.1.0-rev.23",
     "why": "Adds only: the VideoPlayer component, the video and video-gestures modules, an optional portal prop on HintTip and IconButton and 21 wording keys; nothing a bundle built on 0.1.0-rev.23 reads is taken away or changed."
+  },
+  "bmo-ui-0.1.0-rev.26.tgz": {
+    "sha256": "6d4619d70dd067c59d420a07a72420f7ee46626f6a8edd9430a5e1ddf7530684",
+    "bound": "0.1.0-rev.23",
+    "why": "Adds only: LAYER_BOUND and LAYER_RANGE on the console-manifest module, a bound and a range in the layer's version file and a range argument to onThisLayer, which now attaches every release from the bound up; nothing a bundle built on 0.1.0-rev.23 reads is taken away or changed."
   }
 }
