@@ -1,6 +1,6 @@
 import { computed, onScopeDispose, ref, watch } from "vue";
 
-import type { Ref } from "vue";
+import type { ComputedRef, Ref } from "vue";
 
 import type { Translate } from "../../shared/wording";
 import type { WordingKey } from "../../shared/wording-keys";
@@ -22,7 +22,8 @@ export const SHARE_PERMISSIONS = ["read", "edit"] as const;
 
 export type SharePermission = (typeof SHARE_PERMISSIONS)[number];
 
-// The permission a member is given when the thing is shared with them.
+// The permission a member is given when the thing is shared with them, where the host grants it;
+// the first permission it grants otherwise.
 export const MEMBER_PERMISSION: SharePermission = "read";
 
 export interface ShareMember {
@@ -38,6 +39,9 @@ export interface ShareMemberRoad {
   share: (users: string[], permission: SharePermission) => Promise<void>;
   change: (user: string, permission: SharePermission) => Promise<void>;
   remove: (user: string) => Promise<void>;
+  // The permissions a member may be given, where the host grants fewer than all; every permission
+  // where left out.
+  permissions?: readonly [SharePermission, ...SharePermission[]];
 }
 
 // How long typing stands still before the words are searched.
@@ -53,13 +57,16 @@ const PERMISSION_WORDS: Record<SharePermission, WordingKey> = {
   edit: "common.label.permission_edit"
 };
 
-// The permissions as one dropdown offers them, the one a member is given first.
-export function permissionItems(t: Translate): PermissionItem[] {
-  return SHARE_PERMISSIONS.map((value) => ({ value, label: t(PERMISSION_WORDS[value]) }));
+// The permissions as one dropdown offers them, in the order given; every permission, the one a
+// member is given first, where none are given.
+export function permissionItems(t: Translate, permissions: readonly SharePermission[] = SHARE_PERMISSIONS): PermissionItem[] {
+  return permissions.map((value) => ({ value, label: t(PERMISSION_WORDS[value]) }));
 }
 
 export interface ShareMembers {
   members: Ref<ShareMember[]>;
+  // The permissions the host grants, read first; every permission where it names none.
+  permissions: ComputedRef<SharePermission[]>;
   // The first read of who it is shared with is under way.
   loading: Ref<boolean>;
   // The words typed into the search, searched once typing stands still.
@@ -77,6 +84,9 @@ export interface ShareMembers {
   share: () => Promise<void>;
   change: (user: string, permission: SharePermission) => Promise<void>;
   remove: (user: string) => Promise<void>;
+  // The permissions one member's row offers: those the host grants, and the one the member holds
+  // where the host no longer grants it.
+  choices: (member: ShareMember) => SharePermission[];
   // Back to an empty search and no one picked, as the dialog opens again.
   clear: () => void;
 }
@@ -106,6 +116,14 @@ export function useShareMembers(options: ShareMembersOptions): ShareMembers {
   const sharing = ref(false);
   const working = ref<string[]>([]);
   const failed = ref("");
+
+  const permissions = computed(() => {
+    const granted = road()?.permissions ?? SHARE_PERMISSIONS;
+
+    return SHARE_PERMISSIONS.filter((permission) => granted.includes(permission));
+  });
+  // The permission a member is given as the thing is shared with them.
+  const memberPermission = computed(() => (permissions.value.includes(MEMBER_PERMISSION) ? MEMBER_PERMISSION : (permissions.value[0] ?? MEMBER_PERMISSION)));
 
   const offered = computed(() => found.value.filter((person) => !members.value.some((member) => member.person.user === person.user)));
 
@@ -190,12 +208,14 @@ export function useShareMembers(options: ShareMembersOptions): ShareMembers {
     failed.value = "";
 
     try {
+      const permission = memberPermission.value;
+
       await given.share(
         picked.map((person) => person.user),
-        MEMBER_PERMISSION
+        permission
       );
 
-      members.value = [...members.value, ...picked.map((person) => ({ person, permission: MEMBER_PERMISSION }))];
+      members.value = [...members.value, ...picked.map((person) => ({ person, permission }))];
       clear();
       told(members.value.length);
     } catch (error) {
@@ -246,6 +266,10 @@ export function useShareMembers(options: ShareMembersOptions): ShareMembers {
     );
   }
 
+  function choices(member: ShareMember): SharePermission[] {
+    return SHARE_PERMISSIONS.filter((permission) => permissions.value.includes(permission) || permission === member.permission);
+  }
+
   function clear(): void {
     stopPause();
     asked++;
@@ -255,5 +279,5 @@ export function useShareMembers(options: ShareMembersOptions): ShareMembers {
     words.value = "";
   }
 
-  return { members, loading, words, offered, searching, chosen, sharing, working, failed, read, find, share, change, remove, clear };
+  return { members, permissions, loading, words, offered, searching, chosen, sharing, working, failed, read, find, share, change, remove, choices, clear };
 }

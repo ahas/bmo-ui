@@ -82,6 +82,46 @@ describe("the permissions", () => {
       { value: "read", label: "common.label.permission_read" },
       { value: "edit", label: "common.label.permission_edit" }
     ]);
+    expect(permissionItems(wording, ["edit"])).toEqual([{ value: "edit", label: "common.label.permission_edit" }]);
+  });
+
+  test("a host that names none grants both", () => {
+    const { state, stop } = members(standIn([]).road);
+
+    expect(state.permissions.value).toEqual<SharePermission[]>(["read", "edit"]);
+    expect(state.choices({ person: FIRST, permission: "read" })).toEqual<SharePermission[]>(["read", "edit"]);
+    stop();
+  });
+
+  test("a host's grant is read first whatever order it names it in", () => {
+    const host = standIn([]);
+    const { state, stop } = members({ ...host.road, permissions: ["edit", "read"] });
+
+    expect(state.permissions.value).toEqual<SharePermission[]>(["read", "edit"]);
+    stop();
+  });
+
+  test("a row offers what the host grants, and the permission its member holds where the host no longer grants it", () => {
+    const host = standIn([]);
+    const { state, stop } = members({ ...host.road, permissions: ["read"] });
+
+    expect(state.permissions.value).toEqual<SharePermission[]>(["read"]);
+    expect(state.choices({ person: FIRST, permission: "read" })).toEqual<SharePermission[]>(["read"]);
+    expect(state.choices({ person: FIRST, permission: "edit" })).toEqual<SharePermission[]>(["read", "edit"]);
+    stop();
+  });
+
+  test("a host that grants edit alone shares at edit", async () => {
+    const host = standIn([FIRST]);
+    const { state, stop } = members({ ...host.road, permissions: ["edit"] });
+
+    await state.read();
+    state.chosen.value = [FIRST];
+    await state.share();
+
+    expect(host.calls.at(-1)).toEqual({ name: "share", args: [["1"], "edit"] });
+    expect(state.members.value).toEqual([{ person: FIRST, permission: "edit" }]);
+    stop();
   });
 });
 

@@ -86,9 +86,17 @@ async function lastCall(page: Page, name: string): Promise<ShareCall | undefined
   return (await calls(page)).findLast((call) => call.name === name);
 }
 
-// The members listed, each as its account key and the permission its row shows.
+// The members listed, each as its account key and the permission its row shows, in its dropdown or
+// in words where the row offers nothing to choose.
 async function rows(page: Page): Promise<string[]> {
-  return page.$$eval("[data-member]", (found) => found.map((row) => `${row.getAttribute("data-member")} ${row.querySelector("[role=combobox]")?.textContent?.trim()}`));
+  return page.$$eval("[data-member]", (found) =>
+    found.map((row) => {
+      const shown = row.querySelector("[data-member-permission]");
+      const how = shown?.getAttribute("role") === "combobox" ? "" : " in words";
+
+      return `${row.getAttribute("data-member")} ${shown?.textContent?.trim()}${how}`;
+    })
+  );
 }
 
 // Words typed into the search, and the person it offers picked off the menu.
@@ -186,6 +194,45 @@ describe.skipIf(!ready)("the member part", () => {
 
     expect(await page.textContent("[data-no-members]")).toBe("Shared with nobody");
     expect(await page.textContent("[data-count]")).toBe("0");
+    await context.close();
+  });
+});
+
+describe.skipIf(!ready)("a host that grants read alone", () => {
+  test("shares at read, says read in words, and keeps a member's edit among the choices until it is changed", async () => {
+    const { context, page } = await session("?grant=read");
+
+    await page.waitForSelector("[data-member='2']");
+    await pick(page, "er", "tester");
+    await page.click("[data-member-share]");
+    await page.waitForSelector("[data-member='1']");
+
+    expect(await lastCall(page, "members.share")).toEqual({ name: "members.share", args: [["1"], "read"] });
+    expect(await rows(page)).toEqual(["2 Edit", "1 Read in words"]);
+
+    // The row in words stands as tall as the row with a dropdown, its words on the row's centre line.
+    const measured = await page.$$eval("[data-member]", (found) =>
+      found.map((row) => {
+        const box = row.getBoundingClientRect();
+        const shown = row.querySelector("[data-member-permission]")!.getBoundingClientRect();
+
+        return { height: box.height, offCentre: Math.abs(shown.top + shown.height / 2 - (box.top + box.height / 2)) };
+      })
+    );
+
+    expect(measured[1]!.height).toBe(measured[0]!.height);
+    expect(measured[1]!.offCentre).toBeLessThan(1);
+
+    await page.waitForSelector(MENU, { state: "detached" });
+    await page.click("[data-member='2'] [role=combobox]");
+
+    expect(await page.$$eval(`${MENU} [role=option]`, (options) => options.map((option) => option.textContent?.trim()))).toEqual(["Read", "Edit"]);
+
+    await page.getByRole("option", { name: "Read" }).click();
+    await page.waitForSelector("[data-member='2'] [role=combobox]", { state: "detached" });
+
+    expect(await lastCall(page, "members.change")).toEqual({ name: "members.change", args: ["2", "read"] });
+    expect(await rows(page)).toEqual(["2 Read in words", "1 Read in words"]);
     await context.close();
   });
 });

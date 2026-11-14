@@ -295,12 +295,18 @@ default; a screen supplies what it holds and what a press means there. Every exp
 
 - **The host hands it the road members go by** (the share-members module): a search of the people
   the thing may be shared with, given words; who it is shared with now, each a person and a
-  permission; sharing with one or more people at a permission; changing one member's permission; and
-  taking one member off. A person is the account key, the name, the organization and the job title.
-  Who the people are, and where who is shared with is kept, are the host's; the dialog calls no
+  permission; sharing with one or more people at a permission; changing one member's permission;
+  taking one member off; and the permissions it grants, where it grants fewer than all. A person is
+  the account key, the name, the organization and the job title. Who the people are, where who is
+  shared with is kept and which permissions there are to grant are the host's; the dialog calls no
   server.
-- **The permission is `read` or `edit`, and a member is given `read`.** Each member's row offers both
-  in one dropdown, read first, and edit is chosen there.
+- **A permission is `read` or `edit`, and the host grants one or both.** A host that names none
+  grants both. A member is given `read` where the host grants it, and `edit` where it grants that
+  alone.
+- **Each member's row offers the permissions granted in one dropdown,** read first, and another is
+  chosen there. A member who holds a permission the host no longer grants keeps it shown among them.
+  Where a row would offer one permission alone, it says that permission in words where the dropdown
+  would stand, and nothing on the row changes it.
 - **Members are found by a search** in one field under the part's label: it asks the road once typing
   stops, drops an answer to words already typed past, and offers each person by name with the
   organization and job title under it, the words typed marked where they stand. The people found
@@ -308,7 +314,7 @@ default; a screen supplies what it holds and what a press means there. Every exp
   shared with is not offered again. One or more are picked, each standing as a chip in the field, and
   the share action beside the field shares with all of them at once and empties the field.
 - **Each member stands on a row** under the field: the name with the organization and job title
-  under it, the permission dropdown, and an icon button that takes the member off, named in its
+  under it, the permission, and an icon button that takes the member off, named in its
   tooltip.
   With nobody shared with, one line says so.
 - **Every change takes effect as it is made.** Sharing, changing a permission and taking a member
