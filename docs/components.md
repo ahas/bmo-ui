@@ -459,6 +459,9 @@ default; a screen supplies what it holds and what a press means there. Every exp
 - **A tooltip switched off comes up for nothing:** no hover, no focus, no tap and no resting finger opens it, so
   what it stands on is pressed as if no tooltip stood there.
 - **Its words wrap** inside a box no wider than a phone has room for.
+- **It is drawn into the page's body,** unless what it stands on is inside an element taken to full
+  screen, which is all the browser shows then: the caller names that element, to the shared tooltip
+  and to the icon button alike, and the tooltip is drawn inside it.
 - **A cut name names itself only where it is actually cut,** measured as the tooltip is about to come
   up.
 - **It stands on what it names through a box of its own,** and marks that box each time it is drawn
@@ -607,7 +610,8 @@ default; a screen supplies what it holds and what a press means there. Every exp
   for once hydration ends (the loading module).
 - **`LoadingImage` and `LoadingVideo`** keep a picture's or a video's place while it loads and say
   when it failed; **`ImageViewer`** opens a picture whole, zoomed by wheel, pinch, double press or its
-  buttons; **`AudioPlayer`** plays a sound over its own waveform.
+  buttons; **`AudioPlayer`** plays a sound over its own waveform; **`VideoPlayer`** plays a video
+  (see The video player).
 - **`AudioPlayer`'s waveform is the sound's own loudness,** read in the browser once the player comes
   near the screen. The file is fetched once per address and read no further than the waveform's
   fetch limit, whether or not the server says the length before it sends the bytes; the browser
@@ -667,6 +671,81 @@ on a screen.
   moved the audio element it stands for.
 - **One sound plays at a time across the page:** a player that starts stops every other element of
   its name.
+
+## The video player
+
+`VideoPlayer` plays a video in one of two sizes, chosen once by its host: the full player, and the still
+a message holds, which opens the full player large.
+
+- **The full player fills the box its host gives it,** on a black ground of its own whatever the
+  theme, so its words and marks are fixed light ones. Under the picture stand its controls: the
+  position bar with the time played and the length, play and pause, ten seconds back and forward, the
+  next video where the host names one, mute and the volume slider, the subtitles where the video has
+  any, the speed, turning the picture and full screen. Each is an icon button named in the shared
+  tooltip with the key that presses it, a finger's size on a touch screen. A menu or a tooltip opened
+  in full screen stands inside the player, which is all the browser shows then.
+- **A player short of room gathers its bar.** Narrower than the room every bar of actions needs
+  before it stands them all (the action bar module), it leaves the volume slider off and gathers the
+  subtitles, the speed and turning into one more menu before full screen, so no control runs off its
+  edge. It reads its own width, never the window's.
+- **The controls come and go.** Before the first play they stand under one large play mark over the
+  picture. While it plays they stand for two and a half seconds after the pointer last moved, a press
+  or a focus, and stay while a control holds the keyboard's focus. A mouse press on the picture plays
+  or pauses, and a double press takes it to full screen. A finger's tap shows hidden controls and
+  hides standing ones: the press is read on its way down through the player, before the gesture
+  reader brings the controls itself, so the tap that brought them does not hide them.
+- **A finger on the picture** takes the player's gestures. A double tap on its left or right half
+  skips ten seconds back or forward; a held finger, by the layer's one long press, plays at twice the
+  chosen speed, never under two nor over four times, until it lifts; a horizontal drag moves the
+  position as the finger travels, the picture's width spanning the whole length; a vertical drag sets
+  the picture's brightness on the left half and the volume on the right. A drag keeps the direction
+  it first went. Each shows a cue over the picture that lingers a moment after the finger lifts, and
+  a screen reader hears what it did once it has ended. A mouse drag moves nothing.
+- **The keys:** space or k plays and pauses, the left and right arrows or j and l skip ten seconds,
+  the up and down arrows move the volume a tenth, f takes it to full screen, m mutes, c turns the
+  subtitles off and back to the last one shown, and r turns the picture. They answer while the full
+  player stands, except a key a field or a control keeps for itself.
+- **Nothing answers through a layer over it.** No key and no gesture reaches the player while a
+  dialog, a drawer or a menu stands open over it. The layer the player itself stands in, as the
+  dialog that shows it large, is not over it.
+- **Turning the picture** goes to full screen and locks the screen to the other orientation where the
+  browser can; where it cannot, as on a desktop or an iPhone, it turns the picture inside the player a
+  quarter at a time, fitted to the player's box. Leaving full screen or the player gives the
+  orientation back and stands the picture straight, and on a phone a second press does the same.
+- **Subtitles are text tracks the host names,** each by a number of its own; the one shown is a model
+  the host binds, and none shows unless the host says so. They stand above the controls while the
+  controls stand, and at the picture's foot once they go.
+- **What it tells its host:** where the video stands every five seconds while it plays, as it pauses
+  and as the player goes, and again as the page itself goes away, each named by what the video is to
+  the host, since the screen may have moved on to another by then; that it ended; and that the next
+  was asked for. What a host keeps of a position, where a video starts and which subtitle shows first
+  are the host's.
+- **One thing plays at a time.** The full player is one of the page's players: a video that starts
+  stops every sound and video playing, and a sound that starts stops it. Its volume is the reader's
+  one volume for the page, the audio player's.
+- **The still** shows the video's first frame, read from a moment past the start so a phone draws it
+  too, with a play mark over its middle in a button's corners, and the length at its top leading
+  corner: 4px in from the corner, small corners, a dark translucent ground and light tabular figures.
+  Only the file's length and size are fetched before it is pressed, and until the file first answers
+  the picture's place stands as the layer's skeleton under the play mark. A file that refuses shows
+  why in place of the play mark.
+  - It has no corners or edge of its own. The box it stands in cuts it at that box's own corners, so
+    in a message bubble the bubble's corners and edge are the only ones drawn.
+  - Its picture stands at the video's own ratio, no taller than 20rem and no wider than the box it
+    stands in, scaled to whichever bounds it first; a box fitted to what it holds, as a bubble is,
+    takes that width. Where the host knows the shape the picture stands in it from the first frame,
+    so nothing under it moves when the file answers; where it does not, it takes the shape the file
+    says.
+  - The still fills its box's width. Where the box is wider than the picture, as when a caption under
+    a tall video is wider, the picture stands in the middle on the still's black ground, which runs
+    to the box's edges.
+- **A press on the still opens the full player large:** over the whole screen in a dialog headed by
+  the video's name, with its close, playing from the start. The close, Escape and the back gesture
+  close it. The keys and gestures answer there as anywhere, and its full screen button takes it to the
+  browser's full screen. The still hands on everything the full player tells.
+- **A host standing the still in a message** runs it to the bubble's edges as a picture runs, outside
+  the bubble's inner room, and stands what the message says with it — a caption, the file's line —
+  under it, inside that room.
 
 ## Code and files
 

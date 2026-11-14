@@ -1,0 +1,10 @@
+/* The harness page's sheet: the layer's own stylesheet with the utility classes the video player, the
+   parts it is built from and the page itself are drawn with. */
+@import "../../app/assets/css/main.css";
+
+@source "../../app/components/VideoPlayer.vue";
+@source "../../app/components/IconButton.vue";
+@source "../../app/components/HintTip.vue";
+@source "../../app/components/ShellClose.vue";
+@source "../../app/components/SkeletonBar.vue";
+@source "./video-harness.ts";

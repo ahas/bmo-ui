@@ -6,7 +6,7 @@
        else it is handed is the library button's: its icon, size, colour, variant, a press, a route,
        and what a menu or a popover it opens puts on its trigger. The keys that press it, where
        it has any, stand in its tooltip after its name. -->
-  <HintTip class="inline-flex" :text="props.label" :kbds="props.kbds" press :keyboard-focus="props.keyboardFocus">
+  <HintTip class="inline-flex" :text="props.label" :kbds="props.kbds" press :keyboard-focus="props.keyboardFocus" :portal="props.portal">
     <UButton ref="button" color="neutral" variant="ghost" square v-bind="$attrs" :aria-label="props.label" />
   </HintTip>
 </template>
@@ -23,11 +23,13 @@ interface Props extends /* @vue-ignore */ Omit<ButtonProps, "label" | "square"> 
   keyboardFocus?: (event: FocusEvent) => boolean;
   // The keys that press it, shown in its tooltip after its name.
   kbds?: string[];
+  // Where its tooltip is drawn, as the shared tooltip takes it.
+  portal?: boolean | string | HTMLElement;
 }
 
 defineOptions({ inheritAttrs: false });
 
-const props = withDefaults(defineProps<Props>(), { keyboardFocus: undefined, kbds: undefined });
+const props = withDefaults(defineProps<Props>(), { keyboardFocus: undefined, kbds: undefined, portal: true });
 
 const button = useTemplateRef<ComponentPublicInstance>("button");
 
