@@ -27,13 +27,30 @@ export const RELAY_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE"] as const;
 
 export type RelayMethod = (typeof RELAY_METHODS)[number];
 
+// What the layer's version file holds: the version, and in a release's file the bound and the releases
+// from it up, which the release verb writes there. A checkout's file names its version alone.
+interface LayerFile {
+  layer: string;
+  bound?: string;
+  range?: string[];
+  sharedLibraries: string[];
+}
+
+const layerFile: LayerFile = layer;
+
 // The version of the layer this module is part of (`docs/console-bundles.md`, "The layer a bundle is
 // built on"): a release's version where the layer was installed from the file its release verb wrote,
 // the package's version marked `+source` where it was installed from its source.
-export const LAYER_VERSION: string = layer.layer;
+export const LAYER_VERSION: string = layerFile.layer;
+
+// That release's bound, the oldest release whose bundles still run on it unchanged, and every release
+// from the bound up to it in the order they were released, which a console on it attaches bundles of.
+// A layer taken from its source is its own bound and attaches its own bundles alone.
+export const LAYER_BOUND: string = layerFile.bound ?? layerFile.layer;
+export const LAYER_RANGE: readonly string[] = layerFile.range ?? [layerFile.layer];
 
 // The libraries a bundle leaves unbundled and finds as its console's copy, each by its package's path.
-export const CONSOLE_SHARED_LIBRARIES: readonly string[] = layer.sharedLibraries;
+export const CONSOLE_SHARED_LIBRARIES: readonly string[] = layerFile.sharedLibraries;
 
 const KEBAB = /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/;
 
@@ -195,9 +212,10 @@ export function consoleManifest(value: unknown): ConsoleManifest {
   throw new Error(`The console manifest does not keep the contract: ${faults.join("; ")}`);
 }
 
-// Whether a bundle was built on the layer this module is part of, the one a console attaches it by.
-export function onThisLayer(manifest: ConsoleManifest): boolean {
-  return manifest.layer === LAYER_VERSION;
+// Whether a bundle was built on a release inside the range of the layer this module is part of, the one a
+// console attaches it by; a range is handed in where another release's is read.
+export function onThisLayer(manifest: ConsoleManifest, range: readonly string[] = LAYER_RANGE): boolean {
+  return range.includes(manifest.layer);
 }
 
 // Whether a reader holding one role may open a screen needing another.

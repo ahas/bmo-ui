@@ -92,14 +92,15 @@ names them.
 
 ## The layer a bundle is built on
 
-A bundle runs on the console's own copies of the shared libraries, this layer among them, so a
-bundle and its console stand on the same release of the layer or the bundle is not attached.
+A bundle runs on the console's own copies of the shared libraries, this layer among them. Every
+release of the layer declares how far back it stays compatible, and a console attaches a bundle built
+on any release from that bound up to its own.
 
 - **One file per version.** The layer is taken as the one packed file its release verb writes for a
   version, kept under the layer's `releases/` by the version's name, beside a ledger of each file's
-  sha256 (the README, "Version"). A service and a console vendor that file as it stands, checked
-  against the ledger, and never pack the layer from its source; so one version names one set of bytes
-  wherever it runs.
+  sha256 and bound (the README, "Version"). A service and a console vendor that file as it stands,
+  checked against the ledger, and never pack the layer from its source; so one version names one set
+  of bytes wherever it runs.
 - **The bundle build names the layer.** A bundle is built with the layer's bundle build
   (`docs/boundary.md`, "The bundle build"), which leaves the shared libraries unbundled and writes
   the layer's version into `layer.json` beside the module. The service answers that version as the
@@ -108,21 +109,42 @@ bundle and its console stand on the same release of the layer or the bundle is n
   bundle whose screens ask for a key under the layer's domains that the `wording-keys` list lacks, a
   key under the bundle's namespace a locale's words do not answer, or a key of any other domain, and
   words holding a tree beside the namespace ("How a bundle mounts", the words).
+- **Every release declares its bound:** the oldest release whose bundles still run on it unchanged.
+  - A release that only adds — a component, a module, an export, an optional prop, field or argument,
+    a wording key — keeps the bound of the release before it.
+  - A release that takes away or changes anything a bundle built on an earlier release reads — an
+    export, a prop, what a component or a module does that a screen relies on, a wording key, a
+    shared library — raises the bound to itself.
+  - The bound is judged from the release's own change against the boundary (`docs/boundary.md`), and
+    never falls from one release to the next.
+- **The release carries its bound.** The release verb is handed the bound and the reason for it, and
+  refuses a release that names either not at all. It writes both into the ledger beside the packed
+  file's sha256, and into the release's own version file the bound and every release from the bound up
+  to itself, in the order they were released. The shared module answers the console's own version,
+  its bound and those releases (`docs/boundary.md`, `console-manifest`), so a console knows them
+  without unpacking anything or reading the ledger.
+- **A console attaches a bundle built inside its range.** A manifest whose `layer` is one of the
+  releases the console's layer names, from its bound up to its own, attaches. One built on a release
+  older than the bound, on a release newer than the console's or on a layer taken from its source is
+  left out as a manifest that does not read is: no menu entry, no relay and no notices. The console
+  records why, naming the manifest's layer, its own and its bound, where its administrator reads what
+  it left out, so a bundle missing from the menu is explained there.
+- **Why a range and no further.** A bundle imports the layer's components and modules, and the
+  libraries' own, as the release it was built on has them, and finds the console's in their place. A
+  release that only adds leaves all of those where the bundle found them, so a bundle built on any
+  release from the bound up runs unchanged. One older than the bound may reach for what the console's
+  release took away or changed, and would fail while a reader uses the screen, after its manifest read
+  clean; one newer than the console's may reach for what the console's release does not have yet.
+- **The range is a list, never an order.** Which releases stand inside it is the list the release
+  names, never an order read off the version strings, since the layer's earlier numbering does not
+  sort with its later one.
 - **A layer taken from its source is no release.** Installed from its source rather than from a
-  release's file, the layer names its version marked `+source`, so a bundle built on it names a layer
-  no console runs.
-- **A console leaves out a bundle on another layer.** A manifest whose `layer` is not the version of
-  the layer the console runs, which the shared module answers, leaves its service out as a manifest
-  that does not read does: no menu entry, no relay and no notices. The console records why, naming
-  the manifest's layer and its own, where its administrator reads what it left out, so a bundle
-  missing from the menu is explained there.
-- **Why the versions must be equal.** A bundle imports the layer's components and modules, and the
-  libraries' own, as the release it was built on has them, and finds the console's in their place.
-  Where the two releases' boundaries differ it fails while a reader uses the screen, after its
-  manifest has read clean, and nothing the console reads beforehand shows which difference will
-  break which screen. Equal versions are the one test that needs no such knowledge.
-- **A new release moves everything together.** The console and every bundle are built on the new
-  release; a bundle not yet rebuilt stays out of the console's menu until its service rebuilds it.
+  release's file, the layer names its version marked `+source` and no release but itself, so a bundle
+  built on it stands inside no console's range.
+- **A release that raises the bound moves everything together.** The console and every bundle built
+  on a release older than the new bound are built on the new release; a bundle not yet rebuilt stays
+  out of the console's menu until its service rebuilds it. A release that keeps the bound moves the
+  console alone, and each bundle comes onto it when its service next builds.
 
 ## How a console finds the services
 
@@ -135,8 +157,8 @@ bundle and its console stand on the same release of the layer or the bundle is n
   and nothing a reader is shown as a fault. The first manifest it answers again attaches it again.
 - **A manifest that does not read leaves its service out** as well, and the console records the
   reading's fault, naming each field.
-- **A manifest built on another layer leaves its service out,** and the console records both layers
-  ("The layer a bundle is built on").
+- **A manifest built on a layer outside the console's range leaves its service out,** and the console
+  records the manifest's layer, its own and its bound ("The layer a bundle is built on").
 - **Two manifests sharing a name, a screen path or a service name** leave both services out, rather
   than either attached over the other. A former screen path counts as a screen path here: one manifest's
   screen path or former screen path that is another's screen path or former screen path is shared.
@@ -376,8 +398,8 @@ under `calls`, and its screens hand the module texts and a language.
   extends this layer and owes it what the layer asks of a host (`docs/boundary.md`, "What the host
   owes").
 - **It runs one release of the layer,** vendored as its file stands, and leaves out every bundle
-  whose manifest names another, recording both versions where its administrator reads them ("The
-  layer a bundle is built on").
+  whose manifest names a release outside that release's range, recording the manifest's layer, its
+  own and its bound where its administrator reads them ("The layer a bundle is built on").
 - **It finds the services** as the contract states: its own list, every manifest read through the
   shared module, the absent left out and the conflicting refused.
 - **It attaches each bundle by its manifest alone:** an entry under its title and icon leading to its
@@ -433,7 +455,8 @@ under `calls`, and its screens hand the module texts and a language.
   module's reading, so a manifest that breaks the contract fails there first.
 - **It builds its bundle on the console's release of the layer,** vendored as its file stands, with
   the layer's bundle build handed the bundle's name and the words it answers, and answers the layer
-  that build wrote as the manifest's `layer`.
+  that build wrote as the manifest's `layer`. A bundle built on an earlier release inside the
+  console's range keeps attaching until the service rebuilds it.
 - **It answers its module, its stylesheet and its words** at the paths the manifest names.
 - **It leaves the name `people` to the console:** its manifest never gives it as the service's name, and names it
   under `calls` where its screens read the company's members ("How a bundle mounts", the company's members).

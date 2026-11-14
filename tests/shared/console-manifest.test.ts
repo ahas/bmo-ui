@@ -253,10 +253,17 @@ describe("the layer a manifest names", () => {
     expect(faultsOf({ ...answered, layer: "" })).toContain("layer");
   });
 
-  test("attaches the bundle only where it is the layer this module is part of", () => {
+  test("attaches the bundle only where it is the layer this module is part of, taken from its source", () => {
     expect(onThisLayer(consoleManifest({ ...answered, layer: LAYER_VERSION }))).toBe(true);
     expect(onThisLayer(consoleManifest(answered))).toBe(false);
     expect(onThisLayer(consoleManifest({ ...answered, layer: `${LAYER_VERSION}.1` }))).toBe(false);
+  });
+
+  test("attaches a bundle built on any release of a release's range, and none outside it", () => {
+    const range = ["1.0.0-rev.3", "1.0.0-rev.4", "1.0.0-rev.5"];
+
+    expect(range.map((layer) => onThisLayer(consoleManifest({ ...answered, layer }), range))).toEqual([true, true, true]);
+    expect(["1.0.0-rev.2", "1.0.0-rev.6", "1.0.0-rev.4+source"].map((layer) => onThisLayer(consoleManifest({ ...answered, layer }), range))).toEqual([false, false, false]);
   });
 });
 
