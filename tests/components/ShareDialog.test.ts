@@ -127,12 +127,19 @@ describe("the member part", () => {
     expect(tagOf(`:label="$t('common.action.share')"`)).toContain('@click="share"');
   });
 
-  test("each member's row offers the permissions and an icon button that takes them off", () => {
+  test("each member's row offers its permissions and an icon button that takes them off", () => {
     expect(tagOf("<li")).toContain('v-for="member in members"');
-    expect(tagOf("<USelect\n")).toContain(':items="permissions"');
+    expect(tagOf("<USelect\n")).toContain(':items="choiceItems(member)"');
     expect(tagOf("<USelect\n")).toContain('@update:model-value="change(member.person.user, $event)"');
+    expect(source).toContain("permissionItems(t, choices(member))");
     expect(tagOf("<IconButton\n")).toContain('@click="remove(member.person.user)"');
     expect(tagOf("<IconButton\n")).toContain(":label=\"$t('common.action.unshare')\"");
+  });
+
+  test("a row with one permission to offer says it in words where the dropdown would stand", () => {
+    expect(tagOf("<USelect\n")).toContain('v-if="choiceItems(member).length !== 1"');
+    expect(tagOf("<span v-else")).toContain("data-member-permission");
+    expect(part).toContain("{{ choiceItems(member)[0]?.label }}");
   });
 
   test("its rows are a skeleton while they are read, and nobody shared with is said in one line", () => {

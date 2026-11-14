@@ -116,7 +116,10 @@ const road: ShareRoad = {
 };
 
 // The people directory stands behind the search, matching a name, an organization or a job title;
-// the host's own service behind the rest. One member stands from the start.
+// the host's own service behind the rest. One member stands from the start, holding edit; the host
+// grants read alone where the address says so.
+const grantsRead = query.get("grant") === "read";
+
 let sharedWith: ShareMember[] = [{ person: PEOPLE[1]!, permission: "edit" }];
 
 const members: ShareMemberRoad = {
@@ -144,7 +147,8 @@ const members: ShareMemberRoad = {
   remove: async (user) => {
     called("members.remove", user);
     sharedWith = sharedWith.filter((member) => member.person.user !== user);
-  }
+  },
+  ...(grantsRead ? { permissions: ["read"] as const } : {})
 };
 
 const SPANS: ShareSpan[] = [

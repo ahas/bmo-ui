@@ -150,8 +150,9 @@ Each is named with everything it exports.
   opens and the spans offered are the host's; the module holds their shapes and the one reading of a
   link's end, as the date it stands until.
 - **`share-members` takes a member's road as given.** Who may be found, where who a thing is shared
-  with is kept and what a permission opens are the host's; the module holds their shapes, the two
-  permissions and the one a member is given, and the member part's state over the road.
+  with is kept, which permissions it grants and what a permission opens are the host's; the module
+  holds their shapes, the two permissions and the one a member is given, and the member part's state
+  over the road.
 - **`monaco` opens code and source views only.** Any other view over the editor is the host's.
 - **`relay` makes an address, and calls only where a screen asks it to.** It answers where a screen
   calls a service, under the app's base path and the host's relay base (see What the host owes),

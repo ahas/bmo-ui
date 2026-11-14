@@ -89,9 +89,11 @@
             <span v-if="personLine(member.person) !== ''" class="truncate text-sm text-muted">{{ personLine(member.person) }}</span>
           </div>
 
+          <!-- A row with one permission to offer says it in words: there is nothing to choose. -->
           <USelect
+            v-if="choiceItems(member).length !== 1"
             :model-value="member.permission"
-            :items="permissions"
+            :items="choiceItems(member)"
             value-key="value"
             :loading="working.includes(member.person.user)"
             :aria-label="$t('common.aria.member_permission', { name: member.person.name })"
@@ -99,6 +101,8 @@
             data-member-permission
             @update:model-value="change(member.person.user, $event)"
           />
+
+          <span v-else class="shrink-0 text-sm" data-member-permission>{{ choiceItems(member)[0]?.label }}</span>
 
           <IconButton
             :label="$t('common.action.unshare')"
@@ -132,7 +136,7 @@ import { permissionItems, useShareMembers } from "../domain/share-members";
 import { formatDateClock, useNowSeconds } from "../domain/time";
 
 import type { ShareLink, ShareMark, ShareRoad, ShareSpan } from "../domain/share-links";
-import type { ShareMemberRoad, SharePerson } from "../domain/share-members";
+import type { PermissionItem, ShareMember, ShareMemberRoad, SharePerson } from "../domain/share-members";
 
 // One link at a time. Where the thing shared has one, the link part opens on it instead of on the
 // form: its address to copy, the day it stands until, and the one control that ends it. A link is
@@ -142,7 +146,8 @@ import type { ShareMemberRoad, SharePerson } from "../domain/share-members";
 // already standing, so the address is read and copied where it was asked for.
 //
 // The members it is shared with stand under the link, where the host hands their road: found by a
-// search, shared with at the permission a member is given, changed and taken off each on its own.
+// search, shared with at the permission a member is given, changed among the permissions the host
+// grants and taken off each on its own.
 //
 // The host hands over the roads its links and members go by and the spans it offers; this dialog
 // knows nothing of what a link opens or of who the people are.
@@ -193,6 +198,7 @@ const {
   share,
   change,
   remove,
+  choices,
   clear: clearMembers
 } = useShareMembers({
   t,
@@ -201,7 +207,10 @@ const {
   told: (count) => emit("members", count)
 });
 
-const permissions = computed(() => permissionItems(t));
+// The permissions one member's row offers, as its dropdown names them.
+function choiceItems(member: ShareMember): PermissionItem[] {
+  return permissionItems(t, choices(member));
+}
 
 // The people found stand in a menu only while words are typed, and what it offered is held while it
 // closes, so a share that empties the search never shows an empty menu on its way out.
