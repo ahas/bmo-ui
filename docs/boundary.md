@@ -80,6 +80,7 @@ wording keys listed here are the ones the layer's list holds.
 | `ThemePreview` | A small piece of a screen in one theme and one mode. |
 | `ThemeSwatch` | A theme's accent and raised grey as dots, in one mode. |
 | `ToolBar` | The toolbar flush against one target, cells parted by dividers. |
+| `VideoPlayer` | A video: the full player with its own controls, gestures and keys, or the still a message holds, its first frame with a play mark and its length, which opens the full player large. |
 
 ## Domain modules
 
@@ -141,11 +142,14 @@ Each is named with everything it exports.
 | `time` | `FOREVER_LABEL`, `formatClock`, `formatDay`, `formatShortDay`, `formatDayClock`, `clockUnder`, `formatDateClock`, `formatStamp`, `formatTime`, `dayKey`, `spanClock`, `elapsedText`, `timerClock`, `remainingText`, `useNowSeconds`, `toUnixSeconds` |
 | `tooltip` | `TOOLTIP_UI`, `TOOLTIP_PROVIDER` |
 | `translation` | `Reading`, `Translator`, `Untranslated`, `TRANSLATION_BATCH`, `TRANSLATION_ASKS_AT_ONCE`, `translatorOf`, `hasTranslator`, `translated` |
+| `video` | `SKIP_SECONDS`, `SAVE_EVERY_MS`, `VOLUME_STEP`, `SPEEDS`, `CUE_LINE_OVER_CONTROLS`, `CONTROLS_IDLE_MS`, `STILL_CAP_REM`, `FIRST_FRAME`, `PlayerAction`, `PlayerTrack`, `VideoShape`, `keyAction`, `skipTo`, `steppedVolume`, `speedText`, `toggledTrack`, `nextTurn`, `otherOrientation`, `turnedBox`, `stillBox`, `firstFrameOf` |
+| `video-gestures` | `DOUBLE_TAP_MS`, `DOUBLE_TAP_SLOP_PX`, `BRIGHTNESS_MIN`, `BRIGHTNESS_MAX`, `CUE_LINGER_MS`, `HOLD_SPEED_MIN`, `HOLD_SPEED_MAX`, `overlayOpen`, `sideOf`, `dragAxis`, `tapMatches`, `seekFrom`, `levelFrom`, `brightnessFrom`, `heldSpeed`, `PlayerCue`, `GestureSpec`, `GestureReader`, `attachGestures`, `PlayerGestureSpec`, `usePlayerGestures` |
 | `volume` | `Loudness`, `Volume`, `VOLUME_KEY`, `FULL_VOLUME`, `UNMUTED_LEVEL`, `slid`, `muteToggled`, `createVolume`, `useVolume` |
 | `waveform` | `WAVE_DETAIL`, `WAVE_FETCH_LIMIT`, `WAVE_FLOOR`, `Waveform`, `levelsOf`, `waveBars`, `barCount`, `loudnessAt`, `waveformOf` |
 | `zoom` | `ZoomView`, `Point`, `Size`, `FIT`, `MIN_SCALE`, `MAX_SCALE`, `DOUBLE_SCALE`, `bounded`, `zoomedTo`, `wheeled`, `moved`, `pinched`, `toggled`, `fittedSize`, `swipeStep` |
 
-- **`player` takes a sound's address as given.** Where a sound is fetched from is the host's.
+- **`player` and `video` take a sound's and a video's address as given.** Where either is fetched
+  from is the host's.
 - **`share-links` takes a link's road as given.** How a link is read, made and ended, the page it
   opens and the spans offered are the host's; the module holds their shapes and the one reading of a
   link's end, as the date it stands until.
@@ -288,16 +292,18 @@ What a coding harness takes the layer through (`docs/harness.md`).
 
 ## Wording keys
 
-The layer reads these 105 keys and no others. The `wording-keys` shared module lists them, the one
+The layer reads these 126 keys and no others. The `wording-keys` shared module lists them, the one
 list a host's pack is held to. Placeholders are named after each key.
 
 - **`common.action`:** `cancel`, `choose_all`, `choose_none`, `close`, `close_all_tabs`,
-  `close_other_tabs`, `close_right_tabs`, `copy`, `create_link`, `discard`, `fit_screen`, `more`, `mute`,
-  `next_picture`, `pause`, `pin`, `play`, `previous_picture`, `save`, `share`, `unmute`, `unpin`,
-  `unshare`, `zoom_in`, `zoom_out`.
+  `close_other_tabs`, `close_right_tabs`, `copy`, `create_link`, `discard`, `exit_fullscreen`,
+  `fit_screen`, `fullscreen`, `more`, `mute`, `next_picture`, `pause`, `pin`, `play`,
+  `previous_picture`, `save`, `share`, `skip_back` `{n}`, `skip_forward` `{n}`, `subtitles`,
+  `turn_picture`, `unmute`, `unpin`, `unshare`, `zoom_in`, `zoom_out`.
 - **`common.aria`:** `close_named` `{name}`, `column_width` `{name}`, `decrease`, `download_named`
   `{name}`, `image_zoom` `{title}`, `increase`, `member_permission` `{name}`, `more_notices` `{n}`,
-  `pinned_named` `{name}`, `share_address`.
+  `pinned_named` `{name}`, `play_named` `{name}`, `player_named` `{name}`, `share_address`,
+  `speed_named` `{speed}`.
 - **`common.error`:** `editor_failed`, `link_copy_failed`, `member_change_failed`,
   `member_search_failed`, `member_share_failed`, `members_read_failed`, `picture_failed`,
   `share_create_failed`, `share_read_failed`, `unshare_failed`, `video_failed`.
@@ -308,13 +314,16 @@ list a host's pack is held to. Placeholders are named after each key.
   `palette_sea`, `palette_sunset`, `palette_teal`, `palette_violet`, `permission_edit`,
   `permission_read`, `play_position`, `properties`,
   `seconds` `{n}`, `share_until` `{date}`, `short_day_format` (the short date format the time
-  module's short day is written in, the year in two figures), `theme_forest`, `theme_sea`,
-  `theme_sunset`, `theme_teal`, `theme_violet`, `unplayable`, `volume`.
+  module's short day is written in, the year in two figures), `speed_normal` `{speed}`,
+  `subtitles_off`, `theme_forest`, `theme_sea`, `theme_sunset`, `theme_teal`, `theme_violet`,
+  `unplayable`, `volume`.
 - **`common.message`:** `link_copied`, and the theme preview's words:
   `preview_badge`, `preview_field`, `preview_link`, `preview_meta`, `preview_note`.
 - **`common.placeholder`:** `member_search`.
-- **`common.status`:** `copied`, `loading`, `members_loading`, `no_members`, `picture_loading`,
-  `share_loading`, `video_loading`.
+- **`common.status`:** `brightness` `{n}`, `copied`, `loading`, `members_loading`, `muted`,
+  `no_members`, `picture_loading`, `share_loading`, `speed` `{speed}`, `subtitles_off`,
+  `subtitles_on` `{name}`, `turned` `{degrees}`, `unmuted`, `video_loading`, `volume` `{n}`,
+  `went_back` `{n}`, `went_forward` `{n}`.
 - **`common.title`:** `discard_changes`, `share`.
 - **`files.action`:** `keep_both`, `replace`, `skip`.
 - **`files.aria`:** `name_field`.
@@ -322,8 +331,8 @@ list a host's pack is held to. Placeholders are named after each key.
 - **`files.message`:** `conflict`.
 - **`files.status`:** `uploading`.
 
-That is 24 actions, 9 accessible names, 7 errors, 33 labels, 6 messages, 5 statuses and 2 titles
-under `common`, and 7 keys under `files`.
+That is 31 actions, 13 accessible names, 11 errors, 38 labels, 6 messages, a placeholder, 17
+statuses and 2 titles under `common`, and 7 keys under `files`.
 
 ## Tokens
 

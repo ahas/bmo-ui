@@ -474,6 +474,12 @@
           "type": "string[] | undefined",
           "required": false,
           "default": "undefined"
+        },
+        {
+          "name": "portal",
+          "type": "string | boolean | HTMLElement | undefined",
+          "required": false,
+          "default": "true"
         }
       ],
       "slots": [
@@ -515,6 +521,12 @@
           "type": "string[] | undefined",
           "required": false,
           "default": "undefined"
+        },
+        {
+          "name": "portal",
+          "type": "string | boolean | HTMLElement | undefined",
+          "required": false,
+          "default": "true"
         },
         {
           "name": "size",
@@ -1771,6 +1783,109 @@
       ],
       "events": [],
       "example": "<ToolBar :label=\"t('notes.aria.editor_tools')\">\n  <UTooltip :text=\"t('notes.action.bold')\">\n    <UButton icon=\"i-material-symbols-format-bold\" color=\"neutral\" variant=\"ghost\" :aria-label=\"t('notes.action.bold')\" />\n  </UTooltip>\n  <UTooltip :text=\"t('notes.action.italic')\">\n    <UButton icon=\"i-material-symbols-format-italic\" color=\"neutral\" variant=\"ghost\" :aria-label=\"t('notes.action.italic')\" />\n  </UTooltip>\n  <UButton class=\"ms-auto\" color=\"neutral\" variant=\"ghost\" :label=\"t('common.action.save')\" />\n</ToolBar>"
+    },
+    {
+      "name": "VideoPlayer",
+      "kind": "component",
+      "line": "A video: the full player with its own controls, gestures and keys, or the still a message holds, its first frame with a play mark and its length, which opens the full player large.",
+      "props": [
+        {
+          "name": "video",
+          "type": "string | number | undefined",
+          "required": false,
+          "default": "0",
+          "description": "What the video is to its host, handed back with everything the player tells of it."
+        },
+        {
+          "name": "src",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "poster",
+          "type": "string | null | undefined",
+          "required": false,
+          "default": "null"
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "required": true,
+          "description": "The video's name, which the player is named by."
+        },
+        {
+          "name": "tracks",
+          "type": "PlayerTrack[] | undefined",
+          "required": false,
+          "default": "[]"
+        },
+        {
+          "name": "start",
+          "type": "number | undefined",
+          "required": false,
+          "default": "0",
+          "description": "Where it starts, in seconds."
+        },
+        {
+          "name": "autoplay",
+          "type": "boolean | undefined",
+          "required": false,
+          "default": "false",
+          "description": "Whether it starts as soon as it can, as the next of a playlist does."
+        },
+        {
+          "name": "next",
+          "type": "string | null | undefined",
+          "required": false,
+          "default": "null",
+          "description": "The next video's words, where there is one to go on to."
+        },
+        {
+          "name": "size",
+          "type": "\"full\" | \"still\" | undefined",
+          "required": false,
+          "default": "\"full\"",
+          "description": "The full player, or the still a message holds, which opens the full player large. Chosen once."
+        },
+        {
+          "name": "shape",
+          "type": "VideoShape | null | undefined",
+          "required": false,
+          "default": "null",
+          "description": "The video's shape where the host knows it before the file answers, so the still stands in it from the start."
+        },
+        {
+          "name": "track",
+          "type": "number | null | undefined",
+          "required": false,
+          "default": "null",
+          "description": "The subtitle shown, or none."
+        }
+      ],
+      "slots": [],
+      "events": [
+        {
+          "name": "position",
+          "type": "[video: string | number, seconds: number]"
+        },
+        {
+          "name": "next",
+          "type": "[]"
+        },
+        {
+          "name": "leaving",
+          "type": "[video: string | number, seconds: number]"
+        },
+        {
+          "name": "update:track",
+          "type": "[value: number | null]"
+        },
+        {
+          "name": "ended",
+          "type": "[video: string | number, seconds: number]"
+        }
+      ],
+      "example": "<div class=\"flex flex-col gap-4\">\n  <div class=\"aspect-video w-full max-w-3xl\">\n    <VideoPlayer v-model:track=\"track\" :video=\"12\" src=\"https://example.com/videos/walk.mp4\" title=\"walk.mp4\" :tracks=\"tracks\" next=\"harbour.mp4\" @position=\"(video, seconds) => kept.set(video, seconds)\" />\n  </div>\n  <div class=\"w-fit max-w-80 overflow-hidden rounded-lg bg-elevated\">\n    <VideoPlayer size=\"still\" src=\"https://example.com/videos/harbour.mp4\" title=\"harbour.mp4\" :shape=\"{ width: 1280, height: 720 }\" />\n  </div>\n</div>"
     },
     {
       "name": "dialog-origin",

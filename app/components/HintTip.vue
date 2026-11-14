@@ -16,6 +16,7 @@
     disable-closing-trigger
     :ignore-non-keyboard-focus="TOOLTIP_PROVIDER.ignoreNonKeyboardFocus"
     :content="tipContent"
+    :portal="props.portal"
     :ui="TOOLTIP_UI"
   >
     <template v-if="$slots.content" #content>
@@ -66,11 +67,14 @@ interface Props {
   side?: "top" | "right" | "bottom" | "left";
   // The keys that press what it stands on, shown after its words in the library's key marks.
   kbds?: string[];
+  // Where it is drawn: the page's body unless what it stands on is inside an element taken to full
+  // screen, which is all the browser shows then.
+  portal?: boolean | string | HTMLElement;
 }
 
 defineOptions({ inheritAttrs: false });
 
-const props = withDefaults(defineProps<Props>(), { text: undefined, label: undefined, cut: false, press: false, keyboardFocus: undefined, disabled: false, as: "span", side: undefined, kbds: undefined });
+const props = withDefaults(defineProps<Props>(), { text: undefined, label: undefined, cut: false, press: false, keyboardFocus: undefined, disabled: false, as: "span", side: undefined, kbds: undefined, portal: true });
 
 // What the library is told of the tooltip's own box: the name a screen reader hears, and the side.
 const tipContent = computed(() => {
