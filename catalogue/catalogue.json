@@ -484,6 +484,84 @@
       "example": "<div class=\"flex h-96 flex-col\">\n  <FilesText :text=\"text\" name=\"plan.md\" />\n</div>"
     },
     {
+      "name": "FloatingWindow",
+      "kind": "component",
+      "line": "A part of a screen floating beside it: a window moved, sized and kept inside what is visible on a wide screen, a sheet of two heights on a narrow one, folded to a pill.",
+      "props": [
+        {
+          "name": "open",
+          "type": "boolean",
+          "required": true
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "pillLabel",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "pillColor",
+          "type": "\"primary\" | \"secondary\" | \"success\" | \"info\" | \"warning\" | \"error\" | \"neutral\" | undefined",
+          "required": false,
+          "default": "\"neutral\""
+        },
+        {
+          "name": "area",
+          "type": "(() => WindowFrame | null) | undefined",
+          "required": false,
+          "default": "undefined"
+        },
+        {
+          "name": "foot",
+          "type": "number | undefined",
+          "required": false,
+          "default": "0"
+        },
+        {
+          "name": "size",
+          "type": "{ width: number; height: number; } | undefined",
+          "required": false,
+          "default": "WINDOW_SIZE"
+        },
+        {
+          "name": "floor",
+          "type": "{ width: number; height: number; } | undefined",
+          "required": false,
+          "default": "WINDOW_MIN"
+        }
+      ],
+      "slots": [
+        {
+          "name": "title",
+          "type": "{}"
+        },
+        {
+          "name": "default",
+          "type": "{}"
+        },
+        {
+          "name": "pill",
+          "type": "{}"
+        }
+      ],
+      "events": [
+        {
+          "name": "update:open",
+          "type": "[open: boolean]"
+        }
+      ],
+      "example": "<FloatingWindow v-model:open=\"open\" name=\"notes\" :label=\"t('notes.title.window')\" :pill-label=\"t('notes.action.open_window')\">\n  <template #title>\n    <span class=\"truncate font-semibold text-highlighted\">{{ t(\"notes.title.window\") }}</span>\n  </template>\n\n  <template #pill>\n    <UIcon name=\"i-material-symbols-sticky-note-2-outline\" class=\"size-5\" />\n  </template>\n\n  <p class=\"p-4 text-sm\">{{ t(\"notes.message.window_body\") }}</p>\n</FloatingWindow>"
+    },
+    {
       "name": "GrowingTextarea",
       "kind": "component",
       "line": "A form's text box that grows with its text and never scrolls inside.",
