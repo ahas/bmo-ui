@@ -45,6 +45,59 @@
       "example": "<ActionGroup :actions=\"actions\" :properties=\"properties\" :properties-title=\"t('notes.title.details')\" :label=\"t('notes.aria.note_actions')\" />"
     },
     {
+      "name": "ArtworkFrame",
+      "kind": "component",
+      "line": "A card's picture at one of the artwork shapes, whole over a ground of itself where its shape is not the frame's, or its kind's mark over its name where it has none.",
+      "props": [
+        {
+          "name": "src",
+          "type": "string | null",
+          "required": true,
+          "description": "The picture's address, or none where the thing has no picture."
+        },
+        {
+          "name": "shape",
+          "type": "ArtworkShape",
+          "required": true,
+          "description": "The shape the frame stands at."
+        },
+        {
+          "name": "size",
+          "type": "PictureSize | null | undefined",
+          "required": false,
+          "default": "null",
+          "description": "The picture's own size where the host knows it before the picture loads."
+        },
+        {
+          "name": "alt",
+          "type": "string | undefined",
+          "required": false,
+          "default": "\"\"",
+          "description": "The picture's alternative words; empty where the card names the thing beside it."
+        },
+        {
+          "name": "icon",
+          "type": "string",
+          "required": true,
+          "description": "The mark of the thing's kind, drawn where it has no picture."
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "required": true,
+          "description": "The thing's name, set in the frame where it has no picture."
+        }
+      ],
+      "slots": [
+        {
+          "name": "default",
+          "type": "{}"
+        }
+      ],
+      "events": [],
+      "example": "<div class=\"grid w-full max-w-xl grid-cols-3 gap-4\">\n  <ArtworkFrame src=\"https://example.com/pictures/harbour.jpg\" :size=\"{ width: 640, height: 360 }\" :shape=\"LANDSCAPE\" icon=\"i-material-symbols-movie-outline\" name=\"Harbour\" class=\"rounded-md\" />\n  <ArtworkFrame src=\"https://example.com/pictures/field.jpg\" :size=\"{ width: 640, height: 480 }\" :shape=\"LANDSCAPE\" icon=\"i-material-symbols-movie-outline\" name=\"Field\" class=\"rounded-md\" />\n  <ArtworkFrame :src=\"null\" :shape=\"LANDSCAPE\" icon=\"i-material-symbols-movie-outline\" name=\"Morning walk\" class=\"rounded-md\" />\n</div>"
+    },
+    {
       "name": "AudioPlayer",
       "kind": "component",
       "line": "A kept sound: a play and pause button, its waveform as its progress, a volume popover and a download.",
@@ -85,6 +138,40 @@
       "slots": [],
       "events": [],
       "example": "<AudioPlayer src=\"https://example.com/sounds/morning.ogg\" download=\"https://example.com/sounds/morning.ogg?download=1\" name=\"morning.ogg\" size=\"1.2 MB\" />"
+    },
+    {
+      "name": "CardRow",
+      "kind": "component",
+      "line": "A heading over one line of cards that scrolls sideways, paged by a pointer's buttons and swiped by a finger, with the link that opens it whole.",
+      "props": [
+        {
+          "name": "title",
+          "type": "string",
+          "required": true,
+          "description": "The row's name, its heading and its region's name."
+        },
+        {
+          "name": "items",
+          "type": "T[]",
+          "required": true,
+          "description": "What the row shows, each drawn by the slot."
+        },
+        {
+          "name": "all",
+          "type": "string | Record<string, unknown> | null | undefined",
+          "required": false,
+          "default": "null",
+          "description": "Where the row opens whole, or nowhere."
+        }
+      ],
+      "slots": [
+        {
+          "name": "default",
+          "type": "{ item: T; index: number; }"
+        }
+      ],
+      "events": [],
+      "example": "<CardRow v-slot=\"{ item }\" :title=\"t('notes.label.recent')\" :items=\"items\" all=\"/notes\">\n  <span class=\"flex w-40 flex-col gap-2\">\n    <ArtworkFrame :src=\"null\" :shape=\"PORTRAIT\" icon=\"i-material-symbols-description-outline\" :name=\"item\" class=\"rounded-md\" />\n    <span class=\"truncate text-base\">{{ item }}</span>\n  </span>\n</CardRow>"
     },
     {
       "name": "ChooseAll",
@@ -1839,6 +1926,13 @@
           "required": false,
           "default": "null",
           "description": "The next video's words, where there is one to go on to."
+        },
+        {
+          "name": "autoNext",
+          "type": "boolean | undefined",
+          "required": false,
+          "default": "false",
+          "description": "Whether the next video follows on its own: offered on a card near the end of a long video, asked for as it ends."
         },
         {
           "name": "size",

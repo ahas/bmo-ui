@@ -5,7 +5,8 @@
        it — play, ten-second skips, the next item, the volume, the subtitle and the speed, turning the picture, and
        full screen. A finger on the picture takes the player's gestures, its cue standing over the picture. It
        stands on a black ground of its own whatever the theme, so its words and marks are fixed light ones. The
-       keys answer while it stands and nothing is open over it: space, the arrows, f, m, c and r.
+       keys answer while it stands and nothing is open over it: space and k, the arrows, j and l, f, m, c and r.
+       Where the host asks for the next video to follow, a long video offers it on a card near its end.
 
        The still, the size a message holds: the first frame, a play mark over its middle and the length at its top
        corner, with no corners or edge of its own, so the box it stands in cuts it. Its shape stands from the first
@@ -138,6 +139,24 @@
 
     <p v-if="failed" role="alert" class="absolute inset-x-4 top-1/2 -translate-y-1/2 text-center text-base">{{ $t("common.error.video_failed") }}</p>
 
+    <!-- The next video, offered near the end of a long one: what it is, the seconds left turning down, and a way
+         to play it now or to stay. It stands in the picture's top trailing corner, clear of the controls and of
+         the subtitles at the foot. -->
+    <div
+      v-if="nextCard"
+      data-video-next
+      class="absolute end-3 top-3 z-10 flex w-[min(20rem,calc(100%-1.5rem))] flex-col gap-2 rounded-lg bg-black/90 p-3 text-white"
+    >
+      <p class="flex flex-col gap-1">
+        <RollingSentence keypath="common.status.next_in" :figures="{ n: secondsLeft }" class="text-sm text-white/80 tabular-nums" />
+        <span class="truncate text-base font-medium">{{ props.next }}</span>
+      </p>
+      <div class="flex items-center justify-end gap-2">
+        <UButton data-video-next-cancel size="sm" color="neutral" variant="ghost" class="text-white hover:bg-white/15 hover:text-white active:bg-white/25" :label="$t('common.action.cancel')" @click="dismissNext" />
+        <UButton data-video-next-now size="sm" class="badge-ink" icon="i-material-symbols-skip-next" :label="$t('common.action.play_now')" @click="emit('next')" />
+      </div>
+    </div>
+
     <div
       data-video-controls
       class="absolute inset-x-0 bottom-0 flex flex-col gap-1 bg-black/75 px-2 pt-1 pb-[max(0.25rem,var(--bmo-safe-bottom,0px))] transition-opacity sm:px-3"
@@ -155,6 +174,7 @@
           :ui="{ thumb: THUMB }"
           :aria-label="$t('common.label.play_position')"
           :aria-valuetext="`${playClock(current)} / ${playClock(length ?? 0)}`"
+          aria-keyshortcuts="ArrowLeft ArrowRight"
           :disabled="length === null"
           @update:model-value="seek"
         />
@@ -171,8 +191,8 @@
           :kbds="['space']"
           @click="toggle"
         />
-        <IconButton icon="i-material-symbols-replay-10" v-bind="BUTTON" :portal="portal" :label="$t('common.action.skip_back', { n: SKIP_SECONDS })" :kbds="['arrowleft']" @click="skip(-SKIP_SECONDS)" />
-        <IconButton icon="i-material-symbols-forward-10" v-bind="BUTTON" :portal="portal" :label="$t('common.action.skip_forward', { n: SKIP_SECONDS })" :kbds="['arrowright']" @click="skip(SKIP_SECONDS)" />
+        <IconButton icon="i-material-symbols-replay-10" v-bind="BUTTON" :portal="portal" :label="$t('common.action.skip_back', { n: SKIP_SECONDS })" :kbds="['j']" @click="skip(-SKIP_SECONDS)" />
+        <IconButton icon="i-material-symbols-forward-10" v-bind="BUTTON" :portal="portal" :label="$t('common.action.skip_forward', { n: SKIP_SECONDS })" :kbds="['l']" @click="skip(SKIP_SECONDS)" />
         <IconButton v-if="props.next" icon="i-material-symbols-skip-next" v-bind="BUTTON" :portal="portal" :label="props.next" @click="emit('next')" />
         <IconButton
           :icon="muteIcon"
@@ -192,6 +212,7 @@
           class="video-seek w-24 shrink-0"
           :ui="{ thumb: THUMB }"
           :aria-label="$t('common.label.volume')"
+          aria-keyshortcuts="ArrowUp ArrowDown"
           @update:model-value="(level) => volume.slide((Number(level) || 0) / 100)"
         />
 
@@ -237,7 +258,7 @@ import { useI18n } from "vue-i18n";
 import { useBarGathers } from "../domain/actionbar";
 import { knownLength, playAlone, playClock } from "../domain/player";
 import { useNarrow } from "../domain/screen";
-import { CONTROLS_IDLE_MS, CUE_LINE_OVER_CONTROLS, SAVE_EVERY_MS, SKIP_SECONDS, SPEEDS, VOLUME_STEP, firstFrameOf, keyAction, nextTurn, otherOrientation, skipTo, speedText, steppedVolume, stillBox, toggledTrack, turnedBox } from "../domain/video";
+import { CONTROLS_IDLE_MS, CUE_LINE_OVER_CONTROLS, NUDGE_SECONDS, SAVE_EVERY_MS, SKIP_SECONDS, SPEEDS, VOLUME_STEP, firstFrameOf, keyAction, nextCardLead, nextTurn, otherOrientation, skipTo, speedText, steppedVolume, stillBox, toggledTrack, turnedBox } from "../domain/video";
 import { overlayOpen, usePlayerGestures } from "../domain/video-gestures";
 import { useVolume } from "../domain/volume";
 
@@ -260,6 +281,8 @@ interface Props {
   autoplay?: boolean;
   /** The next video's words, where there is one to go on to. */
   next?: string | null;
+  /** Whether the next video follows on its own: offered on a card near the end of a long video, asked for as it ends. */
+  autoNext?: boolean;
   /** The full player, or the still a message holds, which opens the full player large. Chosen once. */
   size?: "full" | "still";
   /** The video's shape where the host knows it before the file answers, so the still stands in it from the start. */
@@ -268,7 +291,7 @@ interface Props {
 
 defineOptions({ inheritAttrs: false });
 
-const props = withDefaults(defineProps<Props>(), { video: 0, poster: null, tracks: () => [], start: 0, autoplay: false, next: null, size: "full", shape: null });
+const props = withDefaults(defineProps<Props>(), { video: 0, poster: null, tracks: () => [], start: 0, autoplay: false, next: null, autoNext: false, size: "full", shape: null });
 
 const emit = defineEmits<{
   /**
@@ -332,6 +355,12 @@ const framing = computed(() => !stillRead.value && !stillFailed.value);
 let lastTouchAt = Number.NEGATIVE_INFINITY;
 
 const stillStyle = computed(() => stillBox(props.shape ?? fileShape.value));
+// Whether the reader sent the card offering the next video away; moving back before its moment brings it again.
+const nextDismissed = ref(false);
+// How long before the end the next video is offered, where it follows on its own and the video is long enough.
+const nextLead = computed(() => (props.autoNext && props.next ? nextCardLead(length.value) : null));
+const secondsLeft = computed(() => Math.max(0, Math.ceil((length.value ?? 0) - current.value)));
+const nextCard = computed(() => nextLead.value !== null && started.value && !failed.value && !nextDismissed.value && secondsLeft.value > 0 && secondsLeft.value <= nextLead.value);
 // A menu or a tooltip opened in full screen stands inside the player, which is all the browser shows.
 const portal = computed(() => (fullscreen.value ? (rootRef.value ?? true) : true));
 const controlsShown = computed(() => !playing.value || awake.value || failed.value);
@@ -402,6 +431,18 @@ watch(
 
 watch(track, () => showTrack());
 
+watch(current, (now) => {
+  if (nextLead.value !== null && length.value !== null && length.value - now > nextLead.value) nextDismissed.value = false;
+});
+
+watch(nextCard, (shown) => {
+  if (shown && props.next) say(props.next);
+});
+
+function dismissNext(): void {
+  nextDismissed.value = true;
+}
+
 watch(controlsShown, () => placeCues());
 
 watch(
@@ -411,6 +452,7 @@ watch(
     failed.value = false;
     current.value = 0;
     length.value = null;
+    nextDismissed.value = false;
     fileShape.value = null;
     stillRead.value = false;
     stillFailed.value = false;
@@ -688,6 +730,9 @@ function onEnded(): void {
   playing.value = false;
   stopSaving();
   emit("ended", props.video, length.value ?? current.value);
+
+  // The next video follows where the host asked for it and the reader did not send its card away.
+  if (props.autoNext && props.next && !nextDismissed.value) emit("next");
 }
 
 // Whether a key's target keeps the key for itself: a field, a control that reads the arrows, or a layer of its own
@@ -725,6 +770,12 @@ function onKey(event: KeyboardEvent): void {
       break;
     case "forward":
       skip(SKIP_SECONDS);
+      break;
+    case "nudge-back":
+      skip(-NUDGE_SECONDS);
+      break;
+    case "nudge-forward":
+      skip(NUDGE_SECONDS);
       break;
     case "louder":
     case "quieter": {

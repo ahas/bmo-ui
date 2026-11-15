@@ -701,10 +701,20 @@ a message holds, which opens the full player large.
   the picture's brightness on the left half and the volume on the right. A drag keeps the direction
   it first went. Each shows a cue over the picture that lingers a moment after the finger lifts, and
   a screen reader hears what it did once it has ended. A mouse drag moves nothing.
-- **The keys:** space or k plays and pauses, the left and right arrows or j and l skip ten seconds,
-  the up and down arrows move the volume a tenth, f takes it to full screen, m mutes, c turns the
+- **The keys:** space or k plays and pauses, the left and right arrows skip five seconds and j and l
+  ten, the up and down arrows move the volume a tenth, f takes it to full screen, m mutes, c turns the
   subtitles off and back to the last one shown, and r turns the picture. They answer while the full
-  player stands, except a key a field or a control keeps for itself.
+  player stands, except a key a field or a control keeps for itself. Each control a key presses names
+  that key in its tooltip; the arrows, which no control stands for, are named on the volume and the
+  position bars to a screen reader.
+- **The next video can follow on its own** where the host names one and asks for it. A video of ten
+  minutes or more then offers it on a card in the picture's top trailing corner, clear of the controls
+  and the subtitles, from thirty seconds before its end (thirty-five for a video of forty minutes or
+  more, forty for fifty or more): the next video's words, the seconds left turning down, and two
+  buttons, cancel and play now. Play now and the end of the video each tell the host the next was asked
+  for; cancel takes the card away and lets the video end where it is, and moving back before the card's
+  moment brings it back. A video shorter than ten minutes asks for the next as it ends, with no card.
+  Where the host does not ask, the video ends and only says so.
 - **Nothing answers through a layer over it.** No key and no gesture reaches the player while a
   dialog, a drawer or a menu stands open over it. The layer the player itself stands in, as the
   dialog that shows it large, is not over it.
@@ -746,6 +756,41 @@ a message holds, which opens the full player large.
 - **A host standing the still in a message** runs it to the bubble's edges as a picture runs, outside
   the bubble's inner room, and stands what the message says with it — a caption, the file's line —
   under it, inside that room.
+
+## Artwork
+
+- **A card's picture stands at one of a few shapes** (the artwork module): portrait, two wide by three
+  high; landscape, sixteen by nine; and square. A picture's own shape is read from its width and
+  height: landscape from four by three wide and wider, square from just over four by five, portrait
+  under that. A row or a grid of cards takes one shape for every card, the one most of its pictures
+  have, the first of landscape, portrait and square where two are as many, and the host's own where it
+  knows none.
+- **A picture is never cut or stretched** (`ArtworkFrame`). The frame stands at its shape and the
+  picture stands whole inside it, as large as fits. Where the picture's shape is not the frame's, the
+  room left round it is filled with the picture itself, blurred and drawn a little dim, under it; a
+  picture of the frame's own shape fills it edge to edge. Where its size is known the frame decides
+  this before the picture loads, and otherwise as it loads.
+- **A card with no picture** stands as its kind's mark over its name, set as words in the frame on the
+  raised ground, a few lines at most, so two such cards still read as two.
+- **While its picture loads** the frame stands as the shared skeleton at its own shape; a picture that
+  fails says so where it stood.
+- **The frame draws no corners of its own:** it is cut to the corners the host gives it, by the box it
+  stands in or a class handed to it. Anything a host lays on the picture — a bar of how far it was
+  watched, a mark — stands inside it, cut the same way.
+
+## Rows of cards
+
+- **A row of cards** (`CardRow`) is a heading over one line of cards that scrolls sideways, the
+  component library's carousel at its heart. Its heading names it and is its region's name; beside the
+  heading stands, where the host gives it a place, a link that opens the whole row (*all*).
+- **A pointer pages it.** Two icon buttons at the heading's trailing end page back and forward by
+  what the row shows at once, each standing only while there is somewhere to go and named in the
+  shared tooltip. A touch screen has neither: a finger swipes the row, and it glides as it is thrown.
+  A drag of the mouse moves it too, and a press that ends a drag opens nothing.
+- **The keyboard walks its cards** in their order, and a card the focus lands on is brought into
+  view. A reader who asked for less movement sees each page stand at once.
+- **The host gives the cards** and the width each stands at; the row keeps the library's own room
+  between them. The cards of one row stand at one shape (「Artwork」), so they line up as one strip.
 
 ## Code and files
 
