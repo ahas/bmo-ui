@@ -22,6 +22,12 @@ export const CONSOLE_ROLES = ["administrator", "member"] as const;
 
 export type ConsoleRole = (typeof CONSOLE_ROLES)[number];
 
+// The sections of a console's sidebar a bundle's entry stands in: among the services an administrator runs the
+// system with, or among the applications a reader works in.
+export const CONSOLE_SIDEBAR_SECTIONS = ["administration", "application"] as const;
+
+export type ConsoleSidebarSection = (typeof CONSOLE_SIDEBAR_SECTIONS)[number];
+
 // The methods a route a console relays outside the API prefix is named by.
 export const RELAY_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE"] as const;
 
@@ -118,6 +124,10 @@ const manifest = z
     words: apiPath("The path of the service's API the bundle's words are answered at."),
     apiPrefix: apiPath("The path of the service's API every call the screens make stands under.").default("/"),
     role: z.enum(CONSOLE_ROLES).describe("The least role a reader holds to open the screen."),
+    sidebarSection: z
+      .enum(CONSOLE_SIDEBAR_SECTIONS)
+      .default("application")
+      .describe("The section of a console's sidebar the bundle's entry stands in: administration, among the services an administrator runs the system with, or application, among the applications a reader works in."),
     ownerKey: z.boolean().default(false).describe("Whether every call the screens make needs the reader's owner key."),
     events: z.boolean().default(false).describe("Whether the screens read the service's event stream."),
     websocket: z.boolean().default(false).describe("Whether the screens open a WebSocket to the service."),

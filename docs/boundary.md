@@ -191,14 +191,14 @@ Each is named with everything it exports.
 | `files` | `FileConflict` |
 | `code-language` | `codeLanguage` |
 | `screen-mode` | `DocumentScheme`, `DEFAULT_SCHEME`, `SCHEME_COOKIE`, `isDocumentScheme` |
-| `console-manifest` | `CONSOLE_MANIFEST_ROUTE`, `OWNER_KEY_HEADER`, `OWNER_ROLE_HEADER`, `CONSOLE_ROLES`, `ConsoleRole`, `RELAY_METHODS`, `RelayMethod`, `LAYER_VERSION`, `LAYER_BOUND`, `LAYER_RANGE`, `CONSOLE_SHARED_LIBRARIES`, `ConsoleManifest`, `CONSOLE_MANIFEST_SCHEMA`, `consoleManifest`, `onThisLayer`, `roleAllows`, `screensCall`, `relaysRoute`, `shareRead`, `ShareHead`, `SHARE_HEAD_LANGUAGE_QUERY`, `shareHeadPath`, `shareHead`, `movedScreenAddress`, `ConsoleWords`, `ConsoleBundleModule` |
+| `console-manifest` | `CONSOLE_MANIFEST_ROUTE`, `OWNER_KEY_HEADER`, `OWNER_ROLE_HEADER`, `CONSOLE_ROLES`, `ConsoleRole`, `CONSOLE_SIDEBAR_SECTIONS`, `ConsoleSidebarSection`, `RELAY_METHODS`, `RelayMethod`, `LAYER_VERSION`, `LAYER_BOUND`, `LAYER_RANGE`, `CONSOLE_SHARED_LIBRARIES`, `ConsoleManifest`, `CONSOLE_MANIFEST_SCHEMA`, `consoleManifest`, `onThisLayer`, `roleAllows`, `screensCall`, `relaysRoute`, `shareRead`, `ShareHead`, `SHARE_HEAD_LANGUAGE_QUERY`, `shareHeadPath`, `shareHead`, `movedScreenAddress`, `ConsoleWords`, `ConsoleBundleModule` |
 
 - **`search` folds letter case in the locale each call is handed,** the runtime's own where none is.
   It reads no app configuration, so it runs alike in a browser and on a server; a host searching in
   the app hands it `countLocale`'s answer, as the layer's own components do.
 - **`console-manifest` is the contract's manifest** (`docs/console-bundles.md`): the route a service
   answers it at, the two headers a console relays the owner key and the role in, the roles and whether
-  one held allows one needed, the version of the layer it is part of, that release's bound and the
+  one held allows one needed, the sections of a console's sidebar a bundle's entry stands in, the version of the layer it is part of, that release's bound and the
   releases from the bound up to it, and whether a manifest was built on one of them, the libraries a bundle shares with its console, the manifest's JSON Schema, its type
   with each optional field that states a default filled, the reading that fills them or refuses a
   manifest naming each field at fault,

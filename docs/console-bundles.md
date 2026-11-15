@@ -76,6 +76,7 @@ none of them a dot or two standing for a folder.
 | `words` | The path of the service's API its words are answered at. | yes |
 | `apiPrefix` | The path of the service's API every call the screens make stands under. A console relays nothing of the service outside it but the module, the stylesheet and the routes under `relays`. | no, `/` |
 | `role` | The least role a reader holds to open the screen: `administrator` or `member`. | yes |
+| `sidebarSection` | The section of a console's sidebar the bundle's entry stands in: `administration`, among the services an administrator runs the system with, or `application`, among the applications a reader works in ("How a bundle mounts", the sidebar section). | no, `application` |
 | `ownerKey` | Whether every call the screens make needs the reader's owner key. | no, false |
 | `events` | Whether the screens read the service's event stream through the console. | no, false |
 | `websocket` | Whether the screens open a WebSocket to the service through the console. | no, false |
@@ -256,6 +257,11 @@ on any release from that bound up to its own.
 - **Notices.** A console that raises notices reads the service's event stream for the kinds under
   `pushKinds` and raises each in the words the bundle's words give that kind, under the bundle's
   namespace, to the readers whose role allows the manifest's.
+- **The sidebar section.** A console whose sidebar parts its entries into sections draws a bundle's entry in
+  the section its manifest names under `sidebarSection`: `administration` among the services an administrator
+  runs the system with, `application` among the applications a reader works in. The section places the entry
+  and opens it to no one: who sees it is the manifest's `role`. A console that draws one list draws every entry
+  in it alike.
 - **The sidebar count.** Where a manifest names a `sidebarUnread`, a console reads the count for the
   reader whose sidebar it draws, with its own credential and that reader's owner key and role, and draws
   a positive count on the bundle's sidebar entry. It reads the count again as it chooses; one that did
@@ -429,6 +435,9 @@ under `calls`, and its screens hand the module texts and a language.
 - **It keeps a screen's foot clear,** standing whatever it floats over the page area of its own accord above every
   element carrying `data-screen-foot` ("How a bundle mounts", the screen's foot), so it does not cover a screen's
   foot bar until the reader moves it there.
+- **It places a bundle's entry in the section its manifest names,** where its sidebar parts entries into sections
+  ("How a bundle mounts", the sidebar section), reading the section from the manifest alone and keeping no list of
+  its own of which bundle stands where.
 - **It draws the sidebar count a bundle declares** ("How a bundle mounts", the sidebar count), reading it for the
   reader whose sidebar it draws and leaving the last count where a read does not answer.
 - **It answers a moved screen's addresses** ("A screen that moved"): every address under a bundle's former
@@ -476,7 +485,7 @@ under `calls`, and its screens hand the module texts and a language.
 
 - **This document is the contract's one statement.** A repository whose service has a bundle, and a
   console, name this document in their own documents with the parts of it they use (a share page, a
-  sidebar count, the people directory, the company's members, sharing with members, a translator) and what they add of their own. They do not copy
+  sidebar count, a sidebar section, the people directory, the company's members, sharing with members, a translator) and what they add of their own. They do not copy
   its rules, its fields or its headers: a copy trails this document as soon as it changes.
 - **Conformance is held by shared checks,** never by a repository's own prose: the console face of
   the base library the services build on, which serves the manifest, the module, the stylesheet, the
