@@ -34,6 +34,16 @@ export const OVER_LAYERS = "data-over-layers";
 // library's own, still close it.
 export const OFF_HISTORY = "data-off-history";
 
+// What floats beside the page rather than over it carries this attribute, on the element the library
+// marks as a layer or around it: a sheet the page stays in use under (`docs/components.md`, "A window
+// beside the page"). It is a layer of the back gesture and Esc as any other, but a finger's tap away
+// from it is no tap away: the page under it is meant to be pressed while it stands.
+export const BESIDE_PAGE = "data-beside-page";
+
+function besidePage(element: Element): boolean {
+  return element.closest(`[${BESIDE_PAGE}]`) !== null;
+}
+
 function overLayers(target: EventTarget | null | undefined): boolean {
   return target instanceof Element && target.closest(`[${OVER_LAYERS}]`) !== null;
 }
@@ -244,7 +254,8 @@ export function refuseHandedBackFocus(): void {
 // tap opens its own menu, a link, a button — and a person tapping away to close something has not
 // yet looked at what is under their finger. So the click that press ends in goes nowhere, and the
 // next tap is the one that acts. A mouse is left alone: it points before it presses. What floats
-// over every layer is under no layer, so a tap on it acts.
+// over every layer is under no layer, so a tap on it acts, and a tap beside what floats beside the
+// page acts too.
 function listenForTaps(): void {
   let away = false;
 
@@ -253,7 +264,12 @@ function listenForTaps(): void {
     (event) => {
       const top = topLayer();
 
-      away = event.pointerType === "touch" && top !== null && !(event.target instanceof Node && top.contains(event.target)) && !overLayers(event.target);
+      away =
+        event.pointerType === "touch"
+        && top !== null
+        && !besidePage(top)
+        && !(event.target instanceof Node && top.contains(event.target))
+        && !overLayers(event.target);
     },
     true
   );
