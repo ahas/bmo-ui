@@ -4,6 +4,7 @@ import {
   CONSOLE_MANIFEST_ROUTE,
   CONSOLE_MANIFEST_SCHEMA,
   CONSOLE_ROLES,
+  CONSOLE_SIDEBAR_SECTIONS,
   LAYER_VERSION,
   SHARE_HEAD_LANGUAGE_QUERY,
   consoleManifest,
@@ -50,6 +51,7 @@ describe("a service's manifest", () => {
     expect(consoleManifest(answered)).toEqual({
       ...answered,
       role: "member",
+      sidebarSection: "application",
       formerScreenPaths: [],
       apiPrefix: "/",
       ownerKey: false,
@@ -89,6 +91,11 @@ describe("a service's manifest", () => {
     expect(faultsOf({ ...answered, sidebarUnread: { path: "summary", field: "unreadCount" } })).toContain("sidebarUnread.path:");
     expect(faultsOf({ ...answered, sidebarUnread: { path: "/summary", field: "UnreadCount" } })).toContain("sidebarUnread.field:");
     expect(faultsOf({ ...answered, sidebarUnread: { path: "/summary", field: "unreadCount", label: "notes.label.unread" } })).toContain("sidebarUnread");
+  });
+
+  test("keeps the sidebar section it names, and refuses one the contract does not name", () => {
+    expect(CONSOLE_SIDEBAR_SECTIONS.map((sidebarSection) => consoleManifest({ ...answered, sidebarSection }).sidebarSection)).toEqual(["administration", "application"]);
+    expect(faultsOf({ ...answered, sidebarSection: "settings" })).toContain("sidebarSection:");
   });
 
   test("is refused naming each field at fault", () => {
@@ -272,9 +279,13 @@ describe("the manifest's JSON Schema", () => {
     expect(CONSOLE_MANIFEST_SCHEMA.required).toEqual(["name", "title", "icon", "screenPath", "serviceName", "layer", "bundle", "words", "role"]);
     expect(CONSOLE_MANIFEST_SCHEMA.additionalProperties).toBe(false);
     expect(Object.keys(CONSOLE_MANIFEST_SCHEMA.properties as object).toSorted()).toEqual(
-      [...Object.keys(answered), "formerScreenPaths", "stylesheet", "apiPrefix", "ownerKey", "events", "websocket", "pushKinds", "sidebarUnread", "calls", "relays", "shareReads", "shareHead"].toSorted()
+      [...Object.keys(answered), "formerScreenPaths", "stylesheet", "apiPrefix", "ownerKey", "events", "websocket", "pushKinds", "sidebarUnread", "sidebarSection", "calls", "relays", "shareReads", "shareHead"].toSorted()
     );
     expect((CONSOLE_MANIFEST_SCHEMA.properties as Record<string, { enum?: unknown }>).role!.enum).toEqual(["administrator", "member"]);
+    expect((CONSOLE_MANIFEST_SCHEMA.properties as Record<string, unknown>).sidebarSection).toMatchObject({
+      enum: ["administration", "application"],
+      default: "application"
+    });
   });
 });
 
