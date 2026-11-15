@@ -138,5 +138,10 @@
     "sha256": "ff676166f45210890d1325ddfc7d74c05c40061c3a400e6d61c1b43067266fcd",
     "bound": "0.1.0-rev.23",
     "why": "Adds only: an optional sidebarSection on the console manifest, defaulting to application, with CONSOLE_SIDEBAR_SECTIONS and ConsoleSidebarSection on the console-manifest module; nothing a bundle built on 0.1.0-rev.23 reads is taken away or changed."
+  },
+  "bmo-ui-0.1.0-rev.28.tgz": {
+    "sha256": "ca587ffac4c21f66e886c5aee26500aec40b8ff82f7d79f7a25ef3b7af68676d",
+    "bound": "0.1.0-rev.23",
+    "why": "Adds only: FloatingWindow with the floating-window module, BESIDE_PAGE on the overlays module, ArtworkFrame and CardRow with the artwork module, the video player's optional autoNext and its next video card with NUDGE_SECONDS, NEXT_CARD_FROM_SECONDS and nextCardLead on the video module, and nine wording keys; nothing a bundle built on 0.1.0-rev.23 reads is taken away or changed."
   }
 }
