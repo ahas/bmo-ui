@@ -133,5 +133,10 @@
     "sha256": "6d4619d70dd067c59d420a07a72420f7ee46626f6a8edd9430a5e1ddf7530684",
     "bound": "0.1.0-rev.23",
     "why": "Adds only: LAYER_BOUND and LAYER_RANGE on the console-manifest module, a bound and a range in the layer's version file and a range argument to onThisLayer, which now attaches every release from the bound up; nothing a bundle built on 0.1.0-rev.23 reads is taken away or changed."
+  },
+  "bmo-ui-0.1.0-rev.27.tgz": {
+    "sha256": "ff676166f45210890d1325ddfc7d74c05c40061c3a400e6d61c1b43067266fcd",
+    "bound": "0.1.0-rev.23",
+    "why": "Adds only: an optional sidebarSection on the console manifest, defaulting to application, with CONSOLE_SIDEBAR_SECTIONS and ConsoleSidebarSection on the console-manifest module; nothing a bundle built on 0.1.0-rev.23 reads is taken away or changed."
   }
 }
