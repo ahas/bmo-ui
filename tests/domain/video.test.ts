@@ -1,13 +1,25 @@
 import { describe, expect, test } from "bun:test";
 
-import { firstFrameOf, keyAction, nextTurn, otherOrientation, skipTo, steppedVolume, stillBox, toggledTrack, turnedBox } from "~/domain/video";
+import { firstFrameOf, keyAction, nextCardLead, nextTurn, otherOrientation, skipTo, steppedVolume, stillBox, toggledTrack, turnedBox } from "~/domain/video";
 
 // How the video player behaves apart from the element it drives: its keys, its skips, its volume steps, the
 // subtitle the captions key turns to, how a picture is turned, and the box its still stands in.
 
 describe("the keys", () => {
-  test("space plays and pauses, the arrows skip and move the volume, f, m and c do their own", () => {
-    expect([" ", "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "f", "m", "c"].map(keyAction)).toEqual(["toggle", "back", "forward", "louder", "quieter", "fullscreen", "mute", "captions"]);
+  test("space and k play and pause, the arrows nudge and move the volume, j and l skip, f, m and c do their own", () => {
+    expect([" ", "k", "ArrowLeft", "ArrowRight", "j", "l", "ArrowUp", "ArrowDown", "f", "m", "c"].map(keyAction)).toEqual([
+      "toggle",
+      "toggle",
+      "nudge-back",
+      "nudge-forward",
+      "back",
+      "forward",
+      "louder",
+      "quieter",
+      "fullscreen",
+      "mute",
+      "captions"
+    ]);
   });
 
   test("r turns the picture", () => {
@@ -81,5 +93,20 @@ describe("the still", () => {
   test("reads its first frame a moment past the start, unless the address names a moment", () => {
     expect(firstFrameOf("/media/1?item=2")).toBe("/media/1?item=2#t=0.1");
     expect(firstFrameOf("/media/1#t=4")).toBe("/media/1#t=4");
+  });
+});
+
+describe("the next video's card", () => {
+  test("stands thirty seconds before the end of a video of ten minutes, more for longer ones", () => {
+    expect(nextCardLead(600)).toBe(30);
+    expect(nextCardLead(39 * 60)).toBe(30);
+    expect(nextCardLead(40 * 60)).toBe(35);
+    expect(nextCardLead(50 * 60)).toBe(40);
+  });
+
+  test("stands for no video shorter than ten minutes nor one of a length not known", () => {
+    expect(nextCardLead(599)).toBeNull();
+    expect(nextCardLead(null)).toBeNull();
+    expect(nextCardLead(Number.NaN)).toBeNull();
   });
 });

@@ -1,10 +1,16 @@
 // How the video player behaves, apart from the element it drives (`docs/components.md`, "The video
 // player"): the keys it answers, the speeds it offers, how far a skip goes, how often it tells where it
-// stands, how a picture is turned, and the shape its still takes in a message. What a host keeps of a
-// position, and which subtitle it shows first, are the host's.
+// stands, how a picture is turned, when the next video is offered, and the shape its still takes in a
+// message. What a host keeps of a position, and which subtitle it shows first, are the host's.
 
-/** How far a skip goes, in seconds. */
+/** How far a skip goes, in seconds: a skip button's, and j's and l's. */
 export const SKIP_SECONDS = 10;
+
+/** How far an arrow key nudges, in seconds. */
+export const NUDGE_SECONDS = 5;
+
+/** The shortest video, in seconds, that offers its next one on a card before it ends. */
+export const NEXT_CARD_FROM_SECONDS = 600;
 
 /** How often the player tells where it stands while it plays. */
 export const SAVE_EVERY_MS = 5_000;
@@ -27,7 +33,7 @@ export const STILL_CAP_REM = 20;
 /** Where the still's first frame is read from: a moment past the start, which a phone draws as well. */
 export const FIRST_FRAME = "#t=0.1";
 
-export type PlayerAction = "toggle" | "back" | "forward" | "louder" | "quieter" | "fullscreen" | "turn" | "mute" | "captions";
+export type PlayerAction = "toggle" | "back" | "forward" | "nudge-back" | "nudge-forward" | "louder" | "quieter" | "fullscreen" | "turn" | "mute" | "captions";
 
 /** A subtitle the player offers, by the number its host knows it by. */
 export interface PlayerTrack {
@@ -43,16 +49,18 @@ export interface VideoShape {
   height: number;
 }
 
-/** The action a key stands for, or none: space, the arrows, f, m, c and r. */
+/** The action a key stands for, or none: space and k, the arrows, j and l, f, m, c and r. */
 export function keyAction(key: string): PlayerAction | null {
   switch (key) {
     case " ":
     case "k":
       return "toggle";
     case "ArrowLeft":
+      return "nudge-back";
+    case "ArrowRight":
+      return "nudge-forward";
     case "j":
       return "back";
-    case "ArrowRight":
     case "l":
       return "forward";
     case "ArrowUp":
@@ -74,6 +82,17 @@ export function keyAction(key: string): PlayerAction | null {
     default:
       return null;
   }
+}
+
+/**
+ * How many seconds before its end a video offers its next one on a card: thirty, thirty-five from forty minutes and
+ * forty from fifty; none for a video shorter than ten minutes or of a length not known, which goes on as it ends.
+ */
+export function nextCardLead(length: number | null): number | null {
+  if (length === null || !(length >= NEXT_CARD_FROM_SECONDS)) return null;
+  if (length >= 50 * 60) return 40;
+
+  return length >= 40 * 60 ? 35 : 30;
 }
 
 /** Where a skip lands: never before the start, and never past the end where the end is known. */

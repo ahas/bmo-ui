@@ -32,7 +32,9 @@ wording keys listed here are the ones the layer's list holds.
 | Component | What it is |
 | --- | --- |
 | `ActionGroup` | The one group of actions on what a tab or a toolbar stands for, folding to a menu; the properties action last. |
+| `ArtworkFrame` | A card's picture at one of the artwork shapes, whole over a ground of itself where its shape is not the frame's, or its kind's mark over its name where it has none. |
 | `AudioPlayer` | A kept sound: a play and pause button, its waveform as its progress, a volume popover and a download. |
+| `CardRow` | A heading over one line of cards that scrolls sideways, paged by a pointer's buttons and swiped by a finger, with the link that opens it whole. |
 | `ChooseAll` | The three-state checkbox that takes every row shown or gives the choice up. |
 | `ColumnResizeHandle` | The right edge of a column's name, dragged or moved with the arrow keys. |
 | `CreateButton` | The one button a screen creates from: a grey icon in its row on a wide screen, a floating primary icon on a phone drawn under every overlay, its key named in its tooltip; marked `contained`, an add that belongs to a row, a sidebar's or a list's head, a tab bar or a dialog's or a drawer's row, is that row's grey icon at every width, answering no key. |
@@ -89,6 +91,7 @@ Each is named with everything it exports.
 | Module | Exports |
 | --- | --- |
 | `actionbar` | `BAR_GATHERS_UNDER_PX`, `GATHERED_ACTIONS`, `STANDING_ACTIONS`, `barGathers`, `actionsOutside`, `useBarRoom`, `useBarGathers` |
+| `artwork` | `PictureSize`, `ArtworkShape`, `PORTRAIT`, `LANDSCAPE`, `SQUARE`, `ARTWORK_SHAPES`, `LANDSCAPE_FROM`, `SQUARE_PAST`, `FILLS_WITHIN`, `shapeOf`, `rowShape`, `fillsShape` |
 | `bars` | `BarColor`, `BAR_SIZE`, `STACKED_LEGEND`, `INLINE_LEGEND`, `FOLDED_LEGEND` |
 | `chooseall` | `ChooseAllState`, `chooseAllState`, `chosenRuns`, `chooseAllPress`, `chooseAllLabel`, `CHOOSE_CELL`, `CHOOSE_GUTTER` |
 | `closing` | `OVERLAY_CLOSE_MS`, `useHeldWhileClosing` |
@@ -142,7 +145,7 @@ Each is named with everything it exports.
 | `time` | `FOREVER_LABEL`, `formatClock`, `formatDay`, `formatShortDay`, `formatDayClock`, `clockUnder`, `formatDateClock`, `formatStamp`, `formatTime`, `dayKey`, `spanClock`, `elapsedText`, `timerClock`, `remainingText`, `useNowSeconds`, `toUnixSeconds` |
 | `tooltip` | `TOOLTIP_UI`, `TOOLTIP_PROVIDER` |
 | `translation` | `Reading`, `Translator`, `Untranslated`, `TRANSLATION_BATCH`, `TRANSLATION_ASKS_AT_ONCE`, `translatorOf`, `hasTranslator`, `translated` |
-| `video` | `SKIP_SECONDS`, `SAVE_EVERY_MS`, `VOLUME_STEP`, `SPEEDS`, `CUE_LINE_OVER_CONTROLS`, `CONTROLS_IDLE_MS`, `STILL_CAP_REM`, `FIRST_FRAME`, `PlayerAction`, `PlayerTrack`, `VideoShape`, `keyAction`, `skipTo`, `steppedVolume`, `speedText`, `toggledTrack`, `nextTurn`, `otherOrientation`, `turnedBox`, `stillBox`, `firstFrameOf` |
+| `video` | `SKIP_SECONDS`, `NUDGE_SECONDS`, `NEXT_CARD_FROM_SECONDS`, `SAVE_EVERY_MS`, `VOLUME_STEP`, `SPEEDS`, `CUE_LINE_OVER_CONTROLS`, `CONTROLS_IDLE_MS`, `STILL_CAP_REM`, `FIRST_FRAME`, `PlayerAction`, `PlayerTrack`, `VideoShape`, `keyAction`, `nextCardLead`, `skipTo`, `steppedVolume`, `speedText`, `toggledTrack`, `nextTurn`, `otherOrientation`, `turnedBox`, `stillBox`, `firstFrameOf` |
 | `video-gestures` | `DOUBLE_TAP_MS`, `DOUBLE_TAP_SLOP_PX`, `BRIGHTNESS_MIN`, `BRIGHTNESS_MAX`, `CUE_LINGER_MS`, `HOLD_SPEED_MIN`, `HOLD_SPEED_MAX`, `overlayOpen`, `sideOf`, `dragAxis`, `tapMatches`, `seekFrom`, `levelFrom`, `brightnessFrom`, `heldSpeed`, `PlayerCue`, `GestureSpec`, `GestureReader`, `attachGestures`, `PlayerGestureSpec`, `usePlayerGestures` |
 | `volume` | `Loudness`, `Volume`, `VOLUME_KEY`, `FULL_VOLUME`, `UNMUTED_LEVEL`, `slid`, `muteToggled`, `createVolume`, `useVolume` |
 | `waveform` | `WAVE_DETAIL`, `WAVE_FETCH_LIMIT`, `WAVE_FLOOR`, `Waveform`, `levelsOf`, `waveBars`, `barCount`, `loudnessAt`, `waveformOf` |
@@ -297,14 +300,14 @@ What a coding harness takes the layer through (`docs/harness.md`).
 
 ## Wording keys
 
-The layer reads these 126 keys and no others. The `wording-keys` shared module lists them, the one
+The layer reads these 131 keys and no others. The `wording-keys` shared module lists them, the one
 list a host's pack is held to. Placeholders are named after each key.
 
 - **`common.action`:** `cancel`, `choose_all`, `choose_none`, `close`, `close_all_tabs`,
   `close_other_tabs`, `close_right_tabs`, `copy`, `create_link`, `discard`, `exit_fullscreen`,
-  `fit_screen`, `fullscreen`, `more`, `mute`, `next_picture`, `pause`, `pin`, `play`,
-  `previous_picture`, `save`, `share`, `skip_back` `{n}`, `skip_forward` `{n}`, `subtitles`,
-  `turn_picture`, `unmute`, `unpin`, `unshare`, `zoom_in`, `zoom_out`.
+  `fit_screen`, `fullscreen`, `more`, `mute`, `next_picture`, `page_back`, `page_forward`, `pause`,
+  `pin`, `play`, `play_now`, `previous_picture`, `save`, `see_all`, `share`, `skip_back` `{n}`,
+  `skip_forward` `{n}`, `subtitles`, `turn_picture`, `unmute`, `unpin`, `unshare`, `zoom_in`, `zoom_out`.
 - **`common.aria`:** `close_named` `{name}`, `column_width` `{name}`, `decrease`, `download_named`
   `{name}`, `image_zoom` `{title}`, `increase`, `member_permission` `{name}`, `more_notices` `{n}`,
   `pinned_named` `{name}`, `play_named` `{name}`, `player_named` `{name}`, `share_address`,
@@ -326,7 +329,7 @@ list a host's pack is held to. Placeholders are named after each key.
   `preview_badge`, `preview_field`, `preview_link`, `preview_meta`, `preview_note`.
 - **`common.placeholder`:** `member_search`.
 - **`common.status`:** `brightness` `{n}`, `copied`, `loading`, `members_loading`, `muted`,
-  `no_members`, `picture_loading`, `share_loading`, `speed` `{speed}`, `subtitles_off`,
+  `next_in` `{n}`, `no_members`, `picture_loading`, `share_loading`, `speed` `{speed}`, `subtitles_off`,
   `subtitles_on` `{name}`, `turned` `{degrees}`, `unmuted`, `video_loading`, `volume` `{n}`,
   `went_back` `{n}`, `went_forward` `{n}`.
 - **`common.title`:** `discard_changes`, `share`.

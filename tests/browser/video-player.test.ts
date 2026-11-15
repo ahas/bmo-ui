@@ -358,7 +358,7 @@ describe.skipIf(!ready)("the still in a message bubble", () => {
     await page.locator(`[role=dialog] ${PLAYER} [data-video-toggle]`).waitFor();
     await page.keyboard.press("ArrowRight");
 
-    expect((await clip(page, video)).time).toBe(10);
+    expect((await clip(page, video)).time).toBe(5);
 
     await page.keyboard.press("k");
 
@@ -421,7 +421,7 @@ describe.skipIf(!ready)("the full player", () => {
     }
   }
 
-  test("plays and pauses on a mouse press, and its keys skip, step the volume and turn on subtitles", async () => {
+  test("plays and pauses on a mouse press, and its keys skip by j and l, nudge by the arrows, step the volume and turn on subtitles", async () => {
     const { context, page } = await session("full", "desktop", "dark");
     const video = `${PLAYER} video`;
 
@@ -430,11 +430,17 @@ describe.skipIf(!ready)("the full player", () => {
     await page.mouse.click(picture.x, picture.y);
     expect((await clip(page, video)).paused).toBe(false);
 
+    await page.keyboard.press("l");
+    await page.keyboard.press("l");
+    await page.keyboard.press("j");
+    expect((await clip(page, video)).time).toBe(10);
+    expect(await said(page)).toBe("Back 10 seconds");
+
     await page.keyboard.press("ArrowRight");
     await page.keyboard.press("ArrowRight");
     await page.keyboard.press("ArrowLeft");
-    expect((await clip(page, video)).time).toBe(10);
-    expect(await said(page)).toBe("Back 10 seconds");
+    expect((await clip(page, video)).time).toBe(15);
+    expect(await said(page)).toBe("Back 5 seconds");
 
     await page.keyboard.press("ArrowDown");
     expect(await said(page)).toMatch(/^Volume \d+%$/);
