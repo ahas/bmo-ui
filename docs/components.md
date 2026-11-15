@@ -565,6 +565,62 @@ default; a screen supplies what it holds and what a press means there. Every exp
   of its own (`FULL_SHEET`, `SPLIT_HANDLE`). A dialog that is no part of the page is a centred modal at
   every width, centred on what can be seen, so a keyboard never covers it.
 - **A dropdown stays inside the screen** (see Tab bar and toolbar).
+- **What floats beside the page leaves the page in use.** A floating thing the library draws that the
+  page stays usable under — a sheet that is no dialog — carries the overlays module's `BESIDE_PAGE`
+  mark. It is a layer of the back gesture and Esc as any other, but a tap away from it is no tap away:
+  it closes nothing and the tap does what it points at.
+
+## A window beside the page
+
+`FloatingWindow` holds a part of a screen taken out of the screen's flow, floating over it while the
+screen behind stays in use: read, scrolled, pressed and written in. It is no dialog. It draws no
+shade, holds no focus captive, and a press, a tap or a focus outside it closes nothing. Its title, its
+body and what its pill shows are the host's; how it moves, where it stands and how it folds are the
+component's.
+
+- **On a wide screen it is a window** at a place and a size of its own.
+  - **It is drawn into the app's own root, after the app's screens,** so it stands over every screen
+    and under everything the library floats — a dialog, a sheet, a menu, a popover, a tooltip, the
+    message pill — whenever that opens, since those are drawn after the app.
+  - **Its title bar moves it:** a pointer or a finger dragging the bar, and the arrow keys once the
+    bar holds the keyboard's focus, a step of 16 pixels and 64 with Shift. The bar shows the shared
+    ring where the keyboard put the focus there. A press on a control inside the bar is that control's
+    and moves nothing.
+  - **Its trailing foot corner sizes it,** dragged or moved by the arrow keys the same way, between a
+    floor the host names — 320 by 240 pixels where it names none — and what is visible less the
+    gutter. The corner names itself in the shared tooltip.
+  - **It never stands outside what is visible.** It keeps a 16-pixel gutter inside the visible part of
+    the window on every side: a drag stops at the edge, and a window narrowed, or a keyboard laid over
+    the page's foot, moves it back into view and shrinks it where moving is not enough. The visible
+    part is the browser's visual viewport, so a keyboard counts.
+  - **Its place and size are kept per browser** under the name the host gives it and the width class
+    the window stands in — narrower than 1,024 pixels, narrower than 1,536, or wider — so a wide desk
+    and a narrowed window each keep their own. They are kept in the browser's storage, written as the
+    reader lets go of a move or a size; a storage that refuses is read as nothing kept and written to
+    in vain, and the window stands all the same.
+  - **Where nothing is kept for its class it stands at its first place:** at the default size the host
+    names — 400 by 520 pixels where it names none — inside the area the host names, the visible window
+    where it names none, at that area's top trailing corner a gutter in from both edges, and never
+    taller than three fifths of the area, so the foot of what the area shows stays clear.
+- **On a narrow screen it is a sheet,** under the screen module's narrow query, risen from the bottom
+  edge as the library's drawer with no shade and its handle at its head, carrying the `BESIDE_PAGE`
+  mark.
+  - It stands at one of two heights: short, 45% of the visible height, and tall, 90%. Dragging the
+    handle moves between them, and the button at the header's end, named expand or collapse in the
+    shared tooltip, sets the other; dragging below the short height folds the sheet. The height is kept as the
+    window's place is, under the narrow class.
+  - It covers what stands at the screen's foot while it stands; folding it gives that back.
+- **Folded, it is a pill:** one small button showing what the host gives it and named by the host's
+  words in the shared tooltip. On a wide screen it stands at the top trailing corner of the place the
+  window stood, so the window unfolds out of it to where it was; on a narrow screen it stands at the
+  screen's leading foot, above the room the host says its foot keeps — an input bar, say.
+- **Folding is the window's own close.** The close button at its header's end, Esc pressed inside it
+  and the back gesture fold it; it stands as a layer of the gesture while it stands unfolded. Whether it
+  stands unfolded is the host's to hold, so a host may unfold it again when something new arrives in it.
+- **How it moves.** It unfolds out of its pill and folds back into it, fading and growing from the
+  pill's place and shrinking into it, at `pop`; standing up with no press behind it, it only fades.
+  Dragged or sized, it follows the pointer and moves on no clock of its own. Where less movement was
+  asked for, it fades where it stands. The sheet slides from its edge as every drawer does.
 
 ## Tables
 

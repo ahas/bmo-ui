@@ -46,6 +46,7 @@ wording keys listed here are the ones the layer's list holds.
 | `FilesNameField` | A name renamed in place, chosen up to its ending. |
 | `FilesProgress` | An upload's progress, by files and by bytes, with a bar. |
 | `FilesText` | A text file in the read-only code viewer, coloured by its name's language. |
+| `FloatingWindow` | A part of a screen floating beside it: a window moved, sized and kept inside what is visible on a wide screen, a sheet of two heights on a narrow one, folded to a pill. |
 | `GrowingTextarea` | A form's text box that grows with its text and never scrolls inside. |
 | `HintTip` | The shared tooltip for words that say more than what they stand on. |
 | `IconButton` | A button drawn as its icon alone, its one name heard and shown in the shared tooltip with the keys that press it, a held finger included. |
@@ -107,6 +108,7 @@ Each is named with everything it exports.
 | `dragselect` | `draggedSelection`, `edgeScroll`, `PressKind`, `DragSelectList`, `useDragSelect` |
 | `errors` | `failureText`, `answeredLate` |
 | `file-icons` | `fileIcon`, `folderIcon`, `iconNames` |
+| `floating-window` | `WindowRect`, `WindowFrame`, `WINDOW_GUTTER_PX`, `WINDOW_STEP_PX`, `WINDOW_LEAP_PX`, `WINDOW_MIN`, `WINDOW_SIZE`, `SHEET_HEIGHTS`, `SheetHeight`, `WidthClass`, `widthClass`, `visibleBox`, `clampRect`, `firstRect`, `stepOf`, `keptRect`, `keepRect`, `keptSheet`, `keepSheet` |
 | `foot` | `FootOptions`, `useFootInView` |
 | `form-save` | `FormPart`, `FormSave`, `askDiscard`, `useCloseGuard`, `useFormSave`, `useFormPart`, `useLeaveGuard` |
 | `fullscreen` | `PutBack`, `TakePlace`, `keepPlace`, `holdThroughFullscreen` |
@@ -125,7 +127,7 @@ Each is named with everything it exports.
 | `moving-list` | `unfoldItem`, `settleItem`, `foldItem` |
 | `numbers` | `countLocale`, `countText`, `FigureLine`, `COUNT_BADGE`, `figurePlaces`, `turnOf`, `progressText` |
 | `openings` | `useOpenings` |
-| `overlays` | `OVER_LAYERS`, `OFF_HISTORY`, `standsAsLayer`, `isBackEscape`, `refuseStalePresses`, `refuseHandedBackFocus`, `watchOverlays` |
+| `overlays` | `OVER_LAYERS`, `OFF_HISTORY`, `BESIDE_PAGE`, `standsAsLayer`, `isBackEscape`, `refuseStalePresses`, `refuseHandedBackFocus`, `watchOverlays` |
 | `page-tip` | `PAGE_TIP_UI`, `PageTipBy`, `PageTipFinder`, `PageTip`, `usePageTip` |
 | `player` | `Playing`, `playAlone`, `playClock`, `knownLength`, `loudnessOf`, `easedLoudness`, `AURA_STILL`, `auraOf`, `PlayerButton`, `PlayerSignal`, `buttonAfter` |
 | `prompt` | `TOUCH_QUERY`, `EnterKeys`, `enterKeys`, `PromptEnter`, `usePromptEnter`, `PROMPT_MAX_ROWS`, `PROMPT_TEXTAREA_UI`, `PROMPT_WORDS_WRAP` |
@@ -300,18 +302,18 @@ What a coding harness takes the layer through (`docs/harness.md`).
 
 ## Wording keys
 
-The layer reads these 131 keys and no others. The `wording-keys` shared module lists them, the one
+The layer reads these 135 keys and no others. The `wording-keys` shared module lists them, the one
 list a host's pack is held to. Placeholders are named after each key.
 
 - **`common.action`:** `cancel`, `choose_all`, `choose_none`, `close`, `close_all_tabs`,
-  `close_other_tabs`, `close_right_tabs`, `copy`, `create_link`, `discard`, `exit_fullscreen`,
-  `fit_screen`, `fullscreen`, `more`, `mute`, `next_picture`, `page_back`, `page_forward`, `pause`,
-  `pin`, `play`, `play_now`, `previous_picture`, `save`, `see_all`, `share`, `skip_back` `{n}`,
+  `close_other_tabs`, `close_right_tabs`, `collapse`, `copy`, `create_link`, `discard`, `exit_fullscreen`,
+  `expand`, `fit_screen`, `fullscreen`, `more`, `mute`, `next_picture`, `page_back`, `page_forward`,
+  `pause`, `pin`, `play`, `play_now`, `previous_picture`, `save`, `see_all`, `share`, `skip_back` `{n}`,
   `skip_forward` `{n}`, `subtitles`, `turn_picture`, `unmute`, `unpin`, `unshare`, `zoom_in`, `zoom_out`.
 - **`common.aria`:** `close_named` `{name}`, `column_width` `{name}`, `decrease`, `download_named`
   `{name}`, `image_zoom` `{title}`, `increase`, `member_permission` `{name}`, `more_notices` `{n}`,
   `pinned_named` `{name}`, `play_named` `{name}`, `player_named` `{name}`, `share_address`,
-  `speed_named` `{speed}`.
+  `speed_named` `{speed}`, `window_move`, `window_resize`.
 - **`common.error`:** `editor_failed`, `link_copy_failed`, `member_change_failed`,
   `member_search_failed`, `member_share_failed`, `members_read_failed`, `picture_failed`,
   `share_create_failed`, `share_read_failed`, `unshare_failed`, `video_failed`.
@@ -339,7 +341,7 @@ list a host's pack is held to. Placeholders are named after each key.
 - **`files.message`:** `conflict`.
 - **`files.status`:** `uploading`.
 
-That is 31 actions, 13 accessible names, 11 errors, 38 labels, 6 messages, a placeholder, 17
+That is 37 actions, 15 accessible names, 11 errors, 38 labels, 6 messages, a placeholder, 18
 statuses and 2 titles under `common`, and 7 keys under `files`.
 
 ## Tokens
