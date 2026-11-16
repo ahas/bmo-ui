@@ -298,8 +298,14 @@ whole in `docs/boundary.md`; this document says what each is for and how the lay
   `badge-ink` class, which the layer's badge override puts on every badge. Each of the four shapes —
   solid, outline, soft and subtle — stays the shape it is. The dark mode's 400 already reads at 5 or
   better and is left as it is.
-- A check paints every colour in every shape on each surface a badge is read on — the page, the
-  muted one and the elevated one — in both modes, and measures the words as the browser drew them.
+- **A soft or subtle alert's words read at 4.5:1 or better the same way.** Those two shapes draw an
+  alert's title and description in its colour on its own tint, as a badge of the same shape does,
+  so the layer's alert override puts the `badge-ink` class on both, for every colour. It also draws
+  their description at its full colour: the nine tenths the library draws it at falls under 4.5:1 on
+  the muted and elevated surfaces, in the dark mode as well.
+- A check paints every colour in every badge shape, and in an alert's soft and subtle shapes, on each
+  surface either is read on — the page, the muted one and the elevated one — in both modes and under
+  every theme, and measures the words as the browser drew them.
 
 ## Themes
 

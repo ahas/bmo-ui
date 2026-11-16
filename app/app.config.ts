@@ -114,6 +114,14 @@ export default defineAppConfig({
         }
       }
     },
+    // A soft or subtle alert draws its words in its colour on its own tint, the way a badge does, so
+    // it carries the same class, and its description is drawn at its full colour rather than the
+    // library's nine tenths, which falls under 4.5:1 on the muted and elevated surfaces. It is said as
+    // a compound variant: the library's own shapes are bare strings, and a slot object laid over a
+    // bare string is not merged into it.
+    alert: {
+      compoundVariants: [{ variant: ["soft", "subtle"], class: { root: "badge-ink", description: "opacity-100" } }]
+    },
     // A tooltip's words are drawn under the floor by default, and they are the only words that say
     // what an icon button does. They take the caption size in the box the library already gave
     // them, tightened to that box's own line so the tooltip keeps its height.
