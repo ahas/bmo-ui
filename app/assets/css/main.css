@@ -155,6 +155,21 @@
     Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
+/* A coloured word's own step (`docs/design.md`, "Colour"). The library draws a semantic colour's words,
+   fills, edges and tints from one token, and the step a fill is drawn at need not read as a word. So
+   the text utilities of each colour, every variant of them included, read the colour's word token
+   where a host states one and the colour itself where none is stated; every other utility of the
+   colour keeps reading the colour. The fallback stands inside the utility rather than on the root, so
+   a box that restates a colour for itself, a badge or a host's own surface, has its words follow it. */
+@theme inline {
+  --text-color-primary: var(--bmo-ink-primary, var(--ui-primary));
+  --text-color-secondary: var(--bmo-ink-secondary, var(--ui-secondary));
+  --text-color-success: var(--bmo-ink-success, var(--ui-success));
+  --text-color-info: var(--bmo-ink-info, var(--ui-info));
+  --text-color-warning: var(--bmo-ink-warning, var(--ui-warning));
+  --text-color-error: var(--bmo-ink-error, var(--ui-error));
+}
+
 /* How long movements take and how they ease (`docs/design.md`, "Motion"). Every movement the layer
    draws or retimes names one of these rather than a number of its own, so a kind of movement is
    the same length wherever it happens.
@@ -248,8 +263,9 @@
    a line of words drawn in a state colour on a plain surface, so each colour is taken to its 800
    shade inside it — the step at which every colour still reads on the elevated surface under its
    own tint — and every shape follows at once: a solid badge's fill darkens under its white word,
-   and the other shapes' words darken on their own tint. The dark mode's 400 shade already reads,
-   and is left alone. */
+   and the other shapes' words darken on their own tint. The words take the same step, over whatever
+   step a host states for a coloured word, so a badge or an alert reads the same on every host. The
+   dark mode's 400 shade already reads, and is left alone. */
 :root:not(.dark) .badge-ink {
   --ui-primary: var(--ui-color-primary-800);
   --ui-secondary: var(--ui-color-secondary-800);
@@ -257,6 +273,12 @@
   --ui-info: var(--ui-color-info-800);
   --ui-warning: var(--ui-color-warning-800);
   --ui-error: var(--ui-color-error-800);
+  --bmo-ink-primary: var(--ui-color-primary-800);
+  --bmo-ink-secondary: var(--ui-color-secondary-800);
+  --bmo-ink-success: var(--ui-color-success-800);
+  --bmo-ink-info: var(--ui-color-info-800);
+  --bmo-ink-warning: var(--ui-color-warning-800);
+  --bmo-ink-error: var(--ui-color-error-800);
 }
 
 /* Focus (`docs/design.md`, "Focus"). What the keyboard has reached is ringed once, the same way on

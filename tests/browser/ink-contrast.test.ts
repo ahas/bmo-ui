@@ -18,8 +18,10 @@ type Measured = { measure: typeof import("./measure") };
 // colour and shape it is given and whichever surface it stands on (`docs/design.md`, "Colour"). The
 // page is built the way a host's is: the colour tokens as the library's colour plugin states them,
 // the shapes as the library's badge and alert paint them, the classes the layer's app configuration
-// gives each, and the layer's own rules for those classes read out of its stylesheet as it ships.
-// The browser then draws each one and the measuring module reads what the words ended up as.
+// gives each, their words in the word token the layer's theme reads, and the layer's own rules for
+// those classes read out of its stylesheet as it ships. The host states its word tokens at the fill's
+// own step, the one at which a word falls shortest, so the layer's rule is what makes them read. The
+// browser then draws each one and the measuring module reads what the words ended up as.
 
 // The configuration is written for Nuxt, which supplies the function it is wrapped in; here it is the
 // identity. It is named by a variable so the static check does not follow it into Nuxt's globals.
@@ -60,7 +62,8 @@ function tokens(): string {
   const scale = Object.entries(colors)
     .flatMap(([key, name]) => shades.map((shade) => `--ui-color-${key}-${shade}: ${(tailwind as unknown as Record<string, Record<number, string>>)[name]![shade]};`))
     .join("\n");
-  const pick = (shade: number) => semantic.map((key) => `--ui-${key}: var(--ui-color-${key}-${shade});`).join("\n");
+  const pick = (shade: number) =>
+    semantic.map((key) => `--ui-${key}: var(--ui-color-${key}-${shade}); --bmo-ink-${key}: var(--ui-color-${key}-${shade});`).join("\n");
 
   return `:root { ${scale} }
     :root { ${pick(500)} --ui-text-inverted: #fff; --ui-bg: #fff;
@@ -69,13 +72,16 @@ function tokens(): string {
       --ui-bg-muted: var(--ui-color-neutral-800); --ui-bg-elevated: var(--ui-color-neutral-800); }`;
 }
 
+// A coloured word as the layer's theme draws it: its word token, or the colour where none is stated.
+const word = (key: string) => `var(--bmo-ink-${key}, var(--ui-${key}))`;
+
 // The four shapes, painted as the library paints them.
 const shapes: Record<string, (key: string) => string> = {
   solid: (key) => `background: var(--ui-${key}); color: var(--ui-text-inverted);`,
-  outline: (key) => `color: var(--ui-${key}); box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--ui-${key}) 50%, transparent);`,
-  soft: (key) => `background: color-mix(in oklab, var(--ui-${key}) 10%, transparent); color: var(--ui-${key});`,
+  outline: (key) => `color: ${word(key)}; box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--ui-${key}) 50%, transparent);`,
+  soft: (key) => `background: color-mix(in oklab, var(--ui-${key}) 10%, transparent); color: ${word(key)};`,
   subtle: (key) =>
-    `background: color-mix(in oklab, var(--ui-${key}) 10%, transparent); color: var(--ui-${key}); box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--ui-${key}) 25%, transparent);`
+    `background: color-mix(in oklab, var(--ui-${key}) 10%, transparent); color: ${word(key)}; box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--ui-${key}) 25%, transparent);`
 };
 // The shapes of an alert that draw its words in its colour on its own tint, which the library paints
 // as it paints a badge of the same shape. A solid or outline alert is no part of this.
@@ -204,6 +210,7 @@ describe("the darker ink's own rule", () => {
   test("names every semantic colour the library paints with", () => {
     for (const key of semantic) {
       expect(inkRules.join("\n")).toContain(`--ui-${key}:`);
+      expect(inkRules.join("\n")).toContain(`--bmo-ink-${key}:`);
     }
   });
 });

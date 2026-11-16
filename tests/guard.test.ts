@@ -177,7 +177,7 @@ const FORBIDDEN_NAMES = new Set([
 
 // The words of the layer's own namespace after its prefix; a prefixed word naming anything else names
 // another repository.
-const OWN_NAMESPACE = new Set(["audio", "code", "console", "create", "dialog", "ease", "focus", "inset", "island", "list", "motion", "palette", "safe", "screen", "slide", "touch", "ui"]);
+const OWN_NAMESPACE = new Set(["audio", "code", "console", "create", "dialog", "ease", "focus", "ink", "inset", "island", "list", "motion", "palette", "safe", "screen", "slide", "touch", "ui"]);
 
 // The layer's own skill, named under the namespace a harness loads upstream skills from
 // (`docs/harness.md`, "The skill"). It is one name, so its parts are not read as words of their own.
