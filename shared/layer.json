@@ -1,4 +1,4 @@
 {
-  "layer": "0.1.0-rev.29+source",
+  "layer": "0.1.0-rev.30+source",
   "sharedLibraries": ["vue", "vue-router", "vue-i18n", "nuxt/app", "@nuxt/ui", "bmo-ui"]
 }
