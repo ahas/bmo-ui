@@ -244,11 +244,12 @@
 /* A coloured badge in the light mode (`docs/design.md`, "Colour"). The 500 shade the light mode
    paints every colour with is a fill colour, and a word drawn in it — on white, or on the badge's
    own tint — falls well short of 4.5:1, as does a white word on it. Every badge carries this class
-   (the layer's badge override), and so may a line of words drawn in a state colour on a plain
-   surface, so each colour is taken to its 800 shade inside it — the step at which every colour
-   still reads on the elevated surface under its own tint — and every shape follows at once: a
-   solid badge's fill darkens under its white word, and the other shapes' words darken on their own
-   tint. The dark mode's 400 shade already reads, and is left alone. */
+   (the layer's badge override), so does every soft and subtle alert (its alert override), and so may
+   a line of words drawn in a state colour on a plain surface, so each colour is taken to its 800
+   shade inside it — the step at which every colour still reads on the elevated surface under its
+   own tint — and every shape follows at once: a solid badge's fill darkens under its white word,
+   and the other shapes' words darken on their own tint. The dark mode's 400 shade already reads,
+   and is left alone. */
 :root:not(.dark) .badge-ink {
   --ui-primary: var(--ui-color-primary-800);
   --ui-secondary: var(--ui-color-secondary-800);

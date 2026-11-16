@@ -419,18 +419,18 @@ Every token is a custom property stated by the layer's stylesheet on the root un
 ## The library's overrides
 
 - **Components:** the layer's app configuration overrides the library's `icons`, `colors`, `avatar`,
-  `badge`, `tooltip`, `tabs`, `collapsible`, `navigationMenu`, `kbd`, `checkbox`, `switch`,
+  `badge`, `alert`, `tooltip`, `tabs`, `collapsible`, `navigationMenu`, `kbd`, `checkbox`, `switch`,
   `dashboardSidebar`, `container`, `select`, `selectMenu`, `inputMenu`, `dropdownMenu`,
   `contextMenu`, `modal`, `drawer`, `slideover`, `dashboardPanel`, `popover`, `chatPrompt` and
   `textarea`. A host's own app configuration merges over them.
-- **What they hold, in short:** icons from Material Symbols; motion retimed onto the motion tokens by
-  kind — growing, growing after a delay, unfolding, shading; badges and the small avatars on the
-  14-pixel floor with `badge-ink`; the tooltip at caption size; focus inside clipping rows; the
-  reading width on the dashboard panel and the container's inset outside it; no floor on the panel
-  or the sidebar; dropdowns as wide as their longest item and no wider than the screen; dialogs
-  growing out of their control and standing at once when they fill the screen; sheets clear of the
-  safe area; popovers held to their room; the message bar's focus on its bar; text areas at full
-  width.
+- **What they hold, in short:** icons from Material Symbols; motion retimed onto the motion tokens
+  by kind — growing, growing after a delay, unfolding, shading; badges and the small avatars on the
+  14-pixel floor with `badge-ink`; soft and subtle alerts with `badge-ink` and their description at
+  full colour; the tooltip at caption size; focus inside clipping rows; the reading width on the
+  dashboard panel and the container's inset outside it; no floor on the panel or the sidebar;
+  dropdowns as wide as their longest item and no wider than the screen; dialogs growing out of their
+  control and standing at once when they fill the screen; sheets clear of the safe area; popovers
+  held to their room; the message bar's focus on its bar; text areas at full width.
 - **The layer's Nuxt configuration** brings the library as its module with its semantic colours, the
   layer's stylesheet, the viewport meta (`viewport-fit=cover`, the keyboard resizing the content), the
   screen mode (dark until a reader chooses another, kept for a year in the cookie `screen-mode`
