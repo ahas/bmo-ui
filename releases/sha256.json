@@ -143,5 +143,10 @@
     "sha256": "ca587ffac4c21f66e886c5aee26500aec40b8ff82f7d79f7a25ef3b7af68676d",
     "bound": "0.1.0-rev.23",
     "why": "Adds only: FloatingWindow with the floating-window module, BESIDE_PAGE on the overlays module, ArtworkFrame and CardRow with the artwork module, the video player's optional autoNext and its next video card with NUDGE_SECONDS, NEXT_CARD_FROM_SECONDS and nextCardLead on the video module, and nine wording keys; nothing a bundle built on 0.1.0-rev.23 reads is taken away or changed."
+  },
+  "bmo-ui-0.1.0-rev.29.tgz": {
+    "sha256": "963745571e446a87115b0a3fcf2266d3d32c7c91e56efdb4a8cad0875d89a6b4",
+    "bound": "0.1.0-rev.23",
+    "why": "Adds only: the badge-ink class and a full-colour description on soft and subtle alerts through the layer's alert override; nothing a bundle built on 0.1.0-rev.23 reads is taken away or changed."
   }
 }
