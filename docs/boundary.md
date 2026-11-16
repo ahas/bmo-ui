@@ -356,6 +356,11 @@ Every token is a custom property stated by the layer's stylesheet on the root un
   `--bmo-palette-other-dark`, stated by the palettes module's declarations for one palette; and the
   mode's pair, `--bmo-palette-own` and `--bmo-palette-other`, resolved by the stylesheet on the root
   and `.light` to the light values and on `.dark` to the dark ones.
+- **Words:** `--bmo-ink-primary`, `--bmo-ink-secondary`, `--bmo-ink-success`, `--bmo-ink-info`,
+  `--bmo-ink-warning` and `--bmo-ink-error`, the step a coloured word is drawn at. The layer states
+  none on the root: its theme states `--text-color-<colour>` for each colour as the colour's word token
+  falling back to the colour itself, which the colour's text utilities read, while its fill, edge and
+  ring utilities read the colour alone. `badge-ink` states each at its 800 in the light mode.
 - **Width:** `--ui-container`, 48rem, the reading width; `--bmo-inset`, a container's own side room,
   added outside the reading width.
 - **Height:** the library's `--ui-header-height`, 3rem, one height for a top bar and a panel's head.

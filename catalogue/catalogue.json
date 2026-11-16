@@ -2235,6 +2235,42 @@
       "dark": "\"Apple SD Gothic Neo\", \"Pretendard\", -apple-system, BlinkMacSystemFont, system-ui, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans KR\", \"Malgun Gothic\", \"Apple Color Emoji\", \"Segoe UI Emoji\", sans-serif",
       "source": "layer"
     },
+    "--text-color-error": {
+      "group": "text",
+      "light": "var(--bmo-ink-error, var(--ui-error))",
+      "dark": "var(--bmo-ink-error, var(--ui-error))",
+      "source": "layer"
+    },
+    "--text-color-info": {
+      "group": "text",
+      "light": "var(--bmo-ink-info, var(--ui-info))",
+      "dark": "var(--bmo-ink-info, var(--ui-info))",
+      "source": "layer"
+    },
+    "--text-color-primary": {
+      "group": "text",
+      "light": "var(--bmo-ink-primary, var(--ui-primary))",
+      "dark": "var(--bmo-ink-primary, var(--ui-primary))",
+      "source": "layer"
+    },
+    "--text-color-secondary": {
+      "group": "text",
+      "light": "var(--bmo-ink-secondary, var(--ui-secondary))",
+      "dark": "var(--bmo-ink-secondary, var(--ui-secondary))",
+      "source": "layer"
+    },
+    "--text-color-success": {
+      "group": "text",
+      "light": "var(--bmo-ink-success, var(--ui-success))",
+      "dark": "var(--bmo-ink-success, var(--ui-success))",
+      "source": "layer"
+    },
+    "--text-color-warning": {
+      "group": "text",
+      "light": "var(--bmo-ink-warning, var(--ui-warning))",
+      "dark": "var(--bmo-ink-warning, var(--ui-warning))",
+      "source": "layer"
+    },
     "--text-xs": {
       "group": "text",
       "light": "0.875rem",
