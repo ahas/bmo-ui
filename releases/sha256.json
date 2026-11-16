@@ -148,5 +148,10 @@
     "sha256": "963745571e446a87115b0a3fcf2266d3d32c7c91e56efdb4a8cad0875d89a6b4",
     "bound": "0.1.0-rev.23",
     "why": "Adds only: the badge-ink class and a full-colour description on soft and subtle alerts through the layer's alert override; nothing a bundle built on 0.1.0-rev.23 reads is taken away or changed."
+  },
+  "bmo-ui-0.1.0-rev.30.tgz": {
+    "sha256": "f814c984348446961e1d665fe908647bd8ea5d24ee2f64fd71a972012587d60d",
+    "bound": "0.1.0-rev.23",
+    "why": "Adds only: a word token for each semantic colour, --bmo-ink-<colour>, which the colour text utilities read and which falls back to the colour itself, and the word tokens badge-ink states; nothing a bundle built on 0.1.0-rev.23 reads is taken away or changed."
   }
 }
