@@ -543,6 +543,10 @@ default; a screen supplies what it holds and what a press means there. Every exp
   for every dialog the library draws, so no screen says it. Where less movement was asked for, a
   dialog only fades.
 - **A dialog that fills the screen stands and goes at once.**
+- **A dialog keeps one padding inside it.** Its head, its body and its foot each keep 16 pixels on
+  every side, at every width, so the foot's last button stands as far from the dialog's right edge as
+  from its bottom, and the body's words start on the title's line. The layer's app configuration sets
+  this on every dialog the library draws, so no screen sets it.
 - **What is not cleared** is a tooltip, and what grows inside the screen instead of floating over it.
 - **No screen registers what the library floats.** The library marks each floating thing as a
   dismissable layer and says whether it stands open; the overlays plugin watches the page for those

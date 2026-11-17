@@ -236,7 +236,16 @@ export default defineAppConfig({
     // It comes and goes by the layer's own movement rather than the library's, which grows every
     // dialog out of its own middle: here it grows out of the control pressed to open it, and only
     // fades where nothing was (the dialog-origin module).
+    //
+    // A dialog is one unit and keeps one padding inside it: its head, body and foot each keep the
+    // library's narrow padding at every width, where the library widens the sides of all three and the
+    // top and bottom of the body alone on a wider screen.
     modal: {
+      slots: {
+        header: "sm:p-4",
+        body: "sm:p-4",
+        footer: "sm:p-4"
+      },
       variants: {
         transition: {
           true: {

@@ -434,8 +434,9 @@ Every token is a custom property stated by the layer's stylesheet on the root un
   full colour; the tooltip at caption size; focus inside clipping rows; the reading width on the
   dashboard panel and the container's inset outside it; no floor on the panel or the sidebar;
   dropdowns as wide as their longest item and no wider than the screen; dialogs growing out of their
-  control and standing at once when they fill the screen; sheets clear of the safe area; popovers
-  held to their room; the message bar's focus on its bar; text areas at full width.
+  control, standing at once when they fill the screen, and keeping one padding in their head, body
+  and foot at every width; sheets clear of the safe area; popovers held to their room; the message
+  bar's focus on its bar; text areas at full width.
 - **The layer's Nuxt configuration** brings the library as its module with its semantic colours, the
   layer's stylesheet, the viewport meta (`viewport-fit=cover`, the keyboard resizing the content), the
   screen mode (dark until a reader chooses another, kept for a year in the cookie `screen-mode`

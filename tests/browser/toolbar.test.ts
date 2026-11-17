@@ -837,6 +837,66 @@ describe.skipIf(!ready)("the create button drawn in a browser", () => {
   }
 });
 
+// A form's dialog, as the layer's settings dialog draws it with a long body and two buttons at its foot
+// (`docs/components.md`, "Floating things"): its head, body and foot keep one padding on every side at
+// a wide desktop's width and a phone's alike, so the foot's last button stands as far from the dialog's
+// right edge as from its bottom, and the body starts on the title's line.
+describe.skipIf(!ready)("a dialog drawn in a browser", () => {
+  const PADDING_PX = 16;
+  const DIALOG_WIDTHS = [{ ...WIDTHS[0]!, name: "a wide desktop's width", width: 1440, height: 900 }, WIDTHS[1]!];
+  let own: Browser;
+
+  beforeAll(async () => {
+    own = await chromium.launch();
+  }, BROWSER_HOOK_MS);
+
+  afterAll(async () => {
+    await own?.close();
+  });
+
+  for (const width of DIALOG_WIDTHS) {
+    describe(`at ${width.name}`, () => {
+      let context: BrowserContext;
+      let page: Page;
+
+      beforeAll(async () => {
+        ({ context, page } = await open(width, "light", "?create", own));
+        await page.evaluate(() => (window as unknown as { openDialog: () => void }).openDialog());
+        await page.waitForSelector("[role=dialog] #save");
+        await page.evaluate(() => Promise.all(document.getAnimations().map((animation) => animation.finished.catch(() => undefined))));
+      }, BROWSER_HOOK_MS);
+
+      afterAll(async () => {
+        await context?.close();
+      });
+
+      test("keeps one padding on every side of its head, body and foot", async () => {
+        for (const slot of ["header", "body", "footer"]) {
+          const padding = await page.$eval(`[role=dialog] [data-slot=${slot}]`, (element) => {
+            const style = getComputedStyle(element);
+
+            return [style.paddingTop, style.paddingRight, style.paddingBottom, style.paddingLeft];
+          });
+
+          expect(padding).toEqual(Array(4).fill(`${PADDING_PX}px`));
+        }
+      });
+
+      test("stands the foot's last button as far from the right edge as from the bottom, and the body on the title's line", async () => {
+        const dialog = await box(page, "[role=dialog]");
+        const save = await box(page, "[role=dialog] #save");
+        const title = await box(page, "[role=dialog] [data-slot=title]");
+        const body = await box(page, "[role=dialog] [data-slot=body] > *");
+
+        expect(dialog.right - save.right).toBe(PADDING_PX);
+        expect(dialog.bottom - save.bottom).toBe(PADDING_PX);
+        expect(title.left - dialog.left).toBe(PADDING_PX);
+        expect(body.left).toBe(title.left);
+      });
+    });
+  }
+});
+
 // A menu wrapped round the create button, handed the create button module's settings
 // (`docs/components.md`, "Creating"): it opens against the button itself, at its end edge and inside
 // the screen, at a desktop's width where the button stands in the row and at a phone's where it floats,
