@@ -186,7 +186,10 @@ default; a screen supplies what it holds and what a press means there. Every exp
   row. It is drawn at the end of the app's root element, above everything the screen draws and under
   everything the library floats over the page: the app's root is an isolated stacking context, as the
   component library makes it, and a dialog's or a drawer's overlay, a menu and a tooltip are drawn
-  outside it, so an overlay covers the button however early or late its dialog was set up. Its fill
+  outside it, so an overlay covers the button however early or late its dialog was set up. The app
+  names its root only once its first drawing is done, so the button floats once the app has
+  mounted, and a screen drawn in that first drawing, opened straight from its address, floats its
+  button in the root as one opened later does. Its fill
   takes the darker step a coloured badge takes (`badge-ink`, `docs/design.md`), so its white mark
   reads at 3:1 or better in both modes. Its medium corner is a button's, since nothing but a face and
   a dot is round. It carries `data-screen-foot`, so what a console floats of its own accord stands
@@ -581,7 +584,8 @@ component's.
 - **On a wide screen it is a window** at a place and a size of its own.
   - **It is drawn into the app's own root, after the app's screens,** so it stands over every screen
     and under everything the library floats — a dialog, a sheet, a menu, a popover, a tooltip, the
-    message pill — whenever that opens, since those are drawn after the app.
+    message pill — whenever that opens, since those are drawn after the app. The app names its root
+    only once its first drawing is done, so a window set up in that first drawing reads the root then.
   - **Its title bar moves it:** a pointer or a finger dragging the bar, and the arrow keys once the
     bar holds the keyboard's focus, a step of 16 pixels and 64 with Shift. The bar shows the shared
     ring where the keyboard put the focus there. A press on a control inside the bar is that control's

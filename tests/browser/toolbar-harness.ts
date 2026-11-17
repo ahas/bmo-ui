@@ -12,11 +12,13 @@ import UTooltip from "@nuxt/ui/components/Tooltip.vue";
 import ActionGroup from "../../app/components/ActionGroup.vue";
 import ChooseAll from "../../app/components/ChooseAll.vue";
 import CreateButton from "../../app/components/CreateButton.vue";
+import FloatingWindow from "../../app/components/FloatingWindow.vue";
 import HintTip from "../../app/components/HintTip.vue";
 import IconButton from "../../app/components/IconButton.vue";
 import NumberInput from "../../app/components/NumberInput.vue";
 import ImageViewer from "../../app/components/ImageViewer.vue";
 import MarkupButtonTip from "../../app/components/MarkupButtonTip.vue";
+import SettingsDialog from "../../app/components/SettingsDialog.vue";
 import TabBar from "../../app/components/TabBar.vue";
 import TabSwitch from "../../app/components/TabSwitch.vue";
 import ToolBar from "../../app/components/ToolBar.vue";
@@ -39,17 +41,23 @@ import type { CreateButtonHandle } from "../../app/domain/create-button";
 // and a number box, each press counted; opened with `?markup`, it holds a fenced block's copy button
 // and a diagram's zoom buttons as the host's renderer writes them, named by the markup button layer,
 // the copy button copying through the code-copy module and each press counted; opened with `?create`,
-// it holds a toolbar with the create button at its right end, a field and a long list padded by the
-// room the button takes on a phone, each press of the button counted and a layer opened and closed on
-// the page's word, standing for something floating over the screen; opened with `?create-menu`, it
+// it holds a toolbar with the create button at its right end, drawn as the app is first mounted, a
+// field and a long list padded by the room the button takes on a phone, each press of the button
+// counted, a layer opened and closed on the page's word, standing for something floating over the
+// screen, and a form's dialog opened on the page's word, its body taller than the screen so its foot's
+// buttons stand at the screen's bottom right, each press of them counted; opened with `?create-menu`, it
 // holds a toolbar with the create button wrapped in a menu of two kinds and, in a row under it, a
 // create button marked as contained wrapped in a menu of its own, each placed through the create
 // button module's settings; opened with `?create-contained`, it holds the screen's create button
 // beside three containers that are no screen: a sidebar shown on a wide screen alone, a drawer and a
 // dialog, the first two each holding a create button marked as contained beside an icon button, and
 // the dialog set up in the page's frame before the screen comes in under it, as an app's frame sets up
-// the dialogs it opens over any screen. The page stands
-// outside Nuxt, so the library is installed as a Vue plugin and the words are handed over here.
+// the dialogs it opens over any screen; opened with `?window`, it holds a floating window, open and
+// drawn as the app is first mounted, and a dialog opened over it on the page's word. The page stands
+// outside Nuxt, so the library is installed as a Vue plugin and the words are handed over here, and
+// the router the floating window's Back reads stands in as one that changes nothing.
+
+Object.assign(globalThis, { useRouter: () => ({ options: {}, beforeEach: () => undefined }) });
 
 const WORDS = {
   common: {
@@ -125,11 +133,13 @@ const Page = defineComponent(() => {
   if (new URLSearchParams(location.search).has("create")) {
     const pressed: string[] = [];
     let layer: number | null = null;
+    const dialog = ref(false);
 
     Object.assign(window, {
       pressed,
       float: () => (layer = openLayer(() => undefined)),
-      land: () => layer !== null && closeLayer(layer)
+      land: () => layer !== null && closeLayer(layer),
+      openDialog: () => (dialog.value = true)
     });
 
     const rows = Array.from({ length: 40 }, (_, index) => h("div", { class: "row h-10 border-b border-default px-4 py-2" }, `Row ${index + 1}`));
@@ -143,7 +153,18 @@ const Page = defineComponent(() => {
             h("div", { id: "after" }, [h(IconButton, { label: "Refresh", icon: "i-material-symbols-refresh" })])
           ]),
           h("input", { id: "field", "aria-label": "Field", class: "m-4 border border-default px-2" }),
-          h("div", { id: "list", class: "min-h-0 flex-1 overflow-y-auto pb-(--bmo-create-room)" }, rows)
+          h("div", { id: "list", class: "min-h-0 flex-1 overflow-y-auto pb-(--bmo-create-room)" }, rows),
+          h(
+            SettingsDialog,
+            { open: dialog.value, "onUpdate:open": (value: boolean) => (dialog.value = value), title: "Dialog" },
+            {
+              default: () => h("div", { style: "height: 1200px" }, "Words"),
+              footer: () => [
+                h(UButton, { id: "cancel", label: "Cancel", color: "neutral", variant: "ghost", onClick: () => pressed.push("cancel") }),
+                h(UButton, { id: "save", label: "Save", onClick: () => pressed.push("save") })
+              ]
+            }
+          )
         ])
       );
   }
@@ -209,6 +230,19 @@ const Page = defineComponent(() => {
           ])
         ]),
         h(USlideover, { open: drawer.value, "onUpdate:open": (value: boolean) => (drawer.value = value), side: "left", title: "Drawer" }, { content: () => heading("Items", "drawer-create", "New item") })
+      ]);
+  }
+
+  if (new URLSearchParams(location.search).has("window")) {
+    const dialog = ref(false);
+
+    Object.assign(window, { openDialog: () => (dialog.value = true) });
+
+    return () =>
+      h(UApp, null, () => [
+        h("div", { class: "h-dvh p-4" }, "Screen"),
+        h(FloatingWindow, { open: true, name: "harness-window", label: "Window", pillLabel: "Window" }, () => h("p", { class: "p-4" }, "Inside")),
+        h(UModal, { open: dialog.value, "onUpdate:open": (value: boolean) => (dialog.value = value), title: "Dialog" }, { body: () => h("p", "Words") })
       ]);
   }
 

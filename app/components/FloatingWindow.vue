@@ -188,13 +188,15 @@ const GROWN_FROM = "opacity-0 scale-50 motion-reduce:scale-100";
 const SNAP_POINTS = [SHEET_HEIGHTS.short, SHEET_HEIGHTS.tall];
 
 const narrow = useNarrow();
-const nuxtApp = useNuxtApp();
+const app = getCurrentInstance()?.appContext.app;
 const mounted = ref(false);
 // The width class the window's place was last read under, so a window grown into another class stands at that
 // class's own place.
 const kindNow = ref(widthClass(Number.POSITIVE_INFINITY));
 const rightToLeft = ref(false);
 // The app's own root, where the window is drawn after the screens; the page's body where there is none.
+// The app names its root only once its first drawing is done, after every component drawn in it has
+// been mounted, so it is read a tick after the window mounts.
 const root = ref<Element | string>("body");
 
 const rect = ref<WindowRect>({ x: 0, y: 0, width: props.size.width, height: props.size.height });
@@ -424,7 +426,7 @@ watch(narrow, () => {
 // the screen standing for the same news — has taken its room, so the area the host names is read as it stands.
 onMounted(() => {
   rightToLeft.value = document.documentElement.dir === "rtl";
-  root.value = (nuxtApp.vueApp as { _container?: Element })._container ?? "body";
+  void nextTick(() => (root.value = app?._container ?? "body"));
   requestAnimationFrame(() => {
     place();
     mounted.value = true;

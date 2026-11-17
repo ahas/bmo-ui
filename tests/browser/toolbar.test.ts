@@ -57,6 +57,9 @@ const WIDTHS = [
 ];
 const SCHEMES = ["light", "dark"] as const;
 
+// The floating window the harness draws, named as a screen reader names it.
+const WINDOW = "section[aria-label=Window]";
+
 let out = "";
 let script = "";
 let browser: Browser;
@@ -99,7 +102,9 @@ async function open(width: (typeof WIDTHS)[number], scheme: (typeof SCHEMES)[num
   });
   await page.goto(`${ORIGIN}/${query}`);
   await page.evaluate((dark) => document.documentElement.classList.toggle("dark", dark), scheme === "dark");
-  await page.waitForSelector(query === "" ? "[role=toolbar] #actions [data-slot=base]" : query.startsWith("?create") ? "#create" : "[role=dialog] [data-slot=footer] [data-slot=base]");
+  await page.waitForSelector(
+    query === "" ? "[role=toolbar] #actions [data-slot=base]" : query.startsWith("?create") ? "#create" : query === "?window" ? WINDOW : "[role=dialog] [data-slot=footer] [data-slot=base]"
+  );
   // The page eases into the scheme set as it opens, so nothing is read before its colours have settled;
   // what moves for ever, as a spinner does, is no easing and is not waited on.
   await page.evaluate(() => Promise.all(document.getAnimations().filter((animation) => animation instanceof CSSTransition).map((animation) => animation.finished.catch(() => undefined))));
@@ -798,6 +803,36 @@ describe.skipIf(!ready)("the create button drawn in a browser", () => {
         await page.tap("#create");
         expect(await pressed(page)).toEqual(["create"]);
       });
+
+      // The button was drawn as the app was first mounted, the way a screen opened straight from its
+      // address is, and the dialog's foot stands where the button floats. A dialog takes presses from
+      // the whole page behind it, so what is drawn over the foot is told by its pixels: the place the
+      // two share paints the same with the button hidden as with it shown.
+      test("stays under a dialog opened over it, the dialog's foot uncovered and pressed by a tap", async () => {
+        const already = (await pressed(page)).length;
+
+        await page.evaluate(() => (window as unknown as { openDialog: () => void }).openDialog());
+        await page.waitForSelector("[role=dialog] #save");
+        await page.evaluate(() => Promise.all(document.getAnimations().map((animation) => animation.finished.catch(() => undefined))));
+
+        const save = await box(page, "#save");
+        const button = await box(page, "#create");
+        const shared = { left: Math.max(save.left, button.left), right: Math.min(save.right, button.right), top: Math.max(save.top, button.top), bottom: Math.min(save.bottom, button.bottom) };
+
+        expect(shared.left < shared.right && shared.top < shared.bottom).toBe(true);
+
+        const clip = { x: shared.left, y: shared.top, width: shared.right - shared.left, height: shared.bottom - shared.top };
+        const shown = await page.screenshot({ clip });
+
+        await page.$eval("[data-screen-foot]", (element) => ((element as HTMLElement).style.visibility = "hidden"));
+        const hidden = await page.screenshot({ clip });
+
+        await page.$eval("[data-screen-foot]", (element) => ((element as HTMLElement).style.visibility = ""));
+        expect(shown.equals(hidden)).toBe(true);
+
+        await page.touchscreen.tap(clip.x + clip.width / 2, clip.y + clip.height / 2);
+        expect((await pressed(page)).slice(already)).toEqual(["save"]);
+      });
     });
   }
 });
@@ -994,4 +1029,35 @@ describe.skipIf(!ready)("the create button inside a container that is no screen,
       });
     });
   }
+});
+
+// A floating window drawn as the app is first mounted, the way a screen opened straight from its
+// address draws it (`docs/components.md`, "A window beside the page"): it stands in the app's own
+// root, after the screens, so a dialog opened later covers it.
+describe.skipIf(!ready)("a floating window drawn as the app is first mounted, in a browser", () => {
+  let context: BrowserContext;
+  let page: Page;
+
+  beforeAll(async () => {
+    ({ context, page } = await open(WIDTHS[0]!, "light", "?window"));
+  }, BROWSER_HOOK_MS);
+
+  afterAll(async () => {
+    await context?.close();
+  });
+
+  test("stands in the app's root, under a dialog opened over it", async () => {
+    await page.evaluate(() => Promise.all(document.getAnimations().map((animation) => animation.finished.catch(() => undefined))));
+    expect(await page.$eval(WINDOW, (element) => element.parentElement?.id)).toBe("page");
+
+    const drawn = await box(page, WINDOW);
+    const clip = { x: drawn.left + drawn.width / 4, y: drawn.top + drawn.height / 2, width: drawn.width / 2, height: 8 };
+    const before = await page.screenshot({ clip });
+
+    await page.evaluate(() => (globalThis as unknown as { openDialog: () => void }).openDialog());
+    await page.waitForSelector("div[role=dialog]");
+    await page.evaluate(() => Promise.all(document.getAnimations().map((animation) => animation.finished.catch(() => undefined))));
+
+    expect((await page.screenshot({ clip })).equals(before)).toBe(false);
+  });
 });

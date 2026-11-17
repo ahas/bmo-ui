@@ -33,7 +33,7 @@
       :aria-keyshortcuts="key ?? undefined"
     />
   </div>
-  <Teleport v-else :to="root">
+  <Teleport v-else-if="root !== null" :to="root">
     <div data-screen-foot class="badge-ink fixed end-4 z-50 bottom-[calc(1rem+var(--bmo-safe-bottom))]">
       <IconButton
         ref="button"
@@ -80,8 +80,16 @@ const attrs = useAttrs();
 const narrow = useNarrow();
 const floating = computed(() => narrow.value && !props.contained);
 // The app's root element, which the floating button is drawn at the end of; the page's body where the
-// app was mounted on none.
-const root = getCurrentInstance()?.appContext.app._container ?? "body";
+// app was mounted on none. The app names its root only once its first drawing is done, after every
+// component drawn in it has been mounted, so it is read a tick after this button mounts and nothing
+// floats before then.
+const app = getCurrentInstance()?.appContext.app;
+const root = shallowRef<Element | string | null>(null);
+
+onMounted(() => {
+  void nextTick(() => (root.value = app?._container ?? "body"));
+});
+
 const button = useTemplateRef<CreateButtonHandle>("button");
 
 // The key is named once, as the button is set up; a contained button has none.

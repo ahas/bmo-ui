@@ -11,6 +11,8 @@
 @source "../../app/components/TabBar.vue";
 @source "../../app/components/ImageViewer.vue";
 @source "../../app/components/ShellClose.vue";
+@source "../../app/components/SettingsDialog.vue";
+@source "../../app/components/FloatingWindow.vue";
 @source "../../app/domain/tooltip.ts";
 @source "../../app/domain/page-tip.ts";
 @source "./toolbar-harness.ts";
