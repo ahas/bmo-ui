@@ -285,9 +285,10 @@ function fromList(value: unknown): unknown {
   return value === NOTHING ? "" : value;
 }
 
-// What a slot of the library's is handed, its choice and its value as the screen knows them.
-function fromListScope(scope: Record<string, unknown> | undefined): Record<string, unknown> {
-  if (scope === undefined) return {};
+// What a slot of the library's is handed, its choice and its value as the screen knows them. The scope
+// keeps the library's own type for that slot, so the screen's slot reads what the library's would.
+function fromListScope<Scope extends object>(scope: Scope | undefined): Scope {
+  if (scope === undefined) return {} as Scope;
 
   return {
     ...scope,
