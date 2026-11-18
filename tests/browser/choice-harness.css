@@ -1,0 +1,6 @@
+/* The harness page's sheet: the layer's own stylesheet with the utility classes the one select and
+   the hits it marks are drawn with. */
+@import "../../app/assets/css/main.css";
+
+@source "../../app/components/ChoiceSelect.vue";
+@source "../../app/components/SearchText.vue";

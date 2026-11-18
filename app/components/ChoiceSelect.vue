@@ -1,0 +1,195 @@
+<template>
+  <!-- The one select a value is chosen from a list in (`docs/components.md`, "Choosing a value"): the
+       library's select menu, its search held to one rule by the choices module. A list searches once
+       it holds more than seven choices, and a list found over a road always; the field stands at the
+       top of the opened list with the pack's words for a search, takes the focus unless a finger
+       opened it, and matches what each choice shows, its hits marked where they stand. An empty list
+       says whether nothing matched, nothing is there or the road refused. Everything else it is handed
+       is the library's select menu's. -->
+  <USelectMenu
+    v-bind="$attrs"
+    v-model:search-term="words"
+    :model-value="props.modelValue"
+    :multiple="props.multiple"
+    :value-key="props.valueKey"
+    :items="shown"
+    :label-key="props.labelKey"
+    :description-key="props.descriptionKey"
+    :search-input="searchInput"
+    :loading="busy"
+    ignore-filter
+  >
+    <template v-for="name in passedSlots" #[name]="scope" :key="name">
+      <slot :name="name" v-bind="scope ?? {}" />
+    </template>
+
+    <template #item-label="{ item }">
+      <SearchText :text="shownWords(item).label" :query="words" />
+    </template>
+
+    <template v-if="described" #item-description="{ item }">
+      <SearchText :text="shownWords(item).description" :query="words" />
+    </template>
+
+    <template #empty>
+      {{ emptyWords }}
+    </template>
+  </USelectMenu>
+</template>
+
+<script setup lang="ts">
+import { useI18n } from "vue-i18n";
+
+import { CHOICE_FIND_PAUSE_MS, choiceFields, narrowChoices, searchesChoices } from "../domain/choices";
+import { countLocale } from "../domain/numbers";
+import { TOUCH_QUERY } from "../domain/prompt";
+import { useNarrow } from "../domain/screen";
+
+import type { SelectMenuItem, SelectMenuProps } from "@nuxt/ui";
+import type { ChoiceFind, ChoiceItems } from "../domain/choices";
+
+// The library's virtual scrolling opens a list's groups out into one, and the select keeps its groups,
+// so it is not taken.
+interface Props extends /* @vue-ignore */ Omit<SelectMenuProps, "items" | "virtualize" | "modelValue" | "multiple" | "valueKey" | "searchInput" | "searchTerm" | "ignoreFilter" | "filterFields" | "labelKey" | "descriptionKey"> {
+  // The value chosen, or the values where several are.
+  modelValue?: unknown;
+  multiple?: boolean;
+  // The field of a choice holding its value; the choice itself where unset.
+  valueKey?: string;
+  // The choices: one list, or groups of lists. With a road, those the list shows before anything is
+  // typed, the ones already chosen among them.
+  items: ChoiceItems;
+  // The road that finds choices on the server for the words typed; the list searches always with one.
+  find?: ChoiceFind;
+  // The screen's own word for its list when it holds nothing, where the wording guide gives one.
+  empty?: string;
+  // The fields of a choice holding its label and the line under it.
+  labelKey?: string;
+  descriptionKey?: string;
+  // How long typing stands still before the road is asked.
+  findPauseMs?: number;
+}
+
+defineOptions({ inheritAttrs: false });
+
+const props = withDefaults(defineProps<Props>(), {
+  modelValue: undefined,
+  multiple: false,
+  valueKey: undefined,
+  find: undefined,
+  empty: undefined,
+  labelKey: "label",
+  descriptionKey: "description",
+  findPauseMs: CHOICE_FIND_PAUSE_MS
+});
+
+const slots = useSlots();
+const { t } = useI18n();
+const appConfig = useAppConfig();
+const touch = useNarrow(TOUCH_QUERY);
+
+// The slots the select draws itself; every other slot of the library's select menu is the caller's.
+const OWN_SLOTS = new Set(["item-label", "item-description", "empty"]);
+const passedSlots = computed(() => Object.keys(slots).filter((name) => !OWN_SLOTS.has(name)));
+
+const keys = computed(() => ({ label: props.labelKey, description: props.descriptionKey }));
+
+// The words typed into the search; the library clears them as the list closes.
+const words = ref("");
+
+// What the road answered for the last words asked, null while no answer stands for the words typed.
+const found = shallowRef<SelectMenuItem[] | null>(null);
+const finding = ref(false);
+const refused = ref(false);
+
+const typed = computed(() => words.value.trim() !== "");
+
+const attrs = useAttrs();
+// Busy while the road is asked, and wherever the screen says its own choices are on their way.
+const busy = computed(() => finding.value || (attrs.loading !== undefined && attrs.loading !== false));
+
+const searches = computed(() => searchesChoices(props.items, props.find !== undefined));
+
+const searchInput = computed(() =>
+  searches.value ? { placeholder: t("common.placeholder.search"), icon: appConfig.ui.icons.search, ...(touch.value ? { autofocus: false } : {}) } : false
+);
+
+const shown = computed((): ChoiceItems => {
+  if (props.find === undefined) {
+    return narrowChoices(props.items, words.value, keys.value, countLocale());
+  }
+
+  return typed.value ? (found.value ?? []) : props.items;
+});
+
+// Whether any choice carries a line under its label; the library draws that line's place for every
+// choice once its slot is filled, so it is filled only then.
+const described = computed(() => [...everyChoice(props.items), ...everyChoice(found.value ?? [])].some((item) => shownWords(item).description !== ""));
+
+// The entries of a list, its groups opened out.
+function everyChoice(items: ChoiceItems): SelectMenuItem[] {
+  return (items as unknown[]).flatMap((entry) => (Array.isArray(entry) ? entry : [entry])) as SelectMenuItem[];
+}
+
+const emptyWords = computed(() => {
+  if (refused.value) return t("common.error.choices_find_failed");
+  if (finding.value) return t("common.status.loading");
+  if (typed.value) return t("common.status.no_match");
+
+  return props.empty ?? t("common.status.no_choices");
+});
+
+// A choice's label and the line under it, as the list shows them.
+function shownWords(item: SelectMenuItem): { label: string; description: string } {
+  const [label, description] = choiceFields(item, keys.value);
+
+  return { label: label?.text ?? "", description: description?.text ?? "" };
+}
+
+// Only the answer to the last words asked may land: an answer to words already typed past is dropped.
+let asked = 0;
+let pause: ReturnType<typeof setTimeout> | undefined;
+
+function stopPause(): void {
+  clearTimeout(pause);
+  pause = undefined;
+}
+
+async function ask(given: ChoiceFind, typedWords: string, ticket: number): Promise<void> {
+  try {
+    const answer = await given(typedWords);
+
+    if (ticket === asked) found.value = answer;
+  } catch {
+    if (ticket === asked) {
+      found.value = [];
+      refused.value = true;
+    }
+  } finally {
+    if (ticket === asked) finding.value = false;
+  }
+}
+
+// Typing asks the road once it stands still; the last answer stays shown while the next is awaited.
+watch(words, (now) => {
+  stopPause();
+  refused.value = false;
+  asked += 1;
+
+  const given = props.find;
+
+  if (given === undefined || now.trim() === "") {
+    found.value = null;
+    finding.value = false;
+
+    return;
+  }
+
+  const ticket = asked;
+
+  finding.value = true;
+  pause = setTimeout(() => void ask(given, now, ticket), props.findPauseMs);
+});
+
+onScopeDispose(stopPause);
+</script>

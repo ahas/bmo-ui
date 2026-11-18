@@ -1,0 +1,111 @@
+// What the one select a value is chosen in searches, and when (`docs/components.md`, "Choosing a
+// value"). A list searches once it holds more than seven choices, counted from what it is handed, so
+// a list read from data takes its search as it grows and no screen decides it; a list found on the
+// server searches always. What a choice shows is what is matched, by the search module every list
+// search goes through.
+
+import { matchFields } from "../../shared/search";
+
+import type { SelectMenuItem } from "@nuxt/ui";
+import type { SearchField } from "../../shared/search";
+
+// The choices a select is handed, as the component library's select menu takes them: one list, or
+// groups of lists drawn apart.
+export type ChoiceItems = SelectMenuItem[] | SelectMenuItem[][];
+
+// The fields of a choice that hold the words it shows: its label, and the line under it.
+export interface ChoiceKeys {
+  label: string;
+  description: string;
+}
+
+// The road a list found on the server is searched over: the choices for the words typed.
+export type ChoiceFind = (words: string) => Promise<SelectMenuItem[]>;
+
+// A list holding more choices than this searches.
+export const SEARCH_ABOVE = 7;
+
+// How long typing stands still before a road is asked for the words typed.
+export const CHOICE_FIND_PAUSE_MS = 300;
+
+const LABEL_KEYS: ChoiceKeys = { label: "label", description: "description" };
+
+type Group = readonly SelectMenuItem[];
+
+// A heading or a separator of a list, which stands among the choices and is none of them.
+function structural(item: SelectMenuItem): boolean {
+  return typeof item === "object" && item !== null && (item.type === "label" || item.type === "separator");
+}
+
+function isSeparator(item: SelectMenuItem): boolean {
+  return typeof item === "object" && item !== null && item.type === "separator";
+}
+
+function nested(items: ChoiceItems): items is SelectMenuItem[][] {
+  return items.length > 0 && items.every((item) => Array.isArray(item));
+}
+
+function groupsOf(items: ChoiceItems): readonly Group[] {
+  return nested(items) ? items : [items as Group];
+}
+
+// How many choices a list holds: its headings and separators are none.
+export function choiceCount(items: ChoiceItems): number {
+  return groupsOf(items).reduce((sum, group) => sum + group.filter((item) => !structural(item)).length, 0);
+}
+
+// Whether a list searches: always where a road finds its choices, and otherwise once it holds more
+// choices than `SEARCH_ABOVE`.
+export function searchesChoices(items: ChoiceItems, finds: boolean): boolean {
+  return finds || choiceCount(items) > SEARCH_ABOVE;
+}
+
+// The words a choice shows, each a field the search matches: a plain value is its own label.
+export function choiceFields(item: SelectMenuItem, keys: ChoiceKeys = LABEL_KEYS): SearchField[] {
+  if (typeof item !== "object" || item === null) {
+    return [{ label: keys.label, text: item === null || item === undefined ? "" : String(item), shown: true }];
+  }
+
+  const record = item as Record<string, unknown>;
+
+  return [keys.label, keys.description].map((key) => ({ label: key, text: typeof record[key] === "string" ? record[key] : "", shown: true }));
+}
+
+// One group narrowed to the choices that match: a heading stands while any choice under it does, and
+// a separator only between two parts that both stand.
+function narrowGroup(group: Group, words: string, keys: ChoiceKeys, locale: string | undefined): SelectMenuItem[] {
+  const kept: SelectMenuItem[] = [];
+  let heading: SelectMenuItem | null = null;
+  let separator: SelectMenuItem | null = null;
+
+  for (const item of group) {
+    if (isSeparator(item)) {
+      separator = kept.length > 0 ? item : null;
+      heading = null;
+    } else if (structural(item)) {
+      heading = item;
+    } else if (matchFields(choiceFields(item, keys), words, locale) !== null) {
+      if (separator !== null) kept.push(separator);
+      if (heading !== null) kept.push(heading);
+      kept.push(item);
+      separator = null;
+      heading = null;
+    }
+  }
+
+  return kept;
+}
+
+// The choices that match the words typed, in the shape they were handed: every choice for no words,
+// and a group left with no choice dropped.
+export function narrowChoices(items: ChoiceItems, words: string, keys: ChoiceKeys = LABEL_KEYS, locale?: string): ChoiceItems {
+  if (words.trim() === "") {
+    return items;
+  }
+
+  if (nested(items)) {
+    return items.map((group) => narrowGroup(group, words, keys, locale)).filter((group) => group.length > 0);
+  }
+
+  return narrowGroup(items as SelectMenuItem[], words, keys, locale);
+}

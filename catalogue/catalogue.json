@@ -174,6 +174,312 @@
       "example": "<CardRow v-slot=\"{ item }\" :title=\"t('notes.label.recent')\" :items=\"items\" all=\"/notes\">\n  <span class=\"flex w-40 flex-col gap-2\">\n    <ArtworkFrame :src=\"null\" :shape=\"PORTRAIT\" icon=\"i-material-symbols-description-outline\" :name=\"item\" class=\"rounded-md\" />\n    <span class=\"truncate text-base\">{{ item }}</span>\n  </span>\n</CardRow>"
     },
     {
+      "name": "ChoiceSelect",
+      "kind": "component",
+      "line": "The one select a value is chosen from a list in, the library's select menu searching once it holds more than seven choices, or always over a road that finds them.",
+      "props": [
+        {
+          "name": "modelValue",
+          "type": "unknown",
+          "required": false,
+          "default": "undefined"
+        },
+        {
+          "name": "multiple",
+          "type": "boolean | undefined",
+          "required": false,
+          "default": "false"
+        },
+        {
+          "name": "valueKey",
+          "type": "string | undefined",
+          "required": false,
+          "default": "undefined"
+        },
+        {
+          "name": "items",
+          "type": "ChoiceItems",
+          "required": true
+        },
+        {
+          "name": "find",
+          "type": "ChoiceFind | undefined",
+          "required": false,
+          "default": "undefined"
+        },
+        {
+          "name": "empty",
+          "type": "string | undefined",
+          "required": false,
+          "default": "undefined"
+        },
+        {
+          "name": "labelKey",
+          "type": "string | undefined",
+          "required": false,
+          "default": "\"label\""
+        },
+        {
+          "name": "descriptionKey",
+          "type": "string | undefined",
+          "required": false,
+          "default": "\"description\""
+        },
+        {
+          "name": "findPauseMs",
+          "type": "number | undefined",
+          "required": false,
+          "default": "CHOICE_FIND_PAUSE_MS"
+        },
+        {
+          "name": "size",
+          "type": "\"sm\" | \"xs\" | \"md\" | \"lg\" | \"xl\" | undefined",
+          "required": false
+        },
+        {
+          "name": "autofocus",
+          "type": "boolean | undefined",
+          "required": false
+        },
+        {
+          "name": "disabled",
+          "type": "boolean | undefined",
+          "required": false,
+          "description": "When `true`, prevents the user from interacting with listbox"
+        },
+        {
+          "name": "form",
+          "type": "string | undefined",
+          "required": false
+        },
+        {
+          "name": "formaction",
+          "type": "string | undefined",
+          "required": false
+        },
+        {
+          "name": "formenctype",
+          "type": "string | undefined",
+          "required": false
+        },
+        {
+          "name": "formmethod",
+          "type": "string | undefined",
+          "required": false
+        },
+        {
+          "name": "formnovalidate",
+          "type": "Booleanish | undefined",
+          "required": false
+        },
+        {
+          "name": "formtarget",
+          "type": "string | undefined",
+          "required": false
+        },
+        {
+          "name": "name",
+          "type": "string | undefined",
+          "required": false,
+          "description": "The name of the field. Submitted with its owning form as part of a name/value pair."
+        },
+        {
+          "name": "loading",
+          "type": "boolean | undefined",
+          "required": false,
+          "description": "When `true`, the loading icon will be displayed."
+        },
+        {
+          "name": "trailing",
+          "type": "boolean | undefined",
+          "required": false,
+          "description": "When `true`, the icon will be displayed on the right side."
+        },
+        {
+          "name": "color",
+          "type": "\"primary\" | \"secondary\" | \"success\" | \"info\" | \"warning\" | \"error\" | \"neutral\" | undefined",
+          "required": false
+        },
+        {
+          "name": "ui",
+          "type": "{ base?: SlotClass; leading?: SlotClass; leadingIcon?: SlotClass; leadingAvatar?: SlotClass; leadingAvatarSize?: SlotClass; trailing?: SlotClass; trailingIcon?: SlotClass; value?: SlotClass; placeholder?: SlotClass; arrow?: SlotClass; content?: SlotClass; viewport?: SlotClass; group?: SlotClass; empty?: SlotClass; label?: SlotClass; separator?: SlotClass; item?: SlotClass; itemLeadingIcon?: SlotClass; itemLeadingAvatar?: SlotClass; itemLeadingAvatarSize?: SlotClass; itemLeadingChip?: SlotClass; itemLeadingChipSize?: SlotClass; itemTrailing?: SlotClass; itemTrailingIcon?: SlotClass; itemWrapper?: SlotClass; itemLabel?: SlotClass; itemDescription?: SlotClass; input?: SlotClass; focusScope?: SlotClass; trailingClear?: SlotClass; } | undefined",
+          "required": false
+        },
+        {
+          "name": "avatar",
+          "type": "AvatarProps | undefined",
+          "required": false,
+          "description": "Display an avatar on the left side."
+        },
+        {
+          "name": "variant",
+          "type": "\"outline\" | \"soft\" | \"subtle\" | \"ghost\" | \"none\" | undefined",
+          "required": false
+        },
+        {
+          "name": "highlight",
+          "type": "boolean | undefined",
+          "required": false,
+          "description": "Highlight the ring color like a focus state."
+        },
+        {
+          "name": "fixed",
+          "type": "boolean | undefined",
+          "required": false,
+          "description": "Keep the mobile text size on all breakpoints."
+        },
+        {
+          "name": "leading",
+          "type": "boolean | undefined",
+          "required": false,
+          "description": "When `true`, the icon will be displayed on the left side."
+        },
+        {
+          "name": "content",
+          "type": "(Omit<ComboboxContentProps, \"as\" | \"asChild\" | \"forceMount\"> & Partial<EmitsToProps<DismissableLayerEmits>>) | undefined",
+          "required": false,
+          "description": "The content of the menu."
+        },
+        {
+          "name": "icon",
+          "type": "any",
+          "required": false,
+          "description": "Display an icon based on the `leading` and `trailing` props."
+        },
+        {
+          "name": "leadingIcon",
+          "type": "any",
+          "required": false,
+          "description": "Display an icon on the left side."
+        },
+        {
+          "name": "trailingIcon",
+          "type": "any",
+          "required": false,
+          "description": "The icon displayed to open the menu."
+        },
+        {
+          "name": "arrow",
+          "type": "boolean | Omit<ComboboxArrowProps, \"as\" | \"asChild\"> | undefined",
+          "required": false,
+          "description": "Display an arrow alongside the menu.\n`{ rounded: true }`{lang=\"ts-type\"}"
+        },
+        {
+          "name": "required",
+          "type": "boolean | undefined",
+          "required": false
+        },
+        {
+          "name": "placeholder",
+          "type": "string | undefined",
+          "required": false,
+          "description": "The placeholder text when the select is empty."
+        },
+        {
+          "name": "open",
+          "type": "boolean | undefined",
+          "required": false,
+          "description": "The controlled open state of the Combobox. Can be binded with `v-model:open`."
+        },
+        {
+          "name": "defaultOpen",
+          "type": "boolean | undefined",
+          "required": false,
+          "description": "The open state of the combobox when it is initially rendered. <br> Use when you do not need to control its open state."
+        },
+        {
+          "name": "resetSearchTermOnBlur",
+          "type": "boolean | undefined",
+          "required": false,
+          "description": "Whether to reset the searchTerm when the Combobox input blurred"
+        },
+        {
+          "name": "resetSearchTermOnSelect",
+          "type": "boolean | undefined",
+          "required": false,
+          "description": "Whether to reset the searchTerm when the Combobox value is selected"
+        },
+        {
+          "name": "resetModelValueOnClear",
+          "type": "boolean | undefined",
+          "required": false,
+          "description": "When `true` the `modelValue` will be reset to `null` (or `[]` if `multiple`)"
+        },
+        {
+          "name": "highlightOnHover",
+          "type": "boolean | undefined",
+          "required": false,
+          "description": "When `true`, hover over item will trigger highlight"
+        },
+        {
+          "name": "by",
+          "type": "string | ((a: ArrayOrNested<SelectMenuItem>, b: ArrayOrNested<SelectMenuItem>) => boolean) | undefined",
+          "required": false,
+          "description": "Use this to compare objects by a particular field, or pass your own comparison function for complete control over how objects are compared."
+        },
+        {
+          "name": "defaultValue",
+          "type": "SelectMenuItem | undefined",
+          "required": false,
+          "description": "The value of the SelectMenu when initially rendered. Use when you do not need to control the state of the SelectMenu."
+        },
+        {
+          "name": "id",
+          "type": "string | undefined",
+          "required": false
+        },
+        {
+          "name": "selectedIcon",
+          "type": "any",
+          "required": false,
+          "description": "The icon displayed when an item is selected."
+        },
+        {
+          "name": "clear",
+          "type": "false | (false & Partial<Omit<ButtonProps, LinkPropsKeys>>) | undefined",
+          "required": false,
+          "description": "Display a clear button to reset the model value.\nCan be an object to pass additional props to the Button."
+        },
+        {
+          "name": "clearIcon",
+          "type": "any",
+          "required": false,
+          "description": "The icon displayed in the clear button."
+        },
+        {
+          "name": "portal",
+          "type": "string | boolean | HTMLElement | undefined",
+          "required": false,
+          "description": "Render the menu in a portal."
+        },
+        {
+          "name": "modelModifiers",
+          "type": "Omit<ModelModifiers, \"lazy\"> | undefined",
+          "required": false
+        },
+        {
+          "name": "createItem",
+          "type": "boolean | \"always\" | { position?: \"top\" | \"bottom\" | undefined; when?: \"empty\" | \"always\" | undefined; } | undefined",
+          "required": false,
+          "description": "Determines if custom user input that does not exist in options can be added."
+        },
+        {
+          "name": "autofocusDelay",
+          "type": "number | undefined",
+          "required": false
+        },
+        {
+          "name": "loadingIcon",
+          "type": "any",
+          "required": false,
+          "description": "The icon when the `loading` prop is `true`."
+        }
+      ],
+      "slots": [],
+      "events": [],
+      "example": "<div class=\"flex flex-wrap gap-4\">\n  <ChoiceSelect v-model=\"size\" :items=\"sizes\" value-key=\"value\" class=\"w-40\" />\n  <ChoiceSelect v-model=\"city\" :items=\"cities\" value-key=\"value\" class=\"w-56\" />\n</div>"
+    },
+    {
       "name": "ChooseAll",
       "kind": "component",
       "line": "The three-state checkbox that takes every row shown or gives the choice up.",
@@ -1243,6 +1549,12 @@
           "description": "Display an icon on the right side."
         },
         {
+          "name": "loadingIcon",
+          "type": "any",
+          "required": false,
+          "description": "The icon when the `loading` prop is `true`."
+        },
+        {
           "name": "activeColor",
           "type": "\"primary\" | \"secondary\" | \"success\" | \"info\" | \"warning\" | \"error\" | \"neutral\" | undefined",
           "required": false
@@ -1257,12 +1569,6 @@
           "type": "boolean | undefined",
           "required": false,
           "description": "Set loading state automatically based on the `@click` promise state"
-        },
-        {
-          "name": "loadingIcon",
-          "type": "any",
-          "required": false,
-          "description": "The icon when the `loading` prop is `true`."
         }
       ],
       "slots": [],

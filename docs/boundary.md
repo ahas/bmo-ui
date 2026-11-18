@@ -35,6 +35,7 @@ wording keys listed here are the ones the layer's list holds.
 | `ArtworkFrame` | A card's picture at one of the artwork shapes, whole over a ground of itself where its shape is not the frame's, or its kind's mark over its name where it has none. |
 | `AudioPlayer` | A kept sound: a play and pause button, its waveform as its progress, a volume popover and a download. |
 | `CardRow` | A heading over one line of cards that scrolls sideways, paged by a pointer's buttons and swiped by a finger, with the link that opens it whole. |
+| `ChoiceSelect` | The one select a value is chosen from a list in, the library's select menu searching once it holds more than seven choices, or always over a road that finds them. |
 | `ChooseAll` | The three-state checkbox that takes every row shown or gives the choice up. |
 | `ColumnResizeHandle` | The right edge of a column's name, dragged or moved with the arrow keys. |
 | `CreateButton` | The one button a screen creates from: a grey icon in its row on a wide screen, a floating primary icon on a phone drawn under every overlay, its key named in its tooltip; marked `contained`, an add that belongs to a row, a sidebar's or a list's head, a tab bar or a dialog's or a drawer's row, is that row's grey icon at every width, answering no key. |
@@ -95,6 +96,7 @@ Each is named with everything it exports.
 | `actionbar` | `BAR_GATHERS_UNDER_PX`, `GATHERED_ACTIONS`, `STANDING_ACTIONS`, `barGathers`, `actionsOutside`, `useBarRoom`, `useBarGathers` |
 | `artwork` | `PictureSize`, `ArtworkShape`, `PORTRAIT`, `LANDSCAPE`, `SQUARE`, `ARTWORK_SHAPES`, `LANDSCAPE_FROM`, `SQUARE_PAST`, `FILLS_WITHIN`, `shapeOf`, `rowShape`, `fillsShape` |
 | `bars` | `BarColor`, `BAR_SIZE`, `STACKED_LEGEND`, `INLINE_LEGEND`, `FOLDED_LEGEND` |
+| `choices` | `ChoiceItems`, `ChoiceKeys`, `ChoiceFind`, `SEARCH_ABOVE`, `CHOICE_FIND_PAUSE_MS`, `choiceCount`, `searchesChoices`, `choiceFields`, `narrowChoices` |
 | `chooseall` | `ChooseAllState`, `chooseAllState`, `chosenRuns`, `chooseAllPress`, `chooseAllLabel`, `CHOOSE_CELL`, `CHOOSE_GUTTER` |
 | `closing` | `OVERLAY_CLOSE_MS`, `useHeldWhileClosing` |
 | `clipboard` | `copyText` |
@@ -303,7 +305,7 @@ What a coding harness takes the layer through (`docs/harness.md`).
 
 ## Wording keys
 
-The layer reads these 141 keys and no others. The `wording-keys` shared module lists them, the one
+The layer reads these 145 keys and no others. The `wording-keys` shared module lists them, the one
 list a host's pack is held to. Placeholders are named after each key.
 
 - **`common.action`:** `cancel`, `choose_all`, `choose_none`, `close`, `close_all_tabs`,
@@ -317,7 +319,7 @@ list a host's pack is held to. Placeholders are named after each key.
   `{name}`, `image_zoom` `{title}`, `increase`, `member_permission` `{name}`, `more_notices` `{n}`,
   `pinned_named` `{name}`, `play_named` `{name}`, `player_named` `{name}`, `share_address`,
   `speed_named` `{speed}`, `window_move`, `window_resize`.
-- **`common.error`:** `editor_failed`, `link_copy_failed`, `member_change_failed`,
+- **`common.error`:** `choices_find_failed`, `editor_failed`, `link_copy_failed`, `member_change_failed`,
   `member_search_failed`, `member_share_failed`, `members_read_failed`, `picture_failed`,
   `share_create_failed`, `share_read_failed`, `unshare_failed`, `video_failed`.
 - **`common.label`:** `day_format` (a date format the time module's day is written in), `days`
@@ -332,9 +334,9 @@ list a host's pack is held to. Placeholders are named after each key.
   `unplayable`, `volume`.
 - **`common.message`:** `link_copied`, and the theme preview's words:
   `preview_badge`, `preview_field`, `preview_link`, `preview_meta`, `preview_note`.
-- **`common.placeholder`:** `member_search`.
+- **`common.placeholder`:** `member_search`, `search`.
 - **`common.status`:** `brightness` `{n}`, `copied`, `loading`, `members_loading`, `muted`,
-  `next_in` `{n}`, `no_members`, `picture_loading`, `share_loading`, `speed` `{speed}`, `subtitles_off`,
+  `next_in` `{n}`, `no_choices`, `no_match`, `no_members`, `picture_loading`, `share_loading`, `speed` `{speed}`, `subtitles_off`,
   `subtitles_on` `{name}`, `turned` `{degrees}`, `unmuted`, `video_loading`, `volume` `{n}`,
   `went_back` `{n}`, `went_forward` `{n}`.
 - **`common.title`:** `discard_changes`, `share`.

@@ -446,6 +446,34 @@ default; a screen supplies what it holds and what a press means there. Every exp
 - **What is not a form** takes effect as it is done and carries no save: a table whose cells are each
   their own editor, a page of standing switches, a list whose records are each stored on their own.
 
+## Choosing a value
+
+- **A value is chosen from a list in one select** (`ChoiceSelect`), the component library's select
+  menu with the search held by the rule below. It takes everything the library's select menu takes:
+  its value, one or several, its value key, its placeholder, its size, its look and its slots. A
+  screen stands it wherever a value is chosen from a list, a filter's among them, and never the
+  library's select, select menu or input menu bare, nor a dropdown menu of checks standing in for a
+  select.
+- **A list searches once it holds more than seven choices, and only then** (the choices module's
+  `SEARCH_ABOVE`). The count is of the choices it is handed: a group's label and a separator are no
+  choices. A list read from data therefore takes its search the moment it grows past seven, on every
+  screen at once, and no screen decides whether its list searches.
+- **A list found on the server always searches.** The screen hands the road that finds choices for
+  the words typed (`find`); once typing stands still for a pause the road is asked, only the answer
+  to the last words asked lands, and the list shows that answer. Before anything is typed it shows
+  the choices it is handed, among them those already chosen, so the field names them.
+- **The search field stands at the top of the opened list,** above the choices, its search mark
+  leading and the pack's words for a search as its placeholder. Opened by a pointer or a key, the
+  field takes the focus, so typing searches at once; on a touch screen it does not, so the keyboard
+  covers nothing until the field is pressed. Closing the list clears what was typed.
+- **What a choice shows is what is searched:** its label and the line under it, matched by the
+  search module as every list search is (see "List search"), the matched part marked where it
+  stands. A group's label stays while any of its choices does, and a separator stands only between
+  groups that both stay.
+- **An empty list says why.** Nothing matched the words: the pack's words for no match. No choices
+  at all: the pack's words for an empty list, or the screen's own word for its list where the
+  wording guide gives one. A refused find: the pack's words for a search that failed.
+
 ## Dates
 
 - **A date is chosen on one calendar** (`DateCalendar`), the component library's own calendar of
