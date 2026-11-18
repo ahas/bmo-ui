@@ -141,31 +141,100 @@ async function ask(element: Element, raised: () => Element[]): Promise<void> {
   }
 }
 
-async function dismiss(element: Element): Promise<void> {
+// The layers a node put on the page holds, itself among them.
+function layersIn(node: Node): Element[] {
+  if (!(node instanceof Element)) {
+    return [];
+  }
+
+  const inside = Array.from(node.querySelectorAll(LAYER));
+
+  return node.matches(LAYER) ? [node, ...inside] : inside;
+}
+
+// The layers that come open from the moment it is called, other than those standing then, each kept
+// once it has stood open whatever it does after: a question the reader put away before anything here
+// looked is still the answer the press was given. Read through the observer's own records, so a layer
+// that opened and closed between two looks is never missed; held for one press and let go after it.
+function watchRaised(): { raised: () => Element[]; stop: () => void } {
   const before = new Set(openLayers());
-  const raised = (): Element[] => openLayers().filter((layer) => !before.has(layer));
+  const found = new Set<Element>();
 
-  await ask(element, raised);
+  const note = (layer: Element, wasOpen: boolean): void => {
+    if (!before.has(layer) && (wasOpen || isOpen(layer))) {
+      found.add(layer);
+    }
+  };
 
-  // A press that follows another's close at once finds the thing just closed still leaving, and it took the key.
-  // The press is this layer's all the same, so it is asked again once that one has gone.
-  if (isOpen(element) && raised().length === 0 && leaving()) {
-    await left();
-    await ask(element, raised);
+  const read = (records: MutationRecord[]): void => {
+    for (const record of records) {
+      if (record.type === "attributes" && record.target instanceof Element && record.target.matches(LAYER)) {
+        note(record.target, record.oldValue === "open");
+      }
+
+      for (const node of Array.from(record.addedNodes)) {
+        for (const layer of layersIn(node)) {
+          note(layer, false);
+        }
+      }
+    }
+  };
+
+  const observer = new MutationObserver(read);
+
+  observer.observe(document.body, {
+    subtree: true,
+    childList: true,
+    attributes: true,
+    attributeFilter: ["data-state"],
+    attributeOldValue: true
+  });
+
+  return {
+    raised: () => {
+      read(observer.takeRecords());
+
+      return Array.from(found);
+    },
+    stop: () => observer.disconnect()
+  };
+}
+
+// Whether the press asking a layer to close took the layer's entry with it: back lands on the entry
+// below and takes it, a tap away leaves it standing.
+type EntryAfterPress = "taken" | "kept";
+
+async function dismiss(element: Element, entry: EntryAfterPress): Promise<void> {
+  const watch = watchRaised();
+  let asked: Element[];
+
+  try {
+    await ask(element, watch.raised);
+
+    // A press that follows another's close at once finds the thing just closed still leaving, and it took the
+    // key. The press is this layer's all the same, so it is asked again once that one has gone; one the press
+    // raised itself is its answer instead, however soon it went.
+    if (isOpen(element) && watch.raised().length === 0 && leaving()) {
+      await left();
+      await ask(element, watch.raised);
+    }
+
+    asked = watch.raised();
+  } finally {
+    watch.stop();
   }
 
   // What it opened over itself stands as a layer of its own and takes the next press; the layer
   // waits for it to be answered, since a discard closes the layer too.
-  const asked = raised();
-
   if (isOpen(element) && asked.length > 0) {
     await answered(asked);
     await settle();
   }
 
-  // One that refuses to close, or stays once its question is answered, stands on, and so stands as
-  // a layer again with an entry of its own; the press that was spent on it is not the reader's last.
-  if (isOpen(element)) {
+  // One that refuses to close, or stays once its question is answered, stands on. Where the press took
+  // its entry it stands as a layer again with an entry of its own, so the press that was spent on it is
+  // not the reader's last; where the press left the entry, the layer it stood as still holds it.
+  if (isOpen(element) && entry === "taken") {
     standing.delete(element);
     sweep();
   }
@@ -184,7 +253,7 @@ function sweep(): void {
 
   for (const element of found) {
     if (!standing.has(element)) {
-      standing.set(element, openLayer(() => void dismiss(element)));
+      standing.set(element, openLayer(() => void dismiss(element, "taken")));
     }
   }
 }
@@ -390,7 +459,7 @@ function listenForTaps(): void {
       event.stopPropagation();
 
       if (isOpen(pressed)) {
-        void dismiss(pressed);
+        void dismiss(pressed, "kept");
       }
     },
     true

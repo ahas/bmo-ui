@@ -22,7 +22,8 @@ import type { Browser, BrowserContext, Page } from "playwright-core";
 // outside focus it refuses on its own: that raises no question even once the form has turned dirty,
 // and the guard still asks at every real request to close after it, and closes at once where the
 // form is untouched. Esc and back reach the dialog the same way with the focus
-// in a date or a time field's segment. The page is built as the layer's custom elements are, from
+// in a date or a time field's segment. A finger's tap away and back each ask once where the question
+// is answered the moment it opens. The page is built as the layer's custom elements are, from
 // the components that ship, and driven by a real Chromium at a phone's width and a desktop's.
 // Skipped where the browser build is not on the machine.
 
@@ -38,7 +39,8 @@ const REASON = "[data-reason]";
 const SAVE = "[data-save]";
 const LANDED = "Annual leave";
 const FORM = "[role=dialog]:has([data-reason])";
-const QUESTION = "[role=dialog]:has-text('Discard unsaved changes?')";
+const DISCARD_TITLE = "Discard unsaved changes?";
+const QUESTION = `[role=dialog]:has-text('${DISCARD_TITLE}')`;
 
 const WIDTHS = [
   { name: "a phone", width: 360, height: 740 },
@@ -73,9 +75,9 @@ afterAll(async () => {
   if (out !== "") rmSync(out, { recursive: true, force: true });
 });
 
-// The harness page at the address named, with no dialog open.
-async function harness(width: number, height: number, address: string): Promise<{ context: BrowserContext; page: Page }> {
-  const context = await browser.newContext({ viewport: { width, height } });
+// The harness page at the address named, with no dialog open; on a touch screen where `touch` says so.
+async function harness(width: number, height: number, address: string, touch = false): Promise<{ context: BrowserContext; page: Page }> {
+  const context = await browser.newContext({ viewport: { width, height }, hasTouch: touch, isMobile: touch });
   const page = await context.newPage();
 
   await page.route(`${ORIGIN}/**`, (route) => {
@@ -104,8 +106,8 @@ async function created(width: number, height: number): Promise<{ context: Browse
 
 // The page with the form's dialog standing open, its data landed after it opened. Where `beforeLanding`
 // is handed, the reader does that first and the form says when it is ready.
-async function opened(width: number, height: number, beforeLanding?: (page: Page) => Promise<void>): Promise<{ context: BrowserContext; page: Page }> {
-  const { context, page } = await harness(width, height, beforeLanding === undefined ? "/" : "/?ready");
+async function opened(width: number, height: number, beforeLanding?: (page: Page) => Promise<void>, touch = false): Promise<{ context: BrowserContext; page: Page }> {
+  const { context, page } = await harness(width, height, beforeLanding === undefined ? "/" : "/?ready", touch);
 
   await page.click(OPEN);
   await settledOn(page, 1);
@@ -116,9 +118,10 @@ async function opened(width: number, height: number, beforeLanding?: (page: Page
   return { context, page };
 }
 
-// The page with the form's dialog standing open and a change written into it.
-async function changed(width: number, height: number): Promise<{ context: BrowserContext; page: Page }> {
-  const { context, page } = await opened(width, height);
+// The page with the form's dialog standing open and a change written into it; on a touch screen
+// where `touch` says so.
+async function changed(width: number, height: number, touch = false): Promise<{ context: BrowserContext; page: Page }> {
+  const { context, page } = await opened(width, height, undefined, touch);
 
   await page.fill(REASON, "Family event");
 
@@ -499,4 +502,92 @@ describe.skipIf(!ready)("the focus a dialog opened by a key takes up on a contro
 
     await context.close();
   });
+});
+
+// The reader answering the question the moment it opens, before the overlays module next looks at the
+// page (`docs/components.md`, "Floating things" and "A finger's tap away from what floats only closes
+// it"): Esc puts the question away, the form's dialog stands on with its change as the one layer, on
+// an entry of its own, and the press that raised the question asks nothing more. Each question that opens is counted
+// from the page, and the first is answered there in the turn it opened, so how soon the answer lands
+// does not hang on the test's own round trip. Once is enough at a phone's width, where a tap is a
+// finger's.
+const ANSWERED_AT_ONCE = [
+  { way: "a tap away", leave: (page: Page) => page.touchscreen.tap(4, 4) },
+  { way: "back", leave: (page: Page) => page.evaluate(() => history.back()) }
+];
+
+// Counts every question that opens from here on, and answers the first with Esc as it opens.
+async function answerAtOnce(page: Page): Promise<void> {
+  await page.evaluate((title) => {
+    const watched = window as unknown as { questions: number };
+    const seen = new WeakSet<Element>();
+
+    watched.questions = 0;
+    new MutationObserver(() => {
+      for (const layer of Array.from(document.querySelectorAll("[data-dismissable-layer][role=dialog]"))) {
+        if (seen.has(layer) || layer.getAttribute("data-state") !== "open" || layer.textContent?.includes(title) !== true) continue;
+
+        seen.add(layer);
+        watched.questions += 1;
+
+        if (watched.questions === 1) {
+          document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", code: "Escape", bubbles: true, cancelable: true }));
+        }
+      }
+    }).observe(document.body, { subtree: true, childList: true, attributes: true, attributeFilter: ["data-state"] });
+  }, DISCARD_TITLE);
+}
+
+// How many questions have opened and how many dialogs stand once the question answered has gone from
+// the page. Whatever the press still does after an answer it waits on that question's leaving for, and
+// does on the first frame after it has gone, so the count is read two frames later.
+async function afterTheAnswer(page: Page): Promise<{ questions: number; dialogs: number }> {
+  await page.waitForFunction(() => (window as unknown as { questions: number }).questions > 0, null, { timeout: 3000 });
+  await page.waitForSelector(QUESTION, { state: "detached", timeout: 3000 });
+
+  return page.evaluate(
+    () =>
+      new Promise<{ questions: number; dialogs: number }>((resolve) =>
+        requestAnimationFrame(() =>
+          requestAnimationFrame(() =>
+            resolve({
+              questions: (window as unknown as { questions: number }).questions,
+              dialogs: document.querySelectorAll("[role=dialog]").length
+            })
+          )
+        )
+      )
+  );
+}
+
+describe.skipIf(!ready)("a form's dialog holding a change, its question answered at once, on a phone", () => {
+  for (const { way, leave } of ANSWERED_AT_ONCE) {
+    test(`asks once on ${way}, stands on as the one layer with its change, and asks again on the next`, async () => {
+      const { context, page } = await changed(WIDTHS[0]!.width, WIDTHS[0]!.height, true);
+
+      await answerAtOnce(page);
+      await leave(page);
+
+      expect(await afterTheAnswer(page)).toEqual({ questions: 1, dialogs: 1 });
+
+      await settledOn(page, 1);
+
+      expect(await page.inputValue(REASON)).toBe("Family event");
+
+      // The dialog stands as a layer again, so the next press the same way asks again, and discard
+      // leaves the history as it was.
+      await leave(page);
+      await page.waitForSelector(QUESTION, { timeout: 3000 });
+
+      expect(await page.locator(FORM).count()).toBe(1);
+
+      await page.getByRole("button", { name: "Discard" }).click();
+      await page.waitForSelector("[role=dialog]", { state: "detached", timeout: 3000 });
+      await settledOn(page, 0);
+
+      expect(await entries(page)).toEqual({ layers: 0, marked: false });
+
+      await context.close();
+    });
+  }
 });

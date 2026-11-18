@@ -715,7 +715,9 @@ default; a screen supplies what it holds and what a press means there. Every exp
     only once the old one's step back has landed.
   - A press that follows another close at once still closes what it was meant for: the thing just closed is
     still on the page while its leaving is drawn and takes the key for itself, so what stands under it is asked
-    again once that one has gone.
+    again once that one has gone. A floating thing the press itself raised is never that thing: what opened
+    since the press began is the answer to it, even where the reader has already put it away, so the press
+    asks nothing more.
   - Steps back are taken one at a time: where one press closes two floating things, the second step
     is asked for only once the first has landed. A step asked for while another is on its way is
     dropped by some browsers and read by the router as the reader's own press where it lands, and
@@ -723,8 +725,8 @@ default; a screen supplies what it holds and what a press means there. Every exp
     under it.
   - A floating thing that answers the press by asking first — a form's dialog holding changes — is
     not pressed again while the question stands: the question takes the next press of back as any
-    floating thing does, and once it is answered, one that stays stands again with an entry of its
-    own, so the next press of back asks again.
+    floating thing does, and once it is answered, however soon after it opened, one that stays stands
+    again with an entry of its own, so the next press of back asks again.
   - A form's dialog with no change, opened and left untouched, its change put back or just saved,
     closes at once by every way, back among them; what counts as a change is the Forms section's.
   - The focus handed back to the control a floating thing was opened from closes nothing.
@@ -767,8 +769,9 @@ default; a screen supplies what it holds and what a press means there. Every exp
 - **A finger's tap away from what floats only closes it.** On a touch screen a tap outside the topmost
   floating thing closes that one and presses nothing under it. The one closed is the one topmost as
   the finger lands: where it has already closed by the time the finger lifts, a list put away by the
-  focus leaving it, the tap is spent and what stood under it stays. A mouse click away closes it and
-  does what it points at.
+  focus leaving it, the tap is spent and what stood under it stays. A form's dialog holding changes
+  answers the tap as it answers back: it asks once, and once the question is answered, however soon,
+  it stands on with the entry it stood on and the next tap asks again. A mouse click away closes it and does what it points at.
 - **The press that closes one is the press being handled.** An outside touch that has not become the
   press being handled closes nothing, so a button pressed inside a dialog does what it was pressed for
   rather than closing the dialog.
