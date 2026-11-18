@@ -16,11 +16,13 @@ import type { Browser, Page } from "playwright-core";
 // narrows it to what the choices show with the hits marked and the headings of what stays while the
 // control still names what is chosen, an empty answer says why, a list found over a road asks it and
 // says when it refused, a list of three taking free entry opens with its search and takes a value
-// typed into it, a preview follows the choice the keyboard rests on, each list stands as wide as its
-// choices and its control against an edge of the control at a desktop's and a phone's width, and a
-// finger opening a long list leaves the keyboard down and keeps a long value typed in free entry
-// inside the screen. Which choices the words keep is the choices module's own test
-// (`tests/domain/choices.test.ts`). Skipped where the browser build is not on the machine.
+// typed into it, a preview follows the choice the keyboard rests on, a closing list keeps the choices
+// it showed until it is gone, the control takes the accent on its edge with no ring when the keyboard
+// reaches it, each list stands as wide as its choices and its control against an edge of the control
+// at a desktop's and a phone's width, and a finger opening a long list leaves the keyboard down and
+// keeps a long value typed in free entry inside the screen. Which choices the words keep is the
+// choices module's own test (`tests/domain/choices.test.ts`). Skipped where the browser build is not
+// on the machine.
 
 const ready = touchReady();
 const ROOT = new URL("../../", import.meta.url).pathname;
@@ -236,7 +238,7 @@ describe.skipIf(!ready)("the one select at a desktop's width", () => {
     await listedAs(page, []);
     await saysEmpty(page, "Nothing found");
 
-    // Closing clears the words, so the list opens whole again.
+    // Opening again clears the words, so the list opens whole.
     await close(page);
     await page.click("#long");
     await page.waitForSelector(FIELD);
@@ -275,6 +277,51 @@ describe.skipIf(!ready)("the one select at a desktop's width", () => {
     await preview("sunset");
     await close(page);
     await preview("teal");
+  });
+
+  test("keeps the choices the words left until the list is off the screen, closed by a key or by a choice", async () => {
+    for (const closing of ["Escape", "Enter"]) {
+      await page.click("#long");
+      await page.waitForSelector(FIELD);
+      await page.keyboard.type("oslo");
+      await listedAs(page, ["# North", "Oslo"]);
+      await page.evaluate(() => {
+        const seen = new Set<number>();
+        const watch = (): void => {
+          const list = document.querySelector("[data-slot=content]");
+
+          if (list === null) return;
+          if (list.getAttribute("data-state") === "closed") seen.add(list.querySelectorAll("[data-slot=item]").length);
+          requestAnimationFrame(watch);
+        };
+
+        Object.assign(window, { closingCounts: seen });
+        requestAnimationFrame(watch);
+      });
+      await page.keyboard.press(closing);
+      await page.waitForSelector(LIST, { state: "detached" });
+      expect(await page.evaluate(() => [...(window as unknown as { closingCounts: Set<number> }).closingCounts])).toEqual([1]);
+    }
+  });
+
+  test("takes the accent on its control's edge and draws no ring when the keyboard reaches it", async () => {
+    await page.focus("#short");
+    await page.keyboard.press("Tab");
+
+    const drawn = await page.$eval("#long", (control) => {
+      const probe = document.createElement("i");
+
+      probe.style.color = "var(--bmo-focus)";
+      document.body.append(probe);
+
+      const accent = getComputedStyle(probe).color;
+
+      probe.remove();
+
+      return { visible: control.matches(":focus-visible"), outline: getComputedStyle(control).outlineStyle, edge: getComputedStyle(control).boxShadow.includes(`${accent} 0px 0px 0px 1px inset`) };
+    });
+
+    expect(drawn).toEqual({ visible: true, outline: "none", edge: true });
   });
 
   test("stands each list as wide as its choices and its control, against an edge of the control", async () => {

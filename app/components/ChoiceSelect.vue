@@ -9,8 +9,9 @@
        road refused, and the road's first answer is awaited under a skeleton line. The list opens
        against the control's leading edge, and against its trailing edge where the leading one leaves
        it no room. The control names what is chosen from every choice it knows, whatever the words
-       typed leave in the list. Everything else it is handed is the library's select menu's. -->
-
+       typed leave in the list. The words typed stay while the list closes and are cleared as it opens
+       again, so a closing list keeps what it showed. Everything else it is handed is the library's
+       select menu's. -->
   <USelectMenu
     v-bind="$attrs"
     v-model:search-term="words"
@@ -24,8 +25,11 @@
     :loading="busy"
     :content="content"
     :create-item="offered === null ? false : CREATE_ALWAYS"
+    :reset-search-term-on-blur="false"
+    :reset-search-term-on-select="props.multiple"
     ignore-filter
     @create="takeOffered"
+    @update:open="clearOnOpen"
   >
     <template v-for="name in passedSlots" #[name]="scope" :key="name">
       <slot :name="name" v-bind="scope ?? {}" />
@@ -75,7 +79,7 @@ import type { ChoiceFind, ChoiceItems } from "../domain/choices";
 
 // The library's virtual scrolling opens a list's groups out into one, and the select keeps its groups,
 // so it is not taken.
-interface Props extends /* @vue-ignore */ Omit<SelectMenuProps, "items" | "virtualize" | "modelValue" | "multiple" | "valueKey" | "searchInput" | "searchTerm" | "ignoreFilter" | "filterFields" | "labelKey" | "descriptionKey" | "createItem"> {
+interface Props extends /* @vue-ignore */ Omit<SelectMenuProps, "items" | "virtualize" | "modelValue" | "multiple" | "valueKey" | "searchInput" | "searchTerm" | "resetSearchTermOnBlur" | "resetSearchTermOnSelect" | "ignoreFilter" | "filterFields" | "labelKey" | "descriptionKey" | "createItem"> {
   // The value chosen, or the values where several are.
   modelValue?: unknown;
   multiple?: boolean;
@@ -130,8 +134,15 @@ const passedSlots = computed(() => Object.keys(slots).filter((name) => !OWN_SLOT
 
 const keys = computed(() => ({ label: props.labelKey, description: props.descriptionKey, value: props.valueKey }));
 
-// The words typed into the search; the library clears them as the list closes.
+// The words typed into the search. The library would clear them as the list closes, and a list of one
+// value as its choice is made, which swaps the closing list's choices for all of them while it is
+// still on the screen; they are cleared as the list opens instead. A list of several values stays open
+// as a choice is made, so the library clears them then.
 const words = ref("");
+
+function clearOnOpen(open: boolean): void {
+  if (open) words.value = "";
+}
 
 // What the road answered for the last words asked, null while no answer stands for the words typed.
 const found = shallowRef<SelectMenuItem[] | null>(null);

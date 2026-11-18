@@ -349,12 +349,15 @@
 /* A field — a place a value is typed or chosen in — wears its focus on its own edge, which takes the
    accent, and draws no ring around it; one drawn with no edge takes the elevated background by its
    own class instead. A text box holds the caret however it was focused, so the browser counts every
-   focus of one as visible and the edge shows for a press as well. */
+   focus of one as visible and the edge shows for a press as well. A select whose list searches is
+   opened from a button that names the list it drops rather than taking the combobox role, and is a
+   field all the same. */
 :is(
     input:not([type="checkbox"], [type="radio"], [type="range"], [type="file"], [type="color"], [type="button"], [type="submit"], [type="reset"], [type="image"]),
     textarea,
     select,
     [role="combobox"],
+    button[aria-haspopup="listbox"],
     [contenteditable]
   ):focus-visible {
   outline-style: none;

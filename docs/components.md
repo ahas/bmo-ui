@@ -491,7 +491,10 @@ default; a screen supplies what it holds and what a press means there. Every exp
   leading and the pack's words for a search as its placeholder. It has no edge of its own, so while
   it holds the focus it takes the elevated background, as a field with no edge does. Opened by a pointer or a key, the
   field takes the focus, so typing searches at once; on a touch screen it does not, so the keyboard
-  covers nothing until the field is pressed. Closing the list clears what was typed.
+  covers nothing until the field is pressed. What was typed stays while the list closes, so the
+  closing list shows what it showed until it is off the screen, and is cleared as the list opens
+  again; a list of several values keeps the library's own clearing when a choice is made, since it
+  stays open.
 - **What a choice shows is what is searched:** its label and the line under it, matched by the
   search module as every list search is (see "List search"), the matched part marked where it
   stands. A group's label stays while any of its choices does, and a separator stands only between
