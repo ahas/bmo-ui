@@ -423,6 +423,15 @@ default; a screen supplies what it holds and what a press means there. Every exp
   press outside, the back gesture — and leaving the page ask first, in the question dialog, whether to
   throw the unsaved changes away: discard drops them and goes, and every way out of the question
   stays. With nothing changed it goes at once.
+- **A dialog never closes itself past the question.** The component library's modal closes on its
+  own when the close in its corner is pressed, beside whatever the close says to the screen. So a
+  dialog with a close guard (`useCloseGuard`, which the settings dialog holds) takes every request
+  of its modal to close as a request to leave, handed to the guard, and the dialog closes only when
+  the guard lets it go; the modal's open state is never bound both ways. The press of that close
+  then reaches the guard through the modal alone, so a screen clearing its form as the dialog closes
+  raises no question; where a press does reach it twice, a request to leave a dialog already closed
+  is none. A screen that builds its own dialog with the guard and `ShellClose` in the modal's close
+  slot wires it the same way.
 - **A refused save keeps every change as written,** with the reason under the field it names. A save
   made in several steps stops at the first refusal, and what went through before it stands as saved.
 - **A text box of a form grows with its text and never scrolls inside** (`GrowingTextarea`). It is

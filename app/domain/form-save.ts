@@ -257,8 +257,11 @@ export function useCloseGuard(open: Ref<boolean>, changes: Changes, t: Translate
   // One question at a time, since the back gesture may press Esc more than once while it stands.
   let asking = false;
 
+  // A floating thing already closed is left alone: one press may ask it to close twice — its close
+  // button and the component library's own close around it — and once the first has closed it the
+  // screen may clear its form, which must not read as a change.
   async function leave(): Promise<void> {
-    if (asking) return;
+    if (asking || !open.value) return;
 
     if (!read.holds()) {
       open.value = false;

@@ -4,17 +4,21 @@
        right of the foot. A form's dialog is handed its form's opened-with snapshot (or, for a form
        with no values to hand, whether it holds changes), and every way of closing it
        — the foot's cancel among them, through the close the foot is handed — then asks first, in
-       the question dialog over it, whether to throw them away (`docs/components.md`, "Forms"). -->
+       the question dialog over it, whether to throw them away (`docs/components.md`, "Forms"). The
+       modal's own close, which the close in its corner sets off beside what the close says, is a
+       request to leave like any other, so the open state is never bound both ways. -->
   <UModal
-    v-model:open="open"
+    :open="open"
     :title="props.title"
     :description="props.description"
     :dismissible="guard.dismissible.value"
     :ui="{ content: props.wide ? 'sm:max-w-4xl' : 'sm:max-w-xl' }"
+    @update:open="(standing: boolean) => (standing ? (open = true) : void guard.leave())"
     @close:prevent="void guard.leave()"
   >
     <template #close="{ ui }">
-      <ShellClose :class="ui.close()" @close="void guard.leave()" />
+      <!-- Pressed, it reaches the guard through the modal's own close alone, so it asks only once. -->
+      <ShellClose :class="ui.close()" />
     </template>
 
     <template #body>

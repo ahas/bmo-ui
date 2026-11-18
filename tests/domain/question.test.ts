@@ -111,4 +111,19 @@ describe("closing a form's dialog", () => {
     await guard.leave();
     expect(open.value).toBe(false);
   });
+
+  test("once closed asks nothing more, though the screen then clears its form", async () => {
+    overlayAnswering(false);
+
+    const open = ref(true);
+    let changed = false;
+    const guard = useCloseGuard(open, () => changed, wording);
+
+    await guard.leave();
+    changed = true;
+    await guard.leave();
+
+    expect(open.value).toBe(false);
+    expect(opened).toEqual([]);
+  });
 });

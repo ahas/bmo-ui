@@ -12,8 +12,10 @@ import type { Browser, BrowserContext, Page } from "playwright-core";
 // A form's dialog asks before it closes only while its values differ from what it opened with
 // (`docs/components.md`, "Forms" and "Floating things"): left untouched, whether opened for a new
 // record with its defaults or with its data landing after it opened, and with its change put back
-// or saved, it closes at once. The back gesture over one holding a change asks first, as its close
-// and Esc do: the question stands over the dialog, discard takes both away and leaves the history
+// or saved, it closes at once. Its close over one holding a change asks first with the dialog still
+// standing under the question, since the modal's own close is a request to leave like any other.
+// The back gesture over one holding a change asks first, as its close and Esc do: the question
+// stands over the dialog, discard takes both away and leaves the history
 // as it was, and every way out of the question keeps the dialog standing with an entry of its own,
 // so the next press of back asks again. Esc and back reach the dialog the same way with the focus
 // in a date or a time field's segment. The page is built as the layer's custom elements are, from
@@ -223,6 +225,38 @@ for (const { name, width, height } of WIDTHS) {
 
       await page.click(SAVE);
       await closesAtOnce(page, pressEsc(page));
+
+      await context.close();
+    });
+  });
+
+  describe.skipIf(!ready)(`the close of a form's dialog holding a change, on ${name}`, () => {
+    test("asks first with the dialog standing under the question, and discard takes both away", async () => {
+      const { context, page } = await changed(width, height);
+
+      await pressClose(page)();
+      await page.waitForSelector(QUESTION, { timeout: 3000 });
+
+      expect(await page.locator(FORM).count()).toBe(1);
+
+      await page.getByRole("button", { name: "Discard" }).click();
+      await page.waitForSelector("[role=dialog]", { state: "detached", timeout: 3000 });
+      await settledOn(page, 0);
+
+      await context.close();
+    });
+
+    test("is held by cancel on the question, the dialog keeping its change", async () => {
+      const { context, page } = await changed(width, height);
+
+      await pressClose(page)();
+      await page.waitForSelector(QUESTION, { timeout: 3000 });
+      await page.getByRole("button", { name: "Cancel" }).click();
+      await page.waitForSelector(QUESTION, { state: "detached", timeout: 3000 });
+      await settledOn(page, 1);
+
+      expect(await page.locator(FORM).count()).toBe(1);
+      expect(await page.inputValue(REASON)).toBe("Family event");
 
       await context.close();
     });
