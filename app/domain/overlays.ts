@@ -290,8 +290,13 @@ export function refuseHandedBackFocus(): void {
 // next tap is the one that acts. A mouse is left alone: it points before it presses. What floats
 // over every layer is under no layer, so a tap on it acts, and a tap beside what floats beside the
 // page acts too.
+//
+// The tap closes the layer that stood on top as the finger landed, and only that one. Between the
+// finger landing and the click it ends in, the focus moves to where the finger fell, and a list that
+// does not hold the focus captive closes itself on that move; the layer under it is then on top by
+// the time the click comes, and closing whatever stands on top then would put that one away too.
 function listenForTaps(): void {
-  let away = false;
+  let away: Element | null = null;
 
   window.addEventListener(
     "pointerdown",
@@ -303,7 +308,9 @@ function listenForTaps(): void {
         && top !== null
         && !besidePage(top)
         && !(event.target instanceof Node && top.contains(event.target))
-        && !overLayers(event.target);
+        && !overLayers(event.target)
+          ? top
+          : null;
     },
     true
   );
@@ -311,18 +318,18 @@ function listenForTaps(): void {
   window.addEventListener(
     "click",
     (event) => {
-      if (!away) {
+      if (away === null) {
         return;
       }
 
-      away = false;
+      const pressed = away;
+
+      away = null;
       event.preventDefault();
       event.stopPropagation();
 
-      const top = topLayer();
-
-      if (top !== null) {
-        void dismiss(top);
+      if (isOpen(pressed)) {
+        void dismiss(pressed);
       }
     },
     true

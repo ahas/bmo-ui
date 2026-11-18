@@ -3,6 +3,8 @@ import { createApp, defineComponent, h, nextTick, onScopeDispose, ref, shallowRe
 import { createI18n } from "vue-i18n";
 
 import UApp from "@nuxt/ui/components/App.vue";
+import UButton from "@nuxt/ui/components/Button.vue";
+import UModal from "@nuxt/ui/components/Modal.vue";
 
 import ChoiceSelect from "../../app/components/ChoiceSelect.vue";
 import { PREVIEW_ITEM, useListPreview } from "../../app/domain/list-preview";
@@ -16,10 +18,11 @@ import type { SelectMenuItem } from "@nuxt/ui";
 // sizes, a dozen cities in two groups each with a line under it, eight tints with a preview beside
 // them, people found over a stand-in road that answers at once, refuses the word "fail", holds its
 // answer to "slow" until the test lets it go and finds nobody for anything else unmatched, three
-// roles taking free entry, each new value added to them and chosen, and a narrow control at the
-// page's trailing end opening a list of sessions wider than itself. The page stands outside Nuxt, so
-// the library is installed as a Vue plugin, the words are handed over here and the layer's registry
-// of floating things is started as its plugin starts it.
+// roles taking free entry, each new value added to them and chosen, a narrow control at the page's
+// trailing end opening a list of sessions wider than itself, and a dialog holding the dozen cities
+// once more, opened from a button under them all. The page stands outside Nuxt, so the library is
+// installed as a Vue plugin, the words are handed over here and the layer's registry of floating
+// things is started as its plugin starts it.
 
 // The layer's code reaches the framework's own names without importing them, since Nuxt binds them
 // in a host; a page standing outside Nuxt hands the same names over before anything opens.
@@ -80,8 +83,11 @@ const Page = defineComponent(() => {
     roles.value = [...roles.value, { label: value, value }];
     role.value = value;
   }
+
   const tint = ref("teal");
   const session = ref<string>();
+  const dialog = ref(false);
+  const cityInDialog = ref<string>();
   const preview = useListPreview(tint);
 
   return () =>
@@ -119,7 +125,16 @@ const Page = defineComponent(() => {
         }),
         h("div", { class: "flex justify-end self-stretch" }, [
           h(ChoiceSelect, { id: "wide", items: SESSIONS, valueKey: "value", modelValue: session.value, "onUpdate:modelValue": (value: string) => (session.value = value), class: "w-32" })
-        ])
+        ]),
+        h(UButton, { id: "open-dialog", label: "Open dialog", onClick: () => (dialog.value = true) }),
+        h(
+          UModal,
+          { open: dialog.value, "onUpdate:open": (value: boolean) => (dialog.value = value), title: "Dialog" },
+          {
+            body: () =>
+              h(ChoiceSelect, { id: "in-dialog", items: CITIES, valueKey: "value", modelValue: cityInDialog.value, "onUpdate:modelValue": (value: string) => (cityInDialog.value = value), class: "w-48" })
+          }
+        )
       ])
     );
 });

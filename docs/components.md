@@ -684,8 +684,10 @@ default; a screen supplies what it holds and what a press means there. Every exp
   marks, so each becomes a layer the moment it opens and stops being one the moment it closes, on
   every screen. A screen registers only what the library does not draw.
 - **A finger's tap away from what floats only closes it.** On a touch screen a tap outside the topmost
-  floating thing closes that one and presses nothing under it. A mouse click away closes it and does
-  what it points at.
+  floating thing closes that one and presses nothing under it. The one closed is the one topmost as
+  the finger lands: where it has already closed by the time the finger lifts, a list put away by the
+  focus leaving it, the tap is spent and what stood under it stays. A mouse click away closes it and
+  does what it points at.
 - **The press that closes one is the press being handled.** An outside touch that has not become the
   press being handled closes nothing, so a button pressed inside a dialog does what it was pressed for
   rather than closing the dialog.

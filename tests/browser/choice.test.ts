@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, describe, expect, test } from "bun:test";
+import { afterAll, afterEach, beforeAll, describe, expect, test } from "bun:test";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -164,6 +164,12 @@ async function close(page: Page): Promise<void> {
   await page.waitForSelector(LIST, { state: "detached" });
 }
 
+// Closes a list a failed test left open, so the next test starts from a closed select and fails only
+// where its own check does.
+async function closeLeftOpen(page: Page): Promise<void> {
+  if ((await page.$(LIST)) !== null) await close(page);
+}
+
 describe.skipIf(!ready)("the one select at a desktop's width", () => {
   let page: Page;
 
@@ -171,6 +177,10 @@ describe.skipIf(!ready)("the one select at a desktop's width", () => {
     page = await (await browser.newContext({ viewport: { width: 1280, height: 720 } })).newPage();
     await serve(page);
   }, BROWSER_HOOK_MS);
+
+  afterEach(async () => {
+    await closeLeftOpen(page);
+  });
 
   afterAll(async () => {
     await page?.context().close();
@@ -407,6 +417,10 @@ describe.skipIf(!ready)("the one select under a finger at a phone's width", () =
     await serve(touch.page);
   }, BROWSER_HOOK_MS);
 
+  afterEach(async () => {
+    await closeLeftOpen(touch.page);
+  });
+
   afterAll(async () => {
     await touch?.close();
   });
@@ -481,6 +495,26 @@ describe.skipIf(!ready)("the one select under a finger at a phone's width", () =
     await page.waitForSelector(LIST, { state: "detached", timeout: 3_000 });
     expect(page.url()).toBe(address);
     expect(await page.$("#long")).not.toBeNull();
+  });
+
+  test("closes only its list when a finger taps the dialog it stands in", async () => {
+    const { page } = touch;
+    const menu = `${LIST}:has([role=option])`;
+    const dialog = "[role=dialog]";
+
+    await touch.tap(await centreOf(page, "#open-dialog"));
+    await page.waitForSelector(`${dialog} #in-dialog`);
+    await touch.tap(await centreOf(page, "#in-dialog"));
+    await page.waitForSelector(menu);
+
+    // The dialog's title presses nothing and stands outside the list alone. The focus moves onto the
+    // dialog as the finger lands there, which closes the list before the tap ends.
+    await touch.tap(await centreOf(page, `${dialog} [data-slot=title]`));
+    await page.waitForSelector(menu, { state: "detached" });
+    await page.evaluate(async () => await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+    expect(await page.$$eval(dialog, (elements) => elements.map((element) => element.getAttribute("data-state")))).toEqual(["open"]);
+
+    await close(page);
   });
 
   test("keeps its search and its list in sight once a pressed field brings the keyboard up", async () => {
