@@ -183,5 +183,10 @@
     "sha256": "fcdca6adda9cba657ab4c4511a82c6a28a8cd3a3edbd4ee76808df0313f6a4e5",
     "bound": "0.1.0-rev.23",
     "why": "An icon button gets the focus back as a menu, popover or dialog it opened closes"
+  },
+  "bmo-ui-0.1.0-rev.37.tgz": {
+    "sha256": "9ba7267795d5a50258bd7c7427e916eee21d90703a077238300fa68bb73fefef",
+    "bound": "0.1.0-rev.23",
+    "why": "The one select takes a value typed into its search in free entry (createItem, the create event and the common.action.add_choice key). Nothing a bundle built on 0.1.0-rev.23 reads is taken away or changed."
   }
 }
