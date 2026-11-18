@@ -173,5 +173,10 @@
     "sha256": "03957be55e6adbd8eb72f4ecdeba74aba3edc71241b11b6a8290ed714f35c5e3",
     "bound": "0.1.0-rev.23",
     "why": "Adds only: the design review fixes of ChoiceSelect (its list opens against the control's leading edge, a road's answer is awaited under a skeleton line) and a select menu's search field taking the elevated background while it holds the focus. Nothing a bundle built on 0.1.0-rev.23 reads is taken away or changed."
+  },
+  "bmo-ui-0.1.0-rev.35.tgz": {
+    "sha256": "18921178339b00d4ec077c36516a2d2f77b490b7f1a46d6bed6e47335815ff08",
+    "bound": "0.1.0-rev.23",
+    "why": "A form dialog no longer asks to discard at an outside focus it refuses on its own, such as a menu handing the focus back to its trigger. Nothing a bundle built on 0.1.0-rev.23 reads is taken away or changed: useCloseGuard still returns dismissible."
   }
 }
