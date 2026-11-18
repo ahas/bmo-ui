@@ -198,5 +198,10 @@
     "sha256": "84f5a70f46de67ac0ae0d4cefde12cf7346ef27c13912da56384dd28f2b2875e",
     "bound": "0.1.0-rev.23",
     "why": "Adds focusHandedBack to the overlays module; the page tooltip and the shared tooltip no longer open on the focus a closing layer hands back"
+  },
+  "bmo-ui-0.1.0-rev.40.tgz": {
+    "sha256": "be7514ca0696cb45cd3a640b935b230fe9cabb37272f7dbe33951d4b3eac6801",
+    "bound": "0.1.0-rev.23",
+    "why": "Adds focusTakenOnOpen to the overlays module; the page tooltip and the shared tooltip no longer open on the focus an opening layer takes up on its own"
   }
 }
