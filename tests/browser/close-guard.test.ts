@@ -10,8 +10,9 @@ import { BROWSER_HOOK_MS, touchReady } from "./touch";
 import type { Browser, BrowserContext, Page } from "playwright-core";
 
 // A form's dialog asks before it closes only while its values differ from what it opened with
-// (`docs/components.md`, "Forms" and "Floating things"): left untouched, its data landing after it
-// opened, its change put back or saved, it closes at once. The back gesture over one holding a change
+// (`docs/components.md`, "Forms" and "Floating things"): left untouched, whether opened for a new
+// record with its defaults or with its data landing after it opened, and with its change put back or
+// saved, it closes at once. The back gesture over one holding a change
 // asks first, as its close and Esc do: the question stands over the dialog, discard takes both away
 // and leaves the history as it was, and every way out of the question keeps the dialog standing with
 // an entry of its own, so the next press of back asks again. The page is built as the layer's custom
@@ -25,6 +26,7 @@ const PAGE = `<!doctype html><html><head><meta charset="utf-8"><meta name="viewp
 <script src="/close-guard-harness.js" defer></script></head><body><div id="page"></div></body></html>`;
 
 const OPEN = "[data-open]";
+const CREATE = "[data-create]";
 const REASON = "[data-reason]";
 const SAVE = "[data-save]";
 const LANDED = "Annual leave";
@@ -64,9 +66,8 @@ afterAll(async () => {
   if (out !== "") rmSync(out, { recursive: true, force: true });
 });
 
-// The page with the form's dialog standing open, its data landed after it opened. Where `beforeLanding`
-// is handed, the reader does that first and the form says when it is ready.
-async function opened(width: number, height: number, beforeLanding?: (page: Page) => Promise<void>): Promise<{ context: BrowserContext; page: Page }> {
+// The harness page at the address named, with no dialog open.
+async function harness(width: number, height: number, address: string): Promise<{ context: BrowserContext; page: Page }> {
   const context = await browser.newContext({ viewport: { width, height } });
   const page = await context.newPage();
 
@@ -78,7 +79,27 @@ async function opened(width: number, height: number, beforeLanding?: (page: Page
 
     return route.fulfill({ status: 404, body: "" });
   });
-  await page.goto(beforeLanding === undefined ? `${ORIGIN}/` : `${ORIGIN}/?ready`);
+  await page.goto(`${ORIGIN}${address}`);
+
+  return { context, page };
+}
+
+// The page with the form's dialog standing open for a new request, with its defaults and nothing to
+// load.
+async function created(width: number, height: number): Promise<{ context: BrowserContext; page: Page }> {
+  const { context, page } = await harness(width, height, "/");
+
+  await page.click(CREATE);
+  await settledOn(page, 1);
+
+  return { context, page };
+}
+
+// The page with the form's dialog standing open, its data landed after it opened. Where `beforeLanding`
+// is handed, the reader does that first and the form says when it is ready.
+async function opened(width: number, height: number, beforeLanding?: (page: Page) => Promise<void>): Promise<{ context: BrowserContext; page: Page }> {
+  const { context, page } = await harness(width, height, beforeLanding === undefined ? "/" : "/?ready");
+
   await page.click(OPEN);
   await settledOn(page, 1);
   await beforeLanding?.(page);
@@ -144,6 +165,14 @@ async function backAsks(page: Page): Promise<void> {
 
 for (const { name, width, height } of WIDTHS) {
   describe.skipIf(!ready)(`a form's dialog with no change, on ${name}`, () => {
+    test("closes at once when opened for a new record with its defaults and left untouched", async () => {
+      const { context, page } = await created(width, height);
+
+      await closesAtOnce(page, pressClose(page));
+
+      await context.close();
+    });
+
     test("closes at once when left untouched, its data landing after it opened", async () => {
       const { context, page } = await opened(width, height);
 

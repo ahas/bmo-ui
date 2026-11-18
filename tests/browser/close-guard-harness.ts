@@ -14,11 +14,12 @@ import { TOOLTIP_PROVIDER } from "../../app/domain/tooltip";
 import sheet from "./close-guard-harness.css?inline";
 
 // A form's dialog closed with and without a change (`docs/components.md`, "Forms" and "Floating
-// things"): the button that opens it, the dialog with one text box and a save, and the page's
-// floating things found by the overlays module as a host's are. The box's text is the form's data,
-// which lands only once the test hands it over (`land`), after the dialog opened; the form hands its
-// values to the opened-with snapshot, saying when it is ready where the address asks for it
-// (`?ready`). The page stands outside Nuxt, so it wires itself as a host's page is wired: the
+// things"): the two buttons that open it, the dialog with one text box and a save, and the page's
+// floating things found by the overlays module as a host's are. Opened on a request, the box's text
+// is the form's data, which lands only once the test hands it over (`land`), after the dialog
+// opened; opened for a new request, the form stands at once with its defaults and loads nothing. The
+// form hands its values to the opened-with snapshot, saying when it is ready where the address asks
+// for it (`?ready`). The page stands outside Nuxt, so it wires itself as a host's page is wired: the
 // library's app root holding the boundary's tooltip setting, the page's own mark of which hand last
 // moved the focus, and the words handed over here.
 
@@ -36,14 +37,34 @@ Object.assign(globalThis, { useRouter: () => ({ options: {}, beforeEach: () => u
 
 const loaded = ref(false);
 const text = ref("");
+// Whether the dialog stands for a new request, and the length a new request takes by default.
+const creating = ref(false);
+const length = ref("");
 
 const Page = defineComponent(() => {
   const open = ref(false);
-  const opened = useOpenedWith(() => ({ reason: text.value }), { open, ready: new URLSearchParams(location.search).has("ready") ? loaded : undefined });
+  const opened = useOpenedWith(() => ({ reason: text.value, length: length.value }), { open, ready: new URLSearchParams(location.search).has("ready") ? loaded : undefined });
 
   return () =>
     h(UApp, { tooltip: TOOLTIP_PROVIDER }, () => [
-      h(UButton, { label: "New request", "data-open": "", onClick: () => (open.value = true) }),
+      h(UButton, {
+        label: "Open request",
+        "data-open": "",
+        onClick: () => {
+          creating.value = false;
+          open.value = true;
+        }
+      }),
+      h(UButton, {
+        label: "New request",
+        "data-create": "",
+        onClick: () => {
+          creating.value = true;
+          length.value = "whole day";
+          loaded.value = true;
+          open.value = true;
+        }
+      }),
       h(
         SettingsDialog,
         {
@@ -52,10 +73,11 @@ const Page = defineComponent(() => {
             open.value = standing;
             if (!standing) {
               text.value = "";
+              length.value = "";
               loaded.value = false;
             }
           },
-          title: "New request",
+          title: creating.value ? "New request" : "Request",
           dirty: opened
         },
         {
