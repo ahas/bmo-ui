@@ -753,6 +753,12 @@ default; a screen supplies what it holds and what a press means there. Every exp
   every side, at every width, so the foot's last button stands as far from the dialog's right edge as
   from its bottom, and the body's words start on the title's line. The layer's app configuration sets
   this on every dialog the library draws, so no screen sets it.
+- **A dialog's close stands on its head's centre line.** The close is the last thing in the head's
+  own row, at its end, rather than held to the dialog's corner, so it and the title share one centre
+  line at every width. A title of two lines, or a title with its description under it, is centred
+  as one block and the close against that block. A long title wraps 8 pixels before the close
+  rather than running under it. The layer's app configuration sets this on every dialog the library
+  draws, so no screen sets it.
 - **What is not cleared** is a tooltip, and what grows inside the screen instead of floating over it.
 - **No screen registers what the library floats.** The library marks each floating thing as a
   dismissable layer and says whether it stands open; the overlays plugin watches the page for those

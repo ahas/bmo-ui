@@ -265,9 +265,17 @@ export default defineAppConfig({
     // A dialog is one unit and keeps one padding inside it: its head, body and foot each keep the
     // library's narrow padding at every width, where the library widens the sides of all three and the
     // top and bottom of the body alone on a wider screen.
+    //
+    // Its close stands in the head's own row, at its end, so the row's centring puts it on the
+    // title's centre line, or on the centre of the title and its description taken as one block. The
+    // library holds it to the dialog's corner instead, where it stands below a one-line title's
+    // centre and a long title runs under it; here the title's block takes what the row leaves and
+    // wraps before the close, 8px clear of it on the 4px grid where the library leaves 6px.
     modal: {
       slots: {
-        header: "sm:p-4",
+        header: "sm:p-4 gap-2",
+        wrapper: "min-w-0 flex-1",
+        close: "static ms-auto shrink-0",
         body: "sm:p-4",
         footer: "sm:p-4"
       },

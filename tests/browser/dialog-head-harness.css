@@ -1,0 +1,7 @@
+/* The harness page's sheet: the layer's own stylesheet with the utility classes the dialog and the
+   page itself are drawn with. */
+@import "../../app/assets/css/main.css";
+
+@source "../../app/components/SettingsDialog.vue";
+@source "../../app/components/ShellClose.vue";
+@source "./dialog-head-harness.ts";
