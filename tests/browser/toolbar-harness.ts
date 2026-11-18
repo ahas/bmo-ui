@@ -6,6 +6,7 @@ import UApp from "@nuxt/ui/components/App.vue";
 import UButton from "@nuxt/ui/components/Button.vue";
 import UDropdownMenu from "@nuxt/ui/components/DropdownMenu.vue";
 import UModal from "@nuxt/ui/components/Modal.vue";
+import UPopover from "@nuxt/ui/components/Popover.vue";
 import USlideover from "@nuxt/ui/components/Slideover.vue";
 import UTooltip from "@nuxt/ui/components/Tooltip.vue";
 
@@ -38,7 +39,7 @@ import type { CreateButtonHandle } from "../../app/domain/create-button";
 // and a diagram's zoom buttons as the host's renderer writes them. Opened with `?viewer`, the page
 // holds the picture viewer instead, open, with its zoom buttons at its foot; opened with `?icons`, it
 // holds the layer's icon button, a group of standing actions, a view switch showing its icons alone
-// and a number box, each press counted; opened with `?markup`, it holds a fenced block's copy button
+// and a number box, each press counted, and an icon button opening a popover and one opening a menu; opened with `?markup`, it holds a fenced block's copy button
 // and a diagram's zoom buttons as the host's renderer writes them, named by the markup button layer,
 // the copy button copying through the code-copy module and each press counted; opened with `?create`,
 // it holds a toolbar with the create button at its right end, drawn as the app is first mounted, a
@@ -125,7 +126,12 @@ const Page = defineComponent(() => {
           h(IconButton, { id: "alone", label: "Refresh", icon: "i-material-symbols-refresh", onClick: press("alone") }),
           h(ActionGroup, { id: "standing", actions: standing, narrowFold: false }),
           h(TabSwitch, { id: "icons-switch", items: VIEWS, modelValue: view.value, label: "View", compact: true, "onUpdate:modelValue": (value: string) => (view.value = value) }),
-          h("div", { id: "number" }, [h(NumberInput, { modelValue: 3, digits: 2 })])
+          h("div", { id: "number" }, [h(NumberInput, { modelValue: 3, digits: 2 })]),
+          h(UPopover, null, {
+            default: () => h(IconButton, { id: "popover-opener", label: "Details", icon: "i-material-symbols-more-vert" }),
+            content: () => h("div", { class: "p-4" }, [h(UButton, { label: "Inside" })])
+          }),
+          h(UDropdownMenu, { items: [{ label: "First" }, { label: "Second" }] }, () => h(IconButton, { id: "menu-opener", label: "Options", icon: "i-material-symbols-more-vert" }))
         ])
       );
   }

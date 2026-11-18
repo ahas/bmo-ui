@@ -103,7 +103,15 @@ async function open(width: (typeof WIDTHS)[number], scheme: (typeof SCHEMES)[num
   await page.goto(`${ORIGIN}/${query}`);
   await page.evaluate((dark) => document.documentElement.classList.toggle("dark", dark), scheme === "dark");
   await page.waitForSelector(
-    query === "" ? "[role=toolbar] #actions [data-slot=base]" : query.startsWith("?create") ? "#create" : query === "?window" ? WINDOW : "[role=dialog] [data-slot=footer] [data-slot=base]"
+    query === ""
+      ? "[role=toolbar] #actions [data-slot=base]"
+      : query.startsWith("?create")
+        ? "#create"
+        : query === "?window"
+          ? WINDOW
+          : query === "?icons"
+            ? "#menu-opener"
+            : "[role=dialog] [data-slot=footer] [data-slot=base]"
   );
   // The page eases into the scheme set as it opens, so nothing is read before its colours have settled;
   // what moves for ever, as a spinner does, is no easing and is not waited on.
@@ -514,6 +522,51 @@ describe.skipIf(!ready)("an icon button under a finger", () => {
         { timeout: 3_000 }
       );
       expect(await tips()).not.toContain(button.label);
+    });
+  }
+});
+
+// What an icon button opens, a popover or a menu, opened from the keyboard and closed by Esc, hands the
+// focus back to the button, ringed (`docs/components.md`, "Actions and the toolbar"), as one opened from the
+// library's own button does, though the library takes the tooltip's box round the button for the
+// trigger.
+describe.skipIf(!ready)("a popover and a menu opened from an icon button", () => {
+  let context: BrowserContext;
+  let page: Page;
+
+  beforeAll(async () => {
+    ({ context, page } = await open(WIDTHS[0]!, "light", "?icons"));
+  }, BROWSER_HOOK_MS);
+
+  afterAll(async () => {
+    await context?.close();
+  });
+
+  // The box round the button takes a focus only to pass it on: a pointer's press focuses the button
+  // itself, unringed, as it does any button.
+  test("leaves a pointer's press on the button the button's focus, unringed", async () => {
+    await page.click("#alone");
+
+    expect(await page.evaluate(() => ({ id: document.activeElement?.id, ringed: document.activeElement?.matches(":focus-visible") }))).toEqual({ id: "alone", ringed: false });
+  });
+
+  const OPENED = [
+    { name: "a popover", opener: "popover-opener", floating: "[role=dialog]" },
+    { name: "a menu", opener: "menu-opener", floating: "[role=menu]" }
+  ];
+
+  for (const opened of OPENED) {
+    test(`gives the focus back to the button as ${opened.name} it opened closes on Esc`, async () => {
+      await page.focus(`#${opened.opener}`);
+      await page.keyboard.press("Enter");
+      await page.waitForSelector(opened.floating);
+      await page.waitForFunction((floating) => document.querySelector(floating)?.contains(document.activeElement) ?? false, opened.floating);
+
+      await page.keyboard.press("Escape");
+      await page.waitForSelector(opened.floating, { state: "detached" });
+
+      // The key that closed it handed the focus back, so the button draws the keyboard's ring.
+      expect(await page.evaluate(() => ({ id: document.activeElement?.id, ringed: document.activeElement?.matches(":focus-visible") }))).toEqual({ id: opened.opener, ringed: true });
     });
   }
 });

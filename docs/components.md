@@ -117,8 +117,10 @@ default; a screen supplies what it holds and what a press means there. Every exp
   the two never part. A tap presses it, so a finger held on it names it and lifting presses nothing.
   It stands neutral and ghost unless it is told otherwise, and takes everything else the library's
   button takes: its icon, size, colour and variant, a press, a route, and what a menu or a popover it
-  opens puts on its trigger. A screen of the host's or of a console bundle draws an icon button this
-  way, never as the library's button inside the library's own tooltip, which no finger reaches.
+  opens puts on its trigger. A menu, a popover or a dialog it opens hands the focus back to the
+  button as it closes, as one opened from the library's own button does. A screen of the host's or of
+  a console bundle draws an icon button this way, never as the library's button inside the library's
+  own tooltip, which no finger reaches.
   `ShellClose` is the close of a modal or a side sheet, named that way.
 - **Properties are the last of the group.** What a file or a document is opens from the properties
   action: a popover on the button on a wide screen, a sheet from the bottom on a narrow one, which

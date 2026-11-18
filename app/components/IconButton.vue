@@ -5,8 +5,11 @@
        it, so a finger held on it names it instead and lifting that finger presses nothing. Everything
        else it is handed is the library button's: its icon, size, colour, variant, a press, a route,
        and what a menu or a popover it opens puts on its trigger. The keys that press it, where
-       it has any, stand in its tooltip after its name. -->
-  <HintTip class="inline-flex" :text="props.label" :kbds="props.kbds" press :keyboard-focus="props.keyboardFocus" :portal="props.portal">
+       it has any, stand in its tooltip after its name. A menu, a popover or a dialog it opens takes
+       the tooltip's box round it for the trigger and hands the focus back there as it closes, so the
+       box takes a focus handed to it and passes it straight on to the button. The box stands
+       outside the keyboard's order. -->
+  <HintTip class="inline-flex" tabindex="-1" :text="props.label" :kbds="props.kbds" press :keyboard-focus="props.keyboardFocus" :portal="props.portal" @focus="passFocus">
     <UButton ref="button" color="neutral" variant="ghost" square v-bind="$attrs" :aria-label="props.label" />
   </HintTip>
 </template>
@@ -36,6 +39,11 @@ const button = useTemplateRef<ComponentPublicInstance>("button");
 // The button's own element, for what is anchored on it: the tooltip's box stands around it.
 function element(): HTMLElement | null {
   return (button.value?.$el as HTMLElement | undefined) ?? null;
+}
+
+// A focus the box itself takes, never one landing on the button inside it, goes on to the button.
+function passFocus(): void {
+  element()?.focus();
 }
 
 defineExpose({ element });
