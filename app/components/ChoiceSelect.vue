@@ -7,8 +7,10 @@
        search, takes the focus unless a finger opened it, and matches what each choice shows, its hits
        marked where they stand. An empty list says whether nothing matched, nothing is there or the
        road refused, and the road's first answer is awaited under a skeleton line. The list opens
-       against the control's leading edge. Everything else it is handed is the library's select
-       menu's. -->
+       against the control's leading edge, and against its trailing edge where the leading one leaves
+       it no room. The control names what is chosen from every choice it knows, whatever the words
+       typed leave in the list. Everything else it is handed is the library's select menu's. -->
+
   <USelectMenu
     v-bind="$attrs"
     v-model:search-term="words"
@@ -27,6 +29,13 @@
   >
     <template v-for="name in passedSlots" #[name]="scope" :key="name">
       <slot :name="name" v-bind="scope ?? {}" />
+    </template>
+
+    <template v-if="!slots.default" #default="{ modelValue: value, ui }">
+      <template v-for="name in [chosenName(value)]" :key="name">
+        <span v-if="name !== undefined" data-slot="value" :class="ui.value({ class: ownUi?.value })">{{ name }}</span>
+        <span v-else data-slot="placeholder" :class="ui.placeholder({ class: ownUi?.placeholder })">{{ attrs.placeholder ?? "\u00A0" }}</span>
+      </template>
     </template>
 
     <template #item-label="{ item }">
@@ -53,6 +62,7 @@
 </template>
 
 <script setup lang="ts">
+import { getDisplayValue } from "@nuxt/ui/utils";
 import { useI18n } from "vue-i18n";
 
 import { CHOICE_FIND_PAUSE_MS, choiceFields, narrowChoices, searchesChoices, typedValue } from "../domain/choices";
@@ -148,9 +158,12 @@ const shown = computed((): ChoiceItems => {
   return typed.value ? (found.value ?? []) : props.items;
 });
 
+// Every choice the select knows: those it is handed and the road's last answer.
+const known = computed(() => [...everyChoice(props.items), ...everyChoice(found.value ?? [])]);
+
 // Whether any choice carries a line under its label; the library draws that line's place for every
 // choice once its slot is filled, so it is filled only then.
-const described = computed(() => [...everyChoice(props.items), ...everyChoice(found.value ?? [])].some((item) => shownWords(item).description !== ""));
+const described = computed(() => known.value.some((item) => shownWords(item).description !== ""));
 
 // The entries of a list, its groups opened out.
 function everyChoice(items: ChoiceItems): SelectMenuItem[] {
@@ -169,8 +182,27 @@ function takeOffered(): void {
 // place is kept by a skeleton line rather than by words.
 const awaited = computed(() => finding.value);
 
-// The list opens against the control's leading edge unless the screen says where.
-const content = computed(() => ({ align: "start" as const, ...(attrs.content as object | undefined) }));
+// The list opens against the control's leading edge unless the screen says where. Where that edge
+// leaves the list no room on the screen, the library tries the trailing edge before it slides the
+// list along, which it otherwise does first.
+const content = computed(() => ({ align: "start" as const, prioritizePosition: true, ...(attrs.content as object | undefined) }));
+
+// The library names what is chosen from the list it shows, which the words typed may have narrowed
+// past the chosen choice; the control names it from every choice the select knows instead, in the
+// library's own value and placeholder parts, as the library would name it there.
+type DisplayOptions = NonNullable<Parameters<typeof getDisplayValue>[2]>;
+
+const ownUi = computed(() => attrs.ui as { value?: string; placeholder?: string } | undefined);
+
+function chosenName(value: unknown): string | undefined {
+  const options = { labelKey: props.labelKey, valueKey: props.valueKey, by: attrs.by as DisplayOptions["by"] };
+  const names = (props.multiple && Array.isArray(value) ? value : [value]).map((one) => getDisplayValue(known.value, one, options) as unknown);
+  const said = names.filter((name) => name !== undefined && name !== null && name !== "").map(String);
+
+  if (props.multiple) return said.length > 0 ? said.join(", ") : undefined;
+
+  return names[0] === undefined || names[0] === null ? undefined : String(names[0]);
+}
 
 const emptyWords = computed(() => {
   if (refused.value) return t("common.error.choices_find_failed");

@@ -13,12 +13,14 @@ import type { Browser, Page } from "playwright-core";
 
 // The one select drawn by a real browser (`docs/components.md`, "Choosing a value"): a list of seven
 // opens with no search, a list of a dozen opens with the search at its top holding the focus, typing
-// narrows it to what the choices show with the hits marked and the headings of what stays, an empty
-// answer says why, a list found over a road asks it and says when it refused, a list of three taking
-// free entry opens with its search and takes a value typed into it, and a finger opening a long list
-// leaves the keyboard down and keeps a long value typed in free entry inside the screen. Which
-// choices the words keep is the choices module's own test (`tests/domain/choices.test.ts`). Skipped
-// where the browser build is not on the machine.
+// narrows it to what the choices show with the hits marked and the headings of what stays while the
+// control still names what is chosen, an empty answer says why, a list found over a road asks it and
+// says when it refused, a list of three taking free entry opens with its search and takes a value
+// typed into it, a preview follows the choice the keyboard rests on, each list stands as wide as its
+// choices and its control against an edge of the control at a desktop's and a phone's width, and a
+// finger opening a long list leaves the keyboard down and keeps a long value typed in free entry
+// inside the screen. Which choices the words keep is the choices module's own test
+// (`tests/domain/choices.test.ts`). Skipped where the browser build is not on the machine.
 
 const ready = touchReady();
 const ROOT = new URL("../../", import.meta.url).pathname;
@@ -99,6 +101,60 @@ async function saysEmpty(page: Page, words: string): Promise<void> {
   await page.waitForFunction(([selector, wanted]) => document.querySelector(selector)?.textContent?.trim() === wanted, [`${LIST} [data-slot=empty]`, words] as const, {
     timeout: 3_000
   });
+}
+
+// The open list, the control that opened it and the list's search field, measured once the list has
+// grown to its size: part way through its opening it stands scaled down and reads narrower than it is.
+// `natural` is the width its choices take at their own widths.
+interface Fitted {
+  list: { left: number; right: number; width: number };
+  control: { left: number; right: number; width: number };
+  field: number | null;
+  natural: number;
+  screen: number;
+}
+
+async function fitted(page: Page, control: string): Promise<Fitted> {
+  return await page.evaluate(async (selector) => {
+    const list = document.querySelector<HTMLElement>("[data-slot=content]")!;
+
+    await Promise.all(list.getAnimations({ subtree: true }).map((animation) => animation.finished));
+    await new Promise((settled) => requestAnimationFrame(() => requestAnimationFrame(settled)));
+
+    const box = (element: Element): { left: number; right: number; width: number } => {
+      const rect = element.getBoundingClientRect();
+
+      return { left: Math.round(rect.left), right: Math.round(rect.right), width: Math.round(rect.width) };
+    };
+    const natural = Math.max(
+      ...[...list.querySelectorAll<HTMLElement>("[data-slot=group]")].map((group) => {
+        group.style.width = "max-content";
+        group.style.minWidth = "0";
+
+        const width = group.getBoundingClientRect().width;
+
+        group.style.width = "";
+        group.style.minWidth = "";
+
+        return Math.round(width);
+      })
+    );
+    const field = list.querySelector("[data-slot=input]");
+
+    return { list: box(list), control: box(document.querySelector(selector)!), field: field === null ? null : box(field).width, natural, screen: document.documentElement.clientWidth };
+  }, control);
+}
+
+// A list stands as wide as its choices, floored at its control and capped at the screen less a
+// gutter each side, its search field filling that width and setting none of it, against the given
+// edge of its control.
+function expectFitted(seen: Fitted, edge: "leading" | "trailing"): void {
+  const width = Math.min(Math.max(seen.control.width, seen.natural), seen.screen - 16);
+
+  expect(Math.abs(seen.list.width - width)).toBeLessThanOrEqual(1);
+  if (seen.field !== null) expect(Math.abs(seen.field - seen.list.width)).toBeLessThanOrEqual(1);
+  if (edge === "leading") expect(seen.list.left).toBe(seen.control.left);
+  else expect(seen.list.right).toBe(seen.control.right);
 }
 
 async function close(page: Page): Promise<void> {
@@ -186,6 +242,55 @@ describe.skipIf(!ready)("the one select at a desktop's width", () => {
     await page.waitForSelector(FIELD);
     expect(await page.inputValue(FIELD)).toBe("");
     await listedWhole(page);
+    await close(page);
+  });
+
+  test("names what is chosen on its control while the words typed leave it out of the list", async () => {
+    await page.click("#long");
+    await page.waitForSelector(FIELD);
+    await page.keyboard.type("oslo");
+    await listedAs(page, ["# North", "Oslo"]);
+    await page.keyboard.press("Enter");
+    await page.waitForSelector(LIST, { state: "detached" });
+
+    await page.click("#long");
+    await page.waitForSelector(FIELD);
+    await page.keyboard.type("rome");
+    await listedAs(page, ["# South", "Rome"]);
+    expect(await page.$eval("#long [data-slot=value]", (value) => value.textContent?.trim())).toBe("Oslo");
+    await close(page);
+  });
+
+  test("moves its preview with the choice the keyboard highlights, and back to the chosen one as it closes", async () => {
+    const preview = async (wanted: string): Promise<void> => {
+      await page.waitForFunction((words) => document.querySelector("#preview")?.textContent === words, wanted, { timeout: 3_000 });
+    };
+
+    await page.click("#tinted");
+    await page.waitForSelector(FIELD);
+    await preview("teal");
+    await page.keyboard.press("ArrowDown");
+    await preview("sea");
+    await page.keyboard.press("ArrowDown");
+    await preview("sunset");
+    await close(page);
+    await preview("teal");
+  });
+
+  test("stands each list as wide as its choices and its control, against an edge of the control", async () => {
+    for (const control of ["#short", "#long"]) {
+      await page.click(control);
+      expectFitted(await fitted(page, control), "leading");
+      await close(page);
+    }
+
+    // A control at the trailing end opens a list wider than itself against its trailing edge.
+    await page.click("#wide");
+
+    const wide = await fitted(page, "#wide");
+
+    expect(wide.natural).toBeGreaterThan(wide.control.width);
+    expectFitted(wide, "trailing");
     await close(page);
   });
 
@@ -296,6 +401,27 @@ describe.skipIf(!ready)("the one select under a finger at a phone's width", () =
     await listedAs(page, [words]);
     await close(page);
     expect(await page.textContent("#free")).toContain(words);
+  });
+
+  test("stands each list as wide as its choices and its control, against an edge of the control", async () => {
+    const { page } = touch;
+
+    for (const control of ["#short", "#long"]) {
+      await touch.tap(await centreOf(page, control));
+      await page.waitForSelector(LIST);
+      expectFitted(await fitted(page, control), "leading");
+      await close(page);
+    }
+
+    // Against its leading edge the list would run off the screen, so it stands against the trailing one.
+    await touch.tap(await centreOf(page, "#wide"));
+    await page.waitForSelector(LIST);
+
+    const wide = await fitted(page, "#wide");
+
+    expect(wide.control.left + wide.list.width).toBeGreaterThan(wide.screen - 8);
+    expectFitted(wide, "trailing");
+    await close(page);
   });
 
   test("closes its list on the back gesture and leaves the page where it was", async () => {

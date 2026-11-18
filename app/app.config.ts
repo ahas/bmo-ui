@@ -217,9 +217,15 @@ export default defineAppConfig({
       variants: { position: { popper: { content: GROWS } } }
     },
     // A select menu's search field is drawn with no edge of its own, so its focus is said by the
-    // elevated background a field with no edge takes.
+    // elevated background a field with no edge takes. It fills the width its list's choices and its
+    // control set and sets none of it: a field's own width is that of twenty characters whatever it
+    // holds, which would stand a list of short choices wider than they are, so the field's width is
+    // held out of the list's measure.
     selectMenu: {
-      slots: { ...dropdown("min-w-[min(var(--reka-combobox-trigger-width),calc(100vw-1rem))]"), input: "border-b border-default has-[input:focus]:bg-elevated" },
+      slots: {
+        ...dropdown("min-w-[min(var(--reka-combobox-trigger-width),calc(100vw-1rem))]"),
+        input: "border-b border-default has-[input:focus]:bg-elevated contain-inline-size"
+      },
       variants: { position: { popper: { content: GROWS } } }
     },
     inputMenu: { slots: dropdown("min-w-[min(var(--reka-combobox-trigger-width),calc(100vw-1rem))]") },

@@ -5,18 +5,21 @@ import { createI18n } from "vue-i18n";
 import UApp from "@nuxt/ui/components/App.vue";
 
 import ChoiceSelect from "../../app/components/ChoiceSelect.vue";
+import { PREVIEW_ITEM, useListPreview } from "../../app/domain/list-preview";
 import { markPainted } from "../../app/domain/loading";
 import { watchOverlays } from "../../app/domain/overlays";
 import sheet from "./choice-harness.css?inline";
 
 import type { SelectMenuItem } from "@nuxt/ui";
 
-// Four of the one select (`docs/components.md`, "Choosing a value") on a page that says nothing
-// else: seven sizes, a dozen cities in two groups each with a line under it, people found over a
-// stand-in road that answers at once, refuses the word "fail", holds its answer to "slow" until the
-// test lets it go and finds nobody for anything else unmatched, and three roles taking free entry,
-// each new value added to them and chosen. The page stands outside Nuxt, so the library is installed as a Vue plugin, the words are
-// handed over here and the layer's registry of floating things is started as its plugin starts it.
+// The one select (`docs/components.md`, "Choosing a value") on a page that says nothing else: seven
+// sizes, a dozen cities in two groups each with a line under it, eight tints with a preview beside
+// them, people found over a stand-in road that answers at once, refuses the word "fail", holds its
+// answer to "slow" until the test lets it go and finds nobody for anything else unmatched, three
+// roles taking free entry, each new value added to them and chosen, and a narrow control at the
+// page's trailing end opening a list of sessions wider than itself. The page stands outside Nuxt, so
+// the library is installed as a Vue plugin, the words are handed over here and the layer's registry
+// of floating things is started as its plugin starts it.
 
 // The layer's code reaches the framework's own names without importing them, since Nuxt binds them
 // in a host; a page standing outside Nuxt hands the same names over before anything opens.
@@ -46,6 +49,12 @@ const CITIES: SelectMenuItem[] = [
   ...["Athens", "Lisbon", "Madrid", "Rome", "Seville", "Valletta"].map((label) => ({ label, value: label.toLowerCase(), description: "Warm winters" }))
 ];
 
+const TINTS = ["Teal", "Sea", "Sunset", "Forest", "Sand", "Slate", "Rose", "Amber"].map((label) => ({ label, value: label.toLowerCase() }));
+
+const SESSIONS = ["Monday morning review", "Tuesday afternoon planning", "Wednesday evening workshop", "Thursday morning standup", "Friday afternoon retrospective", "Saturday open lab", "Sunday quiet hours", "Every weekday lunch"].map(
+  (label) => ({ label, value: label.toLowerCase() })
+);
+
 const PEOPLE = ["Ada Byron", "Alan Moor", "Grace Hill", "Linus Park"];
 
 // Lets the held answer to "slow" go.
@@ -71,12 +80,32 @@ const Page = defineComponent(() => {
     roles.value = [...roles.value, { label: value, value }];
     role.value = value;
   }
+  const tint = ref("teal");
+  const session = ref<string>();
+  const preview = useListPreview(tint);
 
   return () =>
     h(UApp, null, () =>
       h("div", { class: "flex flex-col items-start gap-4 p-4" }, [
         h(ChoiceSelect, { id: "short", items: SIZES, valueKey: "value", modelValue: size.value, "onUpdate:modelValue": (value: string) => (size.value = value), class: "w-48" }),
         h(ChoiceSelect, { id: "long", items: CITIES, valueKey: "value", modelValue: city.value, "onUpdate:modelValue": (value: string) => (city.value = value), class: "w-48" }),
+        h("div", { class: "flex items-center gap-4" }, [
+          h(
+            ChoiceSelect,
+            {
+              id: "tinted",
+              items: TINTS,
+              valueKey: "value",
+              modelValue: tint.value,
+              "onUpdate:modelValue": (value: string) => (tint.value = value),
+              onHighlight: preview.onHighlight,
+              "onUpdate:open": preview.onOpen,
+              class: "w-48"
+            },
+            { "item-leading": ({ item }: { item: { value: string } }) => h("span", { [PREVIEW_ITEM]: item.value }) }
+          ),
+          h("output", { id: "preview" }, preview.shown.value)
+        ]),
         h(ChoiceSelect, { id: "found", items: [], find: findPeople, findPauseMs: 0, valueKey: "value", modelValue: person.value, "onUpdate:modelValue": (value: string) => (person.value = value), class: "w-48" }),
         h(ChoiceSelect, {
           id: "free",
@@ -87,7 +116,10 @@ const Page = defineComponent(() => {
           "onUpdate:modelValue": (value: string) => (role.value = value),
           onCreate: addRole,
           class: "w-48"
-        })
+        }),
+        h("div", { class: "flex justify-end self-stretch" }, [
+          h(ChoiceSelect, { id: "wide", items: SESSIONS, valueKey: "value", modelValue: session.value, "onUpdate:modelValue": (value: string) => (session.value = value), class: "w-32" })
+        ])
       ])
     );
 });

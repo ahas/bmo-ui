@@ -65,4 +65,21 @@ describe("the preview beside a list of choices", () => {
     focusOn(preview, list);
     expect(preview.shown.value).toBe("sunset");
   });
+
+  test("follows the item a select highlights without moving the focus, and no highlight while the list is shut", () => {
+    const chosen = ref("teal");
+    const preview = useListPreview(chosen);
+    const { items } = drawList();
+
+    preview.onHighlight({ ref: items[2]! });
+    expect(preview.shown.value).toBe("teal");
+
+    preview.onOpen(true);
+    preview.onHighlight({ ref: items[1]! });
+    expect(preview.shown.value).toBe("sea");
+
+    // A highlight that names no item leaves the preview where it was.
+    preview.onHighlight(undefined);
+    expect(preview.shown.value).toBe("sea");
+  });
 });

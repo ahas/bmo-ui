@@ -481,7 +481,12 @@ default; a screen supplies what it holds and what a press means there. Every exp
   road is asked, since its answer may hold the words. Without free entry the select takes no value
   the list does not hold.
 - **The list opens against the control's leading edge,** as every dropdown does (see "Tab bar and
-  toolbar").
+  toolbar"), and against its trailing edge where the leading one leaves the list no room on the
+  screen. Only a list that fits against neither edge is slid back inside the screen.
+- **The list is as wide as its widest choice,** never narrower than its control nor wider than the
+  screen less a gutter each side. The search field fills that width and sets none of it.
+- **The control names what is chosen by its label** among every choice it is handed and the road's
+  last answer, whatever the words typed leave in the list.
 - **The search field stands at the top of the opened list,** above the choices, its search mark
   leading and the pack's words for a search as its placeholder. It has no edge of its own, so while
   it holds the focus it takes the elevated background, as a field with no edge does. Opened by a pointer or a key, the
@@ -496,6 +501,11 @@ default; a screen supplies what it holds and what a press means there. Every exp
   wording guide gives one. A refused find: the pack's words for a search that failed. While the
   road is asked, the choices it last answered stay shown and the field's busy mark spins; where it has
   shown none, a skeleton line stands where the answer will.
+- **A preview beside the list follows the choice the pointer or the keyboard rests on** while the
+  list is open, and stands in the chosen one otherwise (the list-preview module). Each choice carries
+  its value on the module's `PREVIEW_ITEM` attribute. The select highlights a choice without moving
+  the focus, so the preview hears the select's highlight; a list that moves its focus onto the
+  choice it rests on is heard by the focus moving between its items.
 
 ## Dates
 
