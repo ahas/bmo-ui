@@ -218,5 +218,10 @@
     "sha256": "e16f8878159ddd2251b52944a44cb2032107464d8a512fa4aab7ed40cd315799",
     "bound": "0.1.0-rev.23",
     "why": "Stands every dropped list's rows on the 4px grid; ChoiceSelect closes a one-value list on free entry, awaits a screen's first choices under a skeleton and takes a choice keyed by the empty string; useOpenedWith take does nothing while the form is not standing; nothing a bundle of rev.23 reads changes"
+  },
+  "bmo-ui-0.1.0-rev.44.tgz": {
+    "sha256": "20ffd7d1c720def01d9e7b7cf8f0cc81418586dab95d4eaedd53d7609f42a8a7",
+    "bound": "0.1.0-rev.23",
+    "why": "Keeps the library's slot types on every slot ChoiceSelect hands on, which rev.43 typed as unknown; carries rev.43's menu rows on the 4px grid, free entry close, first-read skeleton, choice of nothing and useOpenedWith take; nothing a bundle of rev.23 reads changes"
   }
 }
