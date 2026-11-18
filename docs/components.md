@@ -523,6 +523,10 @@ default; a screen supplies what it holds and what a press means there. Every exp
     dropped by some browsers and read by the router as the reader's own press where it lands, and
     either leaves a floating thing standing with no entry of its own, so back would leave the page
     under it.
+  - A floating thing that answers the press by asking first — a form's dialog holding changes — is
+    not pressed again while the question stands: the question takes the next press of back as any
+    floating thing does, and once it is answered, one that stays stands again with an entry of its
+    own, so the next press of back asks again.
   - The focus handed back to the control a floating thing was opened from closes nothing.
   - A tooltip naming a control of what the press closes is put away in the same press: it is asked
     first, and the floating thing is asked again before the press is over.

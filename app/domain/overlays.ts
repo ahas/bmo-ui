@@ -112,25 +112,59 @@ function left(): Promise<void> {
   });
 }
 
-async function ask(element: Element): Promise<void> {
-  for (let tried = 0; tried < ESCAPE_TRIES && isOpen(element); tried += 1) {
+function openLayers(): Element[] {
+  return Array.from(document.querySelectorAll(LAYER)).filter(isOpen);
+}
+
+// Resolves once none of the given layers stands open any more, looked at a frame at a time.
+function answered(layers: Element[]): Promise<void> {
+  return new Promise((resolve) => {
+    const look = (): void => {
+      if (layers.some(isOpen)) {
+        requestAnimationFrame(look);
+      } else {
+        resolve();
+      }
+    };
+
+    look();
+  });
+}
+
+// Asks a layer to close until it has, or until it answered by opening something over itself — the
+// question a form's dialog asks before its changes are thrown away. Such a one has taken the press,
+// and the next Esc would be the question's, closing it unanswered.
+async function ask(element: Element, raised: () => Element[]): Promise<void> {
+  for (let tried = 0; tried < ESCAPE_TRIES && isOpen(element) && raised().length === 0; tried += 1) {
     escape();
     await settle();
   }
 }
 
 async function dismiss(element: Element): Promise<void> {
-  await ask(element);
+  const before = new Set(openLayers());
+  const raised = (): Element[] => openLayers().filter((layer) => !before.has(layer));
+
+  await ask(element, raised);
 
   // A press that follows another's close at once finds the thing just closed still leaving, and it took the key.
   // The press is this layer's all the same, so it is asked again once that one has gone.
-  if (isOpen(element) && leaving()) {
+  if (isOpen(element) && raised().length === 0 && leaving()) {
     await left();
-    await ask(element);
+    await ask(element, raised);
   }
 
-  // One that refuses to close stands on, and so stands as a layer again with an entry of its own;
-  // the press that was spent on it is not the reader's last.
+  // What it opened over itself stands as a layer of its own and takes the next press; the layer
+  // waits for it to be answered, since a discard closes the layer too.
+  const asked = raised();
+
+  if (isOpen(element) && asked.length > 0) {
+    await answered(asked);
+    await settle();
+  }
+
+  // One that refuses to close, or stays once its question is answered, stands on, and so stands as
+  // a layer again with an entry of its own; the press that was spent on it is not the reader's last.
   if (isOpen(element)) {
     standing.delete(element);
     sweep();
