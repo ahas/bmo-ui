@@ -208,5 +208,10 @@
     "sha256": "c7a221e45827f1b128d0abc918a9d6fe33cf1815340c8d3303fef27ac481bcf3",
     "bound": "0.1.0-rev.23",
     "why": "Adds AvatarGroup, UnfoldingBox, the held-size and avatar-group modules, the moving list's sideways axis and one wording key; nothing a bundle of rev.23 reads changes"
+  },
+  "bmo-ui-0.1.0-rev.42.tgz": {
+    "sha256": "450f811be98b7f38d26ebe29794f28424145b3844a6bd1c752a5195249576471",
+    "bound": "0.1.0-rev.23",
+    "why": "The avatar group's cap moves to a new width as its count gains a place; nothing a bundle of rev.23 reads changes"
   }
 }
