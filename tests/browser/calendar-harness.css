@@ -1,0 +1,7 @@
+/* The harness page's sheet: the layer's own stylesheet with the utility classes the date calendar and
+   the markup button layer are drawn with. */
+@import "../../app/assets/css/main.css";
+
+@source "../../app/components/DateCalendar.vue";
+@source "../../app/components/MarkupButtonTip.vue";
+@source "../../app/domain/page-tip.ts";

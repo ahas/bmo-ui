@@ -391,6 +391,268 @@
       "example": "<DataTableSkeleton v-if=\"loading\" :headers=\"headers\" :rows=\"8\" :label=\"t('notes.status.loading_files')\" />"
     },
     {
+      "name": "DateCalendar",
+      "kind": "component",
+      "line": "The one calendar a date is chosen on, the library's own, each paging button named in the host's words in the shared tooltip.",
+      "props": [
+        {
+          "name": "size",
+          "type": "\"sm\" | \"xs\" | \"md\" | \"lg\" | \"xl\" | undefined",
+          "required": false,
+          "default": "undefined"
+        },
+        {
+          "name": "disabled",
+          "type": "boolean | undefined",
+          "required": false,
+          "description": "Whether or not the calendar is disabled"
+        },
+        {
+          "name": "as",
+          "type": "any",
+          "required": false,
+          "description": "The element or component this component should render as."
+        },
+        {
+          "name": "locale",
+          "type": "string | undefined",
+          "required": false,
+          "description": "The locale to use for formatting dates"
+        },
+        {
+          "name": "color",
+          "type": "\"primary\" | \"secondary\" | \"success\" | \"info\" | \"warning\" | \"error\" | \"neutral\" | undefined",
+          "required": false
+        },
+        {
+          "name": "ui",
+          "type": "{ root?: SlotClass; header?: SlotClass; body?: SlotClass; heading?: SlotClass; headingLabel?: SlotClass; grid?: SlotClass; gridRow?: SlotClass; gridWeekDaysRow?: SlotClass; gridBody?: SlotClass; headCell?: SlotClass; headCellWeek?: SlotClass; cell?: SlotClass; cellTrigger?: SlotClass; cellWeek?: SlotClass; } | undefined",
+          "required": false
+        },
+        {
+          "name": "weekNumbers",
+          "type": "boolean | undefined",
+          "required": false
+        },
+        {
+          "name": "variant",
+          "type": "\"solid\" | \"outline\" | \"soft\" | \"subtle\" | undefined",
+          "required": false
+        },
+        {
+          "name": "multiple",
+          "type": "boolean | undefined",
+          "required": false,
+          "description": "Whether or not multiple dates can be selected"
+        },
+        {
+          "name": "placeholder",
+          "type": "DateValue | undefined",
+          "required": false,
+          "description": "The placeholder date, which is used to determine what month to display when no date is selected. This updates as the user navigates the calendar and can be used to programmatically control the calendar view"
+        },
+        {
+          "name": "readonly",
+          "type": "boolean | undefined",
+          "required": false,
+          "description": "Whether or not the calendar is readonly"
+        },
+        {
+          "name": "modelValue",
+          "type": "DateValue | DateValue[] | DateRange | null | undefined",
+          "required": false
+        },
+        {
+          "name": "defaultValue",
+          "type": "DateValue | DateRange | DateValue[] | undefined",
+          "required": false
+        },
+        {
+          "name": "defaultPlaceholder",
+          "type": "DateValue | undefined",
+          "required": false,
+          "description": "The default placeholder date"
+        },
+        {
+          "name": "allowNonContiguousRanges",
+          "type": "boolean | undefined",
+          "required": false,
+          "description": "When combined with `isDateUnavailable`, determines whether non-contiguous ranges, i.e. ranges containing unavailable dates, may be selected."
+        },
+        {
+          "name": "pagedNavigation",
+          "type": "boolean | undefined",
+          "required": false,
+          "description": "This property causes the previous and next buttons to navigate by the number of months displayed at once, rather than one month"
+        },
+        {
+          "name": "preventDeselect",
+          "type": "boolean | undefined",
+          "required": false,
+          "description": "Whether or not to prevent the user from deselecting a date without selecting another date first"
+        },
+        {
+          "name": "maximumDays",
+          "type": "number | undefined",
+          "required": false,
+          "description": "The maximum number of days that can be selected in a range"
+        },
+        {
+          "name": "weekStartsOn",
+          "type": "WeekStartsOn | undefined",
+          "required": false,
+          "description": "The day of the week to start the calendar on"
+        },
+        {
+          "name": "weekdayFormat",
+          "type": "WeekDayFormat | undefined",
+          "required": false,
+          "description": "The format to use for the weekday strings provided via the weekdays slot prop"
+        },
+        {
+          "name": "fixedWeeks",
+          "type": "boolean | undefined",
+          "required": false,
+          "description": "Whether or not to always display 6 weeks in the calendar"
+        },
+        {
+          "name": "maxValue",
+          "type": "DateValue | undefined",
+          "required": false,
+          "description": "The maximum date that can be selected"
+        },
+        {
+          "name": "minValue",
+          "type": "DateValue | undefined",
+          "required": false,
+          "description": "The minimum date that can be selected"
+        },
+        {
+          "name": "numberOfMonths",
+          "type": "number | undefined",
+          "required": false,
+          "description": "The number of months to display at once"
+        },
+        {
+          "name": "initialFocus",
+          "type": "boolean | undefined",
+          "required": false,
+          "description": "If true, the calendar will focus the selected day, today, or the first day of the month depending on what is visible when the calendar is mounted"
+        },
+        {
+          "name": "isDateDisabled",
+          "type": "Matcher | undefined",
+          "required": false,
+          "description": "A function that returns whether or not a date is disabled"
+        },
+        {
+          "name": "isDateUnavailable",
+          "type": "Matcher | undefined",
+          "required": false,
+          "description": "A function that returns whether or not a date is unavailable"
+        },
+        {
+          "name": "isDateHighlightable",
+          "type": "Matcher | undefined",
+          "required": false,
+          "description": "A function that returns whether or not a date is hightable"
+        },
+        {
+          "name": "nextPage",
+          "type": "((placeholder: DateValue) => DateValue) | undefined",
+          "required": false,
+          "description": "A function that returns the next page of the calendar. It receives the current placeholder as an argument inside the component."
+        },
+        {
+          "name": "prevPage",
+          "type": "((placeholder: DateValue) => DateValue) | undefined",
+          "required": false,
+          "description": "A function that returns the previous page of the calendar. It receives the current placeholder as an argument inside the component."
+        },
+        {
+          "name": "disableDaysOutsideCurrentView",
+          "type": "boolean | undefined",
+          "required": false,
+          "description": "Whether or not to disable days outside the current view."
+        },
+        {
+          "name": "fixedDate",
+          "type": "\"start\" | \"end\" | undefined",
+          "required": false,
+          "description": "Which part of the range should be fixed"
+        },
+        {
+          "name": "isMonthDisabled",
+          "type": "Matcher | undefined",
+          "required": false,
+          "description": "A function that returns whether or not a month is disabled"
+        },
+        {
+          "name": "isMonthUnavailable",
+          "type": "Matcher | undefined",
+          "required": false,
+          "description": "A function that returns whether or not a month is unavailable"
+        },
+        {
+          "name": "isYearDisabled",
+          "type": "Matcher | undefined",
+          "required": false,
+          "description": "A function that returns whether or not a year is disabled"
+        },
+        {
+          "name": "isYearUnavailable",
+          "type": "Matcher | undefined",
+          "required": false,
+          "description": "A function that returns whether or not a year is unavailable"
+        },
+        {
+          "name": "nextYearIcon",
+          "type": "any",
+          "required": false,
+          "description": "The icon to use for the next year control."
+        },
+        {
+          "name": "nextMonthIcon",
+          "type": "any",
+          "required": false,
+          "description": "The icon to use for the next month control."
+        },
+        {
+          "name": "prevYearIcon",
+          "type": "any",
+          "required": false,
+          "description": "The icon to use for the previous year control."
+        },
+        {
+          "name": "prevMonthIcon",
+          "type": "any",
+          "required": false,
+          "description": "The icon to use for the previous month control."
+        },
+        {
+          "name": "range",
+          "type": "boolean | undefined",
+          "required": false,
+          "description": "Whether or not a range of dates can be selected"
+        },
+        {
+          "name": "monthControls",
+          "type": "boolean | undefined",
+          "required": false,
+          "description": "Show month controls"
+        },
+        {
+          "name": "yearControls",
+          "type": "boolean | undefined",
+          "required": false,
+          "description": "Show year controls"
+        }
+      ],
+      "slots": [],
+      "events": [],
+      "example": "<UPopover>\n  <UButton color=\"neutral\" variant=\"outline\" icon=\"i-material-symbols-calendar-today-outline\" :label=\"day?.toString() ?? t('notes.placeholder.day')\" />\n\n  <template #content>\n    <DateCalendar v-model=\"day\" class=\"p-2\" />\n  </template>\n</UPopover>"
+    },
+    {
       "name": "FilesConflictDialog",
       "kind": "component",
       "line": "The one question when a change would land on names already taken.",
@@ -1140,7 +1402,7 @@
     {
       "name": "MarkupButtonTip",
       "kind": "component",
-      "line": "The one layer that names any button a host writes as markup carrying data-tooltip, in the shared tooltip.",
+      "line": "The one layer that names any button carrying data-tooltip, one a host writes as markup or the library draws inside a component of its own, in the shared tooltip.",
       "props": [],
       "slots": [],
       "events": [],

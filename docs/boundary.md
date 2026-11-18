@@ -42,6 +42,7 @@ wording keys listed here are the ones the layer's list holds.
 | `CutLineTip` | The one layer that shows any line cut with an ellipsis whole, in the shared tooltip. |
 | `DataTable` | The shared table: sideways scroll, stuck names, movable widths, labelled parts, three layouts. |
 | `DataTableSkeleton` | The shared table's placeholder, its head and rows in the table's own columns, box and height. |
+| `DateCalendar` | The one calendar a date is chosen on, the library's own, each paging button named in the host's words in the shared tooltip. |
 | `FilesConflictDialog` | The one question when a change would land on names already taken. |
 | `FilesNameField` | A name renamed in place, chosen up to its ending. |
 | `FilesProgress` | An upload's progress, by files and by bytes, with a bar. |
@@ -53,7 +54,7 @@ wording keys listed here are the ones the layer's list holds.
 | `ImageViewer` | A picture opened whole, zoomed and moved by wheel, drag, pinch, double press and buttons. |
 | `LoadingImage` | A picture that keeps its place while it loads and says when it failed. |
 | `LoadingVideo` | A video that keeps its place while it loads and says when it failed. |
-| `MarkupButtonTip` | The one layer that names any button a host writes as markup carrying `data-tooltip`, in the shared tooltip. |
+| `MarkupButtonTip` | The one layer that names any button carrying `data-tooltip`, one a host writes as markup or the library draws inside a component of its own, in the shared tooltip. |
 | `MarqueeLine` | A line that slides when it is longer than its box. |
 | `MessageIsland` | The one pill every notice stands on. |
 | `MovingList` | A list whose items come, go and change places by position alone. |
@@ -302,14 +303,16 @@ What a coding harness takes the layer through (`docs/harness.md`).
 
 ## Wording keys
 
-The layer reads these 135 keys and no others. The `wording-keys` shared module lists them, the one
+The layer reads these 141 keys and no others. The `wording-keys` shared module lists them, the one
 list a host's pack is held to. Placeholders are named after each key.
 
 - **`common.action`:** `cancel`, `choose_all`, `choose_none`, `close`, `close_all_tabs`,
-  `close_other_tabs`, `close_right_tabs`, `collapse`, `copy`, `create_link`, `discard`, `exit_fullscreen`,
-  `expand`, `fit_screen`, `fullscreen`, `more`, `mute`, `next_picture`, `page_back`, `page_forward`,
-  `pause`, `pin`, `play`, `play_now`, `previous_picture`, `save`, `see_all`, `share`, `skip_back` `{n}`,
-  `skip_forward` `{n}`, `subtitles`, `turn_picture`, `unmute`, `unpin`, `unshare`, `zoom_in`, `zoom_out`.
+  `close_other_tabs`, `close_right_tabs`, `collapse`, `copy`, `create_link`, `discard`,
+  `exit_fullscreen`, `expand`, `fit_screen`, `fullscreen`, `more`, `mute`, `next_month`,
+  `next_picture`, `next_year`, `next_years`, `page_back`, `page_forward`, `pause`, `pin`, `play`,
+  `play_now`, `previous_month`, `previous_picture`, `previous_year`, `previous_years`, `save`,
+  `see_all`, `share`, `skip_back` `{n}`, `skip_forward` `{n}`, `subtitles`, `turn_picture`, `unmute`,
+  `unpin`, `unshare`, `zoom_in`, `zoom_out`.
 - **`common.aria`:** `close_named` `{name}`, `column_width` `{name}`, `decrease`, `download_named`
   `{name}`, `image_zoom` `{title}`, `increase`, `member_permission` `{name}`, `more_notices` `{n}`,
   `pinned_named` `{name}`, `play_named` `{name}`, `player_named` `{name}`, `share_address`,
@@ -406,8 +409,9 @@ Every token is a custom property stated by the layer's stylesheet on the root un
   zoomed, and `disabled` on a zoom button with nothing left to do.
 - **A button a host writes as markup,** inside rendered text or anywhere else on the page, is named
   by carrying its name in `data-tooltip` beside its `aria-label`: the markup button layer
-  (`MarkupButtonTip`) names every `button` that carries it in the shared tooltip, and the
-  stylesheet draws no name of its own for it.
+  (`MarkupButtonTip`) names every `button` that carries it in the shared tooltip, one the library
+  draws inside a component of its own and that is handed the two attributes as much as one the
+  host writes, and the stylesheet draws no name of its own for it.
 - **The work-in-progress mark** — an icon of the progress-activity kind — always turns, and stands
   still where less movement was asked for.
 - **Keyframes:** `bmo-dialog-in`, `bmo-dialog-out`, `marquee-slide`.
@@ -488,7 +492,10 @@ Every token is a custom property stated by the layer's stylesheet on the root un
   - The `reka-ui` patch gives a collapsible region its own id from the region's root, so a button
     drawn before its region already names it and no id stands twice, and it stops a closed tooltip
     answering the keyboard, so the press that closes a dialog or a drawer is not taken by the tooltip
-    that names a control inside it.
+    that names a control inside it. It also has a tooltip that opens tell the others which one it is,
+    so one brought up again while its going is still drawn stays up rather than taking its own
+    opening for another's and closing itself: a page layer's tooltip, moved on with the pointer from
+    one control it names to the next, comes up over each.
   - The `@nuxt/icon` patch writes an icon drawn as a stylesheet rule under the name it was loaded
     for. Without it, an icon whose name moves on while its drawing is still being fetched — a
     button's spinner giving way to its mark — writes that drawing under the new name, and the new

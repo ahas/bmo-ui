@@ -605,6 +605,28 @@ describe.skipIf(!ready)("a button written as markup under a finger, a pointer an
     await named("Copied", true);
   });
 
+  // The tooltip put away and brought up again over the next button while its going is still drawn
+  // is the one tooltip opening again, not a second one that puts it away as it opens.
+  test("names each markup button a pointer moves on to, straight from the one before or back across a gap", async () => {
+    const { page } = touch;
+
+    await page.goto(`${ORIGIN}/?markup`);
+    await page.waitForSelector("[data-diagram-zoom=out]");
+
+    const out = await centreOf(page, "[data-diagram-zoom=out]");
+    const zoomIn = await centreOf(page, "[data-diagram-zoom=in]");
+
+    await page.mouse.move(out.x, out.y);
+    await named("out", true);
+
+    await page.mouse.move(zoomIn.x, zoomIn.y);
+    await named("in", true);
+
+    await page.mouse.move(2, page.viewportSize()!.height - 2);
+    await page.mouse.move(out.x, out.y);
+    await named("out", true);
+  });
+
   // The name a screen reader hears is read off the tooltip's own box, so it is the one checked as
   // the words change under a tooltip that stands.
   test("names each markup button the keyboard's focus lands on, and says what a key's press changed it to", async () => {

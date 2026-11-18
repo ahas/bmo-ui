@@ -406,6 +406,22 @@ default; a screen supplies what it holds and what a press means there. Every exp
 - **What is not a form** takes effect as it is done and carries no save: a table whose cells are each
   their own editor, a page of standing switches, a list whose records are each stored on their own.
 
+## Dates
+
+- **A date is chosen on one calendar** (`DateCalendar`), the component library's own calendar of
+  days, one date, several or a range, with everything the library's calendar takes: its value, its
+  bounds, the dates it refuses, its size and its cells. A screen stands it wherever it lets a date be
+  chosen, in a popover under a field or open on the page, and never the library's calendar bare.
+- **Each paging button is named** in the shared tooltip, in the host's words, as every icon button
+  is (see "Tooltips"). Among the days the outer two page a year and the inner two a month; among the
+  months the inner two page a year; among the years they page a run of years. Each carries its name
+  as its `aria-label` and its `data-tooltip`, and the markup button layer names it, so a screen
+  reader hears the words the tooltip shows and a finger held on a button names it without paging.
+- **Its heading steps through the views,** the library's own way: a press on the month shown opens
+  the months of its year, a press there the years, and a press among the years comes back to the
+  days. A month or a year chosen there opens the view below it on what was chosen. The heading is
+  the calendar's own, so a caller fills every other slot of the library's calendar but that one.
+
 ## A held finger
 
 - **A finger resting on one point for half a second is a hold,** a touch screen's right press: it
@@ -453,7 +469,8 @@ default; a screen supplies what it holds and what a press means there. Every exp
   anywhere puts it away.
 - **What a tap acts on is named the shared tooltip's way too:** an icon button through the layer's
   icon button, a choice of the view switch shown as its icon alone through the shared tooltip
-  marked as standing on a press, and a button a host writes as markup through the markup button
+  marked as standing on a press, and a button a host writes as markup, or the library draws inside a
+  component of its own where the layer can stand nothing around it, through the markup button
   layer. The library's own tooltip comes up for a pointer and a focus alone, so nothing the layer
   draws, and nothing a host draws, names a control with it, and the stylesheet draws no name of its
   own over any control.
@@ -496,7 +513,9 @@ default; a screen supplies what it holds and what a press means there. Every exp
   the markup-buttons module), a page layer. A button the layer draws no component for, such as a
   fenced block's copy button or a diagram's zoom buttons that the host's renderer writes into the
   text it draws, carries its name in `data-tooltip` beside its `aria-label` (`docs/boundary.md`,
-  "Classes and keyframes"). The layer finds such a button under the pointer, under a keyboard focus
+  "Classes and keyframes"). So does a button the library draws inside a component of its own, handed
+  the two attributes through the props that component passes on to it, as the date calendar's paging
+  buttons are (see "Dates"). The layer finds such a button under the pointer, under a keyboard focus
   landing on it, or under a finger held on it, and its words are that name.
   - A tap presses the button and names nothing; a finger held on it names it instead.
   - The words follow the button's own: a name that changes while its tooltip stands is shown as it
