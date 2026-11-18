@@ -270,6 +270,26 @@ describe.skipIf(!ready)("the one select at a desktop's width", () => {
     await page.keyboard.type("rome");
     await listedAs(page, ["# South", "Rome"]);
     expect(await page.$eval("#long [data-slot=value]", (value) => value.textContent?.trim())).toBe("Oslo");
+
+    await page.fill(FIELD, "zzz");
+    await saysEmpty(page, "Nothing found");
+    expect(await page.$eval("#long [data-slot=value]", (value) => value.textContent?.trim())).toBe("Oslo");
+    await close(page);
+  });
+
+  test("names every value chosen from the road's answers once a later answer finds none of them", async () => {
+    await page.click("#members");
+    await page.waitForSelector(FIELD);
+
+    for (const [typed, name] of [["ada", "Ada Byron"], ["grace", "Grace Hill"]] as const) {
+      await page.fill(FIELD, typed);
+      await listedAs(page, [name]);
+      await page.keyboard.press("Enter");
+    }
+
+    await page.fill(FIELD, "zzz");
+    await saysEmpty(page, "Nothing found");
+    expect(await page.$eval("#members [data-slot=value]", (value) => value.textContent?.trim())).toBe("Ada Byron, Grace Hill");
     await close(page);
   });
 
@@ -497,24 +517,31 @@ describe.skipIf(!ready)("the one select under a finger at a phone's width", () =
     expect(await page.$("#long")).not.toBeNull();
   });
 
-  test("closes only its list when a finger taps the dialog it stands in", async () => {
+  test("closes only its list when a finger taps the dialog or the drawer it stands in", async () => {
     const { page } = touch;
     const menu = `${LIST}:has([role=option])`;
-    const dialog = "[role=dialog]";
+    const holder = "[role=dialog]";
 
-    await touch.tap(await centreOf(page, "#open-dialog"));
-    await page.waitForSelector(`${dialog} #in-dialog`);
-    await touch.tap(await centreOf(page, "#in-dialog"));
-    await page.waitForSelector(menu);
+    for (const { opener, select } of [
+      { opener: "#open-dialog", select: "#in-dialog" },
+      { opener: "#open-drawer", select: "#in-drawer" }
+    ]) {
+      await touch.tap(await centreOf(page, opener));
+      await page.waitForSelector(`${holder} ${select}`);
+      // A drawer rises into place, so the finger waits for it to stand where it is measured.
+      await page.$eval(holder, async (element) => await Promise.all(element.getAnimations({ subtree: true }).map(async (motion) => await motion.finished)));
+      await touch.tap(await centreOf(page, select));
+      await page.waitForSelector(menu);
 
-    // The dialog's title presses nothing and stands outside the list alone. The focus moves onto the
-    // dialog as the finger lands there, which closes the list before the tap ends.
-    await touch.tap(await centreOf(page, `${dialog} [data-slot=title]`));
-    await page.waitForSelector(menu, { state: "detached" });
-    await page.evaluate(async () => await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
-    expect(await page.$$eval(dialog, (elements) => elements.map((element) => element.getAttribute("data-state")))).toEqual(["open"]);
+      // The title presses nothing and stands outside the list alone. The focus moves onto what holds
+      // the list as the finger lands there, which closes the list before the tap ends.
+      await touch.tap(await centreOf(page, `${holder} [data-slot=title]`));
+      await page.waitForSelector(menu, { state: "detached" });
+      await page.evaluate(async () => await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+      expect(await page.$$eval(holder, (elements) => elements.map((element) => element.getAttribute("data-state")))).toEqual(["open"]);
 
-    await close(page);
+      await close(page);
+    }
   });
 
   test("keeps its search and its list in sight once a pressed field brings the keyboard up", async () => {

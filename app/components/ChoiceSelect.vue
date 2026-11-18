@@ -30,6 +30,7 @@
     ignore-filter
     @create="takeOffered"
     @update:open="clearOnOpen"
+    @update:model-value="keepChosen"
   >
     <template v-for="name in passedSlots" #[name]="scope" :key="name">
       <slot :name="name" v-bind="scope ?? {}" />
@@ -66,7 +67,7 @@
 </template>
 
 <script setup lang="ts">
-import { getDisplayValue } from "@nuxt/ui/utils";
+import { compare, get, getDisplayValue } from "@nuxt/ui/utils";
 import { useI18n } from "vue-i18n";
 
 import { CHOICE_FIND_PAUSE_MS, choiceFields, narrowChoices, searchesChoices, typedValue } from "../domain/choices";
@@ -169,8 +170,16 @@ const shown = computed((): ChoiceItems => {
   return typed.value ? (found.value ?? []) : props.items;
 });
 
-// Every choice the select knows: those it is handed and the road's last answer.
-const known = computed(() => [...everyChoice(props.items), ...everyChoice(found.value ?? [])]);
+// The choices the select presents: those it is handed and the road's last answer.
+const presented = computed(() => [...everyChoice(props.items), ...everyChoice(found.value ?? [])]);
+
+// The choices standing chosen, as the select last knew them. A value chosen from one of the road's
+// answers is kept here as it is chosen, before the words cleared on a choice of several take that
+// answer away, so the control still names it once a later answer leaves it out.
+const kept = shallowRef<SelectMenuItem[]>([]);
+
+// Every choice the select knows: those it presents and those standing chosen.
+const known = computed(() => [...presented.value, ...kept.value]);
 
 // Whether any choice carries a line under its label; the library draws that line's place for every
 // choice once its slot is filled, so it is filled only then.
@@ -205,9 +214,31 @@ type DisplayOptions = NonNullable<Parameters<typeof getDisplayValue>[2]>;
 
 const ownUi = computed(() => attrs.ui as { value?: string; placeholder?: string } | undefined);
 
+// The values a model value holds: each of several, or the one.
+function chosenValues(value: unknown): unknown[] {
+  return props.multiple && Array.isArray(value) ? value : [value];
+}
+
+// The choice among those given whose value is the one asked for, compared as the library compares them.
+function choiceOf(among: SelectMenuItem[], value: unknown): SelectMenuItem | undefined {
+  const by = attrs.by as DisplayOptions["by"];
+
+  return among.find((item) => compare(typeof item === "object" && item !== null && props.valueKey ? get(item, props.valueKey) : item, value, by));
+}
+
+// Keeps the choices a value holds, found among every choice the select knows now; it is told of a
+// choice made in the list, of a value the host sets and of the choices presented changing.
+function keepChosen(value: unknown): void {
+  const among = known.value;
+
+  kept.value = chosenValues(value).flatMap((one) => choiceOf(among, one) ?? []);
+}
+
+watch([() => props.modelValue, presented], ([value]) => keepChosen(value), { immediate: true });
+
 function chosenName(value: unknown): string | undefined {
   const options = { labelKey: props.labelKey, valueKey: props.valueKey, by: attrs.by as DisplayOptions["by"] };
-  const names = (props.multiple && Array.isArray(value) ? value : [value]).map((one) => getDisplayValue(known.value, one, options) as unknown);
+  const names = chosenValues(value).map((one) => getDisplayValue(known.value, one, options) as unknown);
   const said = names.filter((name) => name !== undefined && name !== null && name !== "").map(String);
 
   if (props.multiple) return said.length > 0 ? said.join(", ") : undefined;

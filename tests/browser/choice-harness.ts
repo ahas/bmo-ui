@@ -4,6 +4,7 @@ import { createI18n } from "vue-i18n";
 
 import UApp from "@nuxt/ui/components/App.vue";
 import UButton from "@nuxt/ui/components/Button.vue";
+import UDrawer from "@nuxt/ui/components/Drawer.vue";
 import UModal from "@nuxt/ui/components/Modal.vue";
 
 import ChoiceSelect from "../../app/components/ChoiceSelect.vue";
@@ -17,12 +18,13 @@ import type { SelectMenuItem } from "@nuxt/ui";
 // The one select (`docs/components.md`, "Choosing a value") on a page that says nothing else: seven
 // sizes, a dozen cities in two groups each with a line under it, eight tints with a preview beside
 // them, people found over a stand-in road that answers at once, refuses the word "fail", holds its
-// answer to "slow" until the test lets it go and finds nobody for anything else unmatched, three
-// roles taking free entry, each new value added to them and chosen, a narrow control at the page's
-// trailing end opening a list of sessions wider than itself, and a dialog holding the dozen cities
-// once more, opened from a button under them all. The page stands outside Nuxt, so the library is
-// installed as a Vue plugin, the words are handed over here and the layer's registry of floating
-// things is started as its plugin starts it.
+// answer to "slow" until the test lets it go and finds nobody for anything else unmatched, the same
+// people chosen several at a time by an id over a second road, three roles taking free entry, each
+// new value added to them and chosen, a narrow control at the page's trailing end opening a list of
+// sessions wider than itself, and a dialog and a drawer each holding the dozen cities once more,
+// opened from buttons under them all. The page stands outside Nuxt, so the library is installed as a
+// Vue plugin, the words are handed over here and the layer's registry of floating things is started
+// as its plugin starts it.
 
 // The layer's code reaches the framework's own names without importing them, since Nuxt binds them
 // in a host; a page standing outside Nuxt hands the same names over before anything opens.
@@ -60,6 +62,9 @@ const SESSIONS = ["Monday morning review", "Tuesday afternoon planning", "Wednes
 
 const PEOPLE = ["Ada Byron", "Alan Moor", "Grace Hill", "Linus Park"];
 
+// Members found over a second road, each chosen by an id its label does not hold.
+const MEMBERS = PEOPLE.map((label, index) => ({ label, value: 20 + index }));
+
 // Lets the held answer to "slow" go.
 let letGo: () => void = () => undefined;
 
@@ -72,10 +77,15 @@ async function findPeople(words: string): Promise<SelectMenuItem[]> {
   return PEOPLE.filter((name) => name.toLowerCase().includes(words.toLowerCase())).map((label) => ({ label, value: label }));
 }
 
+async function findMembers(words: string): Promise<SelectMenuItem[]> {
+  return MEMBERS.filter((member) => member.label.toLowerCase().includes(words.toLowerCase()));
+}
+
 const Page = defineComponent(() => {
   const size = ref("medium");
   const city = ref<string>();
   const person = ref<string>();
+  const members = ref<number[]>([]);
   const roles = shallowRef<SelectMenuItem[]>(["Designer", "Engineer", "Manager"].map((label) => ({ label, value: label })));
   const role = ref<string>();
 
@@ -88,6 +98,8 @@ const Page = defineComponent(() => {
   const session = ref<string>();
   const dialog = ref(false);
   const cityInDialog = ref<string>();
+  const drawer = ref(false);
+  const cityInDrawer = ref<string>();
   const preview = useListPreview(tint);
 
   return () =>
@@ -114,6 +126,17 @@ const Page = defineComponent(() => {
         ]),
         h(ChoiceSelect, { id: "found", items: [], find: findPeople, findPauseMs: 0, valueKey: "value", modelValue: person.value, "onUpdate:modelValue": (value: string) => (person.value = value), class: "w-48" }),
         h(ChoiceSelect, {
+          id: "members",
+          items: [],
+          find: findMembers,
+          findPauseMs: 0,
+          multiple: true,
+          valueKey: "value",
+          modelValue: members.value,
+          "onUpdate:modelValue": (value: number[]) => (members.value = value),
+          class: "w-48"
+        }),
+        h(ChoiceSelect, {
           id: "free",
           items: roles.value,
           createItem: true,
@@ -126,13 +149,24 @@ const Page = defineComponent(() => {
         h("div", { class: "flex justify-end self-stretch" }, [
           h(ChoiceSelect, { id: "wide", items: SESSIONS, valueKey: "value", modelValue: session.value, "onUpdate:modelValue": (value: string) => (session.value = value), class: "w-32" })
         ]),
-        h(UButton, { id: "open-dialog", label: "Open dialog", onClick: () => (dialog.value = true) }),
+        h("div", { class: "flex gap-4" }, [
+          h(UButton, { id: "open-dialog", label: "Open dialog", onClick: () => (dialog.value = true) }),
+          h(UButton, { id: "open-drawer", label: "Open drawer", onClick: () => (drawer.value = true) })
+        ]),
         h(
           UModal,
           { open: dialog.value, "onUpdate:open": (value: boolean) => (dialog.value = value), title: "Dialog" },
           {
             body: () =>
               h(ChoiceSelect, { id: "in-dialog", items: CITIES, valueKey: "value", modelValue: cityInDialog.value, "onUpdate:modelValue": (value: string) => (cityInDialog.value = value), class: "w-48" })
+          }
+        ),
+        h(
+          UDrawer,
+          { open: drawer.value, "onUpdate:open": (value: boolean) => (drawer.value = value), title: "Drawer" },
+          {
+            body: () =>
+              h(ChoiceSelect, { id: "in-drawer", items: CITIES, valueKey: "value", modelValue: cityInDrawer.value, "onUpdate:modelValue": (value: string) => (cityInDrawer.value = value), class: "w-48" })
           }
         )
       ])

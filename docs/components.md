@@ -485,8 +485,10 @@ default; a screen supplies what it holds and what a press means there. Every exp
   screen. Only a list that fits against neither edge is slid back inside the screen.
 - **The list is as wide as its widest choice,** never narrower than its control nor wider than the
   screen less a gutter each side. The search field fills that width and sets none of it.
-- **The control names what is chosen by its label** among every choice it is handed and the road's
-  last answer, whatever the words typed leave in the list.
+- **The control names what is chosen by its label,** each chosen value among them, whatever the words
+  typed leave in the list. It knows a label from every choice it is handed, the road's last answer and
+  every choice that stands chosen, so a value chosen from an earlier answer is still named by its
+  label once a later answer, or one that found nothing, leaves it out.
 - **The search field stands at the top of the opened list,** above the choices, its search mark
   leading and the pack's words for a search as its placeholder. It has no edge of its own, so while
   it holds the focus it takes the elevated background, as a field with no edge does. Opened by a pointer or a key, the
