@@ -176,7 +176,7 @@
     {
       "name": "ChoiceSelect",
       "kind": "component",
-      "line": "The one select a value is chosen from a list in, the library's select menu searching once it holds more than seven choices, or always over a road that finds them.",
+      "line": "The one select a value is chosen from a list in, the library's select menu searching once it holds more than seven choices, or always over a road that finds them or in free entry, where words no choice shows are offered as a new value.",
       "props": [
         {
           "name": "modelValue",
@@ -230,6 +230,12 @@
           "type": "number | undefined",
           "required": false,
           "default": "CHOICE_FIND_PAUSE_MS"
+        },
+        {
+          "name": "createItem",
+          "type": "boolean | undefined",
+          "required": false,
+          "default": "false"
         },
         {
           "name": "size",
@@ -458,12 +464,6 @@
           "required": false
         },
         {
-          "name": "createItem",
-          "type": "boolean | \"always\" | { position?: \"top\" | \"bottom\" | undefined; when?: \"empty\" | \"always\" | undefined; } | undefined",
-          "required": false,
-          "description": "Determines if custom user input that does not exist in options can be added."
-        },
-        {
           "name": "autofocusDelay",
           "type": "number | undefined",
           "required": false
@@ -476,8 +476,13 @@
         }
       ],
       "slots": [],
-      "events": [],
-      "example": "<div class=\"flex flex-wrap gap-4\">\n  <ChoiceSelect v-model=\"size\" :items=\"sizes\" value-key=\"value\" class=\"w-40\" />\n  <ChoiceSelect v-model=\"city\" :items=\"cities\" value-key=\"value\" class=\"w-56\" />\n</div>"
+      "events": [
+        {
+          "name": "create",
+          "type": "[value: string]"
+        }
+      ],
+      "example": "<div class=\"flex flex-wrap gap-4\">\n  <ChoiceSelect v-model=\"size\" :items=\"sizes\" value-key=\"value\" class=\"w-40\" />\n  <ChoiceSelect v-model=\"city\" :items=\"cities\" value-key=\"value\" class=\"w-56\" />\n  <ChoiceSelect v-model=\"role\" :items=\"roles\" value-key=\"value\" create-item class=\"w-48\" @create=\"addRole\" />\n</div>"
     },
     {
       "name": "ChooseAll",

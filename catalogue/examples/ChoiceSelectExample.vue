@@ -2,13 +2,15 @@
   <div class="flex flex-wrap gap-4">
     <ChoiceSelect v-model="size" :items="sizes" value-key="value" class="w-40" />
     <ChoiceSelect v-model="city" :items="cities" value-key="value" class="w-56" />
+    <ChoiceSelect v-model="role" :items="roles" value-key="value" create-item class="w-48" @create="addRole" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref } from "vue";
 
-// Three sizes open with no search; twelve cities open with the search at the top of the list.
+// Three sizes open with no search; twelve cities open with the search at the top of the list; three
+// roles take free entry, a role typed that none shows added and chosen.
 const sizes = [
   { label: "Small", value: "small" },
   { label: "Medium", value: "medium" },
@@ -17,6 +19,14 @@ const sizes = [
 
 const cities = ["Amsterdam", "Berlin", "Cairo", "Dublin", "Lisbon", "Madrid", "Nairobi", "Oslo", "Paris", "Quito", "Rome", "Vienna"].map((label) => ({ label, value: label.toLowerCase() }));
 
+const roles = ref(["Designer", "Engineer", "Manager"].map((label) => ({ label, value: label })));
+
 const size = ref("medium");
 const city = ref("lisbon");
+const role = ref("Engineer");
+
+function addRole(value: string): void {
+  roles.value = [...roles.value, { label: value, value }];
+  role.value = value;
+}
 </script>

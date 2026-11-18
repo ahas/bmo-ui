@@ -1,12 +1,14 @@
 <template>
   <!-- The one select a value is chosen from a list in (`docs/components.md`, "Choosing a value"): the
        library's select menu, its search held to one rule by the choices module. A list searches once
-       it holds more than seven choices, and a list found over a road always; the field stands at the
-       top of the opened list with the pack's words for a search, takes the focus unless a finger
-       opened it, and matches what each choice shows, its hits marked where they stand. An empty list
-       says whether nothing matched, nothing is there or the road refused, and the road's first answer
-       is awaited under a skeleton line. The list opens against the control's leading edge. Everything
-       else it is handed is the library's select menu's. -->
+       it holds more than seven choices, and a list found over a road or taking free entry always;
+       words typed that no choice shows are offered in free entry as a new value, handed to the screen
+       as it is chosen. The field stands at the top of the opened list with the pack's words for a
+       search, takes the focus unless a finger opened it, and matches what each choice shows, its hits
+       marked where they stand. An empty list says whether nothing matched, nothing is there or the
+       road refused, and the road's first answer is awaited under a skeleton line. The list opens
+       against the control's leading edge. Everything else it is handed is the library's select
+       menu's. -->
   <USelectMenu
     v-bind="$attrs"
     v-model:search-term="words"
@@ -19,7 +21,9 @@
     :search-input="searchInput"
     :loading="busy"
     :content="content"
+    :create-item="offered === null ? false : CREATE_ALWAYS"
     ignore-filter
+    @create="takeOffered"
   >
     <template v-for="name in passedSlots" #[name]="scope" :key="name">
       <slot :name="name" v-bind="scope ?? {}" />
@@ -31,6 +35,10 @@
 
     <template v-if="described" #item-description="{ item }">
       <SearchText :text="shownWords(item).description" :query="words" />
+    </template>
+
+    <template #create-item-label>
+      {{ t("common.action.add_choice", { value: offered }) }}
     </template>
 
     <template #empty>
@@ -47,7 +55,7 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
 
-import { CHOICE_FIND_PAUSE_MS, choiceFields, narrowChoices, searchesChoices } from "../domain/choices";
+import { CHOICE_FIND_PAUSE_MS, choiceFields, narrowChoices, searchesChoices, typedValue } from "../domain/choices";
 import { countLocale } from "../domain/numbers";
 import { TOUCH_QUERY } from "../domain/prompt";
 import { useNarrow } from "../domain/screen";
@@ -57,7 +65,7 @@ import type { ChoiceFind, ChoiceItems } from "../domain/choices";
 
 // The library's virtual scrolling opens a list's groups out into one, and the select keeps its groups,
 // so it is not taken.
-interface Props extends /* @vue-ignore */ Omit<SelectMenuProps, "items" | "virtualize" | "modelValue" | "multiple" | "valueKey" | "searchInput" | "searchTerm" | "ignoreFilter" | "filterFields" | "labelKey" | "descriptionKey"> {
+interface Props extends /* @vue-ignore */ Omit<SelectMenuProps, "items" | "virtualize" | "modelValue" | "multiple" | "valueKey" | "searchInput" | "searchTerm" | "ignoreFilter" | "filterFields" | "labelKey" | "descriptionKey" | "createItem"> {
   // The value chosen, or the values where several are.
   modelValue?: unknown;
   multiple?: boolean;
@@ -75,6 +83,8 @@ interface Props extends /* @vue-ignore */ Omit<SelectMenuProps, "items" | "virtu
   descriptionKey?: string;
   // How long typing stands still before the road is asked.
   findPauseMs?: number;
+  // Free entry: words typed that no choice shows are offered as a new value.
+  createItem?: boolean;
 }
 
 defineOptions({ inheritAttrs: false });
@@ -87,8 +97,17 @@ const props = withDefaults(defineProps<Props>(), {
   empty: undefined,
   labelKey: "label",
   descriptionKey: "description",
-  findPauseMs: CHOICE_FIND_PAUSE_MS
+  findPauseMs: CHOICE_FIND_PAUSE_MS,
+  createItem: false
 });
+
+// The new value free entry offered, chosen; the screen adds it and chooses it.
+const emit = defineEmits<{ create: [value: string] }>();
+
+// The library is asked for its new value only where the select offers one, so the select decides
+// which words are new. It draws the new value nowhere unless told where, so the select names the
+// list's end.
+const CREATE_ALWAYS = { when: "always", position: "bottom" } as const;
 
 const slots = useSlots();
 const { t } = useI18n();
@@ -96,10 +115,10 @@ const appConfig = useAppConfig();
 const touch = useNarrow(TOUCH_QUERY);
 
 // The slots the select draws itself; every other slot of the library's select menu is the caller's.
-const OWN_SLOTS = new Set(["item-label", "item-description", "empty"]);
+const OWN_SLOTS = new Set(["item-label", "item-description", "empty", "create-item-label"]);
 const passedSlots = computed(() => Object.keys(slots).filter((name) => !OWN_SLOTS.has(name)));
 
-const keys = computed(() => ({ label: props.labelKey, description: props.descriptionKey }));
+const keys = computed(() => ({ label: props.labelKey, description: props.descriptionKey, value: props.valueKey }));
 
 // The words typed into the search; the library clears them as the list closes.
 const words = ref("");
@@ -115,7 +134,7 @@ const attrs = useAttrs();
 // Busy while the road is asked, and wherever the screen says its own choices are on their way.
 const busy = computed(() => finding.value || (attrs.loading !== undefined && attrs.loading !== false));
 
-const searches = computed(() => searchesChoices(props.items, props.find !== undefined));
+const searches = computed(() => searchesChoices(props.items, props.find !== undefined, props.createItem));
 
 const searchInput = computed(() =>
   searches.value ? { placeholder: t("common.placeholder.search"), icon: appConfig.ui.icons.search, ...(touch.value ? { autofocus: false } : {}) } : false
@@ -136,6 +155,14 @@ const described = computed(() => [...everyChoice(props.items), ...everyChoice(fo
 // The entries of a list, its groups opened out.
 function everyChoice(items: ChoiceItems): SelectMenuItem[] {
   return (items as unknown[]).flatMap((entry) => (Array.isArray(entry) ? entry : [entry])) as SelectMenuItem[];
+}
+
+// The words free entry offers as a new value: none while the road is asked, since its answer may
+// hold them.
+const offered = computed(() => (props.createItem && !finding.value ? typedValue(shown.value, words.value, keys.value, countLocale()) : null));
+
+function takeOffered(): void {
+  if (offered.value !== null) emit("create", offered.value);
 }
 
 // The road is being asked; the list stands empty only where no earlier answer is left to show, so its

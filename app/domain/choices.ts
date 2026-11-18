@@ -1,8 +1,8 @@
 // What the one select a value is chosen in searches, and when (`docs/components.md`, "Choosing a
 // value"). A list searches once it holds more than seven choices, counted from what it is handed, so
-// a list read from data takes its search as it grows and no screen decides it; a list found on the
-// server searches always. What a choice shows is what is matched, by the search module every list
-// search goes through.
+// a list read from data takes its search as it grows; a list found on the server or taking free entry
+// searches always. What a choice shows is what is matched, by the search module every list search
+// goes through, and words typed that no choice shows are what free entry offers as a new value.
 
 import { matchFields } from "../../shared/search";
 
@@ -13,10 +13,12 @@ import type { SearchField } from "../../shared/search";
 // groups of lists drawn apart.
 export type ChoiceItems = SelectMenuItem[] | SelectMenuItem[][];
 
-// The fields of a choice that hold the words it shows: its label, and the line under it.
+// The fields of a choice that hold the words it shows, its label and the line under it, and the one
+// holding its value where it is not the choice itself.
 export interface ChoiceKeys {
   label: string;
   description: string;
+  value?: string;
 }
 
 // The road a list found on the server is searched over: the choices for the words typed.
@@ -54,10 +56,11 @@ export function choiceCount(items: ChoiceItems): number {
   return groupsOf(items).reduce((sum, group) => sum + group.filter((item) => !structural(item)).length, 0);
 }
 
-// Whether a list searches: always where a road finds its choices, and otherwise once it holds more
-// choices than `SEARCH_ABOVE`.
-export function searchesChoices(items: ChoiceItems, finds: boolean): boolean {
-  return finds || choiceCount(items) > SEARCH_ABOVE;
+// Whether a list searches: always where a road finds its choices or it takes free entry, since the
+// words of a new value are typed into its search, and otherwise once it holds more choices than
+// `SEARCH_ABOVE`.
+export function searchesChoices(items: ChoiceItems, finds: boolean, takesFree = false): boolean {
+  return finds || takesFree || choiceCount(items) > SEARCH_ABOVE;
 }
 
 // The words a choice shows, each a field the search matches: a plain value is its own label.
@@ -108,4 +111,30 @@ export function narrowChoices(items: ChoiceItems, words: string, keys: ChoiceKey
   }
 
   return narrowGroup(items as SelectMenuItem[], words, keys, locale);
+}
+
+// Whether a choice already is the value typed: its label shows the words, letter case folded in the
+// locale handed over, or its value is the words themselves.
+function holds(item: SelectMenuItem, value: string, keys: ChoiceKeys, locale: string | undefined): boolean {
+  if (structural(item)) {
+    return false;
+  }
+
+  if (keys.value !== undefined && typeof item === "object" && item !== null && (item as Record<string, unknown>)[keys.value] === value) {
+    return true;
+  }
+
+  return choiceFields(item, keys)[0]!.text?.localeCompare(value, locale, { sensitivity: "accent" }) === 0;
+}
+
+// The words typed, their ends trimmed, as the new value free entry offers: none where nothing is
+// typed or a choice already is that value.
+export function typedValue(items: ChoiceItems, words: string, keys: ChoiceKeys = LABEL_KEYS, locale?: string): string | null {
+  const value = words.trim();
+
+  if (value === "" || groupsOf(items).some((group) => group.some((item) => holds(item, value, keys, locale)))) {
+    return null;
+  }
+
+  return value;
 }

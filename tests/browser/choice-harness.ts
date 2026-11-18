@@ -1,5 +1,5 @@
 import ui from "@nuxt/ui/vue-plugin";
-import { createApp, defineComponent, h, nextTick, onScopeDispose, ref, watch } from "vue";
+import { createApp, defineComponent, h, nextTick, onScopeDispose, ref, shallowRef, watch } from "vue";
 import { createI18n } from "vue-i18n";
 
 import UApp from "@nuxt/ui/components/App.vue";
@@ -11,10 +11,11 @@ import sheet from "./choice-harness.css?inline";
 
 import type { SelectMenuItem } from "@nuxt/ui";
 
-// Three of the one select (`docs/components.md`, "Choosing a value") on a page that says nothing
-// else: five sizes, a dozen cities in two groups each with a line under it, and people found over a
+// Four of the one select (`docs/components.md`, "Choosing a value") on a page that says nothing
+// else: seven sizes, a dozen cities in two groups each with a line under it, people found over a
 // stand-in road that answers at once, refuses the word "fail", holds its answer to "slow" until the
-// test lets it go and finds nobody for anything else unmatched. The page stands outside Nuxt, so the library is installed as a Vue plugin, the words are
+// test lets it go and finds nobody for anything else unmatched, and three roles taking free entry,
+// each new value added to them and chosen. The page stands outside Nuxt, so the library is installed as a Vue plugin, the words are
 // handed over here and the layer's registry of floating things is started as its plugin starts it.
 
 // The layer's code reaches the framework's own names without importing them, since Nuxt binds them
@@ -28,13 +29,14 @@ Object.assign(globalThis, {
 
 const WORDS = {
   common: {
+    action: { add_choice: 'Add "{value}"' },
     error: { choices_find_failed: "Search failed" },
     placeholder: { search: "Search" },
     status: { loading: "Loading", no_choices: "No choices", no_match: "Nothing found" }
   }
 };
 
-const SIZES = ["Tiny", "Small", "Medium", "Large", "Huge"].map((label) => ({ label, value: label.toLowerCase() }));
+const SIZES = ["Tiny", "Small", "Medium", "Large", "Huge", "Vast", "Giant"].map((label) => ({ label, value: label.toLowerCase() }));
 
 const CITIES: SelectMenuItem[] = [
   { type: "label", label: "North" },
@@ -62,13 +64,30 @@ const Page = defineComponent(() => {
   const size = ref("medium");
   const city = ref<string>();
   const person = ref<string>();
+  const roles = shallowRef<SelectMenuItem[]>(["Designer", "Engineer", "Manager"].map((label) => ({ label, value: label })));
+  const role = ref<string>();
+
+  function addRole(value: string): void {
+    roles.value = [...roles.value, { label: value, value }];
+    role.value = value;
+  }
 
   return () =>
     h(UApp, null, () =>
       h("div", { class: "flex flex-col items-start gap-4 p-4" }, [
         h(ChoiceSelect, { id: "short", items: SIZES, valueKey: "value", modelValue: size.value, "onUpdate:modelValue": (value: string) => (size.value = value), class: "w-48" }),
         h(ChoiceSelect, { id: "long", items: CITIES, valueKey: "value", modelValue: city.value, "onUpdate:modelValue": (value: string) => (city.value = value), class: "w-48" }),
-        h(ChoiceSelect, { id: "found", items: [], find: findPeople, findPauseMs: 0, valueKey: "value", modelValue: person.value, "onUpdate:modelValue": (value: string) => (person.value = value), class: "w-48" })
+        h(ChoiceSelect, { id: "found", items: [], find: findPeople, findPauseMs: 0, valueKey: "value", modelValue: person.value, "onUpdate:modelValue": (value: string) => (person.value = value), class: "w-48" }),
+        h(ChoiceSelect, {
+          id: "free",
+          items: roles.value,
+          createItem: true,
+          valueKey: "value",
+          modelValue: role.value,
+          "onUpdate:modelValue": (value: string) => (role.value = value),
+          onCreate: addRole,
+          class: "w-48"
+        })
       ])
     );
 });

@@ -2,6 +2,7 @@
 // layer's keys are declared: the layer's tests hold its code to it, and a host's tests hold its pack
 // to it, so every key the layer asks for is answered.
 export const WORDING_KEYS = [
+  "common.action.add_choice",
   "common.action.cancel",
   "common.action.choose_all",
   "common.action.choose_none",

@@ -1,9 +1,10 @@
 import { describe, expect, test } from "bun:test";
 
-import { choiceCount, choiceFields, narrowChoices, SEARCH_ABOVE, searchesChoices } from "~/domain/choices";
+import { choiceCount, choiceFields, narrowChoices, SEARCH_ABOVE, searchesChoices, typedValue } from "~/domain/choices";
 
-// When the one select searches and what its search keeps (`docs/components.md`, "Choosing a value").
-// How the search module matches words is its own test's; this one holds the select's list to it.
+// When the one select searches, what its search keeps and which words free entry offers as a new
+// value (`docs/components.md`, "Choosing a value"). How the search module matches words is its own
+// test's; this one holds the select's list to it.
 
 const fruits = ["Apple", "Banana", "Cherry", "Date", "Elderberry", "Fig", "Grape"].map((label) => ({ label, value: label.toLowerCase() }));
 
@@ -32,6 +33,40 @@ describe("whether a list searches", () => {
 
   test("always where a road finds its choices, however few it holds", () => {
     expect(searchesChoices([], true)).toBe(true);
+  });
+
+  test("always where it takes free entry, however few it holds", () => {
+    expect(searchesChoices(fruits.slice(0, 3), false, true)).toBe(true);
+    expect(searchesChoices(fruits.slice(0, 3), false, false)).toBe(false);
+  });
+});
+
+describe("the new value free entry offers", () => {
+  const headed = [{ type: "label" as const, label: "Grape" }, ...fruits.slice(0, 3)];
+
+  test("is the words typed, their ends trimmed, where no choice shows them", () => {
+    expect(typedValue(fruits.slice(0, 3), "  Apricot ")).toBe("Apricot");
+    expect(typedValue(fruits.slice(0, 3), "App")).toBe("App");
+    expect(typedValue(headed, "Grape")).toBe("Grape");
+  });
+
+  test("is none where nothing is typed", () => {
+    expect(typedValue(fruits, "   ")).toBeNull();
+  });
+
+  test("is none where a choice already shows the words as its label, letter case folded, in any group", () => {
+    expect(typedValue(fruits, "banana")).toBeNull();
+    expect(typedValue([fruits.slice(0, 3), fruits.slice(3)], " FIG ")).toBeNull();
+    expect(typedValue(["Red", "Green"], "green")).toBeNull();
+  });
+
+  test("reads the label by the key the select is handed", () => {
+    expect(typedValue([{ name: "Lead" }], "lead", { label: "name", description: "note" })).toBeNull();
+  });
+
+  test("is none where a choice holds the words as its value, read by the value key", () => {
+    expect(typedValue([{ label: "Engineer", value: "eng" }], "eng", { label: "label", description: "description", value: "value" })).toBeNull();
+    expect(typedValue([{ label: "Engineer", value: "eng" }], "eng")).toBe("eng");
   });
 });
 

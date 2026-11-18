@@ -35,7 +35,7 @@ wording keys listed here are the ones the layer's list holds.
 | `ArtworkFrame` | A card's picture at one of the artwork shapes, whole over a ground of itself where its shape is not the frame's, or its kind's mark over its name where it has none. |
 | `AudioPlayer` | A kept sound: a play and pause button, its waveform as its progress, a volume popover and a download. |
 | `CardRow` | A heading over one line of cards that scrolls sideways, paged by a pointer's buttons and swiped by a finger, with the link that opens it whole. |
-| `ChoiceSelect` | The one select a value is chosen from a list in, the library's select menu searching once it holds more than seven choices, or always over a road that finds them. |
+| `ChoiceSelect` | The one select a value is chosen from a list in, the library's select menu searching once it holds more than seven choices, or always over a road that finds them or in free entry, where words no choice shows are offered as a new value. |
 | `ChooseAll` | The three-state checkbox that takes every row shown or gives the choice up. |
 | `ColumnResizeHandle` | The right edge of a column's name, dragged or moved with the arrow keys. |
 | `CreateButton` | The one button a screen creates from: a grey icon in its row on a wide screen, a floating primary icon on a phone drawn under every overlay, its key named in its tooltip; marked `contained`, an add that belongs to a row, a sidebar's or a list's head, a tab bar or a dialog's or a drawer's row, is that row's grey icon at every width, answering no key. |
@@ -96,7 +96,7 @@ Each is named with everything it exports.
 | `actionbar` | `BAR_GATHERS_UNDER_PX`, `GATHERED_ACTIONS`, `STANDING_ACTIONS`, `barGathers`, `actionsOutside`, `useBarRoom`, `useBarGathers` |
 | `artwork` | `PictureSize`, `ArtworkShape`, `PORTRAIT`, `LANDSCAPE`, `SQUARE`, `ARTWORK_SHAPES`, `LANDSCAPE_FROM`, `SQUARE_PAST`, `FILLS_WITHIN`, `shapeOf`, `rowShape`, `fillsShape` |
 | `bars` | `BarColor`, `BAR_SIZE`, `STACKED_LEGEND`, `INLINE_LEGEND`, `FOLDED_LEGEND` |
-| `choices` | `ChoiceItems`, `ChoiceKeys`, `ChoiceFind`, `SEARCH_ABOVE`, `CHOICE_FIND_PAUSE_MS`, `choiceCount`, `searchesChoices`, `choiceFields`, `narrowChoices` |
+| `choices` | `ChoiceItems`, `ChoiceKeys`, `ChoiceFind`, `SEARCH_ABOVE`, `CHOICE_FIND_PAUSE_MS`, `choiceCount`, `searchesChoices`, `choiceFields`, `narrowChoices`, `typedValue` |
 | `chooseall` | `ChooseAllState`, `chooseAllState`, `chosenRuns`, `chooseAllPress`, `chooseAllLabel`, `CHOOSE_CELL`, `CHOOSE_GUTTER` |
 | `closing` | `OVERLAY_CLOSE_MS`, `useHeldWhileClosing` |
 | `clipboard` | `copyText` |
@@ -305,10 +305,10 @@ What a coding harness takes the layer through (`docs/harness.md`).
 
 ## Wording keys
 
-The layer reads these 145 keys and no others. The `wording-keys` shared module lists them, the one
+The layer reads these 146 keys and no others. The `wording-keys` shared module lists them, the one
 list a host's pack is held to. Placeholders are named after each key.
 
-- **`common.action`:** `cancel`, `choose_all`, `choose_none`, `close`, `close_all_tabs`,
+- **`common.action`:** `add_choice` `{value}`, `cancel`, `choose_all`, `choose_none`, `close`, `close_all_tabs`,
   `close_other_tabs`, `close_right_tabs`, `collapse`, `copy`, `create_link`, `discard`,
   `exit_fullscreen`, `expand`, `fit_screen`, `fullscreen`, `more`, `mute`, `next_month`,
   `next_picture`, `next_year`, `next_years`, `page_back`, `page_forward`, `pause`, `pin`, `play`,

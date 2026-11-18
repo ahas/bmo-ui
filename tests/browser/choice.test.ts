@@ -11,12 +11,14 @@ import type { TouchSession } from "./touch";
 
 import type { Browser, Page } from "playwright-core";
 
-// The one select drawn by a real browser (`docs/components.md`, "Choosing a value"): a list of five
+// The one select drawn by a real browser (`docs/components.md`, "Choosing a value"): a list of seven
 // opens with no search, a list of a dozen opens with the search at its top holding the focus, typing
 // narrows it to what the choices show with the hits marked and the headings of what stays, an empty
-// answer says why, a list found over a road asks it and says when it refused, and a finger opening a
-// long list leaves the keyboard down. Which choices the words keep is the choices module's own test
-// (`tests/domain/choices.test.ts`). Skipped where the browser build is not on the machine.
+// answer says why, a list found over a road asks it and says when it refused, a list of three taking
+// free entry opens with its search and takes a value typed into it, and a finger opening a long list
+// leaves the keyboard down and keeps a long value typed in free entry inside the screen. Which
+// choices the words keep is the choices module's own test (`tests/domain/choices.test.ts`). Skipped
+// where the browser build is not on the machine.
 
 const ready = touchReady();
 const ROOT = new URL("../../", import.meta.url).pathname;
@@ -116,9 +118,9 @@ describe.skipIf(!ready)("the one select at a desktop's width", () => {
     await page?.context().close();
   });
 
-  test("opens a list of five with no search", async () => {
+  test("opens a list of seven with no search", async () => {
     await page.click("#short");
-    await listedAs(page, ["Tiny", "Small", "Medium", "Large", "Huge"]);
+    await listedAs(page, ["Tiny", "Small", "Medium", "Large", "Huge", "Vast", "Giant"]);
     expect(await page.$(FIELD)).toBeNull();
     await close(page);
   });
@@ -216,6 +218,33 @@ describe.skipIf(!ready)("the one select at a desktop's width", () => {
     await page.keyboard.press("Enter");
     await page.waitForSelector(LIST, { state: "detached" });
   });
+
+  test("takes a value typed into a list of three in free entry, offering only words no choice shows", async () => {
+    await page.click("#free");
+    await page.waitForSelector(FIELD);
+    expect(await page.$eval(FIELD, (input) => document.activeElement === input)).toBe(true);
+    await listedAs(page, ["Designer", "Engineer", "Manager"]);
+
+    // Words a choice shows are that choice, whatever their letter case; words it only holds are offered too.
+    await page.keyboard.type("engineer");
+    await listedAs(page, ["Engineer"]);
+    await page.fill(FIELD, "eng");
+    await listedAs(page, ["Engineer", 'Add "eng"']);
+
+    // Words no choice holds stand as the one entry, so the list says no empty words.
+    await page.fill(FIELD, " Analyst ");
+    await listedAs(page, ['Add "Analyst"']);
+    expect(await page.$(`${LIST} [data-slot=empty]`)).toBeNull();
+
+    await page.getByRole("option", { name: 'Add "Analyst"' }).click();
+    await listedAs(page, ["Analyst"]);
+    await close(page);
+    expect(await page.textContent("#free")).toContain("Analyst");
+
+    await page.click("#free");
+    await listedAs(page, ["Designer", "Engineer", "Manager", "Analyst"]);
+    await close(page);
+  });
 });
 
 describe.skipIf(!ready)("the one select under a finger at a phone's width", () => {
@@ -241,6 +270,32 @@ describe.skipIf(!ready)("the one select under a finger at a phone's width", () =
     expect(await page.$eval(FIELD, (input) => document.activeElement === input)).toBe(false);
     expect(await leadingEdges(page, "#long")).toEqual({ list: 16, control: 16 });
     await close(page);
+  });
+
+  test("keeps a long value typed in free entry inside the screen, its words whole, and takes it from a finger", async () => {
+    const { page } = touch;
+    const words = "Principal platform reliability engineer";
+
+    await touch.tap(await centreOf(page, "#free"));
+    await page.waitForSelector(FIELD);
+    expect(await page.$eval(FIELD, (input) => document.activeElement === input)).toBe(false);
+    await touch.tap(await centreOf(page, FIELD));
+    await page.keyboard.type(words);
+    await listedAs(page, [`Add "${words}"`]);
+
+    const placed = await page.$eval(LIST, (list) => {
+      const box = list.getBoundingClientRect();
+      const label = list.querySelector("[data-slot=itemLabel]")!;
+
+      return { inside: box.left >= 0 && box.right <= window.innerWidth, whole: label.scrollWidth <= label.clientWidth };
+    });
+
+    expect(placed).toEqual({ inside: true, whole: true });
+
+    await touch.tap(await centreOf(page, `${LIST} [data-slot=item]`));
+    await listedAs(page, [words]);
+    await close(page);
+    expect(await page.textContent("#free")).toContain(words);
   });
 
   test("closes its list on the back gesture and leaves the page where it was", async () => {

@@ -462,14 +462,24 @@ default; a screen supplies what it holds and what a press means there. Every exp
   screen stands it wherever a value is chosen from a list, a filter's among them, and never the
   library's select, select menu or input menu bare, nor a dropdown menu of checks standing in for a
   select.
-- **A list searches once it holds more than seven choices, and only then** (the choices module's
-  `SEARCH_ABOVE`). The count is of the choices it is handed: a group's label and a separator are no
-  choices. A list read from data therefore takes its search the moment it grows past seven, on every
-  screen at once, and no screen decides whether its list searches.
+- **A list searches once it holds more than seven choices, and otherwise only where it is found on
+  the server or takes free entry** (the choices module's `SEARCH_ABOVE`). The count is of the
+  choices it is handed: a group's label and a separator are no choices. A list read from data
+  therefore takes its search the moment it grows past seven, on every screen at once, and no screen
+  sets the count its list searches at.
 - **A list found on the server always searches.** The screen hands the road that finds choices for
   the words typed (`find`); once typing stands still for a pause the road is asked, only the answer
   to the last words asked lands, and the list shows that answer. Before anything is typed it shows
   the choices it is handed, among them those already chosen, so the field names them.
+- **A value the list does not hold is typed in free entry.** The screen turns it on (`createItem`)
+  where a value is taken from the list or written new, a role picked from a catalogue or typed as
+  free text. Free entry always searches, however few choices the list holds, so there is a field to
+  type into. Once the words typed, their ends trimmed, are no choice's label, letter case folded,
+  and no choice's value, they stand as the last entry of the list with the pack's words for taking
+  them as a new value; choosing it hands the screen those words (`create`) and changes no value of
+  its own, so the screen adds the value and chooses it. Over a road, nothing is offered while the
+  road is asked, since its answer may hold the words. Without free entry the select takes no value
+  the list does not hold.
 - **The list opens against the control's leading edge,** as every dropdown does (see "Tab bar and
   toolbar").
 - **The search field stands at the top of the opened list,** above the choices, its search mark
