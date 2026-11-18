@@ -21,8 +21,9 @@ import type { Browser, Page } from "playwright-core";
 // reaches it, each list stands as wide as its choices and its control against an edge of the control
 // at a desktop's and a phone's width, and a finger opening a long list leaves the keyboard down and
 // keeps a long value typed in free entry inside the screen. As the words narrow a list and give back
-// what they took, its choices slide, fold and unfold, a group left with none folding as one, and
-// stand at once for a reader who asked for less movement. Which choices the words keep is the
+// what they took, its choices slide, fold and unfold, a group left with none folding as one, a choice
+// folding away takes no Enter and hands its highlight on, and the choices stand at once for a reader
+// who asked for less movement. Which choices the words keep is the
 // choices module's own test (`tests/domain/choices.test.ts`). Skipped where the browser build is not
 // on the machine.
 
@@ -772,6 +773,43 @@ describe.skipIf(!ready)("the one select's list as the words narrow it", () => {
     expect(new Set(courseOf(seen, "group Beige").map((one) => one.top)).size).toBeGreaterThan(3);
     await listedAs(page, ["Beige", "Black", "Bronze", "Brown"]);
     await close(page);
+  });
+
+  test("takes no Enter on a choice while it folds away, and gives its highlight to the one left", async () => {
+    await page.click("#found");
+    await page.waitForSelector(FIELD);
+    await page.keyboard.type("linus");
+    await listedAs(page, ["Linus Park"]);
+    await page.fill(FIELD, "ada");
+
+    // Enter pressed in the frame the road's next answer comes in, the highlighted choice it leaves
+    // out still folding.
+    const folding = await page.evaluate(async (selector) => {
+      const list = document.querySelector(selector)!;
+      const labels = (): string[] => [...list.querySelectorAll("[data-slot=itemLabel]")].map((part) => part.textContent?.trim() ?? "");
+
+      await new Promise<void>((arrived) => {
+        const look = (): void => (labels().includes("Ada Byron") ? arrived() : void requestAnimationFrame(look));
+
+        look();
+      });
+
+      const stillThere = labels().includes("Linus Park");
+
+      list.querySelector("input")!.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
+
+      return stillThere;
+    }, LIST);
+
+    expect(folding).toBe(true);
+    await listedAs(page, ["Ada Byron"]);
+    expect(await page.$(LIST)).not.toBeNull();
+    expect(await page.textContent("#found")).not.toContain("Linus Park");
+
+    await page.waitForFunction((selector) => document.querySelector(`${selector} [data-highlighted] [data-slot=itemLabel]`)?.textContent?.trim() === "Ada Byron", LIST, { timeout: 3_000 });
+    await page.keyboard.press("Enter");
+    await page.waitForSelector(LIST, { state: "detached" });
+    expect(await page.textContent("#found")).toContain("Ada Byron");
   });
 
   test("changes at once for a reader who asked for less movement", async () => {
