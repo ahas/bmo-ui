@@ -208,5 +208,10 @@
     "sha256": "e0d15f773d42b9b4b99195a55bab67404c888d86b43d0191dc87a408a853cb38",
     "bound": "0.1.0-rev.23",
     "why": "Moves the layer to Nuxt UI 4.12.2 with reka-ui 2.11.0 and adds a Nuxt UI patch; ChoiceSelect's narrowed list moves as a moving list; adds MOVING_LIST, STANDING_LIST and narrowChoicesInPlace"
+  },
+  "bmo-ui-0.1.0-rev.42.tgz": {
+    "sha256": "873c250c60b7956ab2d08c70f575e521361d8122898e392b878a2620c47f9081",
+    "bound": "0.1.0-rev.23",
+    "why": "Adds AvatarGroup, UnfoldingBox, the held-size and avatar-group modules, the moving list's sideways axis and one wording key; nothing a bundle of rev.23 reads changes"
   }
 }
