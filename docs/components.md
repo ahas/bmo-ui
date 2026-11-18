@@ -462,8 +462,11 @@ default; a screen supplies what it holds and what a press means there. Every exp
   the words typed (`find`); once typing stands still for a pause the road is asked, only the answer
   to the last words asked lands, and the list shows that answer. Before anything is typed it shows
   the choices it is handed, among them those already chosen, so the field names them.
+- **The list opens against the control's leading edge,** as every dropdown does (see "Tab bar and
+  toolbar").
 - **The search field stands at the top of the opened list,** above the choices, its search mark
-  leading and the pack's words for a search as its placeholder. Opened by a pointer or a key, the
+  leading and the pack's words for a search as its placeholder. It has no edge of its own, so while
+  it holds the focus it takes the elevated background, as a field with no edge does. Opened by a pointer or a key, the
   field takes the focus, so typing searches at once; on a touch screen it does not, so the keyboard
   covers nothing until the field is pressed. Closing the list clears what was typed.
 - **What a choice shows is what is searched:** its label and the line under it, matched by the
@@ -472,7 +475,9 @@ default; a screen supplies what it holds and what a press means there. Every exp
   groups that both stay.
 - **An empty list says why.** Nothing matched the words: the pack's words for no match. No choices
   at all: the pack's words for an empty list, or the screen's own word for its list where the
-  wording guide gives one. A refused find: the pack's words for a search that failed.
+  wording guide gives one. A refused find: the pack's words for a search that failed. While the
+  road is asked, the choices it last answered stay shown and the field's busy mark spins; where it has
+  shown none, a skeleton line stands where the answer will.
 
 ## Dates
 

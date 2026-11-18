@@ -1,19 +1,30 @@
 import ui from "@nuxt/ui/vue-plugin";
-import { createApp, defineComponent, h, ref } from "vue";
+import { createApp, defineComponent, h, nextTick, onScopeDispose, ref, watch } from "vue";
 import { createI18n } from "vue-i18n";
 
 import UApp from "@nuxt/ui/components/App.vue";
 
 import ChoiceSelect from "../../app/components/ChoiceSelect.vue";
+import { markPainted } from "../../app/domain/loading";
+import { watchOverlays } from "../../app/domain/overlays";
 import sheet from "./choice-harness.css?inline";
 
 import type { SelectMenuItem } from "@nuxt/ui";
 
 // Three of the one select (`docs/components.md`, "Choosing a value") on a page that says nothing
 // else: five sizes, a dozen cities in two groups each with a line under it, and people found over a
-// stand-in road that answers at once, refuses the word "fail" and finds nobody for anything else
-// unmatched. The page stands outside Nuxt, so the library is installed as a Vue plugin and the words
-// are handed over here.
+// stand-in road that answers at once, refuses the word "fail", holds its answer to "slow" until the
+// test lets it go and finds nobody for anything else unmatched. The page stands outside Nuxt, so the library is installed as a Vue plugin, the words are
+// handed over here and the layer's registry of floating things is started as its plugin starts it.
+
+// The layer's code reaches the framework's own names without importing them, since Nuxt binds them
+// in a host; a page standing outside Nuxt hands the same names over before anything opens.
+Object.assign(globalThis, {
+  watch,
+  nextTick,
+  onScopeDispose,
+  useRouter: () => ({ options: {}, beforeEach: () => undefined })
+});
 
 const WORDS = {
   common: {
@@ -35,8 +46,14 @@ const CITIES: SelectMenuItem[] = [
 
 const PEOPLE = ["Ada Byron", "Alan Moor", "Grace Hill", "Linus Park"];
 
+// Lets the held answer to "slow" go.
+let letGo: () => void = () => undefined;
+
+Object.assign(window, { letAnswerGo: () => letGo() });
+
 async function findPeople(words: string): Promise<SelectMenuItem[]> {
   if (words === "fail") throw new Error("refused");
+  if (words === "slow") return await new Promise((resolve) => (letGo = () => resolve([{ label: "Sam Lowe", value: "Sam Lowe" }])));
 
   return PEOPLE.filter((name) => name.toLowerCase().includes(words.toLowerCase())).map((label) => ({ label, value: label }));
 }
@@ -69,3 +86,7 @@ createApp(Page)
   .use(createI18n({ legacy: false, locale: "en", messages: { en: WORDS }, missingWarn: false, fallbackWarn: false }))
   .use(ui)
   .mount("#page");
+
+// The page is drawn in the browser alone, so it is painted as it mounts, as the painted plugin says of a host.
+markPainted();
+watchOverlays();

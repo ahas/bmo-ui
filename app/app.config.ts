@@ -216,8 +216,10 @@ export default defineAppConfig({
       slots: dropdown("min-w-[min(var(--reka-select-trigger-width),calc(100vw-1rem))]"),
       variants: { position: { popper: { content: GROWS } } }
     },
+    // A select menu's search field is drawn with no edge of its own, so its focus is said by the
+    // elevated background a field with no edge takes.
     selectMenu: {
-      slots: dropdown("min-w-[min(var(--reka-combobox-trigger-width),calc(100vw-1rem))]"),
+      slots: { ...dropdown("min-w-[min(var(--reka-combobox-trigger-width),calc(100vw-1rem))]"), input: "border-b border-default has-[input:focus]:bg-elevated" },
       variants: { position: { popper: { content: GROWS } } }
     },
     inputMenu: { slots: dropdown("min-w-[min(var(--reka-combobox-trigger-width),calc(100vw-1rem))]") },

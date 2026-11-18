@@ -4,8 +4,9 @@
        it holds more than seven choices, and a list found over a road always; the field stands at the
        top of the opened list with the pack's words for a search, takes the focus unless a finger
        opened it, and matches what each choice shows, its hits marked where they stand. An empty list
-       says whether nothing matched, nothing is there or the road refused. Everything else it is handed
-       is the library's select menu's. -->
+       says whether nothing matched, nothing is there or the road refused, and the road's first answer
+       is awaited under a skeleton line. The list opens against the control's leading edge. Everything
+       else it is handed is the library's select menu's. -->
   <USelectMenu
     v-bind="$attrs"
     v-model:search-term="words"
@@ -17,6 +18,7 @@
     :description-key="props.descriptionKey"
     :search-input="searchInput"
     :loading="busy"
+    :content="content"
     ignore-filter
   >
     <template v-for="name in passedSlots" #[name]="scope" :key="name">
@@ -32,7 +34,12 @@
     </template>
 
     <template #empty>
-      {{ emptyWords }}
+      <ContentSkeleton v-if="awaited">
+        <SkeletonLine width="w-1/2" class="mx-auto" />
+      </ContentSkeleton>
+      <template v-else>
+        {{ emptyWords }}
+      </template>
     </template>
   </USelectMenu>
 </template>
@@ -131,9 +138,15 @@ function everyChoice(items: ChoiceItems): SelectMenuItem[] {
   return (items as unknown[]).flatMap((entry) => (Array.isArray(entry) ? entry : [entry])) as SelectMenuItem[];
 }
 
+// The road is being asked; the list stands empty only where no earlier answer is left to show, so its
+// place is kept by a skeleton line rather than by words.
+const awaited = computed(() => finding.value);
+
+// The list opens against the control's leading edge unless the screen says where.
+const content = computed(() => ({ align: "start" as const, ...(attrs.content as object | undefined) }));
+
 const emptyWords = computed(() => {
   if (refused.value) return t("common.error.choices_find_failed");
-  if (finding.value) return t("common.status.loading");
   if (typed.value) return t("common.status.no_match");
 
   return props.empty ?? t("common.status.no_choices");

@@ -78,6 +78,16 @@ async function listedAs(page: Page, wanted: string[]): Promise<void> {
   );
 }
 
+// Where the open list and the control that opened it start, each from the page's left.
+async function leadingEdges(page: Page, control: string): Promise<{ list: number; control: number }> {
+  return await page.evaluate((selector) => {
+    const list = document.querySelector("[data-slot=content]")!.getBoundingClientRect();
+    const opener = document.querySelector(selector)!.getBoundingClientRect();
+
+    return { list: Math.round(list.left), control: Math.round(opener.left) };
+  }, control);
+}
+
 // The cities' list whole: its two headings and its twelve choices.
 async function listedWhole(page: Page): Promise<void> {
   await listedAs(page, ["# North", "Berlin", "Dublin", "Oslo", "Riga", "Tallinn", "Vienna", "# South", "Athens", "Lisbon", "Madrid", "Rome", "Seville", "Valletta"]);
@@ -128,6 +138,15 @@ describe.skipIf(!ready)("the one select at a desktop's width", () => {
     });
 
     expect(field).toEqual({ placeholder: "Search", focused: true, above: true });
+    expect(await leadingEdges(page, "#long")).toEqual({ list: 16, control: 16 });
+
+    // The field has no edge, so its focus is the elevated background, gone once the focus leaves it.
+    const ground = async (): Promise<string> => await page.$eval(FIELD, (input) => getComputedStyle(input.parentElement!).backgroundColor);
+    const focusedGround = await ground();
+
+    await page.$eval(FIELD, (input) => (input as HTMLInputElement).blur());
+    expect(await ground()).not.toBe(focusedGround);
+    expect(focusedGround).not.toBe("rgba(0, 0, 0, 0)");
     await listedWhole(page);
     await close(page);
   });
@@ -174,6 +193,13 @@ describe.skipIf(!ready)("the one select at a desktop's width", () => {
     await page.fill(FIELD, "fail");
     await saysEmpty(page, "Search failed");
 
+    // The first answer to the words typed is awaited under a skeleton, a busy status with no words.
+    await page.fill(FIELD, "slow");
+    await page.waitForSelector(`${LIST} [data-slot=empty] [role=status][aria-busy=true]`, { timeout: 3_000 });
+    expect(await page.$eval(`${LIST} [data-slot=empty]`, (empty) => empty.querySelector("[aria-hidden=true]") !== null)).toBe(true);
+    await page.evaluate(() => (window as unknown as { letAnswerGo: () => void }).letAnswerGo());
+    await listedAs(page, ["Sam Lowe"]);
+
     await page.fill(FIELD, "ada");
     await listedAs(page, ["Ada Byron"]);
     await page.keyboard.press("Enter");
@@ -193,7 +219,7 @@ describe.skipIf(!ready)("the one select under a finger at a phone's width", () =
     await touch?.close();
   });
 
-  test("opens a long list with its search standing and the keyboard left down", async () => {
+  test("opens a long list against its control's edge, its search standing and the keyboard left down", async () => {
     const { page } = touch;
 
     expect(page.viewportSize()?.width).toBe(360);
@@ -202,5 +228,19 @@ describe.skipIf(!ready)("the one select under a finger at a phone's width", () =
     await page.waitForSelector(FIELD);
     await listedWhole(page);
     expect(await page.$eval(FIELD, (input) => document.activeElement === input)).toBe(false);
+    expect(await leadingEdges(page, "#long")).toEqual({ list: 16, control: 16 });
+    await close(page);
+  });
+
+  test("closes its list on the back gesture and leaves the page where it was", async () => {
+    const { page } = touch;
+    const address = page.url();
+
+    await touch.tap(await centreOf(page, "#long"));
+    await page.waitForSelector(FIELD);
+    await page.evaluate(() => history.back());
+    await page.waitForSelector(LIST, { state: "detached", timeout: 3_000 });
+    expect(page.url()).toBe(address);
+    expect(await page.$("#long")).not.toBeNull();
   });
 });
