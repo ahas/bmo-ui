@@ -44,7 +44,7 @@
 
 <script setup lang="ts">
 import { useLongPress } from "../domain/longpress";
-import { focusHandedBack } from "../domain/overlays";
+import { focusHandedBack, focusTakenOnOpen } from "../domain/overlays";
 import { TOOLTIP_PROVIDER, TOOLTIP_UI } from "../domain/tooltip";
 
 import type { Component, ComponentPublicInstance } from "vue";
@@ -60,8 +60,8 @@ interface Props {
   // What it stands on acts on a tap, so a finger rests on it to read it instead.
   press?: boolean;
   // Whether a focus arriving on what it stands on is the keyboard's, where the browser's visible-focus
-  // tell cannot say so for it; that tell by default. A focus a closing layer hands back is never the
-  // keyboard's, whatever this says.
+  // tell cannot say so for it; that tell by default. A focus a closing layer hands back, or one an
+  // opening layer takes up on its own, is never the keyboard's, whatever this says.
   keyboardFocus?: (event: FocusEvent) => boolean;
   disabled?: boolean;
   as?: string | Component;
@@ -94,10 +94,10 @@ const pointer = ref("");
 const trigger = useTemplateRef<HTMLElement | ComponentPublicInstance>("trigger");
 // The tap that ends a finger's rest is the rest's, not a press of what it stands on.
 let restEnded = false;
-// Whether the focus now landing here is one a closing layer hands back, from its first listener to
-// its focusin: the library answers the focus of its own trigger before that focusin, and opens
-// nothing for it either.
-let handedBack = false;
+// Whether the focus now landing here is a layer's own move, one a closing layer hands back or one an
+// opening layer takes up, from its first listener to its focusin: the library answers the focus of
+// its own trigger before that focusin, and opens nothing for it either.
+let layersMove = false;
 
 function element(): HTMLElement | null {
   const found = trigger.value;
@@ -132,7 +132,7 @@ const shown = computed({
     // Switched off, it opens for nothing: a tap and a resting finger as little as a hover or a focus.
     if (value && props.disabled) return;
     if (value && props.cut && !isCut()) return;
-    if (value && handedBack) return;
+    if (value && layersMove) return;
     if (value) emit("ask");
 
     open.value = value;
@@ -143,18 +143,22 @@ function onPointerEnter(event: PointerEvent): void {
   if (event.pointerType === "mouse") emit("ask");
 }
 
+function isLayersMove(event: FocusEvent): boolean {
+  return focusHandedBack(event) || focusTakenOnOpen(event);
+}
+
 function onFocusCapture(event: FocusEvent): void {
-  handedBack = focusHandedBack(event);
+  layersMove = isLayersMove(event);
 }
 
 // The library opens on its own trigger's focus; a focus landing on something inside is the same
 // question asked of the same words.
 function onFocusIn(event: FocusEvent): void {
-  const handed = handedBack || focusHandedBack(event);
+  const layers = layersMove || isLayersMove(event);
 
-  handedBack = false;
+  layersMove = false;
 
-  if (!handed && (props.keyboardFocus === undefined ? visibleFocus(event) : props.keyboardFocus(event))) shown.value = true;
+  if (!layers && (props.keyboardFocus === undefined ? visibleFocus(event) : props.keyboardFocus(event))) shown.value = true;
 }
 
 function visibleFocus(event: FocusEvent): boolean {

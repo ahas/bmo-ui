@@ -557,16 +557,17 @@ default; a screen supplies what it holds and what a press means there. Every exp
 - **A pointer brings it up on hover and the keyboard on focus,** including a focus landing on a
   control inside what it stands on. It grows out of what it stands on at `quick`.
 - **A focus the keyboard did not bring brings up no tooltip.** Two arrivals are not the keyboard's:
-  the focus a closing dialog or sheet hands back to the control it was opened from, and the focus a
-  dialog takes up on its own close as it opens. The first would leave that control's name standing
-  over what the reader returned to; the second would stand a name over the open dialog and spend the
-  reader's first Esc closing the name rather than the dialog. Which focus a closing layer hands back
-  is told by the overlays module alone, as the focus lands, and the shared tooltip and every page
-  layer read that tell before anything else: the browser's visible-focus tell names such a focus
-  the keyboard's once a key has closed the layer, so a name would stand over the control the reader
-  returned to and spend their next Esc. The shared tooltip and the library's
-  dialog close (`ShellClose`) hold this themselves, the close by telling the shared tooltip which
-  focus is the keyboard's where the browser's own tell cannot. The tooltip module's provider
+  the focus a closing floating thing hands back to the control it was opened from, and the focus a
+  floating thing takes up on its own as it opens, until the reader's next key or press: on its first
+  control, on its close, on its own box or on the row its list stands chosen on, whenever it moves
+  there. The first would leave that control's name standing over what the reader returned to; the
+  second would stand a name over what just opened; either spends the reader's next Esc closing the
+  name rather than the floating thing. Both are told by the overlays module alone, as the focus
+  lands, and the shared tooltip and every page layer read both tells before anything else, since
+  the browser's visible-focus tell names either focus the keyboard's once a key opened or closed the
+  floating thing. A key moving the focus on from there, Tab or an arrow, is the keyboard's again.
+  The library's dialog close (`ShellClose`) also tells the shared tooltip which focus is the
+  keyboard's where the browser's own tell cannot. The tooltip module's provider
   setting keeps every other tooltip the library draws from coming up for a focus the browser does
   not show as visible, once the host hands it to the library's app root (`docs/boundary.md`, "What the host owes"). The dialog close names itself on
   focus only where the page's own modality mark (`docs/design.md`, "Focus") names the keyboard and
@@ -607,7 +608,8 @@ default; a screen supplies what it holds and what a press means there. Every exp
     one stands brings that one up at once. Leaving it, pressing anywhere or scrolling what holds it
     puts it away. Whether the layer still names it is asked again as the wait ends.
   - A keyboard focus brings it up at once and takes it away as the focus leaves. The focus a
-    closing layer hands back is no keyboard focus and brings up nothing.
+    closing floating thing hands back, and the focus one takes up on its own as it opens, are no
+    keyboard focus and bring up nothing.
   - A finger held on it brings it up by the layer's one held finger, beside whatever a row's own
     hold does, and lifting that finger presses nothing. What it holds selects no words, and the
     phone's own long-press menu over it is turned away. Sliding the finger, or the next touch

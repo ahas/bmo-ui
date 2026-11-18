@@ -6,6 +6,7 @@ import UApp from "@nuxt/ui/components/App.vue";
 import UButton from "@nuxt/ui/components/Button.vue";
 import UInputDate from "@nuxt/ui/components/InputDate.vue";
 import UInputTime from "@nuxt/ui/components/InputTime.vue";
+import UModal from "@nuxt/ui/components/Modal.vue";
 import UPopover from "@nuxt/ui/components/Popover.vue";
 
 import CutLineTip from "../../app/components/CutLineTip.vue";
@@ -31,7 +32,8 @@ import type { InputDateProps, InputTimeProps } from "@nuxt/ui";
 // holding the boundary's tooltip setting and the cut-line page layer, the page's own mark of which
 // hand last moved the focus, and the words handed over here. Two controls in the dialog carry a
 // name cut short by their box: one the cut-line layer names, and one the shared tooltip names as
-// the control itself takes the focus.
+// the control itself takes the focus. A plain dialog with no close of its own opens with one of the
+// two as its first control, so the focus it takes up as it opens lands on a cut name.
 
 const WORDS = {
   common: {
@@ -58,6 +60,9 @@ const length = ref("");
 // The day and the start time the request names, chosen in the component library's own fields.
 const day = shallowRef<InputDateProps<boolean>["modelValue"]>(undefined);
 const start = shallowRef<InputTimeProps<boolean>["modelValue"]>(undefined);
+
+// Which cut name the plain dialog opens with, where it stands open.
+const firstName = ref<"" | "line" | "hint">("");
 
 const Page = defineComponent(() => {
   const open = ref(false);
@@ -114,6 +119,20 @@ const Page = defineComponent(() => {
           ],
           // The save keeps the dialog standing, so what it leaves is read by the next close.
           footer: () => h(UButton, { label: "Save", "data-save": "", onClick: () => void opened.take() })
+        }
+      ),
+      h(UButton, { label: "Open names", "data-open-first-line": "", onClick: () => (firstName.value = "line") }),
+      h(UButton, { label: "Open hints", "data-open-first-hint": "", onClick: () => (firstName.value = "hint") }),
+      h(
+        UModal,
+        { open: firstName.value !== "", "onUpdate:open": (standing: boolean) => standing || (firstName.value = ""), title: "Names", close: false },
+        {
+          body: () => [
+            firstName.value === "hint"
+              ? h(HintTip, { as: "button", type: "button", cut: true, text: CUT_NAME, style: NARROW, "data-first-cut": "" }, () => CUT_NAME)
+              : h("button", { type: "button", "data-first-cut": "" }, [h("span", { style: `${NARROW};text-overflow:ellipsis` }, CUT_NAME)]),
+            h(UButton, { label: "Done", "data-done": "" })
+          ]
         }
       ),
       h(CutLineTip)

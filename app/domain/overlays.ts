@@ -236,18 +236,26 @@ const OUTSIDE_FOCUS = "dismissableLayer.focusOutside";
 // scope hands the focus back to wherever it stood when the layer opened.
 const HANDING_BACK = "focusScope.autoFocusOnUnmount";
 
+// The event the library raises on a layer's focus scope as the layer opens. The scope then moves the
+// focus into the layer on its own, at once or, as a list does onto its chosen row, once it stands.
+const OPENING = "focusScope.autoFocusOnMount";
+
 // The moves of the focus a going layer made, each as it landed: the target's own focus event and the
 // focusin that follows it, so whoever reads either one is told.
 const handedBack = new WeakSet<Event>();
 let handing = 0;
-let tellingHandedBack = false;
+// The same, for the moves an opening layer made into itself.
+const takenOnOpen = new WeakSet<Event>();
+// The layers opened since the reader's last key or press, every move into which is the layer's own.
+let opening: Element[] = [];
+let telling = false;
 
-function tellHandedBack(): void {
-  if (tellingHandedBack) {
+function tellLayerFocus(): void {
+  if (telling) {
     return;
   }
 
-  tellingHandedBack = true;
+  telling = true;
   window.addEventListener(
     HANDING_BACK,
     () => {
@@ -259,6 +267,22 @@ function tellHandedBack(): void {
     true
   );
 
+  window.addEventListener(
+    OPENING,
+    (event) => {
+      if (event.target instanceof Element) {
+        opening.push(event.target);
+      }
+    },
+    true
+  );
+
+  // The reader's next key or press is theirs, a Tab or an arrow moving the focus on among them, and
+  // is caught before the browser moves anything for it.
+  for (const type of ["keydown", "pointerdown"]) {
+    window.addEventListener(type, () => { opening = []; }, true);
+  }
+
   // Caught on the way down, so the mark stands before anything where the focus landed reads it.
   for (const type of ["focus", "focusin"]) {
     window.addEventListener(
@@ -266,6 +290,12 @@ function tellHandedBack(): void {
       (event) => {
         if (handing > 0) {
           handedBack.add(event);
+        }
+
+        const target = event.target;
+
+        if (target instanceof Node && opening.some((layer) => layer.isConnected && layer.contains(target))) {
+          takenOnOpen.add(event);
         }
       },
       true
@@ -281,6 +311,14 @@ export function focusHandedBack(event: Event): boolean {
   return handedBack.has(event);
 }
 
+// Whether a move of the focus is an opening layer taking it up on its own, before the reader's next
+// key or press: onto its first control, its close, its own box or its list's chosen row
+// (`docs/components.md`, "Tooltips"). The browser's visible-focus tell names it the keyboard's once
+// a key opened the layer. Told only once the overlays are watched, as `focusHandedBack` is.
+export function focusTakenOnOpen(event: Event): boolean {
+  return takenOnOpen.has(event);
+}
+
 // The focus a going layer hands back moves out of nothing the reader is in.
 //
 // A menu gives the focus back to its own button as it goes. When the reader's choice in it opened
@@ -291,7 +329,7 @@ export function focusHandedBack(event: Event): boolean {
 // floating thing the choice opened and whichever screen drew it. A press outside, Esc and back
 // still close it.
 export function refuseHandedBackFocus(): void {
-  tellHandedBack();
+  tellLayerFocus();
 
   window.addEventListener(
     OUTSIDE_FOCUS,
@@ -370,6 +408,7 @@ export function watchOverlays(): void {
   listenForBack();
   listenForTaps();
   refuseStalePresses();
+  tellLayerFocus();
   refuseHandedBackFocus();
   new MutationObserver(sweep).observe(document.body, {
     subtree: true,

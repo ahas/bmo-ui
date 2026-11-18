@@ -426,23 +426,77 @@ describe.skipIf(!ready)("the focus the question hands back to a control whose na
       await page.waitForSelector(TOOLTIP, { state: "detached", timeout: 3000 });
       await escAsks(page);
 
-      // Whether a name comes up at any moment from here on, however briefly it stands.
-      await page.evaluate(() => {
-        const seen = window as unknown as { nameCameUp: boolean };
+      const cameUp = await watchNames(page);
 
-        seen.nameCameUp = false;
-        new MutationObserver(() => {
-          if (document.querySelector("[role=tooltip]") !== null) seen.nameCameUp = true;
-        }).observe(document.body, { subtree: true, childList: true });
-      });
       await page.keyboard.press("Escape");
       await page.waitForSelector(QUESTION, { state: "detached", timeout: 3000 });
       await page.waitForFunction((selector) => document.activeElement?.matches(selector) === true, control, { timeout: 3000 });
       await escAsks(page);
 
-      expect(await page.evaluate(() => (window as unknown as { nameCameUp: boolean }).nameCameUp)).toBe(false);
+      expect(await cameUp()).toBe(false);
 
       await context.close();
     });
   }
+});
+
+// A dialog opened by a key moves the focus onto its first control on its own, here a control whose
+// name is cut (`docs/components.md`, "Tooltips"): that focus is no keyboard focus, so it brings up no
+// name, and the first Esc closes the dialog rather than a name. Tab and Shift+Tab back onto the same
+// control are the keyboard's, and bring the name up.
+const FIRST_NAMES = [
+  { by: "the cut-line page layer", opener: "[data-open-first-line]" },
+  { by: "the shared tooltip, on the control's own focus", opener: "[data-open-first-hint]" }
+];
+const NAMES = "[role=dialog]:has([data-first-cut])";
+
+// The plain dialog opened by Enter on its button, with the focus it takes up standing on its first
+// control.
+async function openedByKey(page: Page, opener: string): Promise<void> {
+  await page.focus(opener);
+  await page.keyboard.press("Enter");
+  await page.waitForFunction(() => document.activeElement?.matches("[data-first-cut]") === true, null, { timeout: 3000 });
+}
+
+// Whether a name comes up at any moment from here on, however briefly it stands.
+async function watchNames(page: Page): Promise<() => Promise<boolean>> {
+  await page.evaluate(() => {
+    const seen = window as unknown as { nameCameUp: boolean };
+
+    seen.nameCameUp = false;
+    new MutationObserver(() => {
+      if (document.querySelector("[role=tooltip]") !== null) seen.nameCameUp = true;
+    }).observe(document.body, { subtree: true, childList: true });
+  });
+
+  return () => page.evaluate(() => (window as unknown as { nameCameUp: boolean }).nameCameUp);
+}
+
+describe.skipIf(!ready)("the focus a dialog opened by a key takes up on a control whose name is cut, on a phone", () => {
+  for (const { by, opener } of FIRST_NAMES) {
+    test(`brings up no name from ${by}, so the first Esc closes the dialog`, async () => {
+      const { context, page } = await harness(WIDTHS[0]!.width, WIDTHS[0]!.height, "/");
+      const cameUp = await watchNames(page);
+
+      await openedByKey(page, opener);
+      await page.keyboard.press("Escape");
+      await page.waitForSelector(NAMES, { state: "detached", timeout: 3000 });
+
+      expect(await cameUp()).toBe(false);
+
+      await context.close();
+    });
+  }
+
+  test("still brings the name up once Tab and Shift+Tab come back onto it", async () => {
+    const { context, page } = await harness(WIDTHS[0]!.width, WIDTHS[0]!.height, "/");
+
+    await openedByKey(page, "[data-open-first-line]");
+    await page.keyboard.press("Tab");
+    await page.keyboard.press("Shift+Tab");
+    await page.waitForFunction(() => document.activeElement?.matches("[data-first-cut]") === true, null, { timeout: 3000 });
+    await page.waitForSelector(TOOLTIP, { timeout: 3000 });
+
+    await context.close();
+  });
 });

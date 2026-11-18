@@ -1,7 +1,7 @@
 import { computed, onBeforeUnmount, onMounted, ref, shallowRef } from "vue";
 
 import { pressTravelled, useLongPress } from "./longpress";
-import { focusHandedBack } from "./overlays";
+import { focusHandedBack, focusTakenOnOpen } from "./overlays";
 import { TOOLTIP_UI } from "./tooltip";
 
 import type { TouchPoint } from "./longpress";
@@ -164,11 +164,12 @@ export function usePageTip(finder: PageTipFinder): PageTip {
   }
 
   // A keyboard focus is one the browser shows as visible, which it also does for the focus a closing
-  // layer hands back once a key closed it; that one is no keyboard focus.
+  // layer hands back and the focus an opening layer takes up, once a key closed or opened it; neither
+  // is a keyboard focus.
   function onFocusIn(event: FocusEvent): void {
     const target = event.target;
 
-    if (!(target instanceof Element) || focusHandedBack(event) || !target.matches(":focus-visible")) return;
+    if (!(target instanceof Element) || focusHandedBack(event) || focusTakenOnOpen(event) || !target.matches(":focus-visible")) return;
 
     const found = finder.within(target);
 

@@ -133,7 +133,7 @@ Each is named with everything it exports.
 | `moving-list` | `unfoldItem`, `settleItem`, `foldItem` |
 | `numbers` | `countLocale`, `countText`, `FigureLine`, `COUNT_BADGE`, `figurePlaces`, `turnOf`, `progressText` |
 | `openings` | `useOpenings` |
-| `overlays` | `OVER_LAYERS`, `OFF_HISTORY`, `BESIDE_PAGE`, `standsAsLayer`, `isBackEscape`, `refuseStalePresses`, `refuseHandedBackFocus`, `focusHandedBack`, `watchOverlays` |
+| `overlays` | `OVER_LAYERS`, `OFF_HISTORY`, `BESIDE_PAGE`, `standsAsLayer`, `isBackEscape`, `refuseStalePresses`, `refuseHandedBackFocus`, `focusHandedBack`, `focusTakenOnOpen`, `watchOverlays` |
 | `page-tip` | `PAGE_TIP_UI`, `PageTipBy`, `PageTipFinder`, `PageTip`, `usePageTip` |
 | `player` | `Playing`, `playAlone`, `playClock`, `knownLength`, `loudnessOf`, `easedLoudness`, `AURA_STILL`, `auraOf`, `PlayerButton`, `PlayerSignal`, `buttonAfter` |
 | `prompt` | `TOUCH_QUERY`, `EnterKeys`, `enterKeys`, `PromptEnter`, `usePromptEnter`, `PROMPT_MAX_ROWS`, `PROMPT_TEXTAREA_UI`, `PROMPT_WORDS_WRAP` |
@@ -487,12 +487,12 @@ Every token is a custom property stated by the layer's stylesheet on the root un
   root, beside its pages; a cut line shows whole and a button written as markup is named only where
   its layer stands.
 - **The tooltip setting.** The host's app root, the library's `UApp`, is handed the tooltip
-  module's `TOOLTIP_PROVIDER` as its tooltip setting, so a focus the keyboard did not bring — the
-  one a closing dialog or sheet hands back to its control, or the one an opening dialog takes up on
-  its own close — brings up no tooltip (`docs/components.md`, "Tooltips"). The layer's shared
-  tooltip, its icon button, its dialog close (`ShellClose`) and its page layers hold this on their
-  own, by the overlays module's `focusHandedBack`; the setting keeps every other tooltip the library
-  draws from coming up for a focus the browser does not show as visible.
+  module's `TOOLTIP_PROVIDER` as its tooltip setting, so every other tooltip the library draws comes
+  up for no focus the browser does not show as visible. A focus the keyboard did not bring — the one
+  a closing floating thing hands back to its control, or the one an opening one takes up on its own
+  — brings up no tooltip (`docs/components.md`, "Tooltips"): the layer's shared tooltip, its icon
+  button, its dialog close (`ShellClose`) and its page layers hold this on their own, by the
+  overlays module's `focusHandedBack` and `focusTakenOnOpen`.
 - **The patches.** Each patch under `patches/` is applied to the same version of the dependency it
   names in the host's own install.
   - The `reka-ui` patch gives a collapsible region its own id from the region's root, so a button

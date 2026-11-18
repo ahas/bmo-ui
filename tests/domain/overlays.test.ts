@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, test } from "bun:test";
 
-import { focusHandedBack, OFF_HISTORY, OVER_LAYERS, refuseHandedBackFocus, refuseStalePresses, standsAsLayer } from "~/domain/overlays";
+import { focusHandedBack, focusTakenOnOpen, OFF_HISTORY, OVER_LAYERS, refuseHandedBackFocus, refuseStalePresses, standsAsLayer } from "~/domain/overlays";
 
 // A press outside what floats closes it only while it is the press being handled.
 //
@@ -15,6 +15,7 @@ import { focusHandedBack, OFF_HISTORY, OVER_LAYERS, refuseHandedBackFocus, refus
 const OUTSIDE_PRESS = "dismissableLayer.pointerDownOutside";
 const OUTSIDE_FOCUS = "dismissableLayer.focusOutside";
 const HANDING_BACK = "focusScope.autoFocusOnUnmount";
+const OPENING = "focusScope.autoFocusOnMount";
 
 let installed = false;
 
@@ -139,6 +140,54 @@ describe("the focus a going layer hands back", () => {
     await turn();
 
     expect(tellFocusOutside(focusMove())).toBe(true);
+  });
+});
+
+// A layer opening, as the library says so, and the focus it moves into itself: at once, or turns
+// later, as a list moves it onto its chosen row once it stands.
+describe("the focus an opening layer takes up", () => {
+  function opened(): { layer: HTMLElement; row: HTMLElement } {
+    const layer = document.createElement("div");
+    const row = document.createElement("button");
+
+    layer.append(row);
+    document.body.append(layer);
+    layer.dispatchEvent(new CustomEvent(OPENING, { bubbles: false, cancelable: true }));
+
+    return { layer, row };
+  }
+
+  function focusOn(target: Element, type: "focus" | "focusin"): Event {
+    const event = new Event(type, { bubbles: type === "focusin" });
+
+    target.dispatchEvent(event);
+
+    return event;
+  }
+
+  for (const ends of ["keydown", "pointerdown"]) {
+    test(`is the layer's own however late it lands inside, until the reader's next ${ends}`, async () => {
+      const { layer, row } = opened();
+
+      await turn();
+      await turn();
+
+      expect([focusTakenOnOpen(focusOn(row, "focus")), focusTakenOnOpen(focusOn(row, "focusin"))]).toEqual([true, true]);
+
+      document.dispatchEvent(new Event(ends, { bubbles: true }));
+
+      expect(focusTakenOnOpen(focusOn(row, "focusin"))).toBe(false);
+
+      layer.remove();
+    });
+  }
+
+  test("is no move outside the layer", () => {
+    const { layer } = opened();
+
+    expect(focusTakenOnOpen(focusMove())).toBe(false);
+
+    layer.remove();
   });
 });
 
