@@ -111,7 +111,7 @@ Each is named with everything it exports.
 | `file-icons` | `fileIcon`, `folderIcon`, `iconNames` |
 | `floating-window` | `WindowRect`, `WindowFrame`, `WINDOW_GUTTER_PX`, `WINDOW_STEP_PX`, `WINDOW_LEAP_PX`, `WINDOW_MIN`, `WINDOW_SIZE`, `SHEET_HEIGHTS`, `SheetHeight`, `WidthClass`, `widthClass`, `visibleBox`, `clampRect`, `firstRect`, `stepOf`, `keptRect`, `keepRect`, `keptSheet`, `keepSheet` |
 | `foot` | `FootOptions`, `useFootInView` |
-| `form-save` | `FormPart`, `FormSave`, `askDiscard`, `useCloseGuard`, `useFormSave`, `useFormPart`, `useLeaveGuard` |
+| `form-save` | `FormPart`, `FormSave`, `OpenedWith`, `OpenedWithOptions`, `askDiscard`, `useCloseGuard`, `useFormSave`, `useFormPart`, `useLeaveGuard`, `useOpenedWith` |
 | `fullscreen` | `PutBack`, `TakePlace`, `keepPlace`, `holdThroughFullscreen` |
 | `holdmenu` | `HoldMenu`, `useHoldMenu` |
 | `icon-styles` | `IconStyleOptions`, `isIconStyle` |

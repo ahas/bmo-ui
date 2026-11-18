@@ -9,12 +9,14 @@ import { BROWSER_HOOK_MS, touchReady } from "./touch";
 
 import type { Browser, BrowserContext, Page } from "playwright-core";
 
-// The back gesture over a form's dialog that holds a change asks first, as its close and Esc do
-// (`docs/components.md`, "Forms"): the question stands over the dialog, discard takes both away and
-// leaves the history as it was, and every way out of the question keeps the dialog standing with an
-// entry of its own, so the next press of back asks again. The page is built as the layer's custom
-// elements are, from the components that ship, and driven by a real Chromium at a phone's width and
-// a desktop's. Skipped where the browser build is not on the machine.
+// A form's dialog asks before it closes only while its values differ from what it opened with
+// (`docs/components.md`, "Forms" and "Floating things"): left untouched, its data landing after it
+// opened, its change put back or saved, it closes at once. The back gesture over one holding a change
+// asks first, as its close and Esc do: the question stands over the dialog, discard takes both away
+// and leaves the history as it was, and every way out of the question keeps the dialog standing with
+// an entry of its own, so the next press of back asks again. The page is built as the layer's custom
+// elements are, from the components that ship, and driven by a real Chromium at a phone's width and a
+// desktop's. Skipped where the browser build is not on the machine.
 
 const ready = touchReady();
 const ROOT = new URL("../../", import.meta.url).pathname;
@@ -24,6 +26,8 @@ const PAGE = `<!doctype html><html><head><meta charset="utf-8"><meta name="viewp
 
 const OPEN = "[data-open]";
 const REASON = "[data-reason]";
+const SAVE = "[data-save]";
+const LANDED = "Annual leave";
 const FORM = "[role=dialog]:has([data-reason])";
 const QUESTION = "[role=dialog]:has-text('Discard unsaved changes?')";
 
@@ -60,8 +64,9 @@ afterAll(async () => {
   if (out !== "") rmSync(out, { recursive: true, force: true });
 });
 
-// The page with the form's dialog standing open and a change written into it.
-async function changed(width: number, height: number): Promise<{ context: BrowserContext; page: Page }> {
+// The page with the form's dialog standing open, its data landed after it opened. Where `beforeLanding`
+// is handed, the reader does that first and the form says when it is ready.
+async function opened(width: number, height: number, beforeLanding?: (page: Page) => Promise<void>): Promise<{ context: BrowserContext; page: Page }> {
   const context = await browser.newContext({ viewport: { width, height } });
   const page = await context.newPage();
 
@@ -73,13 +78,37 @@ async function changed(width: number, height: number): Promise<{ context: Browse
 
     return route.fulfill({ status: 404, body: "" });
   });
-  await page.goto(`${ORIGIN}/`);
+  await page.goto(beforeLanding === undefined ? `${ORIGIN}/` : `${ORIGIN}/?ready`);
   await page.click(OPEN);
-  await page.fill(REASON, "Family event");
   await settledOn(page, 1);
+  await beforeLanding?.(page);
+  await page.evaluate((reason) => (window as unknown as { land: (reason: string) => void }).land(reason), LANDED);
+  await page.waitForFunction((reason) => document.querySelector<HTMLTextAreaElement>("[data-reason]")?.value === reason, LANDED, { timeout: 3000 });
 
   return { context, page };
 }
+
+// The page with the form's dialog standing open and a change written into it.
+async function changed(width: number, height: number): Promise<{ context: BrowserContext; page: Page }> {
+  const { context, page } = await opened(width, height);
+
+  await page.fill(REASON, "Family event");
+
+  return { context, page };
+}
+
+// The dialog goes at once on the way out taken, with no question raised, and its entry with it.
+async function closesAtOnce(page: Page, leave: () => Promise<void>): Promise<void> {
+  await leave();
+  await page.waitForSelector(FORM, { state: "detached", timeout: 3000 });
+
+  expect(await page.locator(QUESTION).count()).toBe(0);
+
+  await settledOn(page, 0);
+}
+
+const pressClose = (page: Page) => () => page.getByRole("button", { name: "Close" }).click();
+const pressEsc = (page: Page) => () => page.keyboard.press("Escape");
 
 // Whether the page stands on an entry pushed for a floating thing, and how many layers are registered.
 async function entries(page: Page): Promise<{ layers: number; marked: boolean }> {
@@ -114,6 +143,42 @@ async function backAsks(page: Page): Promise<void> {
 }
 
 for (const { name, width, height } of WIDTHS) {
+  describe.skipIf(!ready)(`a form's dialog with no change, on ${name}`, () => {
+    test("closes at once when left untouched, its data landing after it opened", async () => {
+      const { context, page } = await opened(width, height);
+
+      await closesAtOnce(page, pressEsc(page));
+
+      await context.close();
+    });
+
+    test("closes at once when its data lands after the reader's first press, the form saying when it is ready", async () => {
+      const { context, page } = await opened(width, height, (page) => page.click(REASON));
+
+      await closesAtOnce(page, pressClose(page));
+
+      await context.close();
+    });
+
+    test("closes at once once its change is put back", async () => {
+      const { context, page } = await changed(width, height);
+
+      await page.fill(REASON, LANDED);
+      await closesAtOnce(page, pressClose(page));
+
+      await context.close();
+    });
+
+    test("closes at once once its change is saved", async () => {
+      const { context, page } = await changed(width, height);
+
+      await page.click(SAVE);
+      await closesAtOnce(page, pressEsc(page));
+
+      await context.close();
+    });
+  });
+
   describe.skipIf(!ready)(`the back gesture over a form's dialog holding a change, on ${name}`, () => {
     test("asks first, and discard takes the dialog away and leaves the history as it was", async () => {
       const { context, page } = await changed(width, height);

@@ -1701,7 +1701,7 @@
         },
         {
           "name": "dirty",
-          "type": "boolean | undefined",
+          "type": "boolean | OpenedWith | undefined",
           "required": false,
           "default": "undefined"
         },

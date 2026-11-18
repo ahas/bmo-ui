@@ -1,9 +1,9 @@
-import { computed, inject, onScopeDispose, provide, ref, shallowRef } from "vue";
+import { computed, getCurrentScope, inject, nextTick, onScopeDispose, provide, ref, shallowRef, toRaw, toValue, watch } from "vue";
 import { onBeforeRouteLeave, onBeforeRouteUpdate } from "vue-router";
 
 import { askQuestion } from "./question";
 
-import type { ComputedRef, InjectionKey, Ref } from "vue";
+import type { ComputedRef, InjectionKey, MaybeRefOrGetter, Ref } from "vue";
 import type { RouteLocationNormalized } from "vue-router";
 import type { Translate } from "../../shared/wording";
 
@@ -13,9 +13,212 @@ import type { Translate } from "../../shared/wording";
 // only the block knows. A block that stands where no form holds it saves nothing through here and
 // goes on as it was written for that place.
 
+// What a form opened with, read against what it holds now: the one reading of whether a form holds
+// changes. The screen hands the form's values; the snapshot is taken of them once the form stands
+// open with its data in it, and is taken again after a save.
+export interface OpenedWith {
+  // Whether the values differ from the snapshot; never before one is taken.
+  dirty: ComputedRef<boolean>;
+  // Takes the snapshot again from the values as they stand once what is under way has been drawn,
+  // as after a save that went through.
+  take: () => Promise<void>;
+}
+
+export interface OpenedWithOptions {
+  // Whether what floats the form stands open; left out, the form is open for as long as it stands.
+  open?: Readonly<Ref<boolean>>;
+  // Whether the form's data is in it; left out, it is the moment the form opens.
+  ready?: MaybeRefOrGetter<boolean>;
+}
+
+// What tells whether a form or a block holds a change: its opened-with snapshot, or, for one with no
+// values to hand, a check of its own.
+type Changes = OpenedWith | (() => boolean | undefined);
+
+interface ChangesRead {
+  holds: () => boolean;
+  // Takes the snapshot again where there is one.
+  retake: () => Promise<void>;
+}
+
+function readChanges(changes: Changes): ChangesRead {
+  if (typeof changes === "function") return { holds: () => changes() === true, retake: async () => undefined };
+
+  return { holds: () => changes.dirty.value, retake: changes.take };
+}
+
+// A value as the form's inputs leave it, so two values the reader would call the same compare alike:
+// text trimmed, a number as the text an input writes for it, a date or a time as the text it gives
+// for itself, every kind of nothing one empty, a record without its empty keys, a list item by item,
+// and any other object itself. What is built holds no reactive proxy and shares nothing that can
+// change with the values it was read from, so it keeps as a snapshot.
+const EMPTY = Symbol("empty");
+
+function settled(value: unknown): unknown {
+  const raw: unknown = toRaw(value);
+
+  if (raw === null || raw === undefined) return EMPTY;
+
+  switch (typeof raw) {
+    case "string": {
+      const text = raw.trim();
+
+      return text === "" ? EMPTY : text;
+    }
+    case "number":
+      return Number.isNaN(raw) ? EMPTY : String(raw);
+    case "bigint":
+      return String(raw);
+    case "object":
+      break;
+    default:
+      return raw;
+  }
+
+  // The reactive value itself is walked rather than the raw one, so a read of the settled values
+  // follows every field they hold.
+  const source = value as Record<string, unknown>;
+
+  if (Array.isArray(raw)) return raw.length === 0 ? EMPTY : (source as unknown as unknown[]).map(settled);
+
+  const prototype: unknown = Object.getPrototypeOf(raw);
+
+  if (prototype === Object.prototype || prototype === null) {
+    const kept: Record<string, unknown> = {};
+
+    for (const key of Object.keys(source)) {
+      const one = settled(source[key]);
+
+      if (one !== EMPTY) kept[key] = one;
+    }
+
+    return Object.keys(kept).length === 0 ? EMPTY : kept;
+  }
+
+  return ownText(raw as object) ?? raw;
+}
+
+// The text an object gives for itself, as a date gives its ISO text, or nothing where it gives none
+// of its own.
+function ownText(raw: object): unknown {
+  const written = raw as { toJSON?: () => unknown; toString: () => string };
+
+  if (typeof written.toJSON === "function") {
+    const json = written.toJSON();
+
+    return json === raw ? undefined : settled(json);
+  }
+
+  // A text that only names the object's kind, as every object without one of its own gives, is none.
+  const text = String(raw);
+
+  return /^\[object [^\]]*\]$/.test(text) ? undefined : settled(text);
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) return false;
+
+  const prototype: unknown = Object.getPrototypeOf(value);
+
+  return prototype === Object.prototype || prototype === null;
+}
+
+function alike(first: unknown, second: unknown): boolean {
+  if (first === second) return true;
+
+  if (Array.isArray(first) && Array.isArray(second)) return first.length === second.length && first.every((one, at) => alike(one, second[at]));
+
+  if (isRecord(first) && isRecord(second)) {
+    const keys = Object.keys(first);
+
+    return keys.length === Object.keys(second).length && keys.every((key) => key in second && alike(first[key], second[key]));
+  }
+
+  return false;
+}
+
+// What the reader does that ends a form being filled: a press, a key or a word typed anywhere on the
+// page.
+const PRESSES = ["pointerdown", "keydown", "input"] as const;
+
+// The opened-with snapshot of a form (`docs/components.md`, "Forms"). It is taken when the form
+// opens and is ready, once what the opening set off has been drawn; until the reader then first
+// presses or types anywhere on the page, a change of the values is the form being filled and the
+// snapshot follows it. Closing drops it. A page drawn on the server holds no change and keeps nothing
+// to follow, since no reader stands at it.
+export function useOpenedWith(values: () => unknown, options: OpenedWithOptions = {}): OpenedWith {
+  if (import.meta.server) return { dirty: computed(() => false), take: async () => undefined };
+
+  const taken = shallowRef<{ values: unknown } | null>(null);
+  const now = computed(() => settled(values()));
+  const isOpen = (): boolean => options.open?.value ?? true;
+  const standing = computed(() => isOpen() && toValue(options.ready ?? true));
+  // Ends the form being filled: set while the snapshot follows the values.
+  let filled: (() => void) | null = null;
+  // Whether the scope holding the snapshot has ended, so a snapshot due after that is never taken.
+  let gone = false;
+
+  function follow(): void {
+    // Every change is caught as it is made, so the form never reads as changed while it is filled.
+    const stop = watch(now, (values) => {
+      taken.value = { values };
+    }, { flush: "sync" });
+    const pressed = (): void => filled?.();
+
+    filled = () => {
+      stop();
+      filled = null;
+      for (const kind of PRESSES) document.removeEventListener(kind, pressed, { capture: true });
+    };
+    for (const kind of PRESSES) document.addEventListener(kind, pressed, { capture: true });
+  }
+
+  function drop(): void {
+    taken.value = null;
+    filled?.();
+  }
+
+  async function take(): Promise<void> {
+    await nextTick();
+
+    taken.value = { values: now.value };
+  }
+
+  watch(
+    standing,
+    (stands) => {
+      if (!stands) {
+        if (!isOpen()) drop();
+
+        return;
+      }
+
+      if (taken.value !== null) return;
+
+      void nextTick(() => {
+        if (gone || !standing.value || taken.value !== null) return;
+
+        taken.value = { values: now.value };
+        follow();
+      });
+    },
+    { immediate: true, flush: "post" }
+  );
+
+  if (getCurrentScope() !== undefined) {
+    onScopeDispose(() => {
+      gone = true;
+      drop();
+    });
+  }
+
+  return { dirty: computed(() => taken.value !== null && !alike(taken.value.values, now.value)), take };
+}
+
 export interface FormPart {
-  // Whether the block holds a change not yet saved: its fields read against what is saved.
-  dirty: () => boolean;
+  // Whether the block holds a change not yet saved: its values' opened-with snapshot, or for a block
+  // with no values to hand, its fields read against what is saved.
+  dirty: Changes;
   // Sends the block's changes at once, and once they went through takes what was saved as what it
   // holds, so it holds no change after; answers whether everything went through.
   save: () => Promise<boolean>;
@@ -47,15 +250,17 @@ export function askDiscard(t: Translate, leaving = false): Promise<boolean> {
 // What floats a form over the screen — a dialog, a sheet — closes through here. While the form
 // holds changes the floating thing is told not to close on its own, and every way it is asked to —
 // its close button, Esc, a press outside, the back gesture, a drag away — asks first. A form with
-// nothing changed, and a floating thing that is no form, close at once.
-export function useCloseGuard(open: Ref<boolean>, dirty: () => boolean | undefined, t: Translate): { dismissible: ComputedRef<boolean>; leave: () => Promise<void> } {
+// nothing changed, and a floating thing that is no form, close at once. The form says what it holds
+// through its opened-with snapshot, or, with no values to hand, through a check of its own.
+export function useCloseGuard(open: Ref<boolean>, changes: Changes, t: Translate): { dismissible: ComputedRef<boolean>; leave: () => Promise<void> } {
+  const read = readChanges(changes);
   // One question at a time, since the back gesture may press Esc more than once while it stands.
   let asking = false;
 
   async function leave(): Promise<void> {
     if (asking) return;
 
-    if (!dirty()) {
+    if (!read.holds()) {
       open.value = false;
       return;
     }
@@ -69,7 +274,7 @@ export function useCloseGuard(open: Ref<boolean>, dirty: () => boolean | undefin
     }
   }
 
-  return { dismissible: computed(() => !dirty()), leave };
+  return { dismissible: computed(() => !read.holds()), leave };
 }
 
 // The frame of a form: what its blocks hold, the one save over all of them, and throwing every
@@ -88,10 +293,10 @@ export function useFormSave(t: Translate): FormSave {
     }
   });
 
-  const dirty = computed(() => parts.value.some((part) => part.dirty()));
+  const dirty = computed(() => parts.value.some((part) => readChanges(part.dirty).holds()));
 
   async function save(): Promise<boolean> {
-    const changed = parts.value.filter((part) => part.dirty());
+    const changed = parts.value.filter((part) => readChanges(part.dirty).holds());
 
     if (changed.length === 0 || saving.value) return false;
 
@@ -100,6 +305,8 @@ export function useFormSave(t: Translate): FormSave {
     try {
       for (const part of changed) {
         if (!(await part.save())) return false;
+
+        await readChanges(part.dirty).retake();
       }
 
       return true;

@@ -1,7 +1,8 @@
 <template>
   <!-- A small dialog of its own — a form, a search: in the middle of the screen at every width,
        since it is no part of the page lifted out. The body is the form; the actions stand at the
-       right of the foot. A form's dialog says whether it holds changes, and every way of closing it
+       right of the foot. A form's dialog is handed its form's opened-with snapshot (or, for a form
+       with no values to hand, whether it holds changes), and every way of closing it
        — the foot's cancel among them, through the close the foot is handed — then asks first, in
        the question dialog over it, whether to throw them away (`docs/components.md`, "Forms"). -->
   <UModal
@@ -35,18 +36,21 @@ import { useI18n } from "vue-i18n";
 
 import { useCloseGuard } from "../domain/form-save";
 
+import type { OpenedWith } from "../domain/form-save";
+
 interface Props {
   title: string;
   description?: string;
   // Room for a settings table's row across its columns rather than a form's one field.
   wide?: boolean;
-  // Whether the form it holds has changes not yet saved; left out, it is no form and closes at once.
-  dirty?: boolean;
+  // The opened-with snapshot of the form it holds, or for a form with no values to hand whether it
+  // has changes not yet saved; left out, it is no form and closes at once.
+  dirty?: boolean | OpenedWith;
 }
 
 const props = withDefaults(defineProps<Props>(), { description: undefined, dirty: undefined });
 const open = defineModel<boolean>("open", { default: false });
 const { t } = useI18n();
 
-const guard = useCloseGuard(open, () => props.dirty, t);
+const guard = useCloseGuard(open, () => (typeof props.dirty === "object" ? props.dirty.dirty.value : props.dirty), t);
 </script>

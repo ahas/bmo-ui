@@ -6,22 +6,25 @@ import UApp from "@nuxt/ui/components/App.vue";
 import UButton from "@nuxt/ui/components/Button.vue";
 
 import SettingsDialog from "../../app/components/SettingsDialog.vue";
+import { useOpenedWith } from "../../app/domain/form-save";
 import { layerCount } from "../../app/domain/layers";
 import { watchInputModality } from "../../app/domain/modality";
 import { watchOverlays } from "../../app/domain/overlays";
 import { TOOLTIP_PROVIDER } from "../../app/domain/tooltip";
 import sheet from "./close-guard-harness.css?inline";
 
-// A form's dialog left by the back gesture while it holds a change (`docs/components.md`, "Forms" and
-// "Floating things"): the button that opens it, the dialog with one text box, and the page's
-// floating things found by the overlays module as a host's are. The form holds a change while the
-// box holds any text. The page stands outside Nuxt, so it wires itself as a host's page is wired: the
+// A form's dialog closed with and without a change (`docs/components.md`, "Forms" and "Floating
+// things"): the button that opens it, the dialog with one text box and a save, and the page's
+// floating things found by the overlays module as a host's are. The box's text is the form's data,
+// which lands only once the test hands it over (`land`), after the dialog opened; the form hands its
+// values to the opened-with snapshot, saying when it is ready where the address asks for it
+// (`?ready`). The page stands outside Nuxt, so it wires itself as a host's page is wired: the
 // library's app root holding the boundary's tooltip setting, the page's own mark of which hand last
 // moved the focus, and the words handed over here.
 
 const WORDS = {
   common: {
-    action: { cancel: "Cancel", close: "Close", discard: "Discard" },
+    action: { cancel: "Cancel", close: "Close", discard: "Discard", save: "Save" },
     title: { discard_changes: "Discard unsaved changes?" }
   }
 };
@@ -31,9 +34,12 @@ const WORDS = {
 // small router does.
 Object.assign(globalThis, { useRouter: () => ({ options: {}, beforeEach: () => undefined }) });
 
+const loaded = ref(false);
+const text = ref("");
+
 const Page = defineComponent(() => {
   const open = ref(false);
-  const text = ref("");
+  const opened = useOpenedWith(() => ({ reason: text.value }), { open, ready: new URLSearchParams(location.search).has("ready") ? loaded : undefined });
 
   return () =>
     h(UApp, { tooltip: TOOLTIP_PROVIDER }, () => [
@@ -44,12 +50,19 @@ const Page = defineComponent(() => {
           open: open.value,
           "onUpdate:open": (standing: boolean) => {
             open.value = standing;
-            if (!standing) text.value = "";
+            if (!standing) {
+              text.value = "";
+              loaded.value = false;
+            }
           },
           title: "New request",
-          dirty: text.value !== ""
+          dirty: opened
         },
-        () => h("textarea", { "data-reason": "", value: text.value, onInput: (event: Event) => (text.value = (event.target as HTMLTextAreaElement).value) })
+        {
+          default: () => h("textarea", { "data-reason": "", value: text.value, onInput: (event: Event) => (text.value = (event.target as HTMLTextAreaElement).value) }),
+          // The save keeps the dialog standing, so what it leaves is read by the next close.
+          footer: () => h(UButton, { label: "Save", "data-save": "", onClick: () => void opened.take() })
+        }
       )
     ]);
 });
@@ -68,4 +81,10 @@ createApp(Page)
 
 watchOverlays();
 
-Object.assign(window, { layerCount });
+// The form's data landing from its read.
+function land(reason: string): void {
+  text.value = reason;
+  loaded.value = true;
+}
+
+Object.assign(window, { layerCount, land });

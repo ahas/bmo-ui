@@ -247,8 +247,9 @@ default; a screen supplies what it holds and what a press means there. Every exp
   control under it, at the right.
 - **Everything in a section takes effect as it is changed.** Nothing waits for a save.
 - **A setting that needs a form of its own opens one** (`SettingsDialog`): a dialog with its title,
-  an optional description, its body and a footer, wide enough for a table's row where it asks. Told
-  that its form holds changes, it asks before it closes, by every way of closing (see Forms); told
+  an optional description, its body and a footer, wide enough for a table's row where it asks.
+  Handed its form's opened-with snapshot (or, for a form with no values to hand, told whether it
+  holds changes), it asks before it closes on changes, by every way of closing (see Forms); handed
   nothing, it is no form and closes at once.
 - **The theme and palette pictures** — `ThemePreview`, `ThemeSwatch` and `PaletteSwatch` — draw an
   entry in one mode on their own box, as a row's choices.
@@ -384,10 +385,40 @@ default; a screen supplies what it holds and what a press means there. Every exp
   that stays put while the body scrolls. What is changed is held in the form until the save sends
   every changed value together; a dialog closes once its save has gone through. The form-save module
   holds this, its parts registered with it.
-- **Save is on only while something differs** from what is saved.
+- **Save is on only while the form holds changes.**
+- **A form holds changes only while its values differ from what it opened with.** The form-save
+  module's opened-with snapshot (`useOpenedWith`) reads this, and it is the one reading of it: a
+  screen hands the form's values, never a flag of its own, and the snapshot is taken of those same
+  values once the form stands open with its data in it. A form opened and closed untouched holds no
+  change, a new record's empty form among them, and neither does a change written and then put back.
+- **The snapshot is taken once the form is filled.** A dialog's form is snapshotted when the dialog
+  opens and the screen says its form is ready (at once where it says nothing), after everything the
+  opening set off has been drawn. Until the reader first presses or types anywhere on the page after
+  that, a change of the values is the form being filled rather than an edit, and the snapshot
+  follows it; a form whose data may land after the reader's first press says when it is ready.
+  Closing the dialog drops the snapshot and the next opening takes a new one. A form standing on a
+  page opens with the page.
+- **Values are compared as the inputs leave them.**
+  - A string is compared trimmed.
+  - A number is compared by value, and a number and the text an input writes for it are alike.
+  - A date or a time is compared by the ISO text it gives for itself, so two values naming the same
+    moment are alike whatever object holds them.
+  - Missing, null, an empty or blank string, a number that is none and an empty list are all alike
+    empty, a key holding an empty value is alike to no key, and an object holding nothing but
+    empty values is empty too.
+  - An object is compared key by key, a list item by item in order, and any other object (one that
+    gives no text for itself) by identity.
+  - Where two writings mean the same thing to a screen, the screen hands the meaning as the value.
+- **A block that has no values to hand says itself whether it holds a change.** The close
+  guard of a floating form, a block of a form's frame and the settings dialog each take either the
+  snapshot or a check of the screen's own. The check is only for a block whose changes are no
+  values it can hand: an editor holding its own buffer that says only whether that changed, or work waiting as a
+  list of operations rather than as values.
 - **Save saves at once.** What a field's change sets off is said beside the field before the press.
 - **A save that went through is what is saved from then on.** The form takes the answer as its new
-  saved values, so it holds no change the moment the save is done.
+  saved values, so it holds no change the moment the save is done: once what the save set off has
+  been drawn the snapshot is taken again from the values the form then holds, by the frame for each
+  block it saved and by the screen for a dialog that saves itself.
 - **Leaving with changes asks first.** Closing a dialog whose form holds changes — its close, Esc, a
   press outside, the back gesture — and leaving the page ask first, in the question dialog, whether to
   throw the unsaved changes away: discard drops them and goes, and every way out of the question
@@ -546,6 +577,8 @@ default; a screen supplies what it holds and what a press means there. Every exp
     not pressed again while the question stands: the question takes the next press of back as any
     floating thing does, and once it is answered, one that stays stands again with an entry of its
     own, so the next press of back asks again.
+  - A form's dialog with no change, opened and left untouched, its change put back or just saved,
+    closes at once by every way, back among them; what counts as a change is the Forms section's.
   - The focus handed back to the control a floating thing was opened from closes nothing.
   - A tooltip naming a control of what the press closes is put away in the same press: it is asked
     first, and the floating thing is asked again before the press is over.
