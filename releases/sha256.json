@@ -228,5 +228,10 @@
     "sha256": "f2438a40a91a3e861d716f5d23a75aaf2c7a2578f27f17e0fb87c67a9c16d240",
     "bound": "0.1.0-rev.23",
     "why": "Restyles a dialog head's close and gap only; every bundle built from 0.1.0-rev.23 runs on it unchanged"
+  },
+  "bmo-ui-0.1.0-rev.46.tgz": {
+    "sha256": "e7adc9635aa787532ff7d0260315bfe06aba98531464bebf64546d9244589c79",
+    "bound": "0.1.0-rev.23",
+    "why": "A press's question answered at once is its answer: a tap away or back over a changed form's dialog asks once"
   }
 }
