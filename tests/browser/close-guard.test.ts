@@ -17,7 +17,11 @@ import type { Browser, BrowserContext, Page } from "playwright-core";
 // The back gesture over one holding a change asks first, as its close and Esc do: the question
 // stands over the dialog, discard takes both away and leaves the history
 // as it was, and every way out of the question keeps the dialog standing with an entry of its own,
-// so the next press of back asks again. Esc and back reach the dialog the same way with the focus
+// so the next press of back asks again. A focus handed back to the page while a picker stands open
+// in the dialog, as a menu that opened the dialog hands it to its trigger, reaches the dialog as an
+// outside focus it refuses on its own: that raises no question even once the form has turned dirty,
+// and the guard still asks at every real request to close after it, and closes at once where the
+// form is untouched. Esc and back reach the dialog the same way with the focus
 // in a date or a time field's segment. The page is built as the layer's custom elements are, from
 // the components that ship, and driven by a real Chromium at a phone's width and a desktop's.
 // Skipped where the browser build is not on the machine.
@@ -119,6 +123,19 @@ async function changed(width: number, height: number): Promise<{ context: Browse
   await page.fill(REASON, "Family event");
 
   return { context, page };
+}
+
+// The focus handed back from outside while the dialog stands, as a menu that opened it hands the
+// focus to its trigger once its own way out has played: it lands while the reader has a picker open
+// in the dialog, whose hold on the focus stands above the dialog's, so the move reaches the dialog as
+// an outside focus it refuses. The page's own button takes it, and the picker going with it is
+// awaited before the answer to that hand-back is read.
+async function handFocusBack(page: Page): Promise<void> {
+  await page.click("[data-pick]");
+  await page.waitForSelector("[data-half]", { timeout: 3000 });
+  await page.evaluate(() => document.querySelector<HTMLButtonElement>("[data-open]")?.focus());
+  await page.waitForSelector("[data-half]", { state: "detached", timeout: 3000 });
+  await page.evaluate(() => new Promise((frame) => requestAnimationFrame(() => requestAnimationFrame(frame))));
 }
 
 // The dialog goes at once on the way out taken, with no question raised, and its entry with it.
@@ -257,6 +274,51 @@ for (const { name, width, height } of WIDTHS) {
 
       expect(await page.locator(FORM).count()).toBe(1);
       expect(await page.inputValue(REASON)).toBe("Family event");
+
+      await context.close();
+    });
+  });
+
+  describe.skipIf(!ready)(`a focus handed back to the page over a form's dialog, on ${name}`, () => {
+    test("raises no question once the form has turned dirty, and Esc still asks and Cancel holds", async () => {
+      const { context, page } = await changed(width, height);
+
+      await handFocusBack(page);
+
+      expect(await page.locator(QUESTION).count()).toBe(0);
+      expect(await page.locator(FORM).count()).toBe(1);
+
+      await escAsks(page);
+      await page.getByRole("button", { name: "Cancel" }).click();
+      await page.waitForSelector(QUESTION, { state: "detached", timeout: 3000 });
+      await settledOn(page, 1);
+
+      expect(await page.inputValue(REASON)).toBe("Family event");
+
+      await context.close();
+    });
+
+    test("still asks on back, and discard takes both away", async () => {
+      const { context, page } = await changed(width, height);
+
+      await handFocusBack(page);
+
+      await backAsks(page);
+      await page.getByRole("button", { name: "Discard" }).click();
+      await page.waitForSelector("[role=dialog]", { state: "detached", timeout: 3000 });
+      await settledOn(page, 0);
+
+      await context.close();
+    });
+
+    test("closes at once on Esc when the dialog holds no change", async () => {
+      const { context, page } = await created(width, height);
+
+      await handFocusBack(page);
+
+      expect(await page.locator(QUESTION).count()).toBe(0);
+
+      await closesAtOnce(page, pressEsc(page));
 
       await context.close();
     });

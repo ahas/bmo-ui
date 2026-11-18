@@ -427,11 +427,17 @@ default; a screen supplies what it holds and what a press means there. Every exp
   own when the close in its corner is pressed, beside whatever the close says to the screen. So a
   dialog with a close guard (`useCloseGuard`, which the settings dialog holds) takes every request
   of its modal to close as a request to leave, handed to the guard, and the dialog closes only when
-  the guard lets it go; the modal's open state is never bound both ways. The press of that close
-  then reaches the guard through the modal alone, so a screen clearing its form as the dialog closes
-  raises no question; where a press does reach it twice, a request to leave a dialog already closed
-  is none. A screen that builds its own dialog with the guard and `ShellClose` in the modal's close
-  slot wires it the same way.
+  the guard lets it go; the modal's open state is never bound both ways. The request reaches the
+  guard through the open state alone, and the modal is left to dismiss itself with the guard the one
+  refusal: an outside interaction the modal refuses on its own, such as a menu handing the focus
+  back to its trigger while a picker in the dialog stands open, is never read as a request to close
+  and raises no question. The press of that close then reaches the guard through the modal alone,
+  so a screen clearing its form as the dialog closes raises no question; where a press does reach it
+  twice, a request to leave a dialog already closed is none. A screen that builds its own dialog with
+  the guard and `ShellClose` in the modal's close slot wires it the same way. The guard also says
+  whether its form holds no change (`dismissible`); a modal bound to it reports every outside
+  interaction it then holds off as a refused close, a refused focus among them, so a screen that
+  answers that report by leaving asks where nobody asked to close.
 - **A refused save keeps every change as written,** with the reason under the field it names. A save
   made in several steps stops at the first refusal, and what went through before it stands as saved.
 - **A text box of a form grows with its text and never scrolls inside** (`GrowingTextarea`). It is

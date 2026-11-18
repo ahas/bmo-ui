@@ -247,11 +247,17 @@ export function askDiscard(t: Translate, leaving = false): Promise<boolean> {
   return askQuestion({ title: t("common.title.discard_changes"), confirm: t("common.action.discard"), leaving });
 }
 
-// What floats a form over the screen — a dialog, a sheet — closes through here. While the form
-// holds changes the floating thing is told not to close on its own, and every way it is asked to —
-// its close button, Esc, a press outside, the back gesture, a drag away — asks first. A form with
-// nothing changed, and a floating thing that is no form, close at once. The form says what it holds
-// through its opened-with snapshot, or, with no values to hand, through a check of its own.
+// What floats a form over the screen — a dialog, a sheet — closes through here. Every request to
+// close reaches the guard through the floating thing's open state: its close button, Esc, a press
+// outside, the back gesture and a drag away all ask first while the form holds changes, and a form
+// with nothing changed, and a floating thing that is no form, close at once. The floating thing is
+// left to dismiss itself, with the guard the one refusal, so an outside interaction it refuses on
+// its own — a menu handing the focus back to its trigger — is no request to close and asks nothing.
+// `dismissible` says whether the form holds no change, for a host that binds it to its own floating
+// thing; one that does so and answers the component library's refused close by leaving asks at such
+// a refused focus too, since the library reports every outside interaction it holds off. The form
+// says what it holds through its opened-with snapshot, or, with no values to hand, through a check
+// of its own.
 export function useCloseGuard(open: Ref<boolean>, changes: Changes, t: Translate): { dismissible: ComputedRef<boolean>; leave: () => Promise<void> } {
   const read = readChanges(changes);
   // One question at a time, since the back gesture may press Esc more than once while it stands.

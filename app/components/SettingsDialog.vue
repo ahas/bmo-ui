@@ -6,15 +6,16 @@
        — the foot's cancel among them, through the close the foot is handed — then asks first, in
        the question dialog over it, whether to throw them away (`docs/components.md`, "Forms"). The
        modal's own close, which the close in its corner sets off beside what the close says, is a
-       request to leave like any other, so the open state is never bound both ways. -->
+       request to leave like any other, so the open state is never bound both ways. The modal is left
+       to dismiss itself and the guard alone refuses, every leave reaching it through that open state
+       alone: an outside focus the modal holds off on its own — a menu handing the focus back to its
+       trigger — is no request to leave and asks nothing. -->
   <UModal
     :open="open"
     :title="props.title"
     :description="props.description"
-    :dismissible="guard.dismissible.value"
     :ui="{ content: props.wide ? 'sm:max-w-4xl' : 'sm:max-w-xl' }"
     @update:open="(standing: boolean) => (standing ? (open = true) : void guard.leave())"
-    @close:prevent="void guard.leave()"
   >
     <template #close="{ ui }">
       <!-- Pressed, it reaches the guard through the modal's own close alone, so it asks only once. -->
