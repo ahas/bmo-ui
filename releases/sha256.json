@@ -203,5 +203,10 @@
     "sha256": "be7514ca0696cb45cd3a640b935b230fe9cabb37272f7dbe33951d4b3eac6801",
     "bound": "0.1.0-rev.23",
     "why": "Adds focusTakenOnOpen to the overlays module; the page tooltip and the shared tooltip no longer open on the focus an opening layer takes up on its own"
+  },
+  "bmo-ui-0.1.0-rev.41.tgz": {
+    "sha256": "c7a221e45827f1b128d0abc918a9d6fe33cf1815340c8d3303fef27ac481bcf3",
+    "bound": "0.1.0-rev.23",
+    "why": "Adds AvatarGroup, UnfoldingBox, the held-size and avatar-group modules, the moving list's sideways axis and one wording key; nothing a bundle of rev.23 reads changes"
   }
 }
