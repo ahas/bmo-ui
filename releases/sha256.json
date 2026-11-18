@@ -168,5 +168,10 @@
     "sha256": "4863dc3f6b6e231e9707d20ed3c990ddf82433b0c3434303dfca9a3d3bd199df",
     "bound": "0.1.0-rev.23",
     "why": "Adds only: ChoiceSelect, the one select that searches once it holds more than seven choices or finds them over a road, with the choices module and four wording keys (common.placeholder.search, common.status.no_match, common.status.no_choices, common.error.choices_find_failed). Nothing a bundle built on 0.1.0-rev.23 reads is taken away or changed."
+  },
+  "bmo-ui-0.1.0-rev.34.tgz": {
+    "sha256": "03957be55e6adbd8eb72f4ecdeba74aba3edc71241b11b6a8290ed714f35c5e3",
+    "bound": "0.1.0-rev.23",
+    "why": "Adds only: the design review fixes of ChoiceSelect (its list opens against the control's leading edge, a road's answer is awaited under a skeleton line) and a select menu's search field taking the elevated background while it holds the focus. Nothing a bundle built on 0.1.0-rev.23 reads is taken away or changed."
   }
 }
