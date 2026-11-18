@@ -213,5 +213,10 @@
     "sha256": "873c250c60b7956ab2d08c70f575e521361d8122898e392b878a2620c47f9081",
     "bound": "0.1.0-rev.23",
     "why": "Adds AvatarGroup, UnfoldingBox, the held-size and avatar-group modules, the moving list's sideways axis and one wording key; nothing a bundle of rev.23 reads changes"
+  },
+  "bmo-ui-0.1.0-rev.43.tgz": {
+    "sha256": "e16f8878159ddd2251b52944a44cb2032107464d8a512fa4aab7ed40cd315799",
+    "bound": "0.1.0-rev.23",
+    "why": "Stands every dropped list's rows on the 4px grid; ChoiceSelect closes a one-value list on free entry, awaits a screen's first choices under a skeleton and takes a choice keyed by the empty string; useOpenedWith take does nothing while the form is not standing; nothing a bundle of rev.23 reads changes"
   }
 }
