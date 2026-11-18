@@ -208,8 +208,8 @@ describe("the width a menu dropped from a button stands", () => {
   });
 
   test("and a row's trailing column takes room only where it holds something", () => {
-    expect(slotClasses("dropdownMenu", "itemTrailing")).toEqual(["empty:hidden"]);
-    expect(slotClasses("contextMenu", "itemTrailing")).toEqual(["empty:hidden"]);
+    expect(slotClasses("dropdownMenu", "itemTrailing")).toEqual(["empty:hidden", "gap-2"]);
+    expect(slotClasses("contextMenu", "itemTrailing")).toEqual(["empty:hidden", "gap-2"]);
   });
 
   test("is written on no component of its own", async () => {

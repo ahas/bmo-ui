@@ -112,6 +112,13 @@ whole in `docs/boundary.md`; this document says what each is for and how the lay
 
 ### Lists
 
+- **A list dropped from a control stands its rows on the 4px grid.** In every select, select menu,
+  input menu, dropdown menu and context menu, at every size, each padding and gap of a row, of a
+  group's label and of the words of an empty list is a multiple of 4px, and so are the gaps between
+  the marks in a row's trailing column and between the keys of a shortcut. Where the library's own
+  stand off the grid, the layer's overrides take a row and a label to 8px all round with 8px between
+  their parts, the empty list's words to 8px, the trailing marks to 8px apart and the keys to 4px.
+  A row's trailing check therefore stands as far in from the row's edge as from its top.
 - **A list is found as it was left.** Opening a row and coming back is one move, not an arrival: the
   scroll, the choice and the pages already read are where they were. Not taking the list down — the
   detail standing over it, or the page kept by the router — is the screen's own to arrange. What

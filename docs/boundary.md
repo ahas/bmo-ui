@@ -446,7 +446,7 @@ Every token is a custom property stated by the layer's stylesheet on the root un
   14-pixel floor with `badge-ink`; soft and subtle alerts with `badge-ink` and their description at
   full colour; the tooltip at caption size; focus inside clipping rows; the reading width on the
   dashboard panel and the container's inset outside it; no floor on the panel or the sidebar;
-  dropdowns as wide as their longest item and no wider than the screen; a select menu's search field taking the elevated background while it holds the focus and setting none of its list's width; dialogs growing out of their
+  dropdowns as wide as their longest item and no wider than the screen, their rows padded and spaced on the 4px grid; a select menu's search field taking the elevated background while it holds the focus and setting none of its list's width; dialogs growing out of their
   control, standing at once when they fill the screen, and keeping one padding in their head, body
   and foot at every width; sheets clear of the safe area; popovers held to their room; the message
   bar's focus on its bar; text areas at full width.

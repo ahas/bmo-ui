@@ -9,17 +9,34 @@ import { DEFAULT_THEME } from "../shared/themes";
 // stylesheet is built from the words written here.
 // An item's trailing column — a check, a key, a submenu's arrow — is drawn on every row whether it
 // holds one or not, and an empty one still costs the row its gap, so it stands only where it holds
-// something.
+// something; the marks it holds stand on the 4px grid apart.
 function dropdown(floor: string) {
   return {
     content: `w-max max-w-[calc(100vw-1rem)] ${floor} ${GROWS}`,
     viewport: "overflow-x-auto",
     group: "w-max min-w-full",
-    itemTrailing: "empty:hidden",
+    itemTrailing: "empty:hidden gap-2",
     itemLabel: "text-clip whitespace-nowrap",
     itemDescription: "text-clip whitespace-nowrap"
   };
 }
+
+// What every list dropped from a control stands its rows on at each size: the 4px grid (`docs/design.md`,
+// "Lists"). The library pads a row and a group's label 6px in and spaces their parts 6px apart at the
+// small and medium sizes, and pads an empty list's words 10px in; each is taken to 8px, as its large
+// sizes already stand. Every other size already stands on the grid.
+const ROWS_ON_THE_GRID = {
+  sm: { label: "p-2 gap-2", item: "p-2 gap-2", empty: "p-2" },
+  md: { label: "p-2 gap-2", item: "p-2 gap-2", empty: "p-2" }
+};
+
+// A menu's rows may also show a shortcut, whose keys the library sets 2px apart below its large size;
+// they are taken to 4px, as its large sizes already stand.
+const KEYED_ROWS_ON_THE_GRID = {
+  xs: { itemTrailingKbds: "gap-1" },
+  sm: { ...ROWS_ON_THE_GRID.sm, itemTrailingKbds: "gap-1" },
+  md: { ...ROWS_ON_THE_GRID.md, itemTrailingKbds: "gap-1" }
+};
 
 // How the library's own floating things and folding regions come and go, on the layer's motion
 // tokens (`docs/design.md`, "Motion"). The library's movements themselves are kept, since each
@@ -214,7 +231,7 @@ export default defineAppConfig({
     // the list itself, so the layer's timing is said there too.
     select: {
       slots: dropdown("min-w-[min(var(--reka-select-trigger-width),calc(100vw-1rem))]"),
-      variants: { position: { popper: { content: GROWS } } }
+      variants: { position: { popper: { content: GROWS } }, size: ROWS_ON_THE_GRID }
     },
     // A select menu's search field is drawn with no edge of its own, so its focus is said by the
     // elevated background a field with no edge takes. It fills the width its list's choices and its
@@ -226,15 +243,15 @@ export default defineAppConfig({
         ...dropdown("min-w-[min(var(--reka-combobox-trigger-width),calc(100vw-1rem))]"),
         input: "border-b border-default has-[input:focus]:bg-elevated contain-inline-size"
       },
-      variants: { position: { popper: { content: GROWS } } }
+      variants: { position: { popper: { content: GROWS } }, size: ROWS_ON_THE_GRID }
     },
-    inputMenu: { slots: dropdown("min-w-[min(var(--reka-combobox-trigger-width),calc(100vw-1rem))]") },
+    inputMenu: { slots: dropdown("min-w-[min(var(--reka-combobox-trigger-width),calc(100vw-1rem))]"), variants: { size: ROWS_ON_THE_GRID } },
     // A list that drops for a value it shows is floored at its control's width, so it lines up under
     // what it replaces. A menu dropped from a button or a pointer is not: the button says nothing of
     // the menu's content, and the library's own fixed minimum leaves a short menu standing half
     // empty, so it is taken back to none.
-    dropdownMenu: { slots: dropdown("min-w-0") },
-    contextMenu: { slots: dropdown("min-w-0") },
+    dropdownMenu: { slots: dropdown("min-w-0"), variants: { size: KEYED_ROWS_ON_THE_GRID } },
+    contextMenu: { slots: dropdown("min-w-0"), variants: { size: KEYED_ROWS_ON_THE_GRID } },
     // A dialog stands in the part of the screen that can be seen. On a phone the keyboard covers the
     // foot of the window while a field in the dialog is being written in, and a dialog centred on the
     // whole window puts its field and its buttons behind the keys; centred on what is visible, it
