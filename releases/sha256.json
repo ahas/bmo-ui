@@ -188,5 +188,10 @@
     "sha256": "9ba7267795d5a50258bd7c7427e916eee21d90703a077238300fa68bb73fefef",
     "bound": "0.1.0-rev.23",
     "why": "The one select takes a value typed into its search in free entry (createItem, the create event and the common.action.add_choice key). Nothing a bundle built on 0.1.0-rev.23 reads is taken away or changed."
+  },
+  "bmo-ui-0.1.0-rev.38.tgz": {
+    "sha256": "704d6035df685ff99445a6cb23f88011a8a733d56877c761772fe7b1666aeac6",
+    "bound": "0.1.0-rev.23",
+    "why": "ChoiceSelect's list stands as wide as its choices and its control with the search field setting none of it, opens against the control's trailing edge where the leading one leaves no room, names every chosen value by its label whatever the words typed or a later road answer leave in the list, keeps a closing list's choices, and rings its control as a field; useListPreview follows the select's highlight (onHighlight, HighlightedItem); a finger's tap away from a list inside a dialog closes only the list. Nothing a bundle built on 0.1.0-rev.23 reads is taken away or changed."
   }
 }
