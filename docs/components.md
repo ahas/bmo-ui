@@ -63,7 +63,8 @@ default; a screen supplies what it holds and what a press means there. Every exp
     unless the host names another for a ground of its own.
 - **A cap holds the rest.** Given a most, the group draws that many faces and one more avatar
   holding the count of the rest, a plus sign before it, written with the count's separators in
-  tabular figures; it widens with its count rather than cutting it. A screen reader hears the count
+  tabular figures. It widens with its count rather than cutting it, and a count gaining or losing a
+  place moves the cap to its new width as an unfolding box does, so what stands after it slides. A screen reader hears the count
   in the host's words, the key `common.aria.others_count`, rather than the sign. The cap is an item
   of the list too, so it unfolds as the first face past the most arrives and folds as the last one
   goes.

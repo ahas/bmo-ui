@@ -2,7 +2,7 @@
      moving list along its row, the first standing over the one after it, so a face coming, going or
      changing place moves as a list item does. Each face's item is the box that folds: it draws the
      face's ring as its own padding and ground, and the face inside stands at its full size. Past a
-     most, one more avatar counts the rest. -->
+     most, one more avatar counts the rest, held in an unfolding box of its own. -->
 <template>
   <MovingList :class="['isolate inline-flex items-center', frame.row]">
     <li
@@ -15,7 +15,10 @@
       <UAvatar v-bind="face.avatar" :size="size" />
     </li>
     <li v-if="rest > 0" :key="CAP" :class="['relative z-0 shrink-0 rounded-full', frame.item, ground]" data-face-cap>
-      <UAvatar :text="`+${countText(rest)}`" :size="size" :class="['tabular-nums', frame.cap]" aria-hidden="true" />
+      <!-- Its count gaining or losing a place moves its width rather than jumping. -->
+      <UnfoldingBox class="rounded-full">
+        <UAvatar :text="`+${countText(rest)}`" :size="size" :class="['flex tabular-nums', frame.cap]" aria-hidden="true" />
+      </UnfoldingBox>
       <span class="sr-only">{{ $t("common.aria.others_count", { n: countText(rest) }) }}</span>
     </li>
   </MovingList>

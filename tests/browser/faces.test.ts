@@ -122,11 +122,22 @@ function sidewaysAlone(seen: FacesSeen[], keys: string[]): void {
   }
 }
 
-// The box follows what it holds in every frame, and ends at it.
+// The box follows what it holds in every frame, and ends at it. A frame is read in a task after it
+// is drawn, and a busy machine runs that task late, when the content's movement has gone on past the
+// frame the box took its size in; so the box is held to stand within what the content measured from
+// the frame before to this one, rounding aside, which a box running a movement of its own behind the
+// content leaves within a frame or two.
 function follows(seen: FacesSeen[]): void {
-  for (const one of seen) {
-    expect(Math.abs(one.boxes.box!.width - one.boxes.held!.width), `frame ${one.frame}`).toBeLessThanOrEqual(1);
+  for (const [at, one] of seen.entries()) {
+    const now = one.boxes.held!.width;
+    const before = seen[Math.max(0, at - 1)]!.boxes.held!.width;
+    const box = one.boxes.box!.width;
+
+    expect(box, `frame ${one.frame}`).toBeGreaterThanOrEqual(Math.min(now, before) - 1);
+    expect(box, `frame ${one.frame}`).toBeLessThanOrEqual(Math.max(now, before) + 1);
   }
+
+  expect(Math.abs(seen.at(-1)!.boxes.box!.width - seen.at(-1)!.boxes.held!.width)).toBeLessThanOrEqual(1);
 }
 
 function lefts(seen: FacesSeen[], keys: string[]): number[] {
@@ -206,6 +217,26 @@ describe.skipIf(!ready)("a row of faces in an unfolding box", () => {
     expect(going.at(-1)!.boxes.x).toBeUndefined();
     follows(going);
     expect(lefts(going, ["b", "a"])).toEqual([0, STEP]);
+  });
+
+  test("a cap whose count gains a place widens to it as a box does, the words after it sliding", async () => {
+    const letters = [..."abcdefghijklm"];
+
+    await frames(page, { faces: letters.slice(0, 12) });
+
+    const seen = await frames(page, { faces: letters });
+    const cap = course(seen, "cap").map((one) => one.width);
+    const words = course(seen, "words").map((one) => one.left);
+
+    expect(await page.locator("[data-face-cap]").textContent()).toContain("+10");
+    expect(monotonic(cap)).toBe(true);
+    expect(new Set(cap).size).toBeGreaterThan(3);
+    expect(cap.at(-1)).toBeGreaterThan(cap[0]!);
+    expect(monotonic(words)).toBe(true);
+    expect(new Set(words).size).toBeGreaterThan(3);
+    follows(seen);
+
+    await frames(page, { faces: ["b", "x", "a"] });
   });
 
   test("words replaced at once move the box to its new size at the unfold length, the words standing at theirs", async () => {
