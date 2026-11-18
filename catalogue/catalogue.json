@@ -505,8 +505,16 @@
       "slots": [],
       "events": [
         {
+          "name": "highlight",
+          "type": "[highlighted: Highlighted | undefined]"
+        },
+        {
           "name": "create",
           "type": "[value: string]"
+        },
+        {
+          "name": "update:modelValue",
+          "type": "[value: any]"
         }
       ],
       "example": "<div class=\"flex flex-wrap gap-4\">\n  <ChoiceSelect v-model=\"size\" :items=\"sizes\" value-key=\"value\" class=\"w-40\" />\n  <ChoiceSelect v-model=\"city\" :items=\"cities\" value-key=\"value\" class=\"w-56\" />\n  <ChoiceSelect v-model=\"role\" :items=\"roles\" value-key=\"value\" create-item class=\"w-48\" @create=\"addRole\" />\n</div>"

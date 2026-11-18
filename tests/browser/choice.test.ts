@@ -16,7 +16,9 @@ import type { Browser, Page } from "playwright-core";
 // narrows it to what the choices show with the hits marked and the headings of what stays while the
 // control still names what is chosen, an empty answer says why, a list found over a road asks it and
 // says when it refused, a list of three taking free entry opens with its search and takes a value
-// typed into it, a preview follows the choice the keyboard rests on, a closing list keeps the choices
+// typed into it, closing as it does while a list of several values stays open, a list whose screen
+// says its choices are on their way draws a skeleton line until they land, a choice of nothing keyed
+// by the empty string is listed, taken and named, a preview follows the choice the keyboard rests on, a closing list keeps the choices
 // it showed until it is gone, the control takes the accent on its edge with no ring when the keyboard
 // reaches it, each list stands as wide as its choices and its control against an edge of the control
 // at a desktop's and a phone's width, and a finger opening a long list leaves the keyboard down and
@@ -35,6 +37,12 @@ const PAGE = `<!doctype html><html><head><meta charset="utf-8"><meta name="viewp
 
 const LIST = "[data-slot=content]";
 const FIELD = `${LIST} input`;
+
+// What the harness page hands the test for the list whose screen says its choices are on their way.
+interface AwaitedChoices {
+  landChoices: (labels: string[]) => void;
+  readChoicesAgain: () => void;
+}
 
 let out = "";
 let script = "";
@@ -421,14 +429,63 @@ describe.skipIf(!ready)("the one select at a desktop's width", () => {
     await listedAs(page, ['Add "Analyst"']);
     expect(await page.$(`${LIST} [data-slot=empty]`)).toBeNull();
 
+    // Taken, the new value closes a list of one value as any choice does, the focus back on its control.
     await page.getByRole("option", { name: 'Add "Analyst"' }).click();
-    await listedAs(page, ["Analyst"]);
-    await close(page);
+    await page.waitForSelector(LIST, { state: "detached" });
     expect(await page.textContent("#free")).toContain("Analyst");
+    expect(await page.$eval("#free", (control) => document.activeElement === control)).toBe(true);
 
     await page.click("#free");
     await listedAs(page, ["Designer", "Engineer", "Manager", "Analyst"]);
     await close(page);
+  });
+
+  test("keeps a list of several values open once a value typed in free entry is taken", async () => {
+    await page.click("#free-many");
+    await page.waitForSelector(FIELD);
+    await page.keyboard.type("Singing");
+    // The words stay, so the list shows the new value alone, chosen, with nothing more to offer.
+    await page.getByRole("option", { name: 'Add "Singing"' }).click();
+    await listedAs(page, ["Singing"]);
+    expect(await page.getByRole("option", { name: "Singing" }).getAttribute("aria-selected")).toBe("true");
+    expect(await page.textContent("#free-many")).toContain("Singing");
+    await close(page);
+  });
+
+  test("draws a skeleton line in a list whose screen says its first choices are on their way, and what lands once it lands", async () => {
+    await page.click("#awaited");
+    await page.waitForSelector(`${LIST} [data-slot=empty] [role=status][aria-busy=true]`, { timeout: 3_000 });
+    expect(await page.textContent(`${LIST} [data-slot=empty]`)).not.toContain("No choices");
+
+    // A first read that found none is content: read again, the list keeps its words under the busy mark.
+    await page.evaluate(() => (window as unknown as AwaitedChoices).landChoices([]));
+    await saysEmpty(page, "No choices");
+    await page.evaluate(() => (window as unknown as AwaitedChoices).readChoicesAgain());
+    await page.waitForSelector("#awaited .animate-spin", { timeout: 3_000 });
+    expect(await page.$(`${LIST} [data-slot=empty] [role=status]`)).toBeNull();
+    await saysEmpty(page, "No choices");
+
+    await page.evaluate(() => (window as unknown as AwaitedChoices).landChoices(["Apple", "Pear"]));
+    await listedAs(page, ["Apple", "Pear"]);
+    expect(await page.$(`${LIST} [data-slot=empty]`)).toBeNull();
+    await close(page);
+  });
+
+  test("lists, takes and names a choice of nothing, handing the screen the empty string for it", async () => {
+    await page.click("#team");
+    await listedAs(page, ["Nobody", "Design", "Research", "Support"]);
+
+    await page.getByRole("option", { name: "Nobody" }).click();
+    await page.waitForSelector(LIST, { state: "detached" });
+    expect(await page.textContent("#team-value")).toBe('""');
+    expect(await page.textContent("#team")).toContain("Nobody");
+
+    // Opened again, the choice of nothing stands chosen and another can be taken in its place.
+    await page.click("#team");
+    expect(await page.getByRole("option", { name: "Nobody" }).getAttribute("aria-selected")).toBe("true");
+    await page.getByRole("option", { name: "Support" }).click();
+    await page.waitForSelector(LIST, { state: "detached" });
+    expect(await page.textContent("#team-value")).toBe('"support"');
   });
 });
 
@@ -482,8 +539,7 @@ describe.skipIf(!ready)("the one select under a finger at a phone's width", () =
     expect(placed).toEqual({ inside: true, whole: true });
 
     await touch.tap(await centreOf(page, `${LIST} [data-slot=item]`));
-    await listedAs(page, [words]);
-    await close(page);
+    await page.waitForSelector(LIST, { state: "detached" });
     expect(await page.textContent("#free")).toContain(words);
   });
 

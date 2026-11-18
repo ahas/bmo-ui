@@ -21,7 +21,10 @@ import type { SelectMenuItem } from "@nuxt/ui";
 // them, people found over a stand-in road that answers at once, refuses the word "fail", holds its
 // answer to "slow" until the test lets it go and finds nobody for anything else unmatched, the same
 // people chosen several at a time by an id over a second road, three roles taking free entry, each
-// new value added to them and chosen, a narrow control at the page's trailing end opening a list of
+// new value added to them and chosen, two skills chosen several at a time taking free entry the same
+// way, a list whose screen says its choices are on their way until the test lands them, four teams
+// among them a choice of nothing keyed by the empty string with the value chosen written beside them,
+// a narrow control at the page's trailing end opening a list of
 // sessions wider than itself, and a dialog and a drawer each holding the dozen cities once more,
 // opened from buttons under them all. The page stands outside Nuxt, so the library is installed as a
 // Vue plugin, the words are handed over here and the layer's registry of floating things is started
@@ -75,7 +78,15 @@ const MEMBERS = PEOPLE.map((label, index) => ({ label, value: 20 + index }));
 // Lets the held answer to "slow" go.
 let letGo: () => void = () => undefined;
 
-Object.assign(window, { letAnswerGo: () => letGo() });
+// Lands the choices of the list whose screen says they are on their way, and has the screen read them
+// again.
+let land: (labels: string[]) => void = () => undefined;
+let readAgain: () => void = () => undefined;
+
+Object.assign(window, { letAnswerGo: () => letGo(), landChoices: (labels: string[]) => land(labels), readChoicesAgain: () => readAgain() });
+
+// Teams with a choice of nothing, keyed by the empty string.
+const TEAMS = [{ label: "Nobody", value: "" }, ...["Design", "Research", "Support"].map((label) => ({ label, value: label.toLowerCase() }))];
 
 async function findPeople(words: string): Promise<SelectMenuItem[]> {
   if (words === "fail") throw new Error("refused");
@@ -101,6 +112,28 @@ const Page = defineComponent(() => {
     roles.value = [...roles.value, { label: value, value }];
     role.value = value;
   }
+
+  const skills = shallowRef<SelectMenuItem[]>(["Drawing", "Writing"].map((label) => ({ label, value: label })));
+  const skillsChosen = ref<string[]>([]);
+
+  function addSkill(value: string): void {
+    skills.value = [...skills.value, { label: value, value }];
+    skillsChosen.value = [...skillsChosen.value, value];
+  }
+
+  const awaited = shallowRef<SelectMenuItem[]>([]);
+  const awaiting = ref(true);
+  const fruit = ref<string>();
+
+  land = (labels) => {
+    awaited.value = labels.map((label) => ({ label, value: label.toLowerCase() }));
+    awaiting.value = false;
+  };
+  readAgain = () => {
+    awaiting.value = true;
+  };
+
+  const team = ref<string>("design");
 
   const tint = ref("teal");
   const session = ref<string>();
@@ -155,6 +188,30 @@ const Page = defineComponent(() => {
           onCreate: addRole,
           class: "w-48"
         }),
+        h(ChoiceSelect, {
+          id: "free-many",
+          items: skills.value,
+          createItem: true,
+          multiple: true,
+          valueKey: "value",
+          modelValue: skillsChosen.value,
+          "onUpdate:modelValue": (value: string[]) => (skillsChosen.value = value),
+          onCreate: addSkill,
+          class: "w-48"
+        }),
+        h(ChoiceSelect, {
+          id: "awaited",
+          items: awaited.value,
+          loading: awaiting.value,
+          valueKey: "value",
+          modelValue: fruit.value,
+          "onUpdate:modelValue": (value: string) => (fruit.value = value),
+          class: "w-48"
+        }),
+        h("div", { class: "flex items-center gap-4" }, [
+          h(ChoiceSelect, { id: "team", items: TEAMS, valueKey: "value", modelValue: team.value, "onUpdate:modelValue": (value: string) => (team.value = value), class: "w-48" }),
+          h("output", { id: "team-value" }, JSON.stringify(team.value))
+        ]),
         h("div", { class: "flex justify-end self-stretch" }, [
           h(ChoiceSelect, { id: "wide", items: SESSIONS, valueKey: "value", modelValue: session.value, "onUpdate:modelValue": (value: string) => (session.value = value), class: "w-32" })
         ]),

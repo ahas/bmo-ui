@@ -445,6 +445,10 @@ default; a screen supplies what it holds and what a press means there. Every exp
   follows it; a form whose data may land after the reader's first press says when it is ready.
   Closing the dialog drops the snapshot and the next opening takes a new one. A form standing on a
   page opens with the page.
+- **The snapshot is taken again only while the form stands.** Taking it again (`take`), as after a
+  save that went through, does nothing while the form is closed or its data not yet in it, so an
+  answer that lands after the dialog closed leaves the next opening to take its own snapshot and to
+  follow the form being filled.
 - **Values are compared as the inputs leave them.**
   - A string is compared trimmed.
   - A number is compared by value, and a number and the text an input writes for it are alike.
@@ -522,7 +526,8 @@ default; a screen supplies what it holds and what a press means there. Every exp
   type into. Once the words typed, their ends trimmed, are no choice's label, letter case folded,
   and no choice's value, they stand as the last entry of the list with the pack's words for taking
   them as a new value; choosing it hands the screen those words (`create`) and changes no value of
-  its own, so the screen adds the value and chooses it. Over a road, nothing is offered while the
+  its own, so the screen adds the value and chooses it. A list of one value then closes, as it does on
+  any choice, and a list of several stays open. Over a road, nothing is offered while the
   road is asked, since its answer may hold the words. Without free entry the select takes no value
   the list does not hold.
 - **The list opens against the control's leading edge,** as every dropdown does (see "Tab bar and
@@ -557,7 +562,16 @@ default; a screen supplies what it holds and what a press means there. Every exp
   at all: the pack's words for an empty list, or the screen's own word for its list where the
   wording guide gives one. A refused find: the pack's words for a search that failed. While the
   road is asked, the choices it last answered stay shown and the field's busy mark spins; where it has
-  shown none, a skeleton line stands where the answer will.
+  shown none, a skeleton line stands where the answer will. A screen whose own choices are still on
+  their way says so (`loading`): the field's busy mark spins, and until its first choices land a list
+  that holds none shows the same skeleton line rather than the words for an empty list. A list that
+  landed holding none keeps those words while the screen reads it again.
+- **A choice of nothing is a choice like the others.** A choice whose value is the empty string, such
+  as nobody, no parent or all, is listed, chosen and named as every choice is, and choosing it sets
+  the value to the empty string. The library's list takes no entry of that value, so the select hands
+  it to the list under a key of its own and back as the empty string, in the value it hands the screen
+  and in every slot. Where no choice holds the empty value, an empty value is nothing chosen and the
+  placeholder stands.
 - **A preview beside the list follows the choice the pointer or the keyboard rests on** while the
   list is open, and stands in the chosen one otherwise (the list-preview module). Each choice carries
   its value on the module's `PREVIEW_ITEM` attribute. The select highlights a choice without moving

@@ -157,6 +157,36 @@ describe("a form's opened-with snapshot", () => {
 
     scope.stop();
   });
+
+  test("is not taken again while the form is closed or not yet ready, so the next opening takes and follows its own", async () => {
+    const open = ref(true);
+    const ready = ref(true);
+    const text = ref("Annual leave");
+    const { opened, stop } = openedWith(() => text.value, { open, ready });
+
+    await drawn();
+
+    // A read the last opening set off lands once the form has closed.
+    open.value = false;
+    await drawn();
+    await opened.take();
+
+    // The next opening is filled after it stands, before the reader presses anything.
+    open.value = true;
+    ready.value = false;
+    await drawn();
+    await opened.take();
+    ready.value = true;
+    await drawn();
+    text.value = "Family event";
+    expect(opened.dirty.value).toBe(false);
+
+    press();
+    text.value = "Sick leave";
+    expect(opened.dirty.value).toBe(true);
+
+    stop();
+  });
 });
 
 function mountForm(): { form: FormSave; value: { value: string }; sent: () => number; unmount: () => void } {

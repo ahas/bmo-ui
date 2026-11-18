@@ -3,23 +3,27 @@
        library's select menu, its search held to one rule by the choices module. A list searches once
        it holds more than seven choices, and a list found over a road or taking free entry always;
        words typed that no choice shows are offered in free entry as a new value, handed to the screen
-       as it is chosen. The field stands at the top of the opened list with the pack's words for a
-       search, takes the focus unless a finger opened it, and matches what each choice shows, its hits
-       marked where they stand. An empty list says whether nothing matched, nothing is there or the
-       road refused, and the road's first answer is awaited under a skeleton line. The list opens
-       against the control's leading edge, and against its trailing edge where the leading one leaves
-       it no room. The control names what is chosen from every choice it knows, whatever the words
-       typed leave in the list. The words typed stay while the list closes and are cleared as it opens
-       again, so a closing list keeps what it showed. The list moves as the words change it once it
-       stands open, a moving list drawn by the library's select menu as the layer's patch of it lets it
-       be, and stands still as it opens. Everything else it is handed is the library's select menu's. -->
+       as it is chosen, a list of one value then closing. A choice of nothing, keyed by the empty
+       string, is listed and chosen as every choice is. The field stands at the top of the opened list
+       with the pack's words for a search, takes the focus unless a finger opened it, and matches what
+       each choice shows, its hits marked where they stand. An empty list says whether nothing matched,
+       nothing is there or the road refused, and the road's first answer, or the first choices the
+       screen says are on their way, is awaited under a skeleton line. The list opens against the
+       control's leading edge, and against its trailing edge where the leading one leaves it no room.
+       The control names what is chosen from every choice it knows, whatever the words typed leave in
+       the list. The words typed stay while the list closes and are cleared as it opens again, so a
+       closing list keeps what it showed. The list moves as the words change it once it stands open, a
+       moving list drawn by the library's select menu as the layer's patch of it lets it be, and stands
+       still as it opens. Everything else it is handed is the library's select menu's. -->
   <USelectMenu
+    ref="menu"
     v-bind="$attrs"
     :search-term="words"
-    :model-value="props.modelValue"
+    :model-value="toList(props.modelValue)"
+    :default-value="toList(attrs.defaultValue)"
     :multiple="props.multiple"
     :value-key="props.valueKey"
-    :items="shown"
+    :items="handed"
     :label-key="props.labelKey"
     :description-key="props.descriptionKey"
     :search-input="searchInput"
@@ -33,25 +37,26 @@
     @create="takeOffered"
     @update:search-term="takeWords"
     @update:open="clearOnOpen"
-    @update:model-value="keepChosen"
+    @update:model-value="takeChosen"
+    @highlight="passHighlight"
   >
     <template v-for="name in passedSlots" #[name]="scope" :key="name">
-      <slot :name="name" v-bind="scope ?? {}" />
+      <slot :name="name" v-bind="fromListScope(scope)" />
     </template>
 
     <template v-if="!slots.default" #default="{ modelValue: value, ui }">
-      <template v-for="name in [chosenName(value)]" :key="name">
+      <template v-for="name in [chosenName(fromList(value))]" :key="name">
         <span v-if="name !== undefined" data-slot="value" :class="ui.value({ class: ownUi?.value })">{{ name }}</span>
         <span v-else data-slot="placeholder" :class="ui.placeholder({ class: ownUi?.placeholder })">{{ attrs.placeholder ?? "\u00A0" }}</span>
       </template>
     </template>
 
     <template #item-label="{ item }">
-      <SearchText :text="shownWords(item).label" :query="words" />
+      <SearchText :text="shownWords(fromListChoice(item)).label" :query="words" />
     </template>
 
     <template v-if="described" #item-description="{ item }">
-      <SearchText :text="shownWords(item).description" :query="words" />
+      <SearchText :text="shownWords(fromListChoice(item)).description" :query="words" />
     </template>
 
     <template #create-item-label>
@@ -121,8 +126,16 @@ const props = withDefaults(defineProps<Props>(), {
   createItem: false
 });
 
-// The new value free entry offered, chosen; the screen adds it and chooses it.
-const emit = defineEmits<{ create: [value: string] }>();
+// The new value free entry offered, chosen, which the screen adds and chooses; the value chosen; and the
+// choice the pointer or the keyboard rests on. The last two are the library's select menu's own, handed
+// on with a choice of nothing given back as the empty string. A value is of whatever kind the screen's
+// choices hold, so the screen's own handler names its kind.
+const emit = defineEmits<{ create: [value: string]; "update:modelValue": [value: any]; highlight: [highlighted: Highlighted | undefined] }>();
+
+interface Highlighted {
+  ref: HTMLElement;
+  value: any;
+}
 
 // The library is asked for its new value only where the select offers one, so the select decides
 // which words are new. It draws the new value nowhere unless told where, so the select names the
@@ -178,8 +191,17 @@ const refused = ref(false);
 const typed = computed(() => words.value.trim() !== "");
 
 const attrs = useAttrs();
+// Whether the screen says its own choices are on their way.
+const loadingOwn = computed(() => attrs.loading !== undefined && attrs.loading !== false);
 // Busy while the road is asked, and wherever the screen says its own choices are on their way.
-const busy = computed(() => finding.value || (attrs.loading !== undefined && attrs.loading !== false));
+const busy = computed(() => finding.value || loadingOwn.value);
+// Whether the screen's own choices have landed once: it never said they were on their way, or it no
+// longer does. A list that landed holding none is content, and a later read of it keeps its words.
+const landed = ref(!loadingOwn.value);
+
+watch(loadingOwn, (loading) => {
+  if (!loading) landed.value = true;
+});
 
 const searches = computed(() => searchesChoices(props.items, props.find !== undefined, props.createItem));
 
@@ -203,6 +225,88 @@ const presented = computed(() => [...everyChoice(props.items), ...everyChoice(fo
 // answer away, so the control still names it once a later answer leaves it out.
 const kept = shallowRef<SelectMenuItem[]>([]);
 
+// The library's list takes no entry whose value is the empty string, which it reads as nothing chosen.
+// Where a choice of nothing is presented, it is handed to the list under a key of its own and given
+// back as the empty string, in the value and the highlight handed on and in every slot. The key is no
+// text a reader can type, so no choice's own value is ever read as it.
+const NOTHING = "\u0000";
+
+function valueOf(item: unknown): unknown {
+  return typeof item === "object" && item !== null && props.valueKey ? get(item, props.valueKey) : item;
+}
+
+const holdsNothing = computed(() => presented.value.some((item) => valueOf(item) === ""));
+
+// The choice each entry handed to the list in a choice's place stands for.
+const standsFor = new WeakMap<object, SelectMenuItem>();
+
+// A record with the value at a path of its fields replaced, sharing nothing along the path with the
+// record it was copied from.
+function withValue(record: Record<string, unknown>, path: string[], value: unknown): Record<string, unknown> {
+  const [field, ...rest] = path as [string, ...string[]];
+
+  return { ...record, [field]: rest.length === 0 ? value : withValue((record[field] ?? {}) as Record<string, unknown>, rest, value) };
+}
+
+function toListChoice(item: SelectMenuItem): SelectMenuItem {
+  if (valueOf(item) !== "") return item;
+  if (typeof item !== "object" || item === null) return NOTHING;
+
+  const entry = withValue(item as Record<string, unknown>, props.valueKey!.split("."), NOTHING) as SelectMenuItem;
+
+  standsFor.set(entry as object, item);
+
+  return entry;
+}
+
+function fromListChoice(entry: unknown): SelectMenuItem {
+  if (entry === NOTHING) return "";
+
+  return (typeof entry === "object" && entry !== null ? (standsFor.get(entry) ?? entry) : entry) as SelectMenuItem;
+}
+
+// The choices as the list is handed them.
+const handed = computed((): ChoiceItems => {
+  if (!holdsNothing.value) return shown.value;
+
+  return (shown.value as unknown[]).map((entry) => (Array.isArray(entry) ? entry.map(toListChoice) : toListChoice(entry as SelectMenuItem))) as ChoiceItems;
+});
+
+function toList(value: unknown): unknown {
+  if (!holdsNothing.value) return value;
+  if (props.multiple && Array.isArray(value)) return value.map((one: unknown) => (one === "" ? NOTHING : one));
+
+  return value === "" ? NOTHING : value;
+}
+
+function fromList(value: unknown): unknown {
+  if (props.multiple && Array.isArray(value)) return value.map((one: unknown) => (one === NOTHING ? "" : one));
+
+  return value === NOTHING ? "" : value;
+}
+
+// What a slot of the library's is handed, its choice and its value as the screen knows them.
+function fromListScope(scope: Record<string, unknown> | undefined): Record<string, unknown> {
+  if (scope === undefined) return {};
+
+  return {
+    ...scope,
+    ...("item" in scope ? { item: fromListChoice(scope.item) } : {}),
+    ...("modelValue" in scope ? { modelValue: fromList(scope.modelValue) } : {})
+  };
+}
+
+function takeChosen(value: unknown): void {
+  const chosen = fromList(value);
+
+  keepChosen(chosen);
+  emit("update:modelValue", chosen);
+}
+
+function passHighlight(highlighted: Highlighted | undefined): void {
+  emit("highlight", highlighted === undefined ? undefined : { ...highlighted, value: fromList(highlighted.value) });
+}
+
 // Every choice the select knows: those it presents and those standing chosen.
 const known = computed(() => [...presented.value, ...kept.value]);
 
@@ -219,13 +323,22 @@ function everyChoice(items: ChoiceItems): SelectMenuItem[] {
 // hold them.
 const offered = computed(() => (props.createItem && !finding.value ? typedValue(shown.value, words.value, keys.value, countLocale()) : null));
 
+// The library's select menu holds the list open once its new value is chosen, as it must for a list of
+// several values. A list of one value closes as it does on any choice: through its control, as a press
+// on the control closes an open list, so the menu hears its list close as it hears any closing.
+const menu = useTemplateRef<{ triggerRef?: HTMLElement }>("menu");
+
 function takeOffered(): void {
-  if (offered.value !== null) emit("create", offered.value);
+  if (offered.value === null) return;
+
+  emit("create", offered.value);
+  if (!props.multiple) menu.value?.triggerRef?.click();
 }
 
-// The road is being asked; the list stands empty only where no earlier answer is left to show, so its
-// place is kept by a skeleton line rather than by words.
-const awaited = computed(() => finding.value);
+// The road is being asked, or the screen's first choices are on their way: the list stands empty only
+// where no earlier answer is left to show and nothing has landed yet, so its place is kept by a
+// skeleton line rather than by words. A road that refused says so whatever the screen still awaits.
+const awaited = computed(() => finding.value || (loadingOwn.value && !landed.value && !refused.value));
 
 // The list opens against the control's leading edge unless the screen says where. Where that edge
 // leaves the list no room on the screen, the library tries the trailing edge before it slides the

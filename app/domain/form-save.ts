@@ -20,7 +20,7 @@ export interface OpenedWith {
   // Whether the values differ from the snapshot; never before one is taken.
   dirty: ComputedRef<boolean>;
   // Takes the snapshot again from the values as they stand once what is under way has been drawn,
-  // as after a save that went through.
+  // as after a save that went through; nothing while the form is closed or its data not yet in it.
   take: () => Promise<void>;
 }
 
@@ -178,8 +178,13 @@ export function useOpenedWith(values: () => unknown, options: OpenedWithOptions 
     filled?.();
   }
 
+  // Only a form that stands is taken again: a snapshot set while it is closed or not yet ready would
+  // stand in for the one its standing takes, which then neither takes its own nor follows the form
+  // being filled.
   async function take(): Promise<void> {
     await nextTick();
+
+    if (gone || !standing.value) return;
 
     taken.value = { values: now.value };
   }
