@@ -158,5 +158,10 @@
     "sha256": "045fcab3fbcd0b420d34c3083bd81778a622ced648a321fa9e0967f88c8dd9db",
     "bound": "0.1.0-rev.23",
     "why": "Adds only: DateCalendar with six wording keys for its paging buttons; useOpenedWith with OpenedWith and OpenedWithOptions on the form-save module, which useCloseGuard, FormPart and SettingsDialog now accept beside the function or boolean they took; the floating create button kept under dialogs on a phone; one padding in a dialog head, body and foot; a form dialog holding changes asking on the back gesture; and Esc passing a date or time field segment through the reka-ui patch. Nothing a bundle built on 0.1.0-rev.23 reads is taken away or changed."
+  },
+  "bmo-ui-0.1.0-rev.32.tgz": {
+    "sha256": "029a0cf967a20cfe1cda6c5b87c55efbf7b01e1c771adaa8c4346fa6d752effc",
+    "bound": "0.1.0-rev.23",
+    "why": "A dialog's corner close asks before it throws a change away"
   }
 }
