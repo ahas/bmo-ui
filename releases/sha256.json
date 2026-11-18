@@ -178,5 +178,10 @@
     "sha256": "18921178339b00d4ec077c36516a2d2f77b490b7f1a46d6bed6e47335815ff08",
     "bound": "0.1.0-rev.23",
     "why": "A form dialog no longer asks to discard at an outside focus it refuses on its own, such as a menu handing the focus back to its trigger. Nothing a bundle built on 0.1.0-rev.23 reads is taken away or changed: useCloseGuard still returns dismissible."
+  },
+  "bmo-ui-0.1.0-rev.36.tgz": {
+    "sha256": "fcdca6adda9cba657ab4c4511a82c6a28a8cd3a3edbd4ee76808df0313f6a4e5",
+    "bound": "0.1.0-rev.23",
+    "why": "An icon button gets the focus back as a menu, popover or dialog it opened closes"
   }
 }
