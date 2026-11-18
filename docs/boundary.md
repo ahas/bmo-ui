@@ -13,7 +13,10 @@ wording keys listed here are the ones the layer's list holds.
 
 - **The host vendors a release's file** as it stands, the one the release verb wrote under
   `releases/` for the version, checked against the sha256 the ledger beside it names, and installs
-  that file; it never packs the layer from its source (the README, "Version").
+  that file; it never packs the layer from its source (the README, "Version"). The manifest's
+  `bmo-ui` dependency is a file dependency on that file inside the host's checkout, and the vendor
+  verb moves every such dependency under the checkouts it is handed onto another release, copying
+  the file, checking it against the ledger, removing the old one and writing the lockfile again.
 - **The host extends the layer** from its Nuxt configuration. The layer brings Nuxt UI as its module,
   its stylesheet, fonts and overrides, its components, its page plugins and its head.
 - **Components are registered by name** through the layer, and a host uses them as its own.

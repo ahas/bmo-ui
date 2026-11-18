@@ -28,6 +28,7 @@
     "prepare": "bun x nuxi prepare",
     "prepack": "bun scripts/prepack.ts && bun run elements",
     "release": "bun scripts/release.ts",
+    "vendor": "bun scripts/vendor.ts",
     "elements": "vite build --config elements.config.ts",
     "typecheck": "nuxi typecheck",
     "catalogue": "bun catalogue/generate.ts"

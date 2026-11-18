@@ -107,7 +107,8 @@ export function boundAsked(args: string[]): { bound: string; why: string } | str
   return { bound, why };
 }
 
-class Refused extends Error {}
+/** A refusal the verbs print as it stands, ending with a non-zero exit. */
+export class Refused extends Error {}
 
 function run(command: string[], cwd: string): string {
   const done = Bun.spawnSync(command, { cwd, stdout: "pipe", stderr: "inherit" });

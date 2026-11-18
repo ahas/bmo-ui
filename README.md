@@ -24,7 +24,8 @@ components and behaviours every screen is built from. It is a Nuxt layer, built 
 ## Using it
 
 - Vendor a release's file from `releases/` as it stands, add the package from it and extend it from
-  the host's Nuxt configuration.
+  the host's Nuxt configuration. The vendor verb moves a host that vendors one already onto another
+  release ("Version").
 - Install `@nuxtjs/i18n` in the host and give it a pack answering every key the boundary document
   lists. The layer names it and its engine, `vue-i18n`, as peers.
 - Apply the patches in `patches/` to the same dependencies in the host's own install.
@@ -39,6 +40,8 @@ components and behaviours every screen is built from. It is a Nuxt layer, built 
   local binaries on its path.
 - `bun run release` writes the packed file of the manifest's version under `releases/` and its sha256
   into the ledger beside it ("Version"); it is the one way a packed file comes to exist.
+- `bun run vendor <version> <checkout>...` puts a released file into every manifest under each
+  checkout that vendors the layer ("Version").
 - `bun run elements` builds each custom element into one script under `dist/`, which git ignores;
   packing runs it first, so the packed file carries the scripts.
 - `bun run typecheck` checks the layer, its tests and the harness plugin's code with the components'
@@ -60,7 +63,7 @@ components and behaviours every screen is built from. It is a Nuxt layer, built 
 | `mcp/` | The MCP server the command starts |
 | `patches/` | The patches applied to dependencies on install |
 | `releases/` | The packed file of each version a host takes, with the ledger of their sha256 |
-| `scripts/` | The release verb and the check packing runs first |
+| `scripts/` | The release verb, the vendor verb and the check packing runs first |
 | `shared/` | The shared modules, read by the layer's code and the host's alike |
 | `skills/` | The `bmo-ui` skill |
 | `tests/` | The tests, with the browser lane's files and their support under `tests/browser/` |
@@ -106,6 +109,24 @@ testbed declaration, the Korean ledger the quick checks read, `CLAUDE.md`, and t
   data file, the skill, the Nuxt configuration, the README, the licence and the documents.
 - **A host vendors that file as it stands,** checked against the ledger, so every host of a version
   stands on the same bytes. It never packs the layer from its source, renames a file or packs one
-  again. A path dependency on a checkout serves a repository's own work and tests while a change
+  again.
+- **The vendor verb moves hosts onto a release,** `bun run vendor <version> <checkout>...`, each
+  checkout named by its absolute path, since the verb runs from the layer's root. The checkouts come
+  from the caller alone; the verb knows no host. Under each checkout it reads every package manifest
+  outside dependency folders and hidden folders with a JSON reader, and takes those whose `bmo-ui`
+  dependency, among the dependencies, development dependencies and optional dependencies, is a file
+  dependency on a packed file of the layer inside that checkout. For each one that names another
+  release it copies the version's file from `releases/` into the folder the old file stands in and
+  checks the copy against the ledger's sha256, points the dependency at the new file in the
+  manifest's own spelling, raises a peer dependency that pins the old version exactly to the new one,
+  removes the old file, and writes the lockfile again with the package manager's lockfile-only install
+  where a `bun.lock` stands beside the manifest or in a folder above it inside the checkout. A
+  manifest that already names the version is left as it stands. It prints, under each checkout, what
+  it changed in each manifest, and commits nothing: the job that runs it commits in each repository.
+  Before changing anything it refuses a version with no packed file or no ledger line, a file whose
+  bytes do not match the ledger, a checkout path that is not absolute or not a folder, a checkout
+  holding no manifest that vendors the layer, and a vendored file lying outside its checkout, naming
+  each.
+- A path dependency on a checkout serves a repository's own work and tests while a change
   waits for a release; the layer it installs names its version marked `+source`, so no console
   takes a bundle built on it.
