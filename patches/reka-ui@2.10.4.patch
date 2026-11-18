@@ -105,3 +105,27 @@ index e773fb5ea0a71a2132b200f8baacdc95c39546e0..121efae18ba2370137ec3dd8bfe61cb0
  			} else providerContext.onClose();
  		});
  		const wasOpenDelayedRef = ref(false);
+diff --git a/dist/date/useDateField.cjs b/dist/date/useDateField.cjs
+index b5f576dcc147e27a6d2bf841b858ce4716f8afe9..ba656a07771e05f2e491cf7a92b220c5c5b6b371 100644
+--- a/dist/date/useDateField.cjs
++++ b/dist/date/useDateField.cjs
+@@ -676,6 +676,7 @@ function useDateField(props) {
+ 	}
+ 	function handleSegmentKeydown(e) {
+ 		if (e.isComposing || e.key === "Process") return;
++		if (e.key === kbd.ESCAPE) return;
+ 		const disabled = props.disabled.value;
+ 		const readonly = props.readonly.value;
+ 		if (disabled || readonly) return;
+diff --git a/dist/date/useDateField.js b/dist/date/useDateField.js
+index 32d94e40b33821f3a4ff460f5317083b406c193a..3121e8951f28b6e8561bb345577ee71de3033a6f 100644
+--- a/dist/date/useDateField.js
++++ b/dist/date/useDateField.js
+@@ -675,6 +675,7 @@ function useDateField(props) {
+ 	}
+ 	function handleSegmentKeydown(e) {
+ 		if (e.isComposing || e.key === "Process") return;
++		if (e.key === kbd.ESCAPE) return;
+ 		const disabled = props.disabled.value;
+ 		const readonly = props.readonly.value;
+ 		if (disabled || readonly) return;

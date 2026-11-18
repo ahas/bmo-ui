@@ -11,13 +11,14 @@ import type { Browser, BrowserContext, Page } from "playwright-core";
 
 // A form's dialog asks before it closes only while its values differ from what it opened with
 // (`docs/components.md`, "Forms" and "Floating things"): left untouched, whether opened for a new
-// record with its defaults or with its data landing after it opened, and with its change put back or
-// saved, it closes at once. The back gesture over one holding a change
-// asks first, as its close and Esc do: the question stands over the dialog, discard takes both away
-// and leaves the history as it was, and every way out of the question keeps the dialog standing with
-// an entry of its own, so the next press of back asks again. The page is built as the layer's custom
-// elements are, from the components that ship, and driven by a real Chromium at a phone's width and a
-// desktop's. Skipped where the browser build is not on the machine.
+// record with its defaults or with its data landing after it opened, and with its change put back
+// or saved, it closes at once. The back gesture over one holding a change asks first, as its close
+// and Esc do: the question stands over the dialog, discard takes both away and leaves the history
+// as it was, and every way out of the question keeps the dialog standing with an entry of its own,
+// so the next press of back asks again. Esc and back reach the dialog the same way with the focus
+// in a date or a time field's segment. The page is built as the layer's custom elements are, from
+// the components that ship, and driven by a real Chromium at a phone's width and a desktop's.
+// Skipped where the browser build is not on the machine.
 
 const ready = touchReady();
 const ROOT = new URL("../../", import.meta.url).pathname;
@@ -163,6 +164,25 @@ async function backAsks(page: Page): Promise<void> {
   expect(await page.locator(FORM).count()).toBe(1);
 }
 
+// The segments the component library's own date and time fields are typed in, each of which keeps
+// every key but Tab for itself.
+const SEGMENTS = [
+  { field: "date", segment: "[data-reka-date-field-segment=month]" },
+  { field: "time", segment: "[data-reka-time-field-segment=hour]" }
+];
+
+const pressBack = (page: Page) => async () => {
+  await page.evaluate(() => history.back());
+};
+
+// One press of Esc answered by the question standing over the form's dialog.
+async function escAsks(page: Page): Promise<void> {
+  await page.keyboard.press("Escape");
+  await page.waitForSelector(QUESTION, { timeout: 3000 });
+
+  expect(await page.locator(FORM).count()).toBe(1);
+}
+
 for (const { name, width, height } of WIDTHS) {
   describe.skipIf(!ready)(`a form's dialog with no change, on ${name}`, () => {
     test("closes at once when opened for a new record with its defaults and left untouched", async () => {
@@ -243,4 +263,44 @@ for (const { name, width, height } of WIDTHS) {
       await context.close();
     });
   });
+
+  for (const { field, segment } of SEGMENTS) {
+    describe.skipIf(!ready)(`a form's dialog with the focus in a ${field} field's segment, on ${name}`, () => {
+      test("closes at once on Esc while it holds no change", async () => {
+        const { context, page } = await created(width, height);
+
+        await page.click(segment);
+        await closesAtOnce(page, pressEsc(page));
+
+        await context.close();
+      });
+
+      test("asks on Esc while it holds a change", async () => {
+        const { context, page } = await changed(width, height);
+
+        await page.click(segment);
+        await escAsks(page);
+
+        await context.close();
+      });
+
+      test("closes at once on back while it holds no change", async () => {
+        const { context, page } = await created(width, height);
+
+        await page.click(segment);
+        await closesAtOnce(page, pressBack(page));
+
+        await context.close();
+      });
+
+      test("asks on back while it holds a change", async () => {
+        const { context, page } = await changed(width, height);
+
+        await page.click(segment);
+        await backAsks(page);
+
+        await context.close();
+      });
+    });
+  }
 }

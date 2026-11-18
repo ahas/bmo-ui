@@ -580,6 +580,8 @@ default; a screen supplies what it holds and what a press means there. Every exp
   - A form's dialog with no change, opened and left untouched, its change put back or just saved,
     closes at once by every way, back among them; what counts as a change is the Forms section's.
   - The focus handed back to the control a floating thing was opened from closes nothing.
+  - Esc reaches what floats from every field in it, a date or a time field's segment among them:
+    an untouched form's dialog closes, and one holding a change asks (the patch under `patches/`).
   - A tooltip naming a control of what the press closes is put away in the same press: it is asked
     first, and the floating thing is asked again before the press is over.
   - A choice that changes the page leaves its entry behind, and returning passes it.

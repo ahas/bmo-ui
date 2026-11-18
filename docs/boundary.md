@@ -495,7 +495,9 @@ Every token is a custom property stated by the layer's stylesheet on the root un
     that names a control inside it. It also has a tooltip that opens tell the others which one it is,
     so one brought up again while its going is still drawn stays up rather than taking its own
     opening for another's and closing itself: a page layer's tooltip, moved on with the pointer from
-    one control it names to the next, comes up over each.
+    one control it names to the next, comes up over each. And it lets Esc pass a date or a time
+    field's segment, which keeps every other key but Tab for itself, so Esc pressed there reaches the
+    floating thing around the field as from any other field.
   - The `@nuxt/icon` patch writes an icon drawn as a stylesheet rule under the name it was loaded
     for. Without it, an icon whose name moves on while its drawing is still being fetched — a
     button's spinner giving way to its mark — writes that drawing under the new name, and the new
