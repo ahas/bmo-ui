@@ -560,11 +560,15 @@ default; a screen supplies what it holds and what a press means there. Every exp
   the focus a closing dialog or sheet hands back to the control it was opened from, and the focus a
   dialog takes up on its own close as it opens. The first would leave that control's name standing
   over what the reader returned to; the second would stand a name over the open dialog and spend the
-  reader's first Esc closing the name rather than the dialog. The shared tooltip and the library's
+  reader's first Esc closing the name rather than the dialog. Which focus a closing layer hands back
+  is told by the overlays module alone, as the focus lands, and the shared tooltip and every page
+  layer read that tell before anything else: the browser's visible-focus tell names such a focus
+  the keyboard's once a key has closed the layer, so a name would stand over the control the reader
+  returned to and spend their next Esc. The shared tooltip and the library's
   dialog close (`ShellClose`) hold this themselves, the close by telling the shared tooltip which
-  focus is the keyboard's where the browser's own tell cannot, and the tooltip module's provider
-  setting holds it for every other tooltip the library draws, once the host hands it to the
-  library's app root (`docs/boundary.md`, "What the host owes"). The dialog close names itself on
+  focus is the keyboard's where the browser's own tell cannot. The tooltip module's provider
+  setting keeps every other tooltip the library draws from coming up for a focus the browser does
+  not show as visible, once the host hands it to the library's app root (`docs/boundary.md`, "What the host owes"). The dialog close names itself on
   focus only where the page's own modality mark (`docs/design.md`, "Focus") names the keyboard and
   the focus came to it from a control of its own dialog. The browser's visible-focus tell cannot stand in, since it
   carries over from whatever the page last showed focused, and a dialog opened by a key is no more
@@ -602,7 +606,8 @@ default; a screen supplies what it holds and what a press means there. Every exp
   - A pointer waits the tooltip's usual moment, and moving on to another thing the layer names while
     one stands brings that one up at once. Leaving it, pressing anywhere or scrolling what holds it
     puts it away. Whether the layer still names it is asked again as the wait ends.
-  - A keyboard focus brings it up at once and takes it away as the focus leaves.
+  - A keyboard focus brings it up at once and takes it away as the focus leaves. The focus a
+    closing layer hands back is no keyboard focus and brings up nothing.
   - A finger held on it brings it up by the layer's one held finger, beside whatever a row's own
     hold does, and lifting that finger presses nothing. What it holds selects no words, and the
     phone's own long-press menu over it is turned away. Sliding the finger, or the next touch

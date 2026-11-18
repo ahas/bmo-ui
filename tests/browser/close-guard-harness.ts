@@ -8,6 +8,8 @@ import UInputDate from "@nuxt/ui/components/InputDate.vue";
 import UInputTime from "@nuxt/ui/components/InputTime.vue";
 import UPopover from "@nuxt/ui/components/Popover.vue";
 
+import CutLineTip from "../../app/components/CutLineTip.vue";
+import HintTip from "../../app/components/HintTip.vue";
 import SettingsDialog from "../../app/components/SettingsDialog.vue";
 import { useOpenedWith } from "../../app/domain/form-save";
 import { layerCount } from "../../app/domain/layers";
@@ -26,8 +28,10 @@ import type { InputDateProps, InputTimeProps } from "@nuxt/ui";
 // request, the form stands at once with its defaults and loads nothing. The form hands its values
 // to the opened-with snapshot, saying when it is ready where the address asks for it (`?ready`). The
 // page stands outside Nuxt, so it wires itself as a host's page is wired: the library's app root
-// holding the boundary's tooltip setting, the page's own mark of which hand last moved the focus,
-// and the words handed over here.
+// holding the boundary's tooltip setting and the cut-line page layer, the page's own mark of which
+// hand last moved the focus, and the words handed over here. Two controls in the dialog carry a
+// name cut short by their box: one the cut-line layer names, and one the shared tooltip names as
+// the control itself takes the focus.
 
 const WORDS = {
   common: {
@@ -40,6 +44,11 @@ const WORDS = {
 // host; a page with no pages hands over one that keeps no history of its own, as the framework's
 // small router does.
 Object.assign(globalThis, { useRouter: () => ({ options: {}, beforeEach: () => undefined }) });
+
+const CUT_NAME = "A name far longer than the narrow control it is given to stand in";
+// A control as narrow as a cut name finds it on a phone; the shared tooltip's is clipped with no
+// ellipsis, so the cut-line layer leaves it to the tooltip of its own.
+const NARROW = "display:block;width:120px;overflow:hidden;white-space:nowrap";
 
 const loaded = ref(false);
 const text = ref("");
@@ -99,12 +108,15 @@ const Page = defineComponent(() => {
             h(UPopover, null, {
               default: () => h(UButton, { label: "Pick a length", "data-pick": "" }),
               content: () => h(UButton, { label: "Half day", "data-half": "", onClick: () => (length.value = "half day") })
-            })
+            }),
+            h("button", { type: "button", "data-cut-line": "" }, [h("span", { style: `${NARROW};text-overflow:ellipsis` }, CUT_NAME)]),
+            h(HintTip, { as: "button", type: "button", cut: true, text: CUT_NAME, style: NARROW, "data-cut-hint": "" }, () => CUT_NAME)
           ],
           // The save keeps the dialog standing, so what it leaves is read by the next close.
           footer: () => h(UButton, { label: "Save", "data-save": "", onClick: () => void opened.take() })
         }
-      )
+      ),
+      h(CutLineTip)
     ]);
 });
 

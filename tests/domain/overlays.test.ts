@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, test } from "bun:test";
 
-import { OFF_HISTORY, OVER_LAYERS, refuseHandedBackFocus, refuseStalePresses, standsAsLayer } from "~/domain/overlays";
+import { focusHandedBack, OFF_HISTORY, OVER_LAYERS, refuseHandedBackFocus, refuseStalePresses, standsAsLayer } from "~/domain/overlays";
 
 // A press outside what floats closes it only while it is the press being handled.
 //
@@ -36,9 +36,10 @@ function tellOutside(originalEvent: Event | null): boolean {
   return !event.defaultPrevented;
 }
 
-// A move of the focus, as the browser reports it where the focus lands.
-function focusMove(): Event {
-  const event = new Event("focusin", { bubbles: true });
+// A move of the focus, as the browser reports it where the focus lands: the focusin that bubbles
+// from there, or the target's own focus, which does not.
+function focusMove(type: "focusin" | "focus" = "focusin"): Event {
+  const event = new Event(type, { bubbles: type === "focusin" });
 
   document.body.dispatchEvent(event);
 
@@ -50,7 +51,7 @@ function turn(): Promise<void> {
 }
 
 // A layer going, as the library says so, and the focus handed back on its own later turn.
-async function handBack(): Promise<Event> {
+async function handBack(type: "focusin" | "focus" = "focusin"): Promise<Event> {
   const scope = document.createElement("div");
 
   document.body.append(scope);
@@ -59,7 +60,7 @@ async function handBack(): Promise<Event> {
 
   await turn();
 
-  return focusMove();
+  return focusMove(type);
 }
 
 // The library's own say on a layer the focus landed outside of: it closes unless refused.
@@ -125,6 +126,11 @@ describe("a press that is not the one being handled", () => {
 describe("the focus a going layer hands back", () => {
   test("closes nothing it lands outside of, so what the choice opened stays open", async () => {
     expect(tellFocusOutside(await handBack())).toBe(false);
+  });
+
+  // A tooltip reads the target's own focus as well, which the library answers before the focusin.
+  test("is named as handed back on the target's own focus too, as a tooltip reads it", async () => {
+    expect(focusHandedBack(await handBack("focus"))).toBe(true);
   });
 
   test("is only the move on the library's own turn: the reader's next move still closes", async () => {

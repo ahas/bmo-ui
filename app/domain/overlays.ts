@@ -236,19 +236,18 @@ const OUTSIDE_FOCUS = "dismissableLayer.focusOutside";
 // scope hands the focus back to wherever it stood when the layer opened.
 const HANDING_BACK = "focusScope.autoFocusOnUnmount";
 
-// The focus a going layer hands back moves out of nothing the reader is in.
-//
-// A menu gives the focus back to its own button as it goes. When the reader's choice in it opened
-// something else — a choice opening a panel of details beside the button — that something already
-// stands by the time the focus arrives at the button, and the button is outside it. Told of that
-// move, it closes the moment it opened. The move is the library putting its own things in order
-// rather than the reader going anywhere, so a focus outside told of it closes nothing, whichever
-// floating thing the choice opened and whichever screen drew it. A press outside, Esc and back
-// still close it.
-export function refuseHandedBackFocus(): void {
-  const handedBack = new WeakSet<Event>();
-  let handing = 0;
+// The moves of the focus a going layer made, each as it landed: the target's own focus event and the
+// focusin that follows it, so whoever reads either one is told.
+const handedBack = new WeakSet<Event>();
+let handing = 0;
+let tellingHandedBack = false;
 
+function tellHandedBack(): void {
+  if (tellingHandedBack) {
+    return;
+  }
+
+  tellingHandedBack = true;
   window.addEventListener(
     HANDING_BACK,
     () => {
@@ -260,22 +259,46 @@ export function refuseHandedBackFocus(): void {
     true
   );
 
-  window.addEventListener(
-    "focusin",
-    (event) => {
-      if (handing > 0) {
-        handedBack.add(event);
-      }
-    },
-    true
-  );
+  // Caught on the way down, so the mark stands before anything where the focus landed reads it.
+  for (const type of ["focus", "focusin"]) {
+    window.addEventListener(
+      type,
+      (event) => {
+        if (handing > 0) {
+          handedBack.add(event);
+        }
+      },
+      true
+    );
+  }
+}
+
+// Whether a move of the focus is a going layer handing it back to wherever it stood when the layer
+// opened, rather than the reader moving it (`docs/components.md`, "Tooltips"). The browser's
+// visible-focus tell cannot say so: once a key closed the layer it names the move the keyboard's.
+// Told only once the overlays are watched; before that no move is taken for one.
+export function focusHandedBack(event: Event): boolean {
+  return handedBack.has(event);
+}
+
+// The focus a going layer hands back moves out of nothing the reader is in.
+//
+// A menu gives the focus back to its own button as it goes. When the reader's choice in it opened
+// something else — a choice opening a panel of details beside the button — that something already
+// stands by the time the focus arrives at the button, and the button is outside it. Told of that
+// move, it closes the moment it opened. The move is the library putting its own things in order
+// rather than the reader going anywhere, so a focus outside told of it closes nothing, whichever
+// floating thing the choice opened and whichever screen drew it. A press outside, Esc and back
+// still close it.
+export function refuseHandedBackFocus(): void {
+  tellHandedBack();
 
   window.addEventListener(
     OUTSIDE_FOCUS,
     (event) => {
       const said = (event as CustomEvent<{ originalEvent?: Event }>).detail?.originalEvent;
 
-      if (said !== undefined && (handedBack.has(said) || overLayers(said.target))) {
+      if (said !== undefined && (focusHandedBack(said) || overLayers(said.target))) {
         event.preventDefault();
       }
     },

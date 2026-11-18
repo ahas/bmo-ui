@@ -400,3 +400,49 @@ for (const { name, width, height } of WIDTHS) {
     });
   }
 }
+
+// A control whose name is cut short, holding the focus as the dialog's question opens, gets the focus
+// back as the question goes (`docs/components.md`, "Tooltips"): that focus is no keyboard focus, so it
+// brings up no name, and the next Esc is the dialog's and asks again rather than putting a name away.
+// The keyboard reaching the control first shows the name does come up for a key, and is the first
+// Esc's. Each control is reached from a neighbour that names nothing, so no other name is still
+// leaving as it comes up. Once is enough at a phone's width, where names are cut.
+const CUT_NAMES = [
+  { by: "the cut-line page layer", control: "[data-cut-line]", from: "[data-pick]", key: "Tab" },
+  { by: "the shared tooltip, on the control's own focus", control: "[data-cut-hint]", from: SAVE, key: "Shift+Tab" }
+];
+const TOOLTIP = "[role=tooltip]";
+
+describe.skipIf(!ready)("the focus the question hands back to a control whose name is cut, on a phone", () => {
+  for (const { by, control, from, key } of CUT_NAMES) {
+    test(`brings up no name from ${by}, so the next Esc asks again`, async () => {
+      const { context, page } = await changed(WIDTHS[0]!.width, WIDTHS[0]!.height);
+
+      await page.focus(from);
+      await page.keyboard.press(key);
+      await page.waitForFunction((selector) => document.activeElement?.matches(selector) === true, control, { timeout: 3000 });
+      await page.waitForSelector(TOOLTIP, { timeout: 3000 });
+      await page.keyboard.press("Escape");
+      await page.waitForSelector(TOOLTIP, { state: "detached", timeout: 3000 });
+      await escAsks(page);
+
+      // Whether a name comes up at any moment from here on, however briefly it stands.
+      await page.evaluate(() => {
+        const seen = window as unknown as { nameCameUp: boolean };
+
+        seen.nameCameUp = false;
+        new MutationObserver(() => {
+          if (document.querySelector("[role=tooltip]") !== null) seen.nameCameUp = true;
+        }).observe(document.body, { subtree: true, childList: true });
+      });
+      await page.keyboard.press("Escape");
+      await page.waitForSelector(QUESTION, { state: "detached", timeout: 3000 });
+      await page.waitForFunction((selector) => document.activeElement?.matches(selector) === true, control, { timeout: 3000 });
+      await escAsks(page);
+
+      expect(await page.evaluate(() => (window as unknown as { nameCameUp: boolean }).nameCameUp)).toBe(false);
+
+      await context.close();
+    });
+  }
+});
