@@ -202,10 +202,16 @@ whole in `docs/boundary.md`; this document says what each is for and how the lay
     drawer library's own slide, since the same curve settles a drawer a finger has thrown.
 - **A list whose items come, go and change places while it is read is a moving list**
   (`MovingList`), and shows that by position alone.
-  - The items that stay slide to their new places. An item that comes unfolds its height from
-    nothing where it lands, one that goes folds its height to nothing where it stood, and the items
-    around it close up as it does, the list's own gap included, so nothing jumps at the end. What an
-    item shows is laid out at its full size throughout and only clipped.
+  - It moves along its own axis, which its layout says: a flex row, forward or reversed, lays its
+    items out sideways and moves them sideways; every other list is a column and moves them up and
+    down.
+  - The items that stay slide to their new places. An item that comes unfolds from nothing where it
+    lands, one that goes folds to nothing where it stood: its size along the axis, its padding and
+    its border on that axis's two sides. The items around it close up as it does, so nothing jumps
+    at the end: an item with one before it gives back the list's gap before it and sets its own
+    margins on the axis aside, and an item standing first gives back the gap after it and the
+    leading margin of the item after it. A gap and an overlap drawn as a negative margin close up
+    the same way. What an item shows is laid out at its full size throughout and only clipped.
   - Every item moves at once, at `unfold`, eased by `move`: no item waits for the one before it.
   - Items are keyed by their own lasting id, never by position.
   - A list a search narrows is one too. The one select's choices (`ChoiceSelect`) slide, fold and
@@ -213,6 +219,14 @@ whole in `docs/boundary.md`; this document says what each is for and how the lay
     its heading with it. The component library draws that list itself, so the layer's patch of its
     select menu has the menu draw its groups and choices through Vue's `TransitionGroup` with the
     moving-list module's `MOVING_LIST`, the same engine `MovingList` is.
+- **A box that changes size around what it holds unfolds to its new size** (`UnfoldingBox`). Its
+  ground alone changes box: what it holds is laid out at its final size from the first frame and
+  only moves, the box hiding what lies past its edge while it is smaller. A change that comes at
+  once — words replaced, a figure gaining a place — moves the box at `unfold`, eased by `move`.
+  While a part of what it holds is unfolding or folding of its own, as a moving list's item does,
+  the box follows that size frame by frame and adds no movement of its own, since a second
+  movement chasing the first would end after it and leave the content outside its ground. Nothing
+  in it scales.
 - **A tabbed panel moves as one panel sideways** (`TabSlide`). The panel under the tabs is keyed by
   its tab; the new tab's panel comes in from the side its tab stands on in the tab order while the
   old one leaves to the other side, both together, at `unfold` eased by `move`. The rows inside move
@@ -233,8 +247,9 @@ whole in `docs/boundary.md`; this document says what each is for and how the lay
 - **A list replaced by a different one stands at once.** Keyed by what it was read for, the new list
   replaces the old with none of its rows moving.
 - **Which tool moves what.** A list is Vue's own `TransitionGroup`, through `MovingList`. A tab's
-  panel is Vue's own `Transition` of one keyed element, through `TabSlide`. One list is moved by one
-  engine, never two. A page change on its own does not move.
+  panel is Vue's own `Transition` of one keyed element, through `TabSlide`. A box's size is a CSS
+  transition on the size it is held to, through `UnfoldingBox`. One list is moved by one engine,
+  never two. A page change on its own does not move.
 - **A reader who asked for less movement sees nothing move, grow or unfold.** Every transition's
   length is nought, the pill stands and goes at once, and a dialog, a menu or a folding region only
   fades where it stands.

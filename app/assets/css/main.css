@@ -214,8 +214,9 @@
 }
 
 /* A list whose items come, go and change places (see MovingList): the items that stay slide, and
-   one that comes or goes changes its box, clipped, with the margin that takes in the list's gap.
-   All of it is one movement along the list's own axis, so it shares one length and one easing. */
+   one that comes or goes changes its box along the list's axis, its height in a column and its width
+   in a row, clipped, with the margins that take in what stands between it and its neighbours. All
+   of it is one movement along the list's own axis, so it shares one length and one easing. */
 .bmo-list-move {
   transition: transform var(--bmo-motion-unfold) var(--bmo-ease-move);
 }
@@ -225,6 +226,7 @@
   overflow: clip;
   transition:
     height var(--bmo-motion-unfold) var(--bmo-ease-move),
+    width var(--bmo-motion-unfold) var(--bmo-ease-move),
     padding var(--bmo-motion-unfold) var(--bmo-ease-move),
     border-width var(--bmo-motion-unfold) var(--bmo-ease-move),
     margin var(--bmo-motion-unfold) var(--bmo-ease-move);
