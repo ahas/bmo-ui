@@ -223,5 +223,10 @@
     "sha256": "20ffd7d1c720def01d9e7b7cf8f0cc81418586dab95d4eaedd53d7609f42a8a7",
     "bound": "0.1.0-rev.23",
     "why": "Keeps the library's slot types on every slot ChoiceSelect hands on, which rev.43 typed as unknown; carries rev.43's menu rows on the 4px grid, free entry close, first-read skeleton, choice of nothing and useOpenedWith take; nothing a bundle of rev.23 reads changes"
+  },
+  "bmo-ui-0.1.0-rev.45.tgz": {
+    "sha256": "f2438a40a91a3e861d716f5d23a75aaf2c7a2578f27f17e0fb87c67a9c16d240",
+    "bound": "0.1.0-rev.23",
+    "why": "Restyles a dialog head's close and gap only; every bundle built from 0.1.0-rev.23 runs on it unchanged"
   }
 }
