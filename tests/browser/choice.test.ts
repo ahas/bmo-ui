@@ -151,6 +151,17 @@ describe.skipIf(!ready)("the one select at a desktop's width", () => {
     await close(page);
   });
 
+  test("opened by a key, puts the focus in its search so typing searches at once", async () => {
+    await page.focus("#long");
+    await page.keyboard.press("Enter");
+    await page.waitForSelector(FIELD);
+    expect(await page.$eval(FIELD, (input) => document.activeElement === input)).toBe(true);
+
+    await page.keyboard.type("oslo");
+    await listedAs(page, ["# North", "Oslo"]);
+    await close(page);
+  });
+
   test("narrows to what the choices show, marks the hits and keeps the headings of what stays", async () => {
     await page.click("#long");
     await page.waitForSelector(FIELD);
@@ -242,5 +253,36 @@ describe.skipIf(!ready)("the one select under a finger at a phone's width", () =
     await page.waitForSelector(LIST, { state: "detached", timeout: 3_000 });
     expect(page.url()).toBe(address);
     expect(await page.$("#long")).not.toBeNull();
+  });
+
+  test("keeps its search and its list in sight once a pressed field brings the keyboard up", async () => {
+    const { page } = touch;
+    const full = page.viewportSize()!;
+
+    await touch.tap(await centreOf(page, "#long"));
+    await page.waitForSelector(FIELD);
+    await touch.tap(await centreOf(page, FIELD));
+    await page.waitForFunction((selector) => document.activeElement === document.querySelector(selector), FIELD, { timeout: 3_000 });
+
+    // The keyboard takes the lower part of the screen, and the host's viewport has it resize the page.
+    const left = Math.round(full.height * 0.55);
+
+    try {
+      await page.setViewportSize({ width: full.width, height: left });
+      await page.waitForFunction(
+        ([field, list, height]) => {
+          const input = document.querySelector(field)?.getBoundingClientRect();
+          const box = document.querySelector(list)?.getBoundingClientRect();
+
+          return input !== undefined && box !== undefined && input.top >= 0 && input.bottom <= height && box.top >= 0 && box.bottom <= height;
+        },
+        [FIELD, LIST, left] as const,
+        { timeout: 3_000 }
+      );
+    } finally {
+      await page.setViewportSize(full);
+    }
+
+    await close(page);
   });
 });
