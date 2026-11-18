@@ -76,6 +76,7 @@
 </template>
 
 <script setup lang="ts">
+import { useHeldSize } from "../domain/held-size";
 import { islandState, settle, expands, type IslandAction, type IslandTone } from "../domain/island";
 import { countText } from "../domain/numbers";
 import { SCREEN_TOP_PROPERTY } from "../domain/screen";
@@ -103,44 +104,8 @@ const wide = computed(() => message.value !== null && expands(message.value));
 const inline = computed(() => message.value !== null && message.value.description === null && message.value.actions.length > 0);
 
 const body = useTemplateRef<HTMLElement>("body");
-// The size the pill is held to, taken off what it holds. A box told to be as big as its content
-// cannot be animated between two contents — there is no number for the browser to move along — so
-// the content is laid inside the pill and measured, and the pill is given that number.
-const size = ref<{ width: number; height: number } | null>(null);
-
-if (import.meta.client) {
-  // The border box the content lays itself out at, which is the size the pill is held to. It stands
-  // at that size whatever the pill is doing around it: narrower while it unfolds, or still at the
-  // last message's size while it moves to this one.
-  const watching = new ResizeObserver(([entry]) => {
-    if (entry === undefined) {
-      return;
-    }
-
-    const box = entry.borderBoxSize?.[0];
-    const held = entry.target as HTMLElement;
-
-    size.value =
-      box === undefined
-        ? { width: held.offsetWidth, height: held.offsetHeight }
-        : { width: Math.ceil(box.inlineSize), height: Math.ceil(box.blockSize) };
-  });
-
-  watchPostEffect((onCleanup) => {
-    const held = body.value;
-
-    if (held === null || held === undefined) {
-      size.value = null;
-
-      return;
-    }
-
-    watching.observe(held);
-    onCleanup(() => watching.unobserve(held));
-  });
-
-  onScopeDispose(() => watching.disconnect());
-}
+// The size the pill is held to, taken off what it holds (the held-size module).
+const size = useHeldSize(body);
 
 function away(key: string): void {
   state.value = settle(state.value, key);

@@ -1,0 +1,9 @@
+/* The harness page's sheet: the layer's own stylesheet with the utility classes the avatar group,
+   the unfolding box, the moving list and the page itself are drawn with. */
+@import "../../app/assets/css/main.css";
+
+@source "../../app/components/AvatarGroup.vue";
+@source "../../app/components/UnfoldingBox.vue";
+@source "../../app/components/MovingList.vue";
+@source "../../app/domain/avatar-group.ts";
+@source "./faces-harness.ts";

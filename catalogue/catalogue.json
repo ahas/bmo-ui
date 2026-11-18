@@ -140,6 +140,39 @@
       "example": "<AudioPlayer src=\"https://example.com/sounds/morning.ogg\" download=\"https://example.com/sounds/morning.ogg?download=1\" name=\"morning.ogg\" size=\"1.2 MB\" />"
     },
     {
+      "name": "AvatarGroup",
+      "kind": "component",
+      "line": "The library's avatars overlapping in one moving row, each on a ring of its ground, the rest past a most counted in a cap.",
+      "props": [
+        {
+          "name": "faces",
+          "type": "readonly AvatarFace[]",
+          "required": true
+        },
+        {
+          "name": "max",
+          "type": "number | undefined",
+          "required": false,
+          "default": "undefined"
+        },
+        {
+          "name": "size",
+          "type": "FaceSize | undefined",
+          "required": false,
+          "default": "\"md\""
+        },
+        {
+          "name": "ui",
+          "type": "{ ground?: string | undefined; } | undefined",
+          "required": false,
+          "default": "undefined"
+        }
+      ],
+      "slots": [],
+      "events": [],
+      "example": "<AvatarGroup :faces=\"faces\" :max=\"3\" size=\"sm\" />"
+    },
+    {
       "name": "CardRow",
       "kind": "component",
       "line": "A heading over one line of cards that scrolls sideways, paged by a pointer's buttons and swiped by a finger, with the link that opens it whole.",
@@ -1733,7 +1766,7 @@
     {
       "name": "MovingList",
       "kind": "component",
-      "line": "A list whose items come, go and change places by position alone.",
+      "line": "A list whose items come, go and change places by position alone, along the axis its layout gives it.",
       "props": [
         {
           "name": "tag",
@@ -2509,6 +2542,20 @@
       ],
       "events": [],
       "example": "<ToolBar :label=\"t('notes.aria.editor_tools')\">\n  <UTooltip :text=\"t('notes.action.bold')\">\n    <UButton icon=\"i-material-symbols-format-bold\" color=\"neutral\" variant=\"ghost\" :aria-label=\"t('notes.action.bold')\" />\n  </UTooltip>\n  <UTooltip :text=\"t('notes.action.italic')\">\n    <UButton icon=\"i-material-symbols-format-italic\" color=\"neutral\" variant=\"ghost\" :aria-label=\"t('notes.action.italic')\" />\n  </UTooltip>\n  <UButton class=\"ms-auto\" color=\"neutral\" variant=\"ghost\" :label=\"t('common.action.save')\" />\n</ToolBar>"
+    },
+    {
+      "name": "UnfoldingBox",
+      "kind": "component",
+      "line": "A box held to what it holds, unfolding to each new size or following a part of it that unfolds of its own.",
+      "props": [],
+      "slots": [
+        {
+          "name": "default",
+          "type": "{}"
+        }
+      ],
+      "events": [],
+      "example": "<UnfoldingBox class=\"rounded-full bg-elevated\">\n  <div class=\"flex items-center gap-2 px-3 py-1\">\n    <AvatarGroup :faces=\"faces\" size=\"2xs\" :ui=\"{ ground: 'bg-elevated' }\" />\n    <span class=\"text-sm\">{{ words }}</span>\n  </div>\n</UnfoldingBox>"
     },
     {
       "name": "VideoPlayer",

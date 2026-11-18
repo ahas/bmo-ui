@@ -35,6 +35,50 @@ default; a screen supplies what it holds and what a press means there. Every exp
   - Its ends round whole, and it is at least as wide as it is tall.
   - Its number turns as it changes (the Motion section of `docs/design.md`).
 
+## Moving lists
+
+- **A list whose items come, go and change places while it is read is a `MovingList`,** each item
+  keyed by its own lasting id. How it moves is the Motion section of `docs/design.md`; the
+  moving-list module holds it.
+- **Its axis is its own layout's.** A list laid out as a flex row, forward or reversed, folds and
+  unfolds its items' width, inline padding and inline border, and its items close up over the
+  list's gap or the overlap its items' negative margins draw. Every other list folds and unfolds its
+  items' height, block padding and block border, as a column. The list names nothing more than its
+  classes to choose its axis.
+- **An item is the box that folds.** What it shows is laid out at its full size inside it and only
+  clipped, so an item holding a picture, a face or a fixed box keeps that box's own size and the
+  item around it changes.
+
+## Avatar groups
+
+- **A row of faces is an `AvatarGroup`,** the library's own avatars overlapping in one moving list
+  along its row, so a face coming, going or changing place moves as a list item does.
+  - It is handed its faces, each with its own lasting id and the props the library's avatar takes,
+    and draws them in that order, the first standing over the one after it.
+  - Every face is drawn at the group's size, one of the library's avatar sizes, and each overlaps
+    the one before it by the library's own overlap for that size.
+  - Each face stands on a ring of the ground it is drawn over, as wide as the library's ring for the
+    size. The ring is the face's item's own ground rather than a shadow outside it, so it folds and
+    unfolds with the face and is never cut while the face moves. Its colour is the page's ground
+    unless the host names another for a ground of its own.
+- **A cap holds the rest.** Given a most, the group draws that many faces and one more avatar
+  holding the count of the rest, a plus sign before it, written with the count's separators in
+  tabular figures; it widens with its count rather than cutting it. A screen reader hears the count
+  in the host's words, the key `common.aria.others_count`, rather than the sign. The cap is an item
+  of the list too, so it unfolds as the first face past the most arrives and folds as the last one
+  goes.
+
+## A box that follows what it holds
+
+- **A box whose size follows what it holds is an `UnfoldingBox`.** It holds its content at the
+  content's own size, laid out at its widest and tallest from the first frame, and is held to the
+  size the content measures; how it moves to a new size is the Motion section of `docs/design.md`.
+  Whatever it holds that lies past its edge while it is smaller is hidden.
+- **The ground is the host's.** The box draws none of its own, so its classes give it one, or a
+  ground laid behind it follows the box's own size.
+- **What it measures is read by the held-size module,** which the message pill uses too: the box
+  the content lays itself out at, and whether a part of it is folding or unfolding of its own.
+
 ## Name and value lists
 
 - **A list of names each with its value is one shape everywhere,** the `pair-list` utility.

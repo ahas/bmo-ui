@@ -37,6 +37,7 @@ wording keys listed here are the ones the layer's list holds.
 | `ActionGroup` | The one group of actions on what a tab or a toolbar stands for, folding to a menu; the properties action last. |
 | `ArtworkFrame` | A card's picture at one of the artwork shapes, whole over a ground of itself where its shape is not the frame's, or its kind's mark over its name where it has none. |
 | `AudioPlayer` | A kept sound: a play and pause button, its waveform as its progress, a volume popover and a download. |
+| `AvatarGroup` | The library's avatars overlapping in one moving row, each on a ring of its ground, the rest past a most counted in a cap. |
 | `CardRow` | A heading over one line of cards that scrolls sideways, paged by a pointer's buttons and swiped by a finger, with the link that opens it whole. |
 | `ChoiceSelect` | The one select a value is chosen from a list in, the library's select menu searching once it holds more than seven choices, or always over a road that finds them or in free entry, where words no choice shows are offered as a new value. |
 | `ChooseAll` | The three-state checkbox that takes every row shown or gives the choice up. |
@@ -61,7 +62,7 @@ wording keys listed here are the ones the layer's list holds.
 | `MarkupButtonTip` | The one layer that names any button carrying `data-tooltip`, one a host writes as markup or the library draws inside a component of its own, in the shared tooltip. |
 | `MarqueeLine` | A line that slides when it is longer than its box. |
 | `MessageIsland` | The one pill every notice stands on. |
-| `MovingList` | A list whose items come, go and change places by position alone. |
+| `MovingList` | A list whose items come, go and change places by position alone, along the axis its layout gives it. |
 | `NumberInput` | The number box, as wide as its values, with its two step buttons. |
 | `PaletteSwatch` | A palette's two grounds as dots, in one mode. |
 | `PropertyList` | A file's or a document's details as a name and value list. |
@@ -88,6 +89,7 @@ wording keys listed here are the ones the layer's list holds.
 | `ThemePreview` | A small piece of a screen in one theme and one mode. |
 | `ThemeSwatch` | A theme's accent and raised grey as dots, in one mode. |
 | `ToolBar` | The toolbar flush against one target, cells parted by dividers. |
+| `UnfoldingBox` | A box held to what it holds, unfolding to each new size or following a part of it that unfolds of its own. |
 | `VideoPlayer` | A video: the full player with its own controls, gestures and keys, or the still a message holds, its first frame with a play mark and its length, which opens the full player large. |
 
 ## Domain modules
@@ -98,6 +100,7 @@ Each is named with everything it exports.
 | --- | --- |
 | `actionbar` | `BAR_GATHERS_UNDER_PX`, `GATHERED_ACTIONS`, `STANDING_ACTIONS`, `barGathers`, `actionsOutside`, `useBarRoom`, `useBarGathers` |
 | `artwork` | `PictureSize`, `ArtworkShape`, `PORTRAIT`, `LANDSCAPE`, `SQUARE`, `ARTWORK_SHAPES`, `LANDSCAPE_FROM`, `SQUARE_PAST`, `FILLS_WITHIN`, `shapeOf`, `rowShape`, `fillsShape` |
+| `avatar-group` | `AvatarFace`, `FaceSize`, `FACE_FRAMES`, `facesShown` |
 | `bars` | `BarColor`, `BAR_SIZE`, `STACKED_LEGEND`, `INLINE_LEGEND`, `FOLDED_LEGEND` |
 | `choices` | `ChoiceItems`, `ChoiceKeys`, `ChoiceFind`, `SEARCH_ABOVE`, `CHOICE_FIND_PAUSE_MS`, `choiceCount`, `searchesChoices`, `choiceFields`, `narrowChoices`, `typedValue` |
 | `chooseall` | `ChooseAllState`, `chooseAllState`, `chosenRuns`, `chooseAllPress`, `chooseAllLabel`, `CHOOSE_CELL`, `CHOOSE_GUTTER` |
@@ -118,6 +121,7 @@ Each is named with everything it exports.
 | `foot` | `FootOptions`, `useFootInView` |
 | `form-save` | `FormPart`, `FormSave`, `OpenedWith`, `OpenedWithOptions`, `askDiscard`, `useCloseGuard`, `useFormSave`, `useFormPart`, `useLeaveGuard`, `useOpenedWith` |
 | `fullscreen` | `PutBack`, `TakePlace`, `keepPlace`, `holdThroughFullscreen` |
+| `held-size` | `HeldSize`, `isResizing`, `useHeldSize` |
 | `holdmenu` | `HoldMenu`, `useHoldMenu` |
 | `icon-styles` | `IconStyleOptions`, `isIconStyle` |
 | `island` | `IslandTone`, `IslandAction`, `IslandMessage`, `IslandSaid`, `IslandState`, `TONE_ICONS`, `TONE_MS`, `WAITING_MAX`, `emptyIsland`, `messageOf`, `expands`, `raise`, `settle`, `Island`, `ISLAND_STATE`, `islandState`, `useIsland` |
@@ -308,7 +312,7 @@ What a coding harness takes the layer through (`docs/harness.md`).
 
 ## Wording keys
 
-The layer reads these 146 keys and no others. The `wording-keys` shared module lists them, the one
+The layer reads these 147 keys and no others. The `wording-keys` shared module lists them, the one
 list a host's pack is held to. Placeholders are named after each key.
 
 - **`common.action`:** `add_choice` `{value}`, `cancel`, `choose_all`, `choose_none`, `close`, `close_all_tabs`,
@@ -320,7 +324,7 @@ list a host's pack is held to. Placeholders are named after each key.
   `unpin`, `unshare`, `zoom_in`, `zoom_out`.
 - **`common.aria`:** `close_named` `{name}`, `column_width` `{name}`, `decrease`, `download_named`
   `{name}`, `image_zoom` `{title}`, `increase`, `member_permission` `{name}`, `more_notices` `{n}`,
-  `pinned_named` `{name}`, `play_named` `{name}`, `player_named` `{name}`, `share_address`,
+  `others_count` `{n}`, `pinned_named` `{name}`, `play_named` `{name}`, `player_named` `{name}`, `share_address`,
   `speed_named` `{speed}`, `window_move`, `window_resize`.
 - **`common.error`:** `choices_find_failed`, `editor_failed`, `link_copy_failed`, `member_change_failed`,
   `member_search_failed`, `member_share_failed`, `members_read_failed`, `picture_failed`,

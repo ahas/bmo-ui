@@ -95,7 +95,7 @@ describe("the shape it stands as", () => {
 
   test("it moves between two sizes rather than jumping, and is measured to have a size to move to", () => {
     expect(island).toContain("transition:\n    width var(--bmo-motion-unfold) var(--bmo-ease-move)");
-    expect(island).toContain("new ResizeObserver");
+    expect(island).toContain("useHeldSize(body)");
     expect(island).toContain("width: `${size.width}px`");
   });
 

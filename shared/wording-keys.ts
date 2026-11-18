@@ -54,6 +54,7 @@ export const WORDING_KEYS = [
   "common.aria.increase",
   "common.aria.member_permission",
   "common.aria.more_notices",
+  "common.aria.others_count",
   "common.aria.pinned_named",
   "common.aria.play_named",
   "common.aria.player_named",

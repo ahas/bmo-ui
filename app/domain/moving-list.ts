@@ -4,31 +4,106 @@
 // hand the item its sizes; the list's stylesheet names how long the change takes and how it eases,
 // and the list waits for that transition to end, since each hook takes the element alone.
 //
-// A box keeps its padding and border under any height of its own, so folding means those too. In a
-// column with a gap the item is also led or followed by that gap, so the side the gap stands on — the
-// one before the item, unless nothing stands before it — takes it back in with a margin, and the
-// items around it end where they would have stood without it. What the item shows stays laid out at
-// its full size throughout, clipped by the box.
+// The axis is the list's own layout: a flex row lays its items out sideways, so they fold sideways;
+// every other list is a column. A box keeps its padding and border under any size of its own, so
+// folding means those too, on the axis's two sides. What stands between two items — the list's gap,
+// or a margin an item carries, an overlap drawn as a negative one included — is taken back by the
+// folding item's margins on the axis, so the items around it end where they would have stood
+// without it. What the item shows stays laid out at its full size throughout, clipped by the box.
 
-type Fold = Partial<Record<"height" | "paddingTop" | "paddingBottom" | "borderTopWidth" | "borderBottomWidth" | "marginTop" | "marginBottom", string>>;
+type Side = "Top" | "Bottom" | "InlineStart" | "InlineEnd";
 
-const STANDING: Fold = { height: "", paddingTop: "", paddingBottom: "", borderTopWidth: "", borderBottomWidth: "", marginTop: "", marginBottom: "" };
+// One axis of a list: the size an item has along it, and its two sides in the order the list's
+// items follow one another, the leading side being the one the item before it stands on.
+interface Axis {
+  size: "height" | "width";
+  measure: (item: HTMLElement) => number;
+  gap: (list: CSSStyleDeclaration) => string;
+  leading: Side;
+  trailing: Side;
+}
 
-// What an item stands at with nothing of it left.
-function folded(item: HTMLElement): Fold {
-  const parent = item.parentElement;
-  const gap = parent === null ? 0 : Number.parseFloat(getComputedStyle(parent).rowGap) || 0;
-  const flat: Fold = { height: "0px", paddingTop: "0px", paddingBottom: "0px", borderTopWidth: "0px", borderBottomWidth: "0px" };
+type Fold = Record<string, string>;
 
-  if (gap === 0) {
-    return flat;
+const COLUMN: Axis = { size: "height", measure: (item) => item.offsetHeight, gap: (list) => list.rowGap, leading: "Top", trailing: "Bottom" };
+const COLUMN_REVERSED: Axis = { ...COLUMN, leading: "Bottom", trailing: "Top" };
+const ROW: Axis = { size: "width", measure: (item) => item.offsetWidth, gap: (list) => list.columnGap, leading: "InlineStart", trailing: "InlineEnd" };
+const ROW_REVERSED: Axis = { ...ROW, leading: "InlineEnd", trailing: "InlineStart" };
+
+function axisOf(list: Element | null): Axis {
+  if (list === null) {
+    return COLUMN;
   }
 
+  const style = getComputedStyle(list);
+  const flex = style.display === "flex" || style.display === "inline-flex";
+
+  switch (flex ? style.flexDirection : "column") {
+    case "row":
+      return ROW;
+    case "row-reverse":
+      return ROW_REVERSED;
+    case "column-reverse":
+      return COLUMN_REVERSED;
+    default:
+      return COLUMN;
+  }
+}
+
+// Everything a fold sets on an item: its size along the axis, and its padding, border and margin
+// on the axis's two sides.
+function folding(axis: Axis): { box: string[]; leadingMargin: string; trailingMargin: string } {
+  const sides = [axis.leading, axis.trailing];
+
+  return {
+    box: [axis.size, ...sides.flatMap((side) => [`padding${side}`, `border${side}Width`])],
+    leadingMargin: `margin${axis.leading}`,
+    trailingMargin: `margin${axis.trailing}`
+  };
+}
+
+// Every value a fold sets, handed back to the stylesheet.
+function standing(axis: Axis): Fold {
+  const { box, leadingMargin, trailingMargin } = folding(axis);
+
+  return Object.fromEntries([...box, leadingMargin, trailingMargin].map((key) => [key, ""]));
+}
+
+function folded(axis: Axis, item: HTMLElement, gap: number): Fold {
+  const { box, leadingMargin, trailingMargin } = folding(axis);
+  const at = (leading: number, trailing: number): Fold => ({
+    ...Object.fromEntries(box.map((key) => [key, "0px"])),
+    [leadingMargin]: `${leading}px`,
+    [trailingMargin]: `${trailing}px`
+  });
+
+  // With an item before it, the list keeps the space before the one after it, so the folding item
+  // gives back the gap before it and sets its own margins aside.
   if (item.previousElementSibling !== null) {
-    return { ...flat, marginTop: `-${gap}px` };
+    return at(-gap, 0);
   }
 
-  return item.nextElementSibling === null ? flat : { ...flat, marginBottom: `-${gap}px` };
+  const next = item.nextElementSibling;
+
+  if (next === null) {
+    return at(0, 0);
+  }
+
+  // Standing first, it gives back the space after it: the gap, and the leading margin of the item
+  // after it, which that item sets aside once it stands first.
+  const nextStyle = getComputedStyle(next) as unknown as Record<string, string>;
+  const nextLeading = Number.parseFloat(nextStyle[leadingMargin] ?? "") || 0;
+
+  return at(0, -(gap + nextLeading));
+}
+
+// What an item stands at with nothing of it left, along its list's axis.
+function foldOf(item: HTMLElement): { axis: Axis; fold: Fold } {
+  const list = item.parentElement;
+  const axis = axisOf(list);
+  const gap = list === null ? 0 : Number.parseFloat(axis.gap(getComputedStyle(list))) || 0;
+
+  return { axis, fold: folded(axis, item, gap) };
 }
 
 // Called with the item just put in at its full size: it starts from nothing and grows back to that.
@@ -36,26 +111,30 @@ function folded(item: HTMLElement): Fold {
 // would only reverse a movement just begun, which the browser cuts as short as that movement had run.
 export function unfoldItem(element: Element): void {
   const item = element as HTMLElement;
-  const height = item.offsetHeight;
+  const { axis, fold } = foldOf(item);
+  const size = axis.measure(item);
 
   item.style.transition = "none";
-  Object.assign(item.style, folded(item));
+  Object.assign(item.style, fold);
   void item.offsetHeight;
   item.style.transition = "";
-  Object.assign(item.style, STANDING);
-  item.style.height = `${height}px`;
+  Object.assign(item.style, standing(axis));
+  item.style[axis.size] = `${size}px`;
 }
 
-// Called once it has unfolded: it is left to its own size again.
+// Called once it has unfolded: it is left to its own size again, on either axis.
 export function settleItem(element: Element): void {
-  Object.assign((element as HTMLElement).style, STANDING);
+  const item = element as HTMLElement;
+
+  Object.assign(item.style, standing(COLUMN), standing(ROW));
 }
 
 // Called with the item about to go: it shrinks to nothing from the size it stands at now.
 export function foldItem(element: Element): void {
   const item = element as HTMLElement;
+  const { axis, fold } = foldOf(item);
 
-  item.style.height = `${item.offsetHeight}px`;
+  item.style[axis.size] = `${axis.measure(item)}px`;
   void item.offsetHeight;
-  Object.assign(item.style, folded(item));
+  Object.assign(item.style, fold);
 }
