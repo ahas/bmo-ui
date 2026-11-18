@@ -20,7 +20,9 @@ import type { Browser, Page } from "playwright-core";
 // it showed until it is gone, the control takes the accent on its edge with no ring when the keyboard
 // reaches it, each list stands as wide as its choices and its control against an edge of the control
 // at a desktop's and a phone's width, and a finger opening a long list leaves the keyboard down and
-// keeps a long value typed in free entry inside the screen. Which choices the words keep is the
+// keeps a long value typed in free entry inside the screen. As the words narrow a list and give back
+// what they took, its choices slide, fold and unfold, a group left with none folding as one, and
+// stand at once for a reader who asked for less movement. Which choices the words keep is the
 // choices module's own test (`tests/domain/choices.test.ts`). Skipped where the browser build is not
 // on the machine.
 
@@ -533,8 +535,9 @@ describe.skipIf(!ready)("the one select under a finger at a phone's width", () =
       await touch.tap(await centreOf(page, select));
       await page.waitForSelector(menu);
 
-      // The title presses nothing and stands outside the list alone. The focus moves onto what holds
-      // the list as the finger lands there, which closes the list before the tap ends.
+      // The title presses nothing and stands outside the list alone. The list keeps the focus as the
+      // finger lands there, and the tap closes the list it lands away from, the dialog or the drawer
+      // standing.
       await touch.tap(await centreOf(page, `${holder} [data-slot=title]`));
       await page.waitForSelector(menu, { state: "detached" });
       await page.evaluate(async () => await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
@@ -573,5 +576,228 @@ describe.skipIf(!ready)("the one select under a finger at a phone's width", () =
     }
 
     await close(page);
+  });
+});
+
+// The open list's every frame from here on: each choice by its label and each group by the label of
+// the first choice it was seen holding, where it stands, how tall it is drawn and how opaque.
+interface Drawn {
+  boxes: Record<string, { left: number; top: number; height: number; opacity: number }>;
+}
+
+// Starts writing down the open list's frames once its opening has finished.
+async function recordList(page: Page): Promise<void> {
+  await page.evaluate(async (selector) => {
+    const list = document.querySelector<HTMLElement>(selector)!;
+
+    await Promise.all(list.getAnimations({ subtree: true }).map((animation) => animation.finished));
+
+    const recorder = { frames: [] as Drawn[], recording: true };
+    const groups = new WeakMap<Element, string>();
+    const labelOf = (part: Element): string => part.querySelector("[data-slot=itemLabel]")?.textContent?.trim() ?? "";
+    const keyOf = (part: HTMLElement): string => {
+      if (part.dataset.slot !== "group") return labelOf(part);
+      if (!groups.has(part)) groups.set(part, `group ${labelOf(part)}`);
+
+      return groups.get(part)!;
+    };
+    const look = (): void => {
+      const boxes: Drawn["boxes"] = {};
+
+      for (const part of list.querySelectorAll<HTMLElement>("[data-slot=item], [data-slot=group]")) {
+        const rect = part.getBoundingClientRect();
+
+        boxes[keyOf(part)] = { left: Math.round(rect.left), top: Math.round(rect.top), height: Math.round(rect.height), opacity: Number(getComputedStyle(part).opacity) };
+      }
+
+      recorder.frames.push({ boxes });
+      if (recorder.recording) requestAnimationFrame(look);
+    };
+
+    // The first frame is the list as it stands before the key, written down before the key is pressed.
+    Object.assign(window, { listFrames: recorder });
+    look();
+  }, LIST);
+}
+
+// The frames written down since recording began, once a movement has begun and ended, or long enough
+// has passed that one would have begun, and the last frames are all alike.
+async function settledList(page: Page): Promise<Drawn[]> {
+  return (await page.evaluate(
+    (selector) =>
+      new Promise((resolve) => {
+        const recorder = (window as unknown as { listFrames: { frames: Drawn[]; recording: boolean } }).listFrames;
+        const list = document.querySelector<HTMLElement>(selector)!;
+        let began = false;
+        const wait = (): void => {
+          const running = list.getAnimations({ subtree: true }).length > 0;
+          const last = recorder.frames.slice(-3).map((one) => JSON.stringify(one.boxes));
+
+          began ||= running;
+
+          if (((began || recorder.frames.length > 30) && !running && last.length === 3 && new Set(last).size === 1) || recorder.frames.length > 600) {
+            recorder.recording = false;
+            resolve(recorder.frames);
+          } else {
+            requestAnimationFrame(wait);
+          }
+        };
+
+        requestAnimationFrame(wait);
+      }),
+    LIST
+  )) as Drawn[];
+}
+
+// Every frame the open list draws while a key is pressed into its search.
+async function framesOf(page: Page, key: string): Promise<Drawn[]> {
+  await recordList(page);
+  await page.keyboard.press(key);
+
+  return await settledList(page);
+}
+
+// One box's course through the frames it stands in.
+function courseOf(seen: Drawn[], key: string): { left: number; top: number; height: number }[] {
+  return seen.flatMap((one) => (one.boxes[key] === undefined ? [] : [one.boxes[key]!]));
+}
+
+function steady(values: number[]): boolean {
+  const steps = values.slice(1).map((value, at) => value - values[at]!);
+
+  return steps.every((step) => step >= 0) || steps.every((step) => step <= 0);
+}
+
+// The frame a value first leaves where it stood in the first frame.
+function leavesAt(values: number[]): number {
+  return values.findIndex((value) => value !== values[0]);
+}
+
+const LEFT_BY_A = ["Berlin", "Dublin", "Oslo"];
+const KEPT_BY_A = ["Riga", "Tallinn", "Vienna", "Athens", "Lisbon", "Madrid", "Rome", "Seville", "Valletta"];
+
+// The one select's list as the words typed narrow it and give back what they took (`docs/design.md`,
+// "Motion"): a moving list, at a shorter length than the layer's so a run costs a fraction of a
+// second and still draws several frames. How a moving list's hooks size an item is the motion
+// test's own (`tests/browser/motion.test.ts`); this checks the select's list is moved by them.
+describe.skipIf(!ready)("the one select's list as the words narrow it", () => {
+  async function opened(reducedMotion: "reduce" | "no-preference"): Promise<Page> {
+    const page = await (await browser.newContext({ viewport: { width: 1280, height: 900 }, reducedMotion })).newPage();
+
+    await serve(page);
+    await page.addStyleTag({ content: ":root { --bmo-motion-unfold: 160ms; }" });
+
+    return page;
+  }
+
+  let page: Page;
+
+  beforeAll(async () => {
+    page = await opened("no-preference");
+  }, BROWSER_HOOK_MS);
+
+  afterEach(async () => {
+    await closeLeftOpen(page);
+  });
+
+  afterAll(async () => {
+    await page?.context().close();
+  });
+
+  test("slides the choices that stay, folds those it leaves out and unfolds them back, all at once, with no fade", async () => {
+    await page.click("#long");
+    await page.waitForSelector(FIELD);
+    await listedWhole(page);
+
+    const narrowing = await framesOf(page, "a");
+
+    for (const one of narrowing) {
+      for (const [key, box] of Object.entries(one.boxes)) expect(box.opacity, key).toBe(1);
+    }
+
+    for (const key of LEFT_BY_A) {
+      const heights = courseOf(narrowing, key).map((one) => one.height);
+
+      expect(steady(heights), key).toBe(true);
+      expect(Math.min(...heights), key).toBeLessThan(5);
+      expect(narrowing.at(-1)!.boxes[key], key).toBeUndefined();
+    }
+
+    // A choice that stays is the same choice wherever it stands, so it slides up through the frames
+    // between rather than another choice taking its place at once.
+    for (const key of KEPT_BY_A) {
+      const course = courseOf(narrowing, key);
+
+      expect(new Set(course.map((one) => one.left)).size, key).toBe(1);
+      expect(steady(course.map((one) => one.top)), key).toBe(true);
+      expect(new Set(course.map((one) => one.top)).size, key).toBeGreaterThan(3);
+    }
+
+    // The highlight leaves a choice that goes for the first one left, once the choices have moved.
+    expect(await page.$$eval(`${LIST} [data-highlighted]`, (parts) => parts.map((part) => part.querySelector("[data-slot=itemLabel]")?.textContent?.trim()))).toEqual(["Riga"]);
+
+    const starts = [...LEFT_BY_A.map((key) => leavesAt(courseOf(narrowing, key).map((one) => one.height))), ...KEPT_BY_A.map((key) => leavesAt(courseOf(narrowing, key).map((one) => one.top)))];
+
+    expect(Math.max(...starts) - Math.min(...starts), starts.join(",")).toBeLessThanOrEqual(1);
+
+    const widening = await framesOf(page, "Backspace");
+
+    for (const key of LEFT_BY_A) {
+      const heights = courseOf(widening, key).map((one) => one.height);
+
+      expect(steady(heights), key).toBe(true);
+      expect(heights[0], key).toBeLessThan(heights.at(-1)!);
+      expect(new Set(heights).size, key).toBeGreaterThan(3);
+    }
+
+    expect(new Set(courseOf(widening, "Valletta").map((one) => one.top)).size).toBeGreaterThan(3);
+    await listedWhole(page);
+    await close(page);
+  });
+
+  test("folds a group the words leave no choice in as one, the group after it sliding up", async () => {
+    await page.click("#grouped");
+    await page.waitForSelector(FIELD);
+    await listedAs(page, ["Almond", "Apricot", "Aqua", "Azure", "Beige", "Black", "Bronze", "Brown"]);
+
+    const seen = await framesOf(page, "b");
+    const group = courseOf(seen, "group Almond").map((one) => one.height);
+
+    expect(steady(group)).toBe(true);
+    expect(Math.min(...group)).toBeLessThan(5);
+    expect(seen.at(-1)!.boxes["group Almond"]).toBeUndefined();
+
+    // Its choices go with it, clipped by it, rather than folding of their own.
+    expect(new Set(courseOf(seen, "Almond").map((one) => one.height)).size).toBe(1);
+    expect(new Set(courseOf(seen, "group Beige").map((one) => one.top)).size).toBeGreaterThan(3);
+    await listedAs(page, ["Beige", "Black", "Bronze", "Brown"]);
+    await close(page);
+  });
+
+  test("changes at once for a reader who asked for less movement", async () => {
+    const still = await opened("reduce");
+
+    try {
+      await still.click("#long");
+      await still.waitForSelector(FIELD);
+      await listedWhole(still);
+
+      const seen = await framesOf(still, "a");
+
+      // A choice that goes stands at its height until the frame it is gone in, or stands at none for
+      // that frame before it is taken out.
+      for (const key of LEFT_BY_A) {
+        const heights = courseOf(seen, key).map((one) => one.height);
+
+        expect(heights.every((height) => height === heights[0] || height === 0), `${key}: ${heights.join(",")}`).toBe(true);
+        expect(seen.at(-1)!.boxes[key], key).toBeUndefined();
+      }
+
+      for (const key of KEPT_BY_A) {
+        expect(new Set(courseOf(seen, key).map((one) => one.top)).size, key).toBeLessThanOrEqual(2);
+      }
+    } finally {
+      await still.context().close();
+    }
   });
 });

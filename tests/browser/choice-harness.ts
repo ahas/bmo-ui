@@ -16,7 +16,8 @@ import sheet from "./choice-harness.css?inline";
 import type { SelectMenuItem } from "@nuxt/ui";
 
 // The one select (`docs/components.md`, "Choosing a value") on a page that says nothing else: seven
-// sizes, a dozen cities in two groups each with a line under it, eight tints with a preview beside
+// sizes, a dozen cities under two headings each with a line under it, eight shades handed as two
+// groups of four, eight tints with a preview beside
 // them, people found over a stand-in road that answers at once, refuses the word "fail", holds its
 // answer to "slow" until the test lets it go and finds nobody for anything else unmatched, the same
 // people chosen several at a time by an id over a second road, three roles taking free entry, each
@@ -54,6 +55,12 @@ const CITIES: SelectMenuItem[] = [
   ...["Athens", "Lisbon", "Madrid", "Rome", "Seville", "Valletta"].map((label) => ({ label, value: label.toLowerCase(), description: "Warm winters" }))
 ];
 
+// Two groups of four, the words "b" leaving the first with none.
+const SHADES: SelectMenuItem[][] = [
+  ["Almond", "Apricot", "Aqua", "Azure"].map((label) => ({ label, value: label.toLowerCase() })),
+  ["Beige", "Black", "Bronze", "Brown"].map((label) => ({ label, value: label.toLowerCase() }))
+];
+
 const TINTS = ["Teal", "Sea", "Sunset", "Forest", "Sand", "Slate", "Rose", "Amber"].map((label) => ({ label, value: label.toLowerCase() }));
 
 const SESSIONS = ["Monday morning review", "Tuesday afternoon planning", "Wednesday evening workshop", "Thursday morning standup", "Friday afternoon retrospective", "Saturday open lab", "Sunday quiet hours", "Every weekday lunch"].map(
@@ -84,6 +91,7 @@ async function findMembers(words: string): Promise<SelectMenuItem[]> {
 const Page = defineComponent(() => {
   const size = ref("medium");
   const city = ref<string>();
+  const shade = ref<string>();
   const person = ref<string>();
   const members = ref<number[]>([]);
   const roles = shallowRef<SelectMenuItem[]>(["Designer", "Engineer", "Manager"].map((label) => ({ label, value: label })));
@@ -107,6 +115,7 @@ const Page = defineComponent(() => {
       h("div", { class: "flex flex-col items-start gap-4 p-4" }, [
         h(ChoiceSelect, { id: "short", items: SIZES, valueKey: "value", modelValue: size.value, "onUpdate:modelValue": (value: string) => (size.value = value), class: "w-48" }),
         h(ChoiceSelect, { id: "long", items: CITIES, valueKey: "value", modelValue: city.value, "onUpdate:modelValue": (value: string) => (city.value = value), class: "w-48" }),
+        h(ChoiceSelect, { id: "grouped", items: SHADES, valueKey: "value", modelValue: shade.value, "onUpdate:modelValue": (value: string) => (shade.value = value), class: "w-48" }),
         h("div", { class: "flex items-center gap-4" }, [
           h(
             ChoiceSelect,

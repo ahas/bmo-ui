@@ -501,6 +501,13 @@ default; a screen supplies what it holds and what a press means there. Every exp
   search module as every list search is (see "List search"), the matched part marked where it
   stands. A group's label stays while any of its choices does, and a separator stands only between
   groups that both stay.
+- **The list moves as the words narrow it,** as every moving list does (`docs/design.md`,
+  "Motion"): the choices that stay slide to their new places, one the words leave out folds to
+  nothing where it stood and one they bring back unfolds where it lands, every one at once, and a
+  group left with no choice folds as one. Each choice is known by its value, so it is the same
+  choice wherever it stands. The list moves only once it stands open: as it opens, with the words of
+  its last opening cleared, it stands as it is drawn. A reader who asked for less movement sees the
+  list change at once.
 - **An empty list says why.** Nothing matched the words: the pack's words for no match. No choices
   at all: the pack's words for an empty list, or the screen's own word for its list where the
   wording guide gives one. A refused find: the pack's words for a search that failed. While the

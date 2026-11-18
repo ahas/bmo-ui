@@ -37,7 +37,7 @@
     "@iconify-json/material-icon-theme": "^1.2.72",
     "@iconify-json/material-symbols": "^1.2.93",
     "@modelcontextprotocol/sdk": "^1.32.1",
-    "@nuxt/ui": "^4.11.2",
+    "@nuxt/ui": "4.12.2",
     "@tanstack/vue-table": "8.21.3",
     "dayjs": "^1.11.23",
     "mermaid": "12.0.0",
@@ -71,7 +71,8 @@
     "vue-tsc": "^3.2.0"
   },
   "patchedDependencies": {
-    "reka-ui@2.10.4": "patches/reka-ui@2.10.4.patch",
-    "@nuxt/icon@2.5.1": "patches/@nuxt%2Ficon@2.5.1.patch"
+    "@nuxt/icon@2.5.1": "patches/@nuxt%2Ficon@2.5.1.patch",
+    "reka-ui@2.11.0": "patches/reka-ui@2.11.0.patch",
+    "@nuxt/ui@4.12.2": "patches/@nuxt%2Fui@4.12.2.patch"
   }
 }

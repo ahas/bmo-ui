@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 
-import { choiceCount, choiceFields, narrowChoices, SEARCH_ABOVE, searchesChoices, typedValue } from "~/domain/choices";
+import { choiceCount, choiceFields, narrowChoices, narrowChoicesInPlace, SEARCH_ABOVE, searchesChoices, typedValue } from "~/domain/choices";
 
 // When the one select searches, what its search keeps and which words free entry offers as a new
 // value (`docs/components.md`, "Choosing a value"). How the search module matches words is its own
@@ -113,5 +113,9 @@ describe("the choices kept for the words typed", () => {
   test("keep the groups of a list drawn in groups, dropping a group left with none", () => {
     expect(narrowChoices([fruits.slice(0, 3), fruits.slice(3)], "e")).toEqual([[fruits[0], fruits[2]], [fruits[3], fruits[4], fruits[6]]]);
     expect(narrowChoices([fruits.slice(0, 3), fruits.slice(3)], "fig")).toEqual([[fruits[5]]]);
+  });
+
+  test("kept in place, leave a group with none standing empty where it stood", () => {
+    expect(narrowChoicesInPlace([fruits.slice(0, 3), fruits.slice(3)], "fig")).toEqual([[], [fruits[5]]]);
   });
 });

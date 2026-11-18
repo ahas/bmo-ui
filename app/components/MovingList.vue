@@ -5,13 +5,13 @@
      nothing where it stood, so the items around it close up as it does (the moving-list module).
      Nothing fades, and every item moves at once. -->
 <template>
-  <TransitionGroup :tag="tag" name="bmo-list" @enter="unfoldItem" @after-enter="settleItem" @leave="foldItem">
+  <TransitionGroup :tag="tag" v-bind="MOVING_LIST">
     <slot />
   </TransitionGroup>
 </template>
 
 <script setup lang="ts">
-import { foldItem, settleItem, unfoldItem } from "../domain/moving-list";
+import { MOVING_LIST } from "../domain/moving-list";
 
 withDefaults(defineProps<{ tag?: string }>(), { tag: "ul" });
 </script>

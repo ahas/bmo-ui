@@ -99,7 +99,7 @@ Each is named with everything it exports.
 | `actionbar` | `BAR_GATHERS_UNDER_PX`, `GATHERED_ACTIONS`, `STANDING_ACTIONS`, `barGathers`, `actionsOutside`, `useBarRoom`, `useBarGathers` |
 | `artwork` | `PictureSize`, `ArtworkShape`, `PORTRAIT`, `LANDSCAPE`, `SQUARE`, `ARTWORK_SHAPES`, `LANDSCAPE_FROM`, `SQUARE_PAST`, `FILLS_WITHIN`, `shapeOf`, `rowShape`, `fillsShape` |
 | `bars` | `BarColor`, `BAR_SIZE`, `STACKED_LEGEND`, `INLINE_LEGEND`, `FOLDED_LEGEND` |
-| `choices` | `ChoiceItems`, `ChoiceKeys`, `ChoiceFind`, `SEARCH_ABOVE`, `CHOICE_FIND_PAUSE_MS`, `choiceCount`, `searchesChoices`, `choiceFields`, `narrowChoices`, `typedValue` |
+| `choices` | `ChoiceItems`, `ChoiceKeys`, `ChoiceFind`, `SEARCH_ABOVE`, `CHOICE_FIND_PAUSE_MS`, `choiceCount`, `searchesChoices`, `choiceFields`, `narrowChoices`, `narrowChoicesInPlace`, `typedValue` |
 | `chooseall` | `ChooseAllState`, `chooseAllState`, `chosenRuns`, `chooseAllPress`, `chooseAllLabel`, `CHOOSE_CELL`, `CHOOSE_GUTTER` |
 | `closing` | `OVERLAY_CLOSE_MS`, `useHeldWhileClosing` |
 | `clipboard` | `copyText` |
@@ -130,7 +130,7 @@ Each is named with everything it exports.
 | `marquee` | `MARQUEE_SLACK_PX`, `MARQUEE_SPEED_PX_PER_SECOND`, `MARQUEE_TRAVEL_SHARE`, `MARQUEE_MIN_SECONDS`, `MarqueeVars`, `MarqueeMotion`, `marqueeDistance`, `marqueeSeconds`, `marqueeVars`, `useMarquee` |
 | `modality` | `InputModality`, `MODALITY_ATTRIBUTE`, `modalityOfKey`, `watchInputModality` |
 | `monaco` | `languageOf`, `fenceLanguage`, `colourised`, `CodeView`, `openCodeView`, `SourceSelection`, `SourceView`, `openSourceView` |
-| `moving-list` | `unfoldItem`, `settleItem`, `foldItem` |
+| `moving-list` | `unfoldItem`, `settleItem`, `foldItem`, `MOVING_LIST`, `STANDING_LIST` |
 | `numbers` | `countLocale`, `countText`, `FigureLine`, `COUNT_BADGE`, `figurePlaces`, `turnOf`, `progressText` |
 | `openings` | `useOpenings` |
 | `overlays` | `OVER_LAYERS`, `OFF_HISTORY`, `BESIDE_PAGE`, `standsAsLayer`, `isBackEscape`, `refuseStalePresses`, `refuseHandedBackFocus`, `focusHandedBack`, `focusTakenOnOpen`, `watchOverlays` |
@@ -504,6 +504,17 @@ Every token is a custom property stated by the layer's stylesheet on the root un
     one control it names to the next, comes up over each. And it lets Esc pass a date or a time
     field's segment, which keeps every other key but Tab for itself, so Esc pressed there reaches the
     floating thing around the field as from any other field.
+  - The `@nuxt/ui` patch lets the library's select menu move its list by what it holds: handed a
+    list transition, the transition group's name and hooks, it draws its groups and the choices in
+    each through Vue's `TransitionGroup` with them, each choice keyed by the value it is chosen by
+    and each group by its place among the groups handed in, and a group left with no choice goes
+    rather than standing empty. A choice or a group that goes takes no press and no Enter while it
+    folds, and a highlight it held moves to the first choice left once it has gone, unless the
+    keyboard moved it on meanwhile. While choices come or go, a scroll to the choice the highlight
+    rests on waits until the last of them has settled, so the list moves only by its choices.
+    `ChoiceSelect` hands it the moving-list module's `MOVING_LIST`, and `STANDING_LIST` while the
+    list opens. In an install without the patch the select's list changes at once, with no
+    movement, and works otherwise as it does with it.
   - The `@nuxt/icon` patch writes an icon drawn as a stylesheet rule under the name it was loaded
     for. Without it, an icon whose name moves on while its drawing is still being fetched — a
     button's spinner giving way to its mark — writes that drawing under the new name, and the new
@@ -519,9 +530,10 @@ Every token is a custom property stated by the layer's stylesheet on the root un
 
 - **The layer requires** Nuxt 4.5 or later within 4, `@nuxtjs/i18n` 10.6 or later within 10 and
   `vue-i18n` 11.4.8 or later within 11, the engine that module requires, as peers, and brings Nuxt
-  UI 4.11 or later within 4, with the two icon sets it draws from: Material Symbols and the Material
-  Icon Theme. The command and its MCP server run under Bun 1.3 or later, on the MCP SDK 1.32 or later
-  within 1 and zod 4.
+  UI 4.12.2 exactly, the version its patches of the library and of `reka-ui` are cut for, with the
+  two icon sets it draws from: Material Symbols and the Material Icon Theme. A host locks the same
+  Nuxt UI, so the patches it applies meet the files they were cut from. The command and its MCP
+  server run under Bun 1.3 or later, on the MCP SDK 1.32 or later within 1 and zod 4.
 - **It stands on registry packages alone;** no other repository is a dependency.
 - **One version for the whole repository,** the manifest's; the README states what may change at
   which release.

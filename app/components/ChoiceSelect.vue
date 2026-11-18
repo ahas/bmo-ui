@@ -10,11 +10,12 @@
        against the control's leading edge, and against its trailing edge where the leading one leaves
        it no room. The control names what is chosen from every choice it knows, whatever the words
        typed leave in the list. The words typed stay while the list closes and are cleared as it opens
-       again, so a closing list keeps what it showed. Everything else it is handed is the library's
-       select menu's. -->
+       again, so a closing list keeps what it showed. The list moves as the words change it once it
+       stands open, a moving list drawn by the library's select menu as the layer's patch of it lets it
+       be, and stands still as it opens. Everything else it is handed is the library's select menu's. -->
   <USelectMenu
     v-bind="$attrs"
-    v-model:search-term="words"
+    :search-term="words"
     :model-value="props.modelValue"
     :multiple="props.multiple"
     :value-key="props.valueKey"
@@ -25,10 +26,12 @@
     :loading="busy"
     :content="content"
     :create-item="offered === null ? false : CREATE_ALWAYS"
+    :list-transition="MOVES ? (moving ? MOVING_LIST : STANDING_LIST) : undefined"
     :reset-search-term-on-blur="false"
     :reset-search-term-on-select="props.multiple"
     ignore-filter
     @create="takeOffered"
+    @update:search-term="takeWords"
     @update:open="clearOnOpen"
     @update:model-value="keepChosen"
   >
@@ -67,10 +70,12 @@
 </template>
 
 <script setup lang="ts">
+import SelectMenu from "@nuxt/ui/components/SelectMenu.vue";
 import { compare, get, getDisplayValue } from "@nuxt/ui/utils";
 import { useI18n } from "vue-i18n";
 
-import { CHOICE_FIND_PAUSE_MS, choiceFields, narrowChoices, searchesChoices, typedValue } from "../domain/choices";
+import { CHOICE_FIND_PAUSE_MS, choiceFields, narrowChoices, narrowChoicesInPlace, searchesChoices, typedValue } from "../domain/choices";
+import { MOVING_LIST, STANDING_LIST } from "../domain/moving-list";
 import { countLocale } from "../domain/numbers";
 import { TOUCH_QUERY } from "../domain/prompt";
 import { useNarrow } from "../domain/screen";
@@ -80,7 +85,7 @@ import type { ChoiceFind, ChoiceItems } from "../domain/choices";
 
 // The library's virtual scrolling opens a list's groups out into one, and the select keeps its groups,
 // so it is not taken.
-interface Props extends /* @vue-ignore */ Omit<SelectMenuProps, "items" | "virtualize" | "modelValue" | "multiple" | "valueKey" | "searchInput" | "searchTerm" | "resetSearchTermOnBlur" | "resetSearchTermOnSelect" | "ignoreFilter" | "filterFields" | "labelKey" | "descriptionKey" | "createItem"> {
+interface Props extends /* @vue-ignore */ Omit<SelectMenuProps, "items" | "virtualize" | "modelValue" | "multiple" | "valueKey" | "searchInput" | "searchTerm" | "resetSearchTermOnBlur" | "resetSearchTermOnSelect" | "ignoreFilter" | "filterFields" | "labelKey" | "descriptionKey" | "createItem" | "listTransition"> {
   // The value chosen, or the values where several are.
   modelValue?: unknown;
   multiple?: boolean;
@@ -124,6 +129,13 @@ const emit = defineEmits<{ create: [value: string] }>();
 // list's end.
 const CREATE_ALWAYS = { when: "always", position: "bottom" } as const;
 
+// Whether the library's select menu takes a list transition, as the layer's patch of it lets it
+// (`docs/boundary.md`, "What the host owes"). It then draws the list as a moving list, knowing each
+// group by its place, so the words narrow each group in its place and an emptied group is the menu's
+// to take away; without the patch the list changes at once and an emptied group is dropped here.
+const MOVES = "listTransition" in ((SelectMenu as { props?: object }).props ?? {});
+const narrow = MOVES ? narrowChoicesInPlace : narrowChoices;
+
 const slots = useSlots();
 const { t } = useI18n();
 const appConfig = useAppConfig();
@@ -141,8 +153,21 @@ const keys = computed(() => ({ label: props.labelKey, description: props.descrip
 // as a choice is made, so the library clears them then.
 const words = ref("");
 
+// Whether the list moves as its choices change: only once the words change in the open list, typed
+// or cleared by the library on a choice of several. As the list opens it stands, so the words cleared
+// then and the list being placed on the screen move none of its choices.
+const moving = ref(false);
+
+function takeWords(now: string): void {
+  moving.value = true;
+  words.value = now;
+}
+
 function clearOnOpen(open: boolean): void {
-  if (open) words.value = "";
+  if (open) {
+    moving.value = false;
+    words.value = "";
+  }
 }
 
 // What the road answered for the last words asked, null while no answer stands for the words typed.
@@ -164,7 +189,7 @@ const searchInput = computed(() =>
 
 const shown = computed((): ChoiceItems => {
   if (props.find === undefined) {
-    return narrowChoices(props.items, words.value, keys.value, countLocale());
+    return narrow(props.items, words.value, keys.value, countLocale());
   }
 
   return typed.value ? (found.value ?? []) : props.items;

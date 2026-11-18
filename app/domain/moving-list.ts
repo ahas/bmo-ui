@@ -10,6 +10,8 @@
 // items around it end where they would have stood without it. What the item shows stays laid out at
 // its full size throughout, clipped by the box.
 
+import type { TransitionGroupProps } from "vue";
+
 type Fold = Partial<Record<"height" | "paddingTop" | "paddingBottom" | "borderTopWidth" | "borderBottomWidth" | "marginTop" | "marginBottom", string>>;
 
 const STANDING: Fold = { height: "", paddingTop: "", paddingBottom: "", borderTopWidth: "", borderBottomWidth: "", marginTop: "", marginBottom: "" };
@@ -59,3 +61,12 @@ export function foldItem(element: Element): void {
   void item.offsetHeight;
   Object.assign(item.style, folded(item));
 }
+
+// What a transition group is handed to move as a moving list: the list's stylesheet name and the
+// three hooks. `MovingList` hands it to its own group, and a list the component library draws itself
+// is handed it where the library takes a transition group's props for its list.
+export const MOVING_LIST = { name: "bmo-list", onEnter: unfoldItem, onAfterEnter: settleItem, onLeave: foldItem } as const satisfies TransitionGroupProps;
+
+// What the same transition group is handed while its list is to change at once: a name no stylesheet
+// moves, and no hooks, so its items come, go and change places with no movement while it stays drawn.
+export const STANDING_LIST = { name: "bmo-list-standing" } as const satisfies TransitionGroupProps;

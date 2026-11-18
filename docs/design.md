@@ -208,6 +208,11 @@ whole in `docs/boundary.md`; this document says what each is for and how the lay
     item shows is laid out at its full size throughout and only clipped.
   - Every item moves at once, at `unfold`, eased by `move`: no item waits for the one before it.
   - Items are keyed by their own lasting id, never by position.
+  - A list a search narrows is one too. The one select's choices (`ChoiceSelect`) slide, fold and
+    unfold as the words typed change them, and a group the words leave no choice in folds as one,
+    its heading with it. The component library draws that list itself, so the layer's patch of its
+    select menu has the menu draw its groups and choices through Vue's `TransitionGroup` with the
+    moving-list module's `MOVING_LIST`, the same engine `MovingList` is.
 - **A tabbed panel moves as one panel sideways** (`TabSlide`). The panel under the tabs is keyed by
   its tab; the new tab's panel comes in from the side its tab stands on in the tab order while the
   old one leaves to the other side, both together, at `unfold` eased by `move`. The rows inside move

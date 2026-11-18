@@ -102,12 +102,20 @@ function narrowGroup(group: Group, words: string, keys: ChoiceKeys, locale: stri
 // The choices that match the words typed, in the shape they were handed: every choice for no words,
 // and a group left with no choice dropped.
 export function narrowChoices(items: ChoiceItems, words: string, keys: ChoiceKeys = LABEL_KEYS, locale?: string): ChoiceItems {
+  const narrowed = narrowChoicesInPlace(items, words, keys, locale);
+
+  return narrowed !== items && nested(narrowed) ? narrowed.filter((group) => group.length > 0) : narrowed;
+}
+
+// The choices that match the words typed, each group kept in its place however few it keeps, so a
+// list that knows its groups by their place still knows each one: every choice for no words.
+export function narrowChoicesInPlace(items: ChoiceItems, words: string, keys: ChoiceKeys = LABEL_KEYS, locale?: string): ChoiceItems {
   if (words.trim() === "") {
     return items;
   }
 
   if (nested(items)) {
-    return items.map((group) => narrowGroup(group, words, keys, locale)).filter((group) => group.length > 0);
+    return items.map((group) => narrowGroup(group, words, keys, locale));
   }
 
   return narrowGroup(items as SelectMenuItem[], words, keys, locale);
