@@ -4,10 +4,10 @@
        it holds more than seven choices, and a list found over a road or taking free entry always;
        words typed that no choice shows are offered in free entry as a new value, handed to the screen
        as it is chosen, a list of one value then closing. A list of several values in free entry ends
-       a value at the separators the screen names, as Enter does where no entry stands highlighted:
-       the words before it are taken and the search cleared, a paste is cut at them, and the words left
-       typed are taken as the list closes where the screen asks. A choice of nothing, keyed by the empty
-       string, is listed and chosen as every choice is. The field stands at the top of the opened list
+       values at the separators the screen names, as Enter does where no entry stands highlighted:
+       the words up to the last separator typed are taken and the search keeps the rest, a paste is
+       cut at them, and the words left typed are taken as the list closes where the screen asks. A
+       choice of nothing, keyed by the empty string, is listed and chosen as every choice is. The field stands at the top of the opened list
        with the pack's words for a search, takes the focus unless a finger opened it, and matches what
        each choice shows, its hits marked where they stand. An empty list says whether nothing matched,
        nothing is there or the road refused, and the road's first answer, or the first choices the
@@ -83,7 +83,7 @@ import SelectMenu from "@nuxt/ui/components/SelectMenu.vue";
 import { compare, get, getDisplayValue } from "@nuxt/ui/utils";
 import { useI18n } from "vue-i18n";
 
-import { CHOICE_FIND_PAUSE_MS, choiceFields, cutValues, endsValue, namedChoice, narrowChoices, narrowChoicesInPlace, searchesChoices, typedValue } from "../domain/choices";
+import { CHOICE_FIND_PAUSE_MS, choiceFields, cutTyped, cutValues, endsValue, namedChoice, narrowChoices, narrowChoicesInPlace, searchesChoices, typedValue } from "../domain/choices";
 import { MOVING_LIST, STANDING_LIST } from "../domain/moving-list";
 import { countLocale } from "../domain/numbers";
 import { TOUCH_QUERY } from "../domain/prompt";
@@ -189,6 +189,7 @@ const moving = ref(false);
 function takeWords(now: string): void {
   moving.value = true;
   words.value = now;
+  if (cuts.value) void nextTick(endTyped);
 }
 
 function followOpen(open: boolean): void {
@@ -228,7 +229,7 @@ const searchInput = computed(() =>
         placeholder: t("common.placeholder.search"),
         icon: appConfig.ui.icons.search,
         ...(touch.value ? { autofocus: false } : {}),
-        ...(cuts.value ? { onKeydown: endOnKey, onPaste: cutPasted } : {})
+        ...(cuts.value ? { onKeydown: endOnEnter, onPaste: cutPasted } : {})
       }
     : false
 );
@@ -403,15 +404,25 @@ function holdsHighlight(field: EventTarget | null): boolean {
   return field instanceof HTMLElement && field.closest("[data-slot=content]")?.querySelector("[data-highlighted]") != null;
 }
 
-// A key in the search: a separator, never written, ends the words typed as a value, and so does Enter
-// where no entry stands highlighted for it to take; a word an input method is still composing is
-// left whole.
-function endOnKey(event: KeyboardEvent): void {
-  if (event.isComposing || event.ctrlKey || event.metaKey || event.altKey) return;
+// Takes the words typed up to the last separator they hold, leaving the search the words after it.
+// It runs once the words typed stand in the field: a separator a keyboard writes is read as text, since
+// a phone's keyboard names no key as it writes one, and the field shows the words only once they have
+// been drawn, so clearing them then clears what it shows. The library's search hands on no words while
+// an input method composes one, only the committed word, so a separator waits for its word.
+function endTyped(): void {
+  const { taken, left } = cutTyped(words.value, props.separators);
 
-  const separator = props.separators.includes(event.key);
+  if (left === words.value) return;
 
-  if (!separator && (event.key !== "Enter" || !typed.value || holdsHighlight(event.target))) return;
+  takeValues(taken);
+  words.value = left;
+}
+
+// Enter in the search ends the words typed as a value where no entry stands highlighted for it to
+// take, as while the road is asked; Enter is no text, so the words do not show it.
+function endOnEnter(event: KeyboardEvent): void {
+  if (event.key !== "Enter" || event.isComposing || event.ctrlKey || event.metaKey || event.altKey) return;
+  if (!typed.value || holdsHighlight(event.target)) return;
 
   event.preventDefault();
   takeValues([words.value]);

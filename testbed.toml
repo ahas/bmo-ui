@@ -13,8 +13,8 @@ setup = ["bun install --frozen-lockfile"]
 
 [check]
 quick = ["korean", "layout", "dependencies"]
-# Hangul reaches the code only as test input, written as \u escapes. The ledger allows the three
-# test files that hold it their lines, and every other file none.
+# Hangul reaches the code only as test input, written as \u escapes. The ledger allows the test
+# files that hold it their lines, and every other file none.
 korean_ledger = "korean-ledger.json"
 # The layer stands on registry packages alone; no other repository is a dependency.
 base_libraries = []

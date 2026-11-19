@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 
-import { choiceCount, choiceFields, cutValues, endsValue, namedChoice, narrowChoices, narrowChoicesInPlace, SEARCH_ABOVE, searchesChoices, typedValue } from "~/domain/choices";
+import { choiceCount, choiceFields, cutTyped, cutValues, endsValue, namedChoice, narrowChoices, narrowChoicesInPlace, SEARCH_ABOVE, searchesChoices, typedValue } from "~/domain/choices";
 
 // When the one select searches, what its search keeps, which words free entry offers as a new value
 // and how words are cut into values at a screen's separators (`docs/components.md`, "Choosing a
@@ -90,6 +90,15 @@ describe("the values words are cut into at a screen's separators", () => {
   test("are the words whole where they hold no separator, and none for words of nothing but separators", () => {
     expect(cutValues("one two", [","])).toEqual(["one two"]);
     expect(cutValues(" , ;", [",", ";"])).toEqual([]);
+  });
+
+  test("typed, end at the last separator, the words after it still being typed", () => {
+    expect(cutTyped("one, two; thr", [",", ";"])).toEqual({ taken: ["one", "two"], left: " thr" });
+    expect(cutTyped(",", [","])).toEqual({ taken: [], left: "" });
+  });
+
+  test("typed with no separator, end nothing and stay whole", () => {
+    expect(cutTyped("one two", [",", ""])).toEqual({ taken: [], left: "one two" });
   });
 
   test("end a value only where the words hold a separator or a line break", () => {

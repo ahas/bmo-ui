@@ -102,7 +102,7 @@ Each is named with everything it exports.
 | `artwork` | `PictureSize`, `ArtworkShape`, `PORTRAIT`, `LANDSCAPE`, `SQUARE`, `ARTWORK_SHAPES`, `LANDSCAPE_FROM`, `SQUARE_PAST`, `FILLS_WITHIN`, `shapeOf`, `rowShape`, `fillsShape` |
 | `avatar-group` | `AvatarFace`, `FaceSize`, `FACE_FRAMES`, `facesShown` |
 | `bars` | `BarColor`, `BAR_SIZE`, `STACKED_LEGEND`, `INLINE_LEGEND`, `FOLDED_LEGEND` |
-| `choices` | `ChoiceItems`, `ChoiceKeys`, `ChoiceFind`, `SEARCH_ABOVE`, `CHOICE_FIND_PAUSE_MS`, `choiceCount`, `searchesChoices`, `choiceFields`, `narrowChoices`, `narrowChoicesInPlace`, `namedChoice`, `typedValue`, `cutValues`, `endsValue` |
+| `choices` | `ChoiceItems`, `ChoiceKeys`, `ChoiceFind`, `SEARCH_ABOVE`, `CHOICE_FIND_PAUSE_MS`, `choiceCount`, `searchesChoices`, `choiceFields`, `narrowChoices`, `narrowChoicesInPlace`, `namedChoice`, `typedValue`, `cutValues`, `cutTyped`, `endsValue` |
 | `chooseall` | `ChooseAllState`, `chooseAllState`, `chosenRuns`, `chooseAllPress`, `chooseAllLabel`, `CHOOSE_CELL`, `CHOOSE_GUTTER` |
 | `closing` | `OVERLAY_CLOSE_MS`, `useHeldWhileClosing` |
 | `clipboard` | `copyText` |

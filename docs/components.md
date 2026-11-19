@@ -531,17 +531,19 @@ default; a screen supplies what it holds and what a press means there. Every exp
   road is asked, since its answer may hold the words. Without free entry the select takes no value
   the list does not hold.
 - **A list of several values in free entry may end a value at a separator.** The screen names the
-  characters that end one (`separators`), such as the comma and the semicolon of an address. Typed
-  into the search, a separator is not written: the words before it, their ends trimmed, are taken as
-  a value and the search is cleared for the next. Enter ends them the same way wherever no entry of
-  the list stands highlighted to be taken instead, as while the road is asked. Words pasted that hold
-  a separator or a line break are cut there, and each piece is taken in turn. Words taken are the
-  choice whose label or value they are, chosen and never let go, and otherwise handed to the screen
-  as free entry hands a new value (`create`); a new value taken from the list's own entry clears the
-  search the same way. Where the screen asks for it (`takeOnClose`), words left typed are taken the
-  same way as the list closes, by Esc, Tab or a press outside it. While a word is still being
-  composed in an input method, a separator is part of it. A list of one value takes no separators,
-  since its value is the one the list closes on.
+  characters that end one (`separators`), such as the comma and the semicolon of an address. Once
+  the words typed into the search hold a separator, however the keyboard wrote it, the words up to
+  the last one are taken, each piece between separators a value with its ends trimmed, and the
+  search keeps only what follows it. Enter ends the words the same way wherever no entry of the list
+  stands highlighted to be taken instead, as while the road is asked. Words pasted that hold a
+  separator or a line break are cut there, and every piece is taken. Words taken are the choice
+  whose label or value they are, chosen and never let go, and otherwise handed to the screen as free
+  entry hands a new value (`create`); a new value taken from the list's own entry clears the search
+  too. Where the screen asks for it (`takeOnClose`), words left typed are taken the same way as the
+  list closes, by Esc, a press outside it or the back gesture; Tab stays inside the open list, as
+  in every select. While a word is being composed in an input method, its separator waits for the
+  word to be committed. A list of one value takes no separators, since its value is the one the list
+  closes on.
 - **The list opens against the control's leading edge,** as every dropdown does (see "Tab bar and
   toolbar"), and against its trailing edge where the leading one leaves the list no room on the
   screen. Only a list that fits against neither edge is slid back inside the screen.

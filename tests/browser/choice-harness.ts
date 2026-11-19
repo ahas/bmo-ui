@@ -24,7 +24,8 @@ import type { SelectMenuItem } from "@nuxt/ui";
 // new value added to them and chosen, two skills chosen several at a time taking free entry the same
 // way, two tags chosen several at a time over a road that holds its answer to words opening on
 // "slow", taking free entry ended at a comma or a semicolon and taking the words left as the list
-// closes, with the values chosen written beside them, a list whose screen says its choices are on
+// closes, with the values chosen written beside them and a box words are copied from, a list whose
+// screen says its choices are on
 // their way until the test lands them, four teams
 // among them a choice of nothing keyed by the empty string with the value chosen written beside them,
 // seven sizes whose control the screen fills with a mark of its own only once the test asks, a
@@ -246,7 +247,8 @@ const Page = defineComponent(() => {
             onCreate: addTag,
             class: "w-48"
           }),
-          h("output", { id: "cut-value" }, JSON.stringify(tagsChosen.value))
+          h("output", { id: "cut-value" }, JSON.stringify(tagsChosen.value)),
+          h("textarea", { id: "clip", rows: 1, class: "w-24 border border-default" })
         ]),
         h(ChoiceSelect, {
           id: "awaited",

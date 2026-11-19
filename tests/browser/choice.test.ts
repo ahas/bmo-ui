@@ -17,8 +17,9 @@ import type { Browser, Page } from "playwright-core";
 // control still names what is chosen, an empty answer says why, a list found over a road asks it and
 // says when it refused, a list of three taking free entry opens with its search and takes a value
 // typed into it, closing as it does while a list of several values stays open, a list of several
-// values ends a value at its separators, at Enter where nothing stands highlighted, at a paste cut
-// there and as it closes, under a key and under a finger, a slot the screen fills only after the
+// values ends a value at its separators however the keyboard writes them, once an input method
+// commits a word, at Enter where nothing stands highlighted, at a paste cut there and as it closes,
+// by a key, a finger and the back gesture, a slot the screen fills only after the
 // first drawing is drawn, a list whose screen
 // says its choices are on their way draws a skeleton line until they land, a choice of nothing keyed
 // by the empty string is listed, taken and named, a preview follows the choice the keyboard rests on, a closing list keeps the choices
@@ -113,11 +114,15 @@ async function listedWhole(page: Page): Promise<void> {
   await listedAs(page, ["# North", "Berlin", "Dublin", "Oslo", "Riga", "Tallinn", "Vienna", "# South", "Athens", "Lisbon", "Madrid", "Rome", "Seville", "Valletta"]);
 }
 
-// The values the separators' list holds, as its screen writes them beside it, its search cleared.
+// The values the separators' list took last, as its screen writes them beside it, its search cleared.
 async function takenAs(page: Page, values: string[]): Promise<void> {
   await page.waitForFunction(
-    ([field, wanted]) => document.querySelector("#cut-value")?.textContent === wanted && (document.querySelector(field) as HTMLInputElement | null)?.value === "",
-    [FIELD, JSON.stringify(values)] as const,
+    ([field, wanted]) => {
+      const held = JSON.parse(document.querySelector("#cut-value")?.textContent ?? "[]") as string[];
+
+      return JSON.stringify(held.slice(-wanted.length)) === JSON.stringify(wanted) && (document.querySelector(field) as HTMLInputElement | null)?.value === "";
+    },
+    [FIELD, values] as const,
     { timeout: 3_000 }
   );
 }
@@ -484,7 +489,7 @@ describe.skipIf(!ready)("the one select at a desktop's width", () => {
     await page.click("#cut");
     await page.waitForSelector(FIELD);
 
-    // A separator is not written: the words before it are a new value, or the choice they name.
+    // At a separator the words before it are a new value, or the choice they name.
     await page.keyboard.type("Cooking,");
     await takenAs(page, ["Cooking"]);
     await page.keyboard.type(" drawing ;");
@@ -501,11 +506,6 @@ describe.skipIf(!ready)("the one select at a desktop's width", () => {
     expect(await pasted(page, "dening; Writing\nRowing")).toBe(true);
     await takenAs(page, ["Cooking", "Drawing", "slow tag", "Writing", "Gardening", "Rowing"]);
     expect(await pasted(page, "Reading")).toBe(false);
-
-    // A word an input method is still composing keeps its separator.
-    const composing = await page.$eval(FIELD, (input) => !input.dispatchEvent(new KeyboardEvent("keydown", { key: ",", isComposing: true, bubbles: true, cancelable: true })));
-
-    expect(composing).toBe(false);
     await close(page);
   });
 
@@ -515,6 +515,41 @@ describe.skipIf(!ready)("the one select at a desktop's width", () => {
     await page.keyboard.type("Hiking");
     await close(page);
     expect(JSON.parse((await page.textContent("#cut-value")) ?? "[]")).toContain("Hiking");
+  });
+
+  test("ends a value at a separator a keyboard hands over as text alone, or an input method commits with its word", async () => {
+    const cdp = await page.context().newCDPSession(page);
+
+    await page.click("#cut");
+    await page.waitForSelector(FIELD);
+
+    // A phone's keyboard names no key: the separator arrives as the text it writes.
+    await page.keyboard.type("Sailing");
+    await cdp.send("Input.dispatchKeyEvent", { type: "keyDown", key: "Unidentified", windowsVirtualKeyCode: 229, text: "," });
+    await cdp.send("Input.dispatchKeyEvent", { type: "keyUp", key: "Unidentified", windowsVirtualKeyCode: 229 });
+    await takenAs(page, ["Sailing"]);
+
+    // While a word is composed its separator stays in it, and the word is taken as it is committed.
+    await cdp.send("Input.imeSetComposition", { text: "\uD64D,", selectionStart: 2, selectionEnd: 2 });
+    expect(await page.$eval(FIELD, (input) => (input as HTMLInputElement).value)).toBe("\uD64D,");
+    expect(JSON.parse((await page.textContent("#cut-value")) ?? "[]")).not.toContain("\uD64D");
+    await cdp.send("Input.insertText", { text: "\uD64D," });
+    await takenAs(page, ["Sailing", "\uD64D"]);
+
+    await cdp.detach();
+    await close(page);
+  });
+
+  test("cuts words pasted from the clipboard at their separators and line breaks", async () => {
+    await page.fill("#clip", "Alpha; Beta\nGamma");
+    await page.focus("#clip");
+    await page.keyboard.press("ControlOrMeta+A");
+    await page.keyboard.press("ControlOrMeta+C");
+    await page.click("#cut");
+    await page.waitForSelector(FIELD);
+    await page.keyboard.press("ControlOrMeta+V");
+    await takenAs(page, ["Alpha", "Beta", "Gamma"]);
+    await close(page);
   });
 
   test("draws a slot its screen fills only after the select is first drawn", async () => {
@@ -661,6 +696,18 @@ describe.skipIf(!ready)("the one select under a finger at a phone's width", () =
     await page.waitForSelector(LIST, { state: "detached", timeout: 3_000 });
     expect(page.url()).toBe(address);
     expect(await page.$("#long")).not.toBeNull();
+  });
+
+  test("takes the words a finger left typed as the back gesture closes the list", async () => {
+    const { page } = touch;
+
+    await touch.tap(await centreOf(page, "#cut"));
+    await page.waitForSelector(FIELD);
+    await touch.tap(await centreOf(page, FIELD));
+    await page.keyboard.type("Surfing");
+    await page.evaluate(() => history.back());
+    await page.waitForSelector(LIST, { state: "detached", timeout: 3_000 });
+    expect(JSON.parse((await page.textContent("#cut-value")) ?? "[]")).toContain("Surfing");
   });
 
   test("closes only its list when a finger taps the dialog or the drawer it stands in", async () => {

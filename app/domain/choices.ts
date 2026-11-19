@@ -170,6 +170,25 @@ export function cutValues(words: string, separators: readonly string[]): string[
   return pieces.map((piece) => piece.trim()).filter((piece) => piece !== "");
 }
 
+// The words typed where a screen ends a value at its separators, cut at the last separator they
+// hold: the values ended before it, and the words still being typed after it. Words that hold none
+// end nothing and are left whole.
+export function cutTyped(words: string, separators: readonly string[]): { taken: string[]; left: string } {
+  const ends = separators.flatMap((separator) => {
+    const at = separator === "" ? -1 : words.lastIndexOf(separator);
+
+    return at < 0 ? [] : [at + separator.length];
+  });
+
+  if (ends.length === 0) {
+    return { taken: [], left: words };
+  }
+
+  const end = Math.max(...ends);
+
+  return { taken: cutValues(words.slice(0, end), separators), left: words.slice(end) };
+}
+
 // Whether words hold a separator or a line break, and so end at least one value.
 export function endsValue(words: string, separators: readonly string[]): boolean {
   return /[\r\n]/.test(words) || separators.some((separator) => separator !== "" && words.includes(separator));
