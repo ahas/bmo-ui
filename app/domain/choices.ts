@@ -135,14 +135,42 @@ function holds(item: SelectMenuItem, value: string, keys: ChoiceKeys, locale: st
   return choiceFields(item, keys)[0]!.text?.localeCompare(value, locale, { sensitivity: "accent" }) === 0;
 }
 
+// The choice the words typed, their ends trimmed, already are: the first whose label shows them,
+// letter case folded, or whose value they are.
+export function namedChoice(items: ChoiceItems, words: string, keys: ChoiceKeys = LABEL_KEYS, locale?: string): SelectMenuItem | undefined {
+  const value = words.trim();
+
+  if (value === "") {
+    return undefined;
+  }
+
+  return groupsOf(items)
+    .flat()
+    .find((item) => holds(item, value, keys, locale));
+}
+
 // The words typed, their ends trimmed, as the new value free entry offers: none where nothing is
 // typed or a choice already is that value.
 export function typedValue(items: ChoiceItems, words: string, keys: ChoiceKeys = LABEL_KEYS, locale?: string): string | null {
   const value = words.trim();
 
-  if (value === "" || groupsOf(items).some((group) => group.some((item) => holds(item, value, keys, locale)))) {
+  if (value === "" || namedChoice(items, value, keys, locale) !== undefined) {
     return null;
   }
 
   return value;
+}
+
+// The values words hold where a screen ends a value at its separators: the words cut at each
+// separator and each line break, every piece's ends trimmed, the empty pieces left out.
+export function cutValues(words: string, separators: readonly string[]): string[] {
+  const lines = words.split(/\r\n|\r|\n/);
+  const pieces = separators.reduce((parts, separator) => (separator === "" ? parts : parts.flatMap((part) => part.split(separator))), lines);
+
+  return pieces.map((piece) => piece.trim()).filter((piece) => piece !== "");
+}
+
+// Whether words hold a separator or a line break, and so end at least one value.
+export function endsValue(words: string, separators: readonly string[]): boolean {
+  return /[\r\n]/.test(words) || separators.some((separator) => separator !== "" && words.includes(separator));
 }

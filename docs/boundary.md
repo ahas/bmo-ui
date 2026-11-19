@@ -39,7 +39,7 @@ wording keys listed here are the ones the layer's list holds.
 | `AudioPlayer` | A kept sound: a play and pause button, its waveform as its progress, a volume popover and a download. |
 | `AvatarGroup` | The library's avatars overlapping in one moving row, each on a ring of its ground, the rest past a most counted in a cap. |
 | `CardRow` | A heading over one line of cards that scrolls sideways, paged by a pointer's buttons and swiped by a finger, with the link that opens it whole. |
-| `ChoiceSelect` | The one select a value is chosen from a list in, the library's select menu searching once it holds more than seven choices, or always over a road that finds them or in free entry, where words no choice shows are offered as a new value. |
+| `ChoiceSelect` | The one select a value is chosen from a list in, the library's select menu searching once it holds more than seven choices, or always over a road that finds them or in free entry, where words no choice shows are offered as a new value, and a list of several values may end one at the separators the screen names. |
 | `ChooseAll` | The three-state checkbox that takes every row shown or gives the choice up. |
 | `ColumnResizeHandle` | The right edge of a column's name, dragged or moved with the arrow keys. |
 | `CreateButton` | The one button a screen creates from: a grey icon in its row on a wide screen, a floating primary icon on a phone drawn under every overlay, its key named in its tooltip; marked `contained`, an add that belongs to a row, a sidebar's or a list's head, a tab bar or a dialog's or a drawer's row, is that row's grey icon at every width, answering no key. |
@@ -102,7 +102,7 @@ Each is named with everything it exports.
 | `artwork` | `PictureSize`, `ArtworkShape`, `PORTRAIT`, `LANDSCAPE`, `SQUARE`, `ARTWORK_SHAPES`, `LANDSCAPE_FROM`, `SQUARE_PAST`, `FILLS_WITHIN`, `shapeOf`, `rowShape`, `fillsShape` |
 | `avatar-group` | `AvatarFace`, `FaceSize`, `FACE_FRAMES`, `facesShown` |
 | `bars` | `BarColor`, `BAR_SIZE`, `STACKED_LEGEND`, `INLINE_LEGEND`, `FOLDED_LEGEND` |
-| `choices` | `ChoiceItems`, `ChoiceKeys`, `ChoiceFind`, `SEARCH_ABOVE`, `CHOICE_FIND_PAUSE_MS`, `choiceCount`, `searchesChoices`, `choiceFields`, `narrowChoices`, `narrowChoicesInPlace`, `typedValue` |
+| `choices` | `ChoiceItems`, `ChoiceKeys`, `ChoiceFind`, `SEARCH_ABOVE`, `CHOICE_FIND_PAUSE_MS`, `choiceCount`, `searchesChoices`, `choiceFields`, `narrowChoices`, `narrowChoicesInPlace`, `namedChoice`, `typedValue`, `cutValues`, `endsValue` |
 | `chooseall` | `ChooseAllState`, `chooseAllState`, `chosenRuns`, `chooseAllPress`, `chooseAllLabel`, `CHOOSE_CELL`, `CHOOSE_GUTTER` |
 | `closing` | `OVERLAY_CLOSE_MS`, `useHeldWhileClosing` |
 | `clipboard` | `copyText` |

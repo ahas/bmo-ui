@@ -16,7 +16,10 @@ import type { Browser, Page } from "playwright-core";
 // narrows it to what the choices show with the hits marked and the headings of what stays while the
 // control still names what is chosen, an empty answer says why, a list found over a road asks it and
 // says when it refused, a list of three taking free entry opens with its search and takes a value
-// typed into it, closing as it does while a list of several values stays open, a list whose screen
+// typed into it, closing as it does while a list of several values stays open, a list of several
+// values ends a value at its separators, at Enter where nothing stands highlighted, at a paste cut
+// there and as it closes, under a key and under a finger, a slot the screen fills only after the
+// first drawing is drawn, a list whose screen
 // says its choices are on their way draws a skeleton line until they land, a choice of nothing keyed
 // by the empty string is listed, taken and named, a preview follows the choice the keyboard rests on, a closing list keeps the choices
 // it showed until it is gone, the control takes the accent on its edge with no ring when the keyboard
@@ -108,6 +111,31 @@ async function leadingEdges(page: Page, control: string): Promise<{ list: number
 // The cities' list whole: its two headings and its twelve choices.
 async function listedWhole(page: Page): Promise<void> {
   await listedAs(page, ["# North", "Berlin", "Dublin", "Oslo", "Riga", "Tallinn", "Vienna", "# South", "Athens", "Lisbon", "Madrid", "Rome", "Seville", "Valletta"]);
+}
+
+// The values the separators' list holds, as its screen writes them beside it, its search cleared.
+async function takenAs(page: Page, values: string[]): Promise<void> {
+  await page.waitForFunction(
+    ([field, wanted]) => document.querySelector("#cut-value")?.textContent === wanted && (document.querySelector(field) as HTMLInputElement | null)?.value === "",
+    [FIELD, JSON.stringify(values)] as const,
+    { timeout: 3_000 }
+  );
+}
+
+// Pastes words into the open list's search, saying whether the select took the paste as values
+// rather than leaving it to be typed.
+async function pasted(page: Page, words: string): Promise<boolean> {
+  return await page.$eval(
+    FIELD,
+    (input, text) => {
+      const data = new DataTransfer();
+
+      data.setData("text/plain", text);
+
+      return !input.dispatchEvent(new ClipboardEvent("paste", { clipboardData: data, bubbles: true, cancelable: true }));
+    },
+    words
+  );
 }
 
 async function saysEmpty(page: Page, words: string): Promise<void> {
@@ -452,6 +480,50 @@ describe.skipIf(!ready)("the one select at a desktop's width", () => {
     await close(page);
   });
 
+  test("ends a value at a separator, at Enter with nothing highlighted and at a paste cut there, clearing the search each time", async () => {
+    await page.click("#cut");
+    await page.waitForSelector(FIELD);
+
+    // A separator is not written: the words before it are a new value, or the choice they name.
+    await page.keyboard.type("Cooking,");
+    await takenAs(page, ["Cooking"]);
+    await page.keyboard.type(" drawing ;");
+    await takenAs(page, ["Cooking", "Drawing"]);
+
+    // While the road is asked nothing stands highlighted, so Enter ends the words too.
+    await page.fill(FIELD, "slow tag");
+    await page.waitForSelector(`${LIST} [data-slot=empty] [role=status]`, { timeout: 3_000 });
+    await page.keyboard.press("Enter");
+    await takenAs(page, ["Cooking", "Drawing", "slow tag"]);
+
+    // A paste holding separators or line breaks is cut there, joined to the words already typed.
+    await page.keyboard.type("Gar");
+    expect(await pasted(page, "dening; Writing\nRowing")).toBe(true);
+    await takenAs(page, ["Cooking", "Drawing", "slow tag", "Writing", "Gardening", "Rowing"]);
+    expect(await pasted(page, "Reading")).toBe(false);
+
+    // A word an input method is still composing keeps its separator.
+    const composing = await page.$eval(FIELD, (input) => !input.dispatchEvent(new KeyboardEvent("keydown", { key: ",", isComposing: true, bubbles: true, cancelable: true })));
+
+    expect(composing).toBe(false);
+    await close(page);
+  });
+
+  test("takes the words left typed as a value once its list closes", async () => {
+    await page.click("#cut");
+    await page.waitForSelector(FIELD);
+    await page.keyboard.type("Hiking");
+    await close(page);
+    expect(JSON.parse((await page.textContent("#cut-value")) ?? "[]")).toContain("Hiking");
+  });
+
+  test("draws a slot its screen fills only after the select is first drawn", async () => {
+    expect(await page.$("#late [data-slot=value]")).not.toBeNull();
+    await page.evaluate(() => (window as unknown as { fillLateSlot: () => void }).fillLateSlot());
+    await page.waitForSelector("#late #late-mark", { timeout: 3_000 });
+    expect(await page.$("#late [data-slot=value]")).toBeNull();
+  });
+
   test("draws a skeleton line in a list whose screen says its first choices are on their way, and what lands once it lands", async () => {
     await page.click("#awaited");
     await page.waitForSelector(`${LIST} [data-slot=empty] [role=status][aria-busy=true]`, { timeout: 3_000 });
@@ -541,6 +613,21 @@ describe.skipIf(!ready)("the one select under a finger at a phone's width", () =
     await touch.tap(await centreOf(page, `${LIST} [data-slot=item]`));
     await page.waitForSelector(LIST, { state: "detached" });
     expect(await page.textContent("#free")).toContain(words);
+  });
+
+  test("ends a value typed by a finger at a separator, and takes the words left as a tap outside closes the list", async () => {
+    const { page } = touch;
+
+    await touch.tap(await centreOf(page, "#cut"));
+    await page.waitForSelector(FIELD);
+    await touch.tap(await centreOf(page, FIELD));
+    await page.keyboard.type("Baking,");
+    await takenAs(page, ["Baking"]);
+
+    await page.keyboard.type("Rowing");
+    await touch.tap(await centreOf(page, "#cut-value"));
+    await page.waitForSelector(LIST, { state: "detached" });
+    expect(JSON.parse((await page.textContent("#cut-value")) ?? "[]")).toEqual(["Baking", "Rowing"]);
   });
 
   test("stands each list as wide as its choices and its control, against an edge of the control", async () => {

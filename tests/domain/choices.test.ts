@@ -1,9 +1,10 @@
 import { describe, expect, test } from "bun:test";
 
-import { choiceCount, choiceFields, narrowChoices, narrowChoicesInPlace, SEARCH_ABOVE, searchesChoices, typedValue } from "~/domain/choices";
+import { choiceCount, choiceFields, cutValues, endsValue, namedChoice, narrowChoices, narrowChoicesInPlace, SEARCH_ABOVE, searchesChoices, typedValue } from "~/domain/choices";
 
-// When the one select searches, what its search keeps and which words free entry offers as a new
-// value (`docs/components.md`, "Choosing a value"). How the search module matches words is its own
+// When the one select searches, what its search keeps, which words free entry offers as a new value
+// and how words are cut into values at a screen's separators (`docs/components.md`, "Choosing a
+// value"). How the search module matches words is its own
 // test's; this one holds the select's list to it.
 
 const fruits = ["Apple", "Banana", "Cherry", "Date", "Elderberry", "Fig", "Grape"].map((label) => ({ label, value: label.toLowerCase() }));
@@ -67,6 +68,35 @@ describe("the new value free entry offers", () => {
   test("is none where a choice holds the words as its value, read by the value key", () => {
     expect(typedValue([{ label: "Engineer", value: "eng" }], "eng", { label: "label", description: "description", value: "value" })).toBeNull();
     expect(typedValue([{ label: "Engineer", value: "eng" }], "eng")).toBe("eng");
+  });
+});
+
+describe("the choice words typed name", () => {
+  test("is the first choice in any group whose label shows them, their ends trimmed and letter case folded", () => {
+    expect(namedChoice([fruits.slice(0, 3), fruits.slice(3)], " fig ")).toBe(fruits[5]);
+  });
+
+  test("is no heading, and none where nothing is typed", () => {
+    expect(namedChoice([{ type: "label" as const, label: "Grape" }], "Grape")).toBeUndefined();
+    expect(namedChoice(fruits, "  ")).toBeUndefined();
+  });
+});
+
+describe("the values words are cut into at a screen's separators", () => {
+  test("are the pieces between each separator and each line break, their ends trimmed, the empty ones left out", () => {
+    expect(cutValues(" one, two;;three\r\nfour\nfive ,", [",", ";"])).toEqual(["one", "two", "three", "four", "five"]);
+  });
+
+  test("are the words whole where they hold no separator, and none for words of nothing but separators", () => {
+    expect(cutValues("one two", [","])).toEqual(["one two"]);
+    expect(cutValues(" , ;", [",", ";"])).toEqual([]);
+  });
+
+  test("end a value only where the words hold a separator or a line break", () => {
+    expect(endsValue("one two", [","])).toBe(false);
+    expect(endsValue("one, two", [","])).toBe(true);
+    expect(endsValue("one\ntwo", [])).toBe(true);
+    expect(endsValue("one", [""])).toBe(false);
   });
 });
 

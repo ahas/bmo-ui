@@ -3,7 +3,10 @@
        library's select menu, its search held to one rule by the choices module. A list searches once
        it holds more than seven choices, and a list found over a road or taking free entry always;
        words typed that no choice shows are offered in free entry as a new value, handed to the screen
-       as it is chosen, a list of one value then closing. A choice of nothing, keyed by the empty
+       as it is chosen, a list of one value then closing. A list of several values in free entry ends
+       a value at the separators the screen names, as Enter does where no entry stands highlighted:
+       the words before it are taken and the search cleared, a paste is cut at them, and the words left
+       typed are taken as the list closes where the screen asks. A choice of nothing, keyed by the empty
        string, is listed and chosen as every choice is. The field stands at the top of the opened list
        with the pack's words for a search, takes the focus unless a finger opened it, and matches what
        each choice shows, its hits marked where they stand. An empty list says whether nothing matched,
@@ -14,7 +17,8 @@
        the list. The words typed stay while the list closes and are cleared as it opens again, so a
        closing list keeps what it showed. The list moves as the words change it once it stands open, a
        moving list drawn by the library's select menu as the layer's patch of it lets it be, and stands
-       still as it opens. Everything else it is handed is the library's select menu's. -->
+       still as it opens. Everything else it is handed is the library's select menu's, its slots read
+       as each drawing hands them, so a slot the screen fills only later is drawn once it is. -->
   <USelectMenu
     ref="menu"
     v-bind="$attrs"
@@ -36,11 +40,11 @@
     ignore-filter
     @create="takeOffered"
     @update:search-term="takeWords"
-    @update:open="clearOnOpen"
+    @update:open="followOpen"
     @update:model-value="takeChosen"
     @highlight="passHighlight"
   >
-    <template v-for="name in passedSlots" #[name]="scope" :key="name">
+    <template v-for="name in passedSlots()" #[name]="scope" :key="name">
       <slot :name="name" v-bind="fromListScope(scope)" />
     </template>
 
@@ -79,7 +83,7 @@ import SelectMenu from "@nuxt/ui/components/SelectMenu.vue";
 import { compare, get, getDisplayValue } from "@nuxt/ui/utils";
 import { useI18n } from "vue-i18n";
 
-import { CHOICE_FIND_PAUSE_MS, choiceFields, narrowChoices, narrowChoicesInPlace, searchesChoices, typedValue } from "../domain/choices";
+import { CHOICE_FIND_PAUSE_MS, choiceFields, cutValues, endsValue, namedChoice, narrowChoices, narrowChoicesInPlace, searchesChoices, typedValue } from "../domain/choices";
 import { MOVING_LIST, STANDING_LIST } from "../domain/moving-list";
 import { countLocale } from "../domain/numbers";
 import { TOUCH_QUERY } from "../domain/prompt";
@@ -110,6 +114,10 @@ interface Props extends /* @vue-ignore */ Omit<SelectMenuProps, "items" | "virtu
   findPauseMs?: number;
   // Free entry: words typed that no choice shows are offered as a new value.
   createItem?: boolean;
+  // The characters that end the words typed as a value, in free entry on a list of several values.
+  separators?: string[];
+  // Whether the words left typed are taken as a value as the list closes, where separators would be.
+  takeOnClose?: boolean;
 }
 
 defineOptions({ inheritAttrs: false });
@@ -123,7 +131,9 @@ const props = withDefaults(defineProps<Props>(), {
   labelKey: "label",
   descriptionKey: "description",
   findPauseMs: CHOICE_FIND_PAUSE_MS,
-  createItem: false
+  createItem: false,
+  separators: () => [],
+  takeOnClose: false
 });
 
 // The new value free entry offered, chosen, which the screen adds and chooses; the value chosen; and the
@@ -154,9 +164,14 @@ const { t } = useI18n();
 const appConfig = useAppConfig();
 const touch = useNarrow(TOUCH_QUERY);
 
-// The slots the select draws itself; every other slot of the library's select menu is the caller's.
+// The slots the select draws itself; every other slot of the library's select menu is the caller's,
+// read as each drawing hands them: the names a caller fills are no reactive state, so a slot the
+// caller fills only from a later drawing on is passed on from that drawing.
 const OWN_SLOTS = new Set(["item-label", "item-description", "empty", "create-item-label"]);
-const passedSlots = computed(() => Object.keys(slots).filter((name) => !OWN_SLOTS.has(name)));
+
+function passedSlots(): string[] {
+  return Object.keys(slots).filter((name) => !OWN_SLOTS.has(name));
+}
 
 const keys = computed(() => ({ label: props.labelKey, description: props.descriptionKey, value: props.valueKey }));
 
@@ -176,10 +191,12 @@ function takeWords(now: string): void {
   words.value = now;
 }
 
-function clearOnOpen(open: boolean): void {
+function followOpen(open: boolean): void {
   if (open) {
     moving.value = false;
     words.value = "";
+  } else if (takesOnClose.value) {
+    takeValues([words.value]);
   }
 }
 
@@ -206,7 +223,14 @@ watch(loadingOwn, (loading) => {
 const searches = computed(() => searchesChoices(props.items, props.find !== undefined, props.createItem));
 
 const searchInput = computed(() =>
-  searches.value ? { placeholder: t("common.placeholder.search"), icon: appConfig.ui.icons.search, ...(touch.value ? { autofocus: false } : {}) } : false
+  searches.value
+    ? {
+        placeholder: t("common.placeholder.search"),
+        icon: appConfig.ui.icons.search,
+        ...(touch.value ? { autofocus: false } : {}),
+        ...(cuts.value ? { onKeydown: endOnKey, onPaste: cutPasted } : {})
+      }
+    : false
 );
 
 const shown = computed((): ChoiceItems => {
@@ -333,7 +357,82 @@ function takeOffered(): void {
   if (offered.value === null) return;
 
   emit("create", offered.value);
+  if (cuts.value) words.value = "";
   if (!props.multiple) menu.value?.triggerRef?.click();
+}
+
+// Whether the words typed end as a value at the screen's separators, and as the list closes: only in
+// free entry on a list of several values, since a list of one value takes the value it closes on.
+const cuts = computed(() => props.createItem && props.multiple && props.separators.length > 0);
+const takesOnClose = computed(() => props.createItem && props.multiple && props.takeOnClose);
+
+// Takes each of the words given as a value: the choice whose label or value it is, chosen where it
+// is not yet, and otherwise a new value handed to the screen. The choices are chosen first and at
+// once, so a screen that adds each new value to the values it holds adds it to them all.
+function takeValues(given: string[]): void {
+  const values = given.flatMap((one) => (one.trim() === "" ? [] : [one.trim()]));
+  const chosen = chosenValues(props.modelValue).filter((one) => one !== undefined);
+  const by = attrs.by as DisplayOptions["by"];
+  const added: unknown[] = [];
+  const created: string[] = [];
+
+  for (const value of values) {
+    const choice = namedChoice(known.value, value, keys.value, countLocale());
+
+    if (choice === undefined) {
+      if (!created.includes(value)) created.push(value);
+    } else if (![...chosen, ...added].some((one) => compare(one, valueOf(choice), by))) {
+      added.push(valueOf(choice));
+    }
+  }
+
+  if (added.length > 0) {
+    const next = [...chosen, ...added];
+
+    keepChosen(next);
+    emit("update:modelValue", next);
+  }
+
+  for (const value of created) emit("create", value);
+}
+
+// Whether the open list holding a field stands an entry highlighted, which Enter takes. The library
+// hears a highlight as it moves onto an entry and never as the entry leaves the list, so the list
+// itself is read, as the library reads it as Enter is pressed.
+function holdsHighlight(field: EventTarget | null): boolean {
+  return field instanceof HTMLElement && field.closest("[data-slot=content]")?.querySelector("[data-highlighted]") != null;
+}
+
+// A key in the search: a separator, never written, ends the words typed as a value, and so does Enter
+// where no entry stands highlighted for it to take; a word an input method is still composing is
+// left whole.
+function endOnKey(event: KeyboardEvent): void {
+  if (event.isComposing || event.ctrlKey || event.metaKey || event.altKey) return;
+
+  const separator = props.separators.includes(event.key);
+
+  if (!separator && (event.key !== "Enter" || !typed.value || holdsHighlight(event.target))) return;
+
+  event.preventDefault();
+  takeValues([words.value]);
+  words.value = "";
+}
+
+// A paste into the search: words that then hold a separator or a line break are cut there and each
+// piece taken, the search cleared; any other paste is typed as it is.
+function cutPasted(event: ClipboardEvent): void {
+  const field = event.target;
+
+  if (!(field instanceof HTMLInputElement)) return;
+
+  const pasted = event.clipboardData?.getData("text") ?? "";
+  const whole = `${field.value.slice(0, field.selectionStart ?? field.value.length)}${pasted}${field.value.slice(field.selectionEnd ?? field.value.length)}`;
+
+  if (!endsValue(whole, props.separators)) return;
+
+  event.preventDefault();
+  takeValues(cutValues(whole, props.separators));
+  words.value = "";
 }
 
 // The road is being asked, or the screen's first choices are on their way: the list stands empty only

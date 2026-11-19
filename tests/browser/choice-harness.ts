@@ -22,9 +22,13 @@ import type { SelectMenuItem } from "@nuxt/ui";
 // answer to "slow" until the test lets it go and finds nobody for anything else unmatched, the same
 // people chosen several at a time by an id over a second road, three roles taking free entry, each
 // new value added to them and chosen, two skills chosen several at a time taking free entry the same
-// way, a list whose screen says its choices are on their way until the test lands them, four teams
+// way, two tags chosen several at a time over a road that holds its answer to words opening on
+// "slow", taking free entry ended at a comma or a semicolon and taking the words left as the list
+// closes, with the values chosen written beside them, a list whose screen says its choices are on
+// their way until the test lands them, four teams
 // among them a choice of nothing keyed by the empty string with the value chosen written beside them,
-// a narrow control at the page's trailing end opening a list of
+// seven sizes whose control the screen fills with a mark of its own only once the test asks, a
+// narrow control at the page's trailing end opening a list of
 // sessions wider than itself, and a dialog and a drawer each holding the dozen cities once more,
 // opened from buttons under them all. The page stands outside Nuxt, so the library is installed as a
 // Vue plugin, the words are handed over here and the layer's registry of floating things is started
@@ -83,7 +87,10 @@ let letGo: () => void = () => undefined;
 let land: (labels: string[]) => void = () => undefined;
 let readAgain: () => void = () => undefined;
 
-Object.assign(window, { letAnswerGo: () => letGo(), landChoices: (labels: string[]) => land(labels), readChoicesAgain: () => readAgain() });
+// Fills the control of the sizes' second list with the screen's own mark.
+let fillLate: () => void = () => undefined;
+
+Object.assign(window, { letAnswerGo: () => letGo(), landChoices: (labels: string[]) => land(labels), readChoicesAgain: () => readAgain(), fillLateSlot: () => fillLate() });
 
 // Teams with a choice of nothing, keyed by the empty string.
 const TEAMS = [{ label: "Nobody", value: "" }, ...["Design", "Research", "Support"].map((label) => ({ label, value: label.toLowerCase() }))];
@@ -97,6 +104,15 @@ async function findPeople(words: string): Promise<SelectMenuItem[]> {
 
 async function findMembers(words: string): Promise<SelectMenuItem[]> {
   return MEMBERS.filter((member) => member.label.toLowerCase().includes(words.toLowerCase()));
+}
+
+// The tags a road finds, which never answers words opening on "slow".
+function findTags(known: () => SelectMenuItem[]): (words: string) => Promise<SelectMenuItem[]> {
+  return async (words) => {
+    if (words.trim().toLowerCase().startsWith("slow")) return await new Promise(() => undefined);
+
+    return known().filter((tag) => (tag as { label: string }).label.toLowerCase().includes(words.trim().toLowerCase()));
+  };
 }
 
 const Page = defineComponent(() => {
@@ -120,6 +136,21 @@ const Page = defineComponent(() => {
     skills.value = [...skills.value, { label: value, value }];
     skillsChosen.value = [...skillsChosen.value, value];
   }
+
+  const tags = shallowRef<SelectMenuItem[]>(["Drawing", "Writing"].map((label) => ({ label, value: label })));
+  const tagsChosen = ref<string[]>([]);
+  const findTag = findTags(() => tags.value);
+
+  function addTag(value: string): void {
+    tags.value = [...tags.value, { label: value, value }];
+    tagsChosen.value = [...tagsChosen.value, value];
+  }
+
+  const late = ref(false);
+
+  fillLate = () => {
+    late.value = true;
+  };
 
   const awaited = shallowRef<SelectMenuItem[]>([]);
   const awaiting = ref(true);
@@ -199,6 +230,24 @@ const Page = defineComponent(() => {
           onCreate: addSkill,
           class: "w-48"
         }),
+        h("div", { class: "flex items-center gap-4" }, [
+          h(ChoiceSelect, {
+            id: "cut",
+            items: tags.value,
+            find: findTag,
+            findPauseMs: 0,
+            createItem: true,
+            multiple: true,
+            separators: [",", ";"],
+            takeOnClose: true,
+            valueKey: "value",
+            modelValue: tagsChosen.value,
+            "onUpdate:modelValue": (value: string[]) => (tagsChosen.value = value),
+            onCreate: addTag,
+            class: "w-48"
+          }),
+          h("output", { id: "cut-value" }, JSON.stringify(tagsChosen.value))
+        ]),
         h(ChoiceSelect, {
           id: "awaited",
           items: awaited.value,
@@ -212,6 +261,11 @@ const Page = defineComponent(() => {
           h(ChoiceSelect, { id: "team", items: TEAMS, valueKey: "value", modelValue: team.value, "onUpdate:modelValue": (value: string) => (team.value = value), class: "w-48" }),
           h("output", { id: "team-value" }, JSON.stringify(team.value))
         ]),
+        h(
+          ChoiceSelect,
+          { id: "late", items: SIZES, valueKey: "value", modelValue: size.value, "onUpdate:modelValue": (value: string) => (size.value = value), class: "w-48" },
+          late.value ? { default: () => h("span", { id: "late-mark" }, "Mark") } : {}
+        ),
         h("div", { class: "flex justify-end self-stretch" }, [
           h(ChoiceSelect, { id: "wide", items: SESSIONS, valueKey: "value", modelValue: session.value, "onUpdate:modelValue": (value: string) => (session.value = value), class: "w-32" })
         ]),
