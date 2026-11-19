@@ -209,7 +209,7 @@
     {
       "name": "ChoiceSelect",
       "kind": "component",
-      "line": "The one select a value is chosen from a list in, the library's select menu searching once it holds more than seven choices, or always over a road that finds them or in free entry, where words no choice shows are offered as a new value.",
+      "line": "The one select a value is chosen from a list in, the library's select menu searching once it holds more than seven choices, or always over a road that finds them or in free entry, where words no choice shows are offered as a new value, and a list of several values may end one at the separators the screen names.",
       "props": [
         {
           "name": "modelValue",
@@ -266,6 +266,18 @@
         },
         {
           "name": "createItem",
+          "type": "boolean | undefined",
+          "required": false,
+          "default": "false"
+        },
+        {
+          "name": "separators",
+          "type": "string[] | undefined",
+          "required": false,
+          "default": "[]"
+        },
+        {
+          "name": "takeOnClose",
           "type": "boolean | undefined",
           "required": false,
           "default": "false"
