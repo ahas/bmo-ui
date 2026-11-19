@@ -535,8 +535,10 @@ default; a screen supplies what it holds and what a press means there. Every exp
   the words typed into the search hold a separator, however the keyboard wrote it, the words up to
   the last one are taken, each piece between separators a value with its ends trimmed, and the
   search keeps only what follows it. Enter ends the words the same way wherever no entry of the list
-  stands highlighted to be taken instead, as while the road is asked. Words pasted that hold a
-  separator or a line break are cut there, and every piece is taken. Words taken are the choice
+  stands highlighted to be taken instead, as while the road is asked; such an Enter takes the words
+  and does nothing else, so it lets no value already chosen go, however soon after the typing it
+  comes. Words pasted that hold a separator or a line break are cut there, and every piece is
+  taken. Words taken are the choice
   whose label or value they are, chosen and never let go, and otherwise handed to the screen as free
   entry hands a new value (`create`); a new value taken from the list's own entry clears the search
   too. Where the screen asks for it (`takeOnClose`), words left typed are taken the same way as the

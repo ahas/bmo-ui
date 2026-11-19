@@ -18,7 +18,8 @@ import type { Browser, Page } from "playwright-core";
 // says when it refused, a list of three taking free entry opens with its search and takes a value
 // typed into it, closing as it does while a list of several values stays open, a list of several
 // values ends a value at its separators however the keyboard writes them, once an input method
-// commits a word, at Enter where nothing stands highlighted, at a paste cut there and as it closes,
+// commits a word, at Enter where nothing stands highlighted, letting no value chosen go however soon
+// after the typing it comes, at a paste cut there and as it closes,
 // by a key, a finger and the back gesture, a slot the screen fills only after the
 // first drawing is drawn, a list whose screen
 // says its choices are on their way draws a skeleton line until they land, a choice of nothing keyed
@@ -1028,4 +1029,51 @@ describe.skipIf(!ready)("the one select's list as the words narrow it", () => {
       await still.context().close();
     }
   });
+});
+
+// Enter pressed while the road is asked for the words just typed, in a list of several values that
+// ends values at its separators, at a desktop's and a phone's width. The list then shows no entry,
+// and the value the Enter takes redraws it at once with the first value chosen highlighted, as the
+// library highlights a list whose value it did not change itself; the library's own Enter, heard
+// around the search, would take that value back. The list changes at once for a reader who asked for
+// less movement, so no entry still folding away stands in the way.
+describe.skipIf(!ready)("the one select's Enter pressed while the road is asked", () => {
+  for (const width of [1280, 360]) {
+    test(`at ${width} wide, takes the words as a value and lets no value already chosen go`, async () => {
+      const page = await (await browser.newContext({ viewport: { width, height: 800 }, reducedMotion: "reduce" })).newPage();
+
+      try {
+        await serve(page);
+        await page.click("#cut");
+        await page.waitForSelector(FIELD);
+        await page.keyboard.type("ann,");
+        await takenAs(page, ["ann"]);
+        await page.keyboard.type("bob,");
+        await takenAs(page, ["ann", "bob"]);
+
+        // The road answers "slo" with nothing, and holds its answer to "slow" for as long as the list
+        // stands open.
+        await page.keyboard.type("slo");
+        await listedAs(page, ['Add "slo"']);
+        await page.keyboard.type("w");
+        await page.waitForSelector(`${LIST} [data-slot=empty] [role=status]`, { timeout: 3_000 });
+        await listedAs(page, []);
+
+        await page.keyboard.press("Enter");
+        await takenAs(page, ["slow"]);
+        expect(JSON.parse((await page.textContent("#cut-value")) ?? "[]")).toEqual(["ann", "bob", "slow"]);
+
+        // An entry the list stands highlighted is still the one Enter takes.
+        await page.keyboard.type("writ");
+        await page.waitForFunction((selector) => document.querySelector(`${selector} [data-highlighted] [data-slot=itemLabel]`)?.textContent?.trim() === "Writing", LIST, {
+          timeout: 3_000
+        });
+        await page.keyboard.press("Enter");
+        await takenAs(page, ["Writing"]);
+        expect(JSON.parse((await page.textContent("#cut-value")) ?? "[]")).toEqual(["ann", "bob", "slow", "Writing"]);
+      } finally {
+        await page.context().close();
+      }
+    });
+  }
 });

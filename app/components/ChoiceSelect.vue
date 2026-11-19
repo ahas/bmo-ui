@@ -229,7 +229,7 @@ const searchInput = computed(() =>
         placeholder: t("common.placeholder.search"),
         icon: appConfig.ui.icons.search,
         ...(touch.value ? { autofocus: false } : {}),
-        ...(cuts.value ? { onKeydown: endOnEnter, onPaste: cutPasted } : {})
+        ...(cuts.value ? { onKeydownCapture: endOnEnter, onPaste: cutPasted } : {})
       }
     : false
 );
@@ -419,12 +419,18 @@ function endTyped(): void {
 }
 
 // Enter in the search ends the words typed as a value where no entry stands highlighted for it to
-// take, as while the road is asked; Enter is no text, so the words do not show it.
+// take, as while the road is asked; Enter is no text, so the words do not show it. An Enter that ends
+// the words is that and nothing more. The library hears Enter on the field and again on the list
+// around it, each time clicking the entry it holds highlighted: one the words already left out, or
+// the first value chosen, which it highlights once the value taken redraws the list. So the select
+// hears Enter as it reaches the field, before the library does, and keeps it from the library once
+// it takes the words.
 function endOnEnter(event: KeyboardEvent): void {
   if (event.key !== "Enter" || event.isComposing || event.ctrlKey || event.metaKey || event.altKey) return;
   if (!typed.value || holdsHighlight(event.target)) return;
 
   event.preventDefault();
+  event.stopImmediatePropagation();
   takeValues([words.value]);
   words.value = "";
 }
