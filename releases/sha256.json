@@ -243,5 +243,10 @@
     "sha256": "da5b523e2bf93015b715fc17ec2158e7ee9ec34c8c0a4e0591cabaf5d0037463",
     "bound": "0.1.0-rev.23",
     "why": "Reads a select's separators from the words typed, as a phone's keyboard writes them, only adding; every bundle built from 0.1.0-rev.23 runs on it unchanged"
+  },
+  "bmo-ui-0.1.0-rev.49.tgz": {
+    "sha256": "6ea94d59efb13d1ec9c668f459466e32fc02ce8713981b14825646affeb84195",
+    "bound": "0.1.0-rev.23",
+    "why": "Carries the catalogue naming the select's separators and takeOnClose, which 0.1.0-rev.47 and 0.1.0-rev.48 shipped stale, only adding; every bundle built from 0.1.0-rev.23 runs on it unchanged"
   }
 }
