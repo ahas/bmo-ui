@@ -238,5 +238,10 @@
     "sha256": "3668fedffad56fb5782b774d5d2504e6996111a7c09478186adce5c129baae84",
     "bound": "0.1.0-rev.23",
     "why": "Passes a select's late slots on and adds free entry separators, only adding; every bundle built from 0.1.0-rev.23 runs on it unchanged"
+  },
+  "bmo-ui-0.1.0-rev.48.tgz": {
+    "sha256": "da5b523e2bf93015b715fc17ec2158e7ee9ec34c8c0a4e0591cabaf5d0037463",
+    "bound": "0.1.0-rev.23",
+    "why": "Reads a select's separators from the words typed, as a phone's keyboard writes them, only adding; every bundle built from 0.1.0-rev.23 runs on it unchanged"
   }
 }
