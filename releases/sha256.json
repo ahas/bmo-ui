@@ -263,5 +263,10 @@
     "sha256": "96211dfc8cfc6177fc3386dc880151f1a86cbb0396f08a1bf6bc8bf60780e72b",
     "bound": "0.1.0-rev.23",
     "why": "A focus a floating thing takes up on its own where no key opened it draws no ring"
+  },
+  "bmo-ui-0.1.0-rev.53.tgz": {
+    "sha256": "9d1992d4738cf27cf766e8ad8feff8d72c306a208322a5ed88051a944089c698",
+    "bound": "0.1.0-rev.23",
+    "why": "A folded window's pill is dragged like a picture-in-picture window through one shared drag"
   }
 }
