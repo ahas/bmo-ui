@@ -11,27 +11,27 @@
         <slot name="actions" />
       </div>
 
-      <div class="min-h-0 flex-1 overflow-y-auto p-1.5 [scrollbar-width:thin]">
-        <div v-if="props.failure !== ''" role="alert" class="flex flex-col items-end gap-3 p-2.5" data-choice-sidebar-failure>
+      <div class="min-h-0 flex-1 overflow-y-auto p-1 [scrollbar-width:thin]">
+        <div v-if="props.failure !== ''" role="alert" class="flex flex-col items-end gap-3 p-3" data-choice-sidebar-failure>
           <UAlert class="w-full" color="error" variant="subtle" :description="props.failure" />
           <UButton color="neutral" variant="subtle" :icon="REFRESH_ICON" :label="$t('common.action.refresh')" :loading="props.reading" @click="emit('retry')" />
         </div>
         <ContentSkeleton v-else-if="props.entries === null" :rows="SKELETON_ROWS" listClass="flex flex-col" :label="$t('common.status.loading')">
           <template #default="{ index }">
-            <div class="flex h-8 items-center px-2.5">
+            <div class="flex h-8 items-center px-3">
               <SkeletonBar class="h-4" :class="index % 2 === 0 ? 'w-2/3' : 'w-1/2'" />
             </div>
           </template>
         </ContentSkeleton>
-        <p v-else-if="shown.length === 0" class="px-2.5 py-1.5 text-sm text-muted" data-choice-sidebar-empty>{{ emptyWords }}</p>
-        <div v-else class="flex flex-col">
-          <template v-for="(entry, index) in shown" :key="isSideHeading(entry) ? `heading-${index}` : `choice-${entry.value}`">
-            <p v-if="isSideHeading(entry)" class="px-2.5 pt-3 pb-1 text-sm font-semibold text-muted first:pt-1" data-choice-sidebar-heading>{{ entry.label }}</p>
+        <p v-else-if="shown.length === 0" class="px-3 py-2 text-sm text-muted" data-choice-sidebar-empty>{{ emptyWords }}</p>
+        <MovingList v-else tag="div" class="flex flex-col">
+          <template v-for="entry in shown" :key="isSideHeading(entry) ? `heading-${entry.label}` : `choice-${entry.value}`">
+            <p v-if="isSideHeading(entry)" class="px-3 pt-3 pb-1 text-sm font-semibold text-muted first:pt-1" data-choice-sidebar-heading>{{ entry.label }}</p>
             <UButton
               v-else
               color="neutral"
               :variant="entry.value === props.chosen ? 'soft' : 'ghost'"
-              class="w-full justify-start text-start"
+              class="w-full justify-start px-3 text-start"
               :style="indentOf(entry)"
               :aria-current="entry.value === props.chosen ? 'page' : undefined"
               :data-choice-sidebar-row="entry.value"
@@ -43,7 +43,7 @@
               </span>
             </UButton>
           </template>
-        </div>
+        </MovingList>
       </div>
     </nav>
   </DefineList>
@@ -153,7 +153,7 @@ const regions = computed<SplitterItem[]>(() =>
 function indentOf(choice: SideChoice): Record<string, string> | undefined {
   const depth = choice.depth ?? 0;
 
-  return depth > 0 ? { paddingInlineStart: `calc(var(--spacing) * 2.5 + ${depth * DEPTH_INDENT_PX}px)` } : undefined;
+  return depth > 0 ? { paddingInlineStart: `calc(var(--spacing) * 3 + ${depth * DEPTH_INDENT_PX}px)` } : undefined;
 }
 
 // Choosing a row hands its value to the host and, on a phone, closes the drawer it was chosen in.

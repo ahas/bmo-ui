@@ -616,7 +616,9 @@ are the component's.
   its accessible name, and an action of the host's beside it at the head's trailing end, an add among
   them. Typing narrows the rows to those whose label or line under it holds the words, through the
   search module, the matched part marked where it stands (`SearchText`). A heading stays while any
-  choice under it does, and goes with the last. Nothing matching says so in one line, the host's own
+  choice under it does, and goes with the last. The rows are a `MovingList`: as the words narrow them
+  and give them back, the rows that stay slide and the rest fold and unfold. The rows' words and the
+  search box start on one line, the list's own padding and the rows' together as wide as the head's. Nothing matching says so in one line, the host's own
   words where it names them and the pack's otherwise.
 - **The list keeps its place while it is read and says why a read failed.** Until the host hands it
   entries it stands as a skeleton of rows; a list the host says failed shows the reason in its place,
