@@ -510,7 +510,11 @@ Every token is a custom property stated by the layer's stylesheet on the root un
     opening for another's and closing itself: a page layer's tooltip, moved on with the pointer from
     one control it names to the next, comes up over each. And it lets Esc pass a date or a time
     field's segment, which keeps every other key but Tab for itself, so Esc pressed there reaches the
-    floating thing around the field as from any other field.
+    floating thing around the field as from any other field. It has a row of tabs measure its active
+    line again whenever a tab comes into the row or leaves it, and watch the size of every tab it
+    holds rather than only those it held when first drawn, so the line follows the chosen tab when a
+    tab is put in front of it or a name before it grows. In an install without the patch the line
+    stays where the chosen tab stood until the choice changes.
   - The `@nuxt/ui` patch lets the library's select menu move its list by what it holds: handed a
     list transition, the transition group's name and hooks, it draws its groups and the choices in
     each through Vue's `TransitionGroup` with them, each choice keyed by the value it is chosen by

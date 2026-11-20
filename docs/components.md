@@ -214,6 +214,9 @@ default; a screen supplies what it holds and what a press means there. Every exp
 - **A row of the library's tabs keeps its whole height:** fixed, with no padding above or below, the
   tabs filling it, the active line on the row's bottom edge; a row wider than its place scrolls
   sideways and never vertically.
+- **The active line stands under the chosen tab** however the tabs around it change while it stays
+  chosen: a tab put in front of it or taken away, a tab's name made longer or shorter, in a dialog as
+  on a page (the patch under `patches/`).
 
 ### Creating
 
