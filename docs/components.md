@@ -61,6 +61,9 @@ default; a screen supplies what it holds and what a press means there. Every exp
     size. The ring is the face's item's own ground rather than a shadow outside it, so it folds and
     unfolds with the face and is never cut while the face moves. Its colour is the page's ground
     unless the host names another for a ground of its own.
+  - Every face and the cap stand on the row's vertical centre at every size. A face's item is as
+    tall as the face and its ring and no taller, whatever line height the row inherits from the
+    words around it, so a face is never lowered onto a line of text.
 - **A cap holds the rest.** Given a most, the group draws that many faces and one more avatar
   holding the count of the rest, a plus sign before it, written with the count's separators in
   tabular figures. It widens with its count rather than cutting it, and a count gaining or losing a

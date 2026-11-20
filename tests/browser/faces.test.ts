@@ -5,9 +5,11 @@ import { join } from "node:path";
 
 import { chromium } from "playwright-core";
 
+import { FACE_FRAMES } from "../../app/domain/avatar-group";
 import { BROWSER_HOOK_MS, touchReady } from "./touch";
 
 import type { Browser, BrowserContext, Page } from "playwright-core";
+import type { FaceSize } from "../../app/domain/avatar-group";
 import type { FacesSeen } from "./faces-harness";
 
 // A row of faces and the words after it in one unfolding box, frame by frame under the layer's own
@@ -16,8 +18,9 @@ import type { FacesSeen } from "./faces-harness";
 // to nothing, faces changing places slide sideways, and none of it fades or moves up or down; the
 // box follows the row frame by frame and ends at what it holds. Words replaced at once move the box
 // to its new size at the unfold length while the words stand at their final size. A reader who
-// asked for less movement sees every change stand at once. The vertical list's own movement is
-// `motion.test.ts`'s.
+// asked for less movement sees every change stand at once. At every size the group draws, every face
+// and the cap stand on the row's vertical centre, though the row inherits a line taller than its
+// smallest faces. The vertical list's own movement is `motion.test.ts`'s.
 //
 // The movements run at a shorter length than the layer's, set on the page, so a run costs a
 // fraction of a second and still draws several frames of each. Skipped where the browser build is
@@ -87,13 +90,14 @@ async function session(reducedMotion: "reduce" | "no-preference"): Promise<{ con
   return { context, page };
 }
 
-type Change = { faces: string[] } | { words: string };
+type Change = { faces: string[] } | { words: string } | { size: FaceSize };
 
 // Makes one change and hands back every frame drawn from it until nothing moves.
 async function frames(page: Page, change: Change): Promise<FacesSeen[]> {
   return await page.evaluate(async (change) => {
     window.faces.record();
     if ("faces" in change) window.faces.setFaces(change.faces);
+    else if ("size" in change) window.faces.setSize(change.size);
     else window.faces.setWords(change.words);
 
     return await window.faces.settled();
@@ -269,6 +273,38 @@ describe.skipIf(!ready)("a row of faces for a reader who asked for less movement
         const last = drawn(seen.at(-1)!);
 
         expect(seen.every((one) => drawn(one) === last), JSON.stringify(change)).toBe(true);
+      }
+    } finally {
+      await context.close();
+    }
+  });
+});
+
+describe.skipIf(!ready)("a row of faces at every size", () => {
+  test("stands every face and the cap on the row's vertical centre", async () => {
+    const { context, page } = await session("reduce");
+
+    try {
+      // Four faces past a most of three, so the cap stands beside them.
+      await frames(page, { faces: ["a", "b", "c", "d"] });
+
+      for (const size of Object.keys(FACE_FRAMES) as FaceSize[]) {
+        await frames(page, { size });
+
+        const offsets = await page.evaluate(() => {
+          const centre = (element: Element): number => {
+            const { top, height } = element.getBoundingClientRect();
+
+            return top + height / 2;
+          };
+          const row = centre(document.querySelector("[data-box=held]")!);
+          const avatars = [...document.querySelectorAll("[data-face] > :first-child, [data-face-cap] [aria-hidden=true]")];
+
+          return avatars.map((avatar) => Math.abs(centre(avatar) - row));
+        });
+
+        expect(offsets, size).toHaveLength(4);
+        for (const offset of offsets) expect(offset, size).toBeLessThanOrEqual(0.5);
       }
     } finally {
       await context.close();

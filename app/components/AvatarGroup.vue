@@ -1,14 +1,16 @@
 <!-- A row of faces (`docs/components.md`, "Avatar groups"): the library's avatars overlapping in one
      moving list along its row, the first standing over the one after it, so a face coming, going or
      changing place moves as a list item does. Each face's item is the box that folds: it draws the
-     face's ring as its own padding and ground, and the face inside stands at its full size. Past a
+     face's ring as its own padding and ground, and the face inside stands at its full size, laid
+     out as a flex item rather than on a line of text, so the item is no taller than the face and
+     its ring and the face keeps the row's vertical centre whatever line height it inherits. Past a
      most, one more avatar counts the rest, held in an unfolding box of its own. -->
 <template>
   <MovingList :class="['isolate inline-flex items-center', frame.row]">
     <li
       v-for="(face, at) in shown"
       :key="face.id"
-      :class="['relative shrink-0 rounded-full', frame.item, ground]"
+      :class="['relative flex shrink-0 rounded-full', frame.item, ground]"
       :style="{ zIndex: shown.length - at + 1 }"
       data-face
     >

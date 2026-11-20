@@ -8,13 +8,14 @@ import sheet from "./faces-harness.css?inline";
 
 import type { Component } from "vue";
 
-import type { AvatarFace } from "../../app/domain/avatar-group";
+import type { AvatarFace, FaceSize } from "../../app/domain/avatar-group";
 
 // A row of faces and the words after it, held in one unfolding box (`docs/components.md`, "Avatar
 // groups" and "A box that follows what it holds"), on a page that shows nothing else. What is under
 // test is how they move under the layer's own stylesheet, frame by frame: so every frame drawn while
 // they move is written down — where each face stands and how wide it is, how wide the box and what
-// it holds are, and how opaque each is drawn.
+// it holds are, and how opaque each is drawn. The row's size can be changed, so where each face
+// stands on the row's height is read at every size the group draws.
 
 export interface FacesSeen {
   // The frame's number since recording began.
@@ -26,6 +27,7 @@ export interface FacesSeen {
 export interface FacesPage {
   setFaces: (ids: string[]) => void;
   setWords: (words: string) => void;
+  setSize: (size: FaceSize) => void;
   record: () => void;
   // The frames written down since the last record, once nothing moves or is running any more.
   settled: () => Promise<FacesSeen[]>;
@@ -50,12 +52,13 @@ function face(id: string): AvatarFace {
 
 const faces = ref<AvatarFace[]>(["a", "b"].map(face));
 const words = ref("Writing");
+const size = ref<FaceSize>("md");
 
 const Page = defineComponent(() => () =>
   h("div", { style: "padding:16px", "data-page": "" }, [
     h(UnfoldingBox, { class: "rounded-full bg-neutral-900", "data-box": "box" }, () =>
       h("div", { class: "flex items-center gap-2 py-1 px-2", "data-box": "held" }, [
-        h(Group, { faces: faces.value, max: MOST, size: "md", ui: { ground: "bg-neutral-900" } }),
+        h(Group, { faces: faces.value, max: MOST, size: size.value, ui: { ground: "bg-neutral-900" } }),
         h("span", { class: "text-sm text-white", "data-box": "words" }, words.value)
       ])
     )
@@ -112,6 +115,9 @@ window.faces = {
   },
   setWords: (given) => {
     words.value = given;
+  },
+  setSize: (given) => {
+    size.value = given;
   },
   record: () => {
     frames = [];
