@@ -293,5 +293,10 @@
     "sha256": "401f5bbb9e1c321ee18482290ec8ceada5e31963c0e6a62a2a4509b3fb6f2409",
     "bound": "0.1.0-rev.23",
     "why": "The side list keeps its body standing as the list comes or goes; nothing an earlier bundle reads changes"
+  },
+  "bmo-ui-0.1.0-rev.59.tgz": {
+    "sha256": "8dba91ba3af57002f6fc316aba2d368e45ea0e254b679f35fc3bc163bd706896",
+    "bound": "0.1.0-rev.23",
+    "why": "The side list stands on the 4px grid and its rows move as the search narrows them; nothing an earlier bundle reads changes"
   }
 }
