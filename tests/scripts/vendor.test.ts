@@ -131,6 +131,21 @@ describe("the vendor verb", () => {
     ]);
   });
 
+  test("changes the dependency's values alone, keeping a one-line array and every other byte as the host laid them out", async () => {
+    scratch = await mkdtemp(join(tmpdir(), "bmo-ui-vendor-"));
+
+    const releases = await releasesOf(FROM, TO);
+    const checkout = join(scratch, "checkout");
+    const app = await host(checkout, ".", { name: "first-app", private: true, dependencies: { "bmo-ui": `file:vendor/${releaseFile(FROM)}` } }, FROM);
+    const laidOut = (version: string) =>
+      `{\n  "name": "first-app",\n  "private": true,\n  "files": ["app", "docs"],\n  "peerDependencies": { "bmo-ui": "${version}" },\n  "dependencies": {\n    "bmo-ui": "file:vendor/${releaseFile(version)}"\n  }\n}\n`;
+
+    await Bun.write(app, laidOut(FROM));
+    await vendor(releases, TO, [checkout]);
+
+    expect(await Bun.file(app).text()).toBe(laidOut(TO));
+  });
+
   test("leaves a manifest already on the release as it stands", async () => {
     scratch = await mkdtemp(join(tmpdir(), "bmo-ui-vendor-"));
 

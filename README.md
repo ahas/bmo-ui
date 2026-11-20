@@ -119,10 +119,12 @@ testbed declaration, the Korean ledger the quick checks read, `CLAUDE.md`, and t
   release it copies the version's file from `releases/` into the folder the old file stands in and
   checks the copy against the ledger's sha256, points the dependency at the new file in the
   manifest's own spelling, raises a peer dependency that pins the old version exactly to the new one,
-  removes the old file, and writes the lockfile again with the package manager's lockfile-only install
-  where a `bun.lock` stands beside the manifest or in a folder above it inside the checkout. A
-  manifest that already names the version is left as it stands. It prints, under each checkout, what
-  it changed in each manifest, and commits nothing: the job that runs it commits in each repository.
+  each value edited where it stands with a JSON editor so every other byte of the manifest keeps the
+  layout its repository gave it (an array on one line stays on one line), removes the old file, and
+  writes the lockfile again with the package manager's lockfile-only install where a `bun.lock` stands
+  beside the manifest or in a folder above it inside the checkout. A manifest that already names the
+  version is left as it stands. It prints, under each checkout, what it changed in each manifest, and
+  commits nothing: the job that runs it commits in each repository.
   Before changing anything it refuses a version with no packed file or no ledger line, a file whose
   bytes do not match the ledger, a checkout path that is not absolute or not a folder, a checkout
   holding no manifest that vendors the layer, and a vendored file lying outside its checkout, naming

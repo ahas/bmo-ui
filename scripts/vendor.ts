@@ -3,7 +3,11 @@ import { copyFile, readdir, rm, stat } from "node:fs/promises";
 import { basename, dirname, isAbsolute, join, relative, resolve } from "node:path";
 import { parseArgs } from "node:util";
 
+import { applyEdits, modify } from "jsonc-parser";
+
 import { LEDGER, Refused, releaseFile, sha256, versionOf } from "./release";
+
+import type { JSONPath } from "jsonc-parser";
 
 import type { Ledger } from "./release";
 
@@ -164,26 +168,21 @@ export async function hostManifests(checkout: string): Promise<HostManifest[]> {
   return hosts;
 }
 
-/** The indentation a manifest is written with, read off its first indented line. */
-function indentOf(text: string): string {
-  return /^[ \t]+/m.exec(text)?.[0] ?? "  ";
-}
-
-/** The manifest's text with its dependencies on the layer moved onto a release, in its own spelling and indentation. */
+/**
+ * The manifest's text with its dependencies on the layer moved onto a release, in its own spelling. Each value is
+ * replaced where it stands, so every other byte of the manifest (its indentation, its line breaks, an array kept on
+ * one line) is kept as the host wrote it.
+ */
 function moved(host: HostManifest, release: Release): string {
-  const json = structuredClone(host.json);
+  const values: [JSONPath, string][] = host.vendored.map((dependency) => [
+    [dependency.field, PACKAGE],
+    `${dependency.spec.slice(0, dependency.spec.length - basename(dependency.path).length)}${release.file}`
+  ]);
+  const peers = dependencies(host.json, PEER_FIELD);
 
-  for (const dependency of host.vendored) {
-    const field = dependencies(json, dependency.field)!;
+  if (peers !== null && host.vendored.some((dependency) => peers[PACKAGE] === dependency.version)) values.push([[PEER_FIELD, PACKAGE], release.version]);
 
-    field[PACKAGE] = `${dependency.spec.slice(0, dependency.spec.length - basename(dependency.path).length)}${release.file}`;
-  }
-
-  const peers = dependencies(json, PEER_FIELD);
-
-  if (peers !== null && host.vendored.some((dependency) => peers[PACKAGE] === dependency.version)) peers[PACKAGE] = release.version;
-
-  return `${JSON.stringify(json, null, indentOf(host.text))}${host.text.endsWith("\n") ? "\n" : ""}`;
+  return values.reduce((text, [path, value]) => applyEdits(text, modify(text, path, value, {})), host.text);
 }
 
 /** The folder whose lockfile records a manifest: its own or the nearest above it inside the checkout, or null. */
