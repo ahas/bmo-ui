@@ -5,7 +5,7 @@ import { join } from "node:path";
 
 import { chromium } from "playwright-core";
 
-import { BROWSER_HOOK_MS, touchReady } from "./touch";
+import { BROWSER_HOOK_MS, centreOf, openTouch, touchReady } from "./touch";
 
 import type { Browser, Page } from "playwright-core";
 
@@ -60,6 +60,13 @@ afterAll(async () => {
 async function opened(viewport: { width: number; height: number }): Promise<Page> {
   const page = await (await browser.newContext({ viewport, reducedMotion: "reduce" })).newPage();
 
+  await served(page);
+
+  return page;
+}
+
+// The harness page served on a page of the caller's.
+async function served(page: Page): Promise<void> {
   await page.route(`${ORIGIN}/**`, (route) => {
     const path = new URL(route.request().url()).pathname;
 
@@ -71,8 +78,6 @@ async function opened(viewport: { width: number; height: number }): Promise<Page
   await page.goto(`${ORIGIN}/`);
   await page.waitForSelector("#chosen");
   await page.waitForFunction(() => "sidebar" in window);
-
-  return page;
 }
 
 // The list as it stands, top to bottom: each heading as `# words`, each row by its label.
@@ -220,4 +225,25 @@ describe.skipIf(!ready)("the side list at a phone's width", () => {
 
     await page.close();
   });
+});
+
+describe.skipIf(!ready)("the side list under a finger", () => {
+  test("opens its drawer from a tap on the button and closes it on a tap on a row, the row chosen", async () => {
+    const touch = await openTouch({ device: "Galaxy S24", reducedMotion: "reduce" });
+
+    try {
+      await served(touch.page);
+      await touch.page.waitForSelector("[data-choice-sidebar-open]");
+      await touch.tap(await centreOf(touch.page, "[data-choice-sidebar-open]"));
+      await touch.page.waitForSelector(`[role=dialog] ${ROW}[data-choice-sidebar-row="13"]`);
+      // The drawer is tapped once it has risen and stands still, as a finger meets it.
+      await touch.page.waitForFunction(() => document.getAnimations().every((motion) => motion.playState !== "running"));
+      await touch.tap(await centreOf(touch.page, `[role=dialog] ${ROW}[data-choice-sidebar-row="13"]`));
+      await touch.page.waitForFunction(() => document.querySelector("[role=dialog]") === null);
+      expect(await touch.page.textContent("#chosen")).toBe("13");
+      expect(await touch.page.textContent("[data-choice-sidebar-open]")).toBe("Delta");
+    } finally {
+      await touch.close();
+    }
+  }, BROWSER_HOOK_MS);
 });
