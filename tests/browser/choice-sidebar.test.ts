@@ -9,15 +9,15 @@ import { BROWSER_HOOK_MS, touchReady } from "./touch";
 
 import type { Browser, Page } from "playwright-core";
 
-// The side list drawn by a real browser (`docs/components.md`, "Choosing from a side list"). At a
-// desk's width the list stands beside the body behind a one-pixel splitter, its head as tall as a tab
-// row; typing narrows it to the choices whose label or line holds the words, the hits marked and each
-// heading kept while a choice under it stays, a tree's rows standing in by their depth; a row chosen
-// is handed to the host and marked current. At a phone's width the body fills the screen and one
-// button carrying the chosen label opens the list as a bottom drawer, which closes as a row is
-// chosen. Unread entries stand as a skeleton, a failed read says why with a refresh handed to the
-// host, and a list laid aside leaves the body alone. Which entries the words keep is the side-parts
-// module's own test (`tests/domain/side-parts.test.ts`). Skipped where the browser build is not on
+// The side list drawn by a real browser (`docs/components.md`, "Choosing from a side list"). At a desk's
+// width the list stands beside the body behind a one-pixel splitter, its head as tall as a tab row; typing
+// narrows it to the choices whose label or line holds the words, the hits marked and each heading kept
+// while a choice under it stays, a tree's rows standing in by their depth; a row chosen is handed to the
+// host and marked current. At a phone's width the body fills the screen and one button carrying the chosen
+// label opens the list as a bottom drawer, which closes as a row is chosen. Unread entries stand as a
+// skeleton, a failed read says why with a refresh handed to the host, and a list laid aside leaves the body
+// alone, the same body standing as the list goes and comes back. Which entries the words keep is the
+// side-parts module's own test (`tests/domain/side-parts.test.ts`). Skipped where the browser build is not on
 // the machine.
 
 const ready = touchReady();
@@ -149,10 +149,16 @@ describe.skipIf(!ready)("the side list at a desk's width", () => {
     await page.click("[data-choice-sidebar-failure] button");
     expect(await page.evaluate(() => (window as unknown as { sidebar: { retries: number } }).sidebar.retries)).toBe(1);
 
+    // The body drawn before the list is laid aside is the one standing after it, and after it comes back.
+    await page.evaluate(() => ((document.querySelector("#chosen") as HTMLElement & { kept?: boolean }).kept = true));
     await setState(page, { listed: false });
     await page.waitForFunction(() => document.querySelector("[data-choice-sidebar-list]") === null);
     expect(await page.locator("#chosen").isVisible()).toBe(true);
-    expect(await page.locator("[data-choice-sidebar]").count()).toBe(0);
+    expect(await page.locator("[data-choice-sidebar] [role=separator]").count()).toBe(0);
+    expect(await page.$eval("[data-choice-sidebar-body]", (body) => body.getBoundingClientRect().width)).toBe(DESK.width);
+    await setState(page, { listed: true });
+    await page.waitForSelector("[data-choice-sidebar-list]");
+    expect(await page.$eval("#chosen", (body) => (body as HTMLElement & { kept?: boolean }).kept === true)).toBe(true);
     await page.close();
   });
 });

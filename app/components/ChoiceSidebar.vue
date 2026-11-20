@@ -2,7 +2,8 @@
   <!-- The list a screen chooses what its body stands for from (`docs/components.md`, "Choosing from a
        side list"): beside the body behind a splitter on a wide screen, and a bottom drawer opened from
        one button carrying the chosen label on a narrow one. The body is the default slot, held by the
-       one splitter at every width, so it stays standing as the width crosses from one to the other. -->
+       one splitter at every width and whether the list stands or not, so it stays standing as the width
+       crosses from one to the other and as the list comes or goes. -->
   <DefineList v-slot="{ drawer }">
     <nav class="flex min-h-0 min-w-0 flex-1 flex-col" :aria-label="props.label" data-choice-sidebar-list>
       <div class="flex h-12 shrink-0 items-center gap-2 px-4" :class="drawer ? '' : TAB_ROW_LINE">
@@ -47,38 +48,32 @@
     </nav>
   </DefineList>
 
-  <div v-if="!props.listed" class="flex min-h-0 min-w-0 flex-1 flex-col" data-choice-sidebar-body>
-    <slot />
-  </div>
+  <USplitter :id="props.saveId" :auto-save-id="props.saveId" :items="regions" :ui="{ handle: SPLIT_HANDLE }" class="min-h-0 flex-1" data-choice-sidebar>
+    <template #list>
+      <UseList :drawer="false" />
+    </template>
 
-  <template v-else>
-    <USplitter :id="props.saveId" :auto-save-id="props.saveId" :items="regions" :ui="{ handle: SPLIT_HANDLE }" class="min-h-0 flex-1" data-choice-sidebar>
-      <template #list>
-        <UseList :drawer="false" />
-      </template>
-
-      <template #body>
-        <div class="flex min-h-0 min-w-0 flex-1 flex-col" data-choice-sidebar-body>
-          <!-- On a phone the chosen label opens the list's drawer; a label the button cuts short reads whole
-               in its tooltip, a finger resting on it to read it. -->
-          <div v-if="narrow" class="flex h-12 shrink-0 items-center px-2">
-            <UButton v-if="openerLabel !== null" color="neutral" variant="ghost" class="max-w-full font-semibold text-highlighted" :trailing-icon="UNFOLD_ICON" aria-haspopup="dialog" data-choice-sidebar-open @click="open = true">
-              <HintTip :text="openerLabel" cut press class="block min-w-0 truncate">{{ openerLabel }}</HintTip>
-            </UButton>
-            <SkeletonBar v-else class="ms-2.5 h-4 w-1/2" />
-          </div>
-
-          <slot />
+    <template #body>
+      <div class="flex min-h-0 min-w-0 flex-1 flex-col" data-choice-sidebar-body>
+        <!-- On a phone the chosen label opens the list's drawer; a label the button cuts short reads whole
+             in its tooltip, a finger resting on it to read it. -->
+        <div v-if="narrow && props.listed" class="flex h-12 shrink-0 items-center px-2">
+          <UButton v-if="openerLabel !== null" color="neutral" variant="ghost" class="max-w-full font-semibold text-highlighted" :trailing-icon="UNFOLD_ICON" aria-haspopup="dialog" data-choice-sidebar-open @click="open = true">
+            <HintTip :text="openerLabel" cut press class="block min-w-0 truncate">{{ openerLabel }}</HintTip>
+          </UButton>
+          <SkeletonBar v-else class="ms-2.5 h-4 w-1/2" />
         </div>
-      </template>
-    </USplitter>
 
-    <UDrawer v-if="narrow" v-model:open="open" :title="props.label" :ui="FULL_SHEET">
-      <template #body>
-        <UseList :drawer="true" />
-      </template>
-    </UDrawer>
-  </template>
+        <slot />
+      </div>
+    </template>
+  </USplitter>
+
+  <UDrawer v-if="narrow && props.listed" v-model:open="open" :title="props.label" :ui="FULL_SHEET">
+    <template #body>
+      <UseList :drawer="true" />
+    </template>
+  </UDrawer>
 </template>
 
 <script setup lang="ts">
@@ -141,8 +136,19 @@ const openerLabel = computed(() => {
 });
 
 // The list and the body side by side on a wide screen; on a narrow one the body alone, the list in its
-// drawer.
-const regions = computed<SplitterItem[]>(() => (narrow.value ? [{ slot: "body", minSize: 100, defaultSize: 100 }] : [{ slot: "list", ...SIDE_LIST_REGION }, { slot: "body", minSize: 100 - SIDE_LIST_REGION.maxSize }]));
+// drawer; and the body alone at every width where the list is laid aside. The body stays in the one splitter
+// whichever stands, so it is never drawn again as the list comes or goes.
+// Each region is keyed by its own name under the list's key and stands in its own order, so the body's
+// region is the same one whether the list's stands before it or not, as the width crosses and as the list
+// comes or goes.
+const regions = computed<SplitterItem[]>(() =>
+  narrow.value || !props.listed
+    ? [{ id: `${props.saveId}-body`, slot: "body", order: 2, minSize: 100, defaultSize: 100 }]
+    : [
+        { id: `${props.saveId}-list`, slot: "list", order: 1, ...SIDE_LIST_REGION },
+        { id: `${props.saveId}-body`, slot: "body", order: 2, minSize: 100 - SIDE_LIST_REGION.maxSize }
+      ]
+);
 
 function indentOf(choice: SideChoice): Record<string, string> | undefined {
   const depth = choice.depth ?? 0;

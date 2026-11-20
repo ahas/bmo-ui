@@ -633,7 +633,10 @@ are the component's.
   host's name for the list, its search heading it, and choosing a row closes it. With nothing
   chosen the button carries the list's name, and while the list is unread it stands as a skeleton bar.
 - **A host whose reader has one choice or none may lay the list aside** (`listed` off): the body then
-  stands alone with no list, no splitter and no button, as it would with no component around it.
+  stands alone with no list, no splitter's line and no button, as it would with no component around it.
+- **The body stays standing whatever the list does.** It is drawn once and kept as the width crosses
+  from wide to narrow and as the list comes or goes, so a host that learns only after its first read
+  whether to lay the list aside reads nothing of its body again.
 
 ## Dates
 
