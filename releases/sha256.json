@@ -283,5 +283,10 @@
     "sha256": "582d90ee0dee0f5c1adc70b0e5f4802de4f39ee5b56e7b3189ffd52a8b1b1ee0",
     "bound": "0.1.0-rev.23",
     "why": "The picture viewer is set up afresh at each opening, so it stands over a sheet or dialog it was opened from"
+  },
+  "bmo-ui-0.1.0-rev.57.tgz": {
+    "sha256": "4ca617ccbf2f1416212479f99469b94fd803ac382d43a7c98124b5fbc8498e9a",
+    "bound": "0.1.0-rev.23",
+    "why": "Adds ChoiceSidebar, its side-parts entries and two wording keys; nothing an earlier bundle reads changes"
   }
 }
