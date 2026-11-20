@@ -677,7 +677,8 @@ default; a screen supplies what it holds and what a press means there. Every exp
 - **A control a key presses names that key in its tooltip,** after its words, in the library's key
   marks; the shared tooltip and the layer's icon button take the keys to show beside the name.
 - **A tooltip switched off comes up for nothing:** no hover, no focus, no tap and no resting finger opens it, so
-  what it stands on is pressed as if no tooltip stood there.
+  what it stands on is pressed as if no tooltip stood there. One standing as it is switched off goes at once, as
+  when what it stands on starts to be dragged.
 - **Its words wrap** inside a box no wider than a phone has room for.
 - **It is drawn into the page's body,** unless what it stands on is inside an element taken to full
   screen, which is all the browser shows then: the caller names that element, to the shared tooltip

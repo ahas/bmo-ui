@@ -28,6 +28,10 @@ describe("the shared tooltip", () => {
     expect(tip.indexOf("if (value && props.disabled) return;")).toBeLessThan(tip.indexOf('if (value) emit("ask");'));
   });
 
+  test("switched off while it stands, it goes at once", () => {
+    expect(tip).toContain("if (off) open.value = false;");
+  });
+
   test("names a cut name only where its box actually cuts it", () => {
     expect(tip).toContain("box.scrollWidth > box.clientWidth");
     expect(tip).toContain("if (value && props.cut && !isCut()) return;");

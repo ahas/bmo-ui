@@ -140,6 +140,14 @@ const shown = computed({
   }
 });
 
+// Switched off while it stands, it goes: what it stands on is being dragged or no longer answers.
+watch(
+  () => props.disabled,
+  (off) => {
+    if (off) open.value = false;
+  }
+);
+
 function onPointerEnter(event: PointerEvent): void {
   if (event.pointerType === "mouse") emit("ask");
 }
