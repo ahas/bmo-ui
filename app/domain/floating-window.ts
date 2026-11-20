@@ -1,9 +1,12 @@
 import { NARROW_MAX_PX } from "./screen";
 
+import type { DragBounds, DragSide } from "./floating-drag";
+
 // Where a window beside the page stands (`docs/components.md`, "A window beside the page"): a place
-// and a size of its own on a wide screen, kept inside what is visible and kept per browser, and one
-// of two heights as a sheet on a narrow one. Everything here is arithmetic over rectangles and the
-// browser's storage, so the component only reads the pointer and the keys and hands them in.
+// and a size of its own on a wide screen, kept inside what is visible and kept per browser, one of
+// two heights as a sheet on a narrow one, and where its pill stands there once dragged. Everything
+// here is arithmetic over rectangles and the browser's storage, so the component only reads the
+// pointer and the keys and hands them in.
 
 /** A window's place and size, in pixels of the page's layout. */
 export interface WindowRect {
@@ -191,4 +194,48 @@ export function keptSheet(name: string): SheetHeight | null {
 
 export function keepSheet(name: string, height: SheetHeight): void {
   write(keyOf(name, "narrow"), height);
+}
+
+/** Where the folded pill stands on a narrow screen once it was dragged: a side, and its top in pixels. */
+export interface PillSpot {
+  side: DragSide;
+  top: number;
+}
+
+/**
+ * The edges a pill `size` big may reach on a narrow screen: a gutter in from every edge of what is
+ * visible, inside the area the host names where it names one, and above the room the screen keeps
+ * at its foot.
+ */
+export function pillBounds(frame: WindowFrame, area: WindowFrame | null, foot: number, size: { width: number; height: number }): DragBounds {
+  const left = Math.max(frame.left, area?.left ?? frame.left);
+  const right = Math.min(frame.left + frame.width, area === null ? Number.POSITIVE_INFINITY : area.left + area.width);
+  const top = Math.max(frame.top, area?.top ?? frame.top);
+  const bottom = Math.min(frame.top + frame.height - foot, area === null ? Number.POSITIVE_INFINITY : area.top + area.height);
+
+  return {
+    minLeft: left + WINDOW_GUTTER_PX,
+    maxLeft: right - WINDOW_GUTTER_PX - size.width,
+    minTop: top + WINDOW_GUTTER_PX,
+    maxTop: bottom - WINDOW_GUTTER_PX - size.height
+  };
+}
+
+function pillKey(name: string): string {
+  return `bmo-ui:window:${name}:pill`;
+}
+
+/** The side and height a window's pill was left at on a narrow screen, or null where it was never dragged. */
+export function keptPill(name: string): PillSpot | null {
+  const kept = read(pillKey(name));
+
+  if (typeof kept !== "object" || kept === null) return null;
+
+  const { side, top } = kept as Record<string, unknown>;
+
+  return (side === "left" || side === "right") && finite(top) ? { side, top } : null;
+}
+
+export function keepPill(name: string, spot: PillSpot): void {
+  write(pillKey(name), spot);
 }

@@ -43,10 +43,11 @@
 </template>
 
 <script setup lang="ts">
-import { useLongPress } from "../domain/longpress";
+import { pressTravelled, useLongPress } from "../domain/longpress";
 import { focusHandedBack, focusTakenOnOpen } from "../domain/overlays";
 import { TOOLTIP_PROVIDER, TOOLTIP_UI } from "../domain/tooltip";
 
+import type { TouchPoint } from "../domain/longpress";
 import type { Component, ComponentPublicInstance } from "vue";
 
 interface Props {
@@ -167,16 +168,56 @@ function visibleFocus(event: FocusEvent): boolean {
 
 // The next touch anywhere puts it away, as a tap outside puts away anything floating. A touch on
 // what it stands on puts it away too, and the tap it ends in does not bring it straight back.
+let nextTouch: ((event: PointerEvent) => void) | null = null;
+
 function closeOnNextTouch(): void {
-  document.addEventListener(
-    "pointerdown",
-    (event) => {
-      open.value = false;
-      restEnded = event.target instanceof Node && (element()?.contains(event.target) ?? false);
-    },
-    { once: true, capture: true }
-  );
+  stopWaitingForTouch();
+  nextTouch = (event) => {
+    nextTouch = null;
+    open.value = false;
+    restEnded = event.target instanceof Node && (element()?.contains(event.target) ?? false);
+  };
+  document.addEventListener("pointerdown", nextTouch, { once: true, capture: true });
 }
+
+function stopWaitingForTouch(): void {
+  if (nextTouch !== null) document.removeEventListener("pointerdown", nextTouch, true);
+
+  nextTouch = null;
+}
+
+// The finger that rested goes on being read until it lifts: one that moves on past the held finger's own
+// distance is dragging what it rested on, so the tooltip goes at once, and lifting it then is the drag's
+// rather than the end of a rest. Its next tap on what it stands on presses that.
+let leaveRest: () => void = () => undefined;
+
+function followRest(at: TouchPoint): void {
+  const moved = (event: PointerEvent): void => {
+    if (event.pointerType !== "mouse" && pressTravelled(at, { x: event.clientX, y: event.clientY })) {
+      leaveRest();
+      stopWaitingForTouch();
+      open.value = false;
+      restEnded = false;
+    }
+  };
+  const leave = (): void => {
+    document.removeEventListener("pointermove", moved, true);
+    document.removeEventListener("pointerup", leave, true);
+    document.removeEventListener("pointercancel", leave, true);
+    leaveRest = () => undefined;
+  };
+
+  leaveRest();
+  leaveRest = leave;
+  document.addEventListener("pointermove", moved, { capture: true, passive: true });
+  document.addEventListener("pointerup", leave, true);
+  document.addEventListener("pointercancel", leave, true);
+}
+
+onBeforeUnmount(() => {
+  leaveRest();
+  stopWaitingForTouch();
+});
 
 function showForFinger(): void {
   shown.value = true;
@@ -210,10 +251,11 @@ function onContextMenu(event: MouseEvent): void {
 // A finger resting on it is the layer's one long press, so one that set off scrolls instead.
 useLongPress({
   surface: () => (props.press && !props.disabled ? element() : null),
-  press: () => () => {
+  press: (_target, at) => () => {
     showForFinger();
     // The finger lifting off the rest is no tap of what it rested on.
     restEnded = true;
+    followRest(at);
   }
 });
 </script>

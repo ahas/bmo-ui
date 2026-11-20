@@ -15,8 +15,8 @@ import { onBeforeUnmount, onMounted, watch } from "vue";
 // How long a finger rests before it is held.
 export const HOLD_MS = 500;
 // How far it may slide from where it landed and still be resting: the distance a phone itself reads
-// a touch as moving by.
-const HOLD_SLOP_PX = 10;
+// a touch as moving by, which is also how far a finger travels before a press becomes a drag.
+export const HOLD_SLOP_PX = 10;
 // How lately what is under a finger may have moved for the finger landing on it to be stopping it
 // rather than pressing. A list gliding from a flick reports its position every frame, a sixtieth of
 // a second, and still within a few frames at the slow end of the glide where it creeps less than a

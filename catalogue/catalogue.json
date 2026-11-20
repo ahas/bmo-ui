@@ -1112,7 +1112,7 @@
     {
       "name": "FloatingWindow",
       "kind": "component",
-      "line": "A part of a screen floating beside it: a window moved, sized and kept inside what is visible on a wide screen, a sheet of two heights on a narrow one, folded to a pill.",
+      "line": "A part of a screen floating beside it: a window moved, sized and kept inside what is visible on a wide screen, a sheet of two heights on a narrow one, folded to a pill dragged like a picture-in-picture window.",
       "props": [
         {
           "name": "open",

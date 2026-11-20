@@ -11,10 +11,16 @@ const layers = await Promise.all(["CutLineTip", "MarkupButtonTip"].map((name) =>
 
 describe("the shared tooltip", () => {
   test("rests on the layer's one long press where a tap acts, and puts itself away on the next touch", () => {
-    expect(tip).toContain('import { useLongPress } from "../domain/longpress";');
+    expect(tip).toContain('import { pressTravelled, useLongPress } from "../domain/longpress";');
     expect(tip).toContain("surface: () => (props.press && !props.disabled ? element() : null)");
     expect(tip).toContain('if (by === "touch" && !props.press) showForFinger();');
     expect(tip).toContain('{ once: true, capture: true }');
+  });
+
+  test("goes the moment the resting finger moves on to drag what it rested on, and leaves that finger's lift to the drag", () => {
+    expect(tip).toContain("followRest(at);");
+    expect(tip).toContain('event.pointerType !== "mouse" && pressTravelled(at, { x: event.clientX, y: event.clientY })');
+    expect(tip).toContain("restEnded = false;");
   });
 
   test("switched off, it opens for nothing, a finger's tap included", () => {

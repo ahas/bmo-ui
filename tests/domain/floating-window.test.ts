@@ -7,10 +7,13 @@ import {
   WINDOW_STEP_PX,
   clampRect,
   firstRect,
+  keepPill,
   keepRect,
   keepSheet,
+  keptPill,
   keptRect,
   keptSheet,
+  pillBounds,
   stepOf,
   widthClass
 } from "~/domain/floating-window";
@@ -110,5 +113,35 @@ describe("a window's place kept in the browser", () => {
     keepSheet("panel", "tall");
 
     expect(keptSheet("panel")).toBe("tall");
+  });
+});
+
+describe("a folded window's pill on a narrow screen", () => {
+  const PHONE = { left: 0, top: 0, width: 360, height: 780 };
+  const PILL = { width: 64, height: 36 };
+
+  test("stays a gutter in from what is visible and above the room kept at the foot", () => {
+    expect(pillBounds(PHONE, null, 100, PILL)).toEqual({ minLeft: 16, maxLeft: 360 - 16 - 64, minTop: 16, maxTop: 780 - 100 - 16 - 36 });
+  });
+
+  test("stays inside the area its host names, and inside what is visible where the area runs past it", () => {
+    const area = { left: 0, top: 56, width: 360, height: 900 };
+
+    expect(pillBounds(PHONE, area, 100, PILL)).toEqual({ minLeft: 16, maxLeft: 280, minTop: 72, maxTop: 628 });
+  });
+
+  test("keeps where it was left under the window's name, apart from the sheet's height", () => {
+    keepSheet("notes", "tall");
+    keepPill("notes", { side: "right", top: 300 });
+
+    expect(keptPill("notes")).toEqual({ side: "right", top: 300 });
+    expect(keptSheet("notes")).toBe("tall");
+    expect(keptPill("other")).toBeNull();
+  });
+
+  test("reads nothing kept from a value it did not write", () => {
+    window.localStorage.setItem("bmo-ui:window:notes:pill", JSON.stringify({ side: "middle", top: 3 }));
+
+    expect(keptPill("notes")).toBeNull();
   });
 });

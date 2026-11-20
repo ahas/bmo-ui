@@ -52,7 +52,7 @@ wording keys listed here are the ones the layer's list holds.
 | `FilesNameField` | A name renamed in place, chosen up to its ending. |
 | `FilesProgress` | An upload's progress, by files and by bytes, with a bar. |
 | `FilesText` | A text file in the read-only code viewer, coloured by its name's language. |
-| `FloatingWindow` | A part of a screen floating beside it: a window moved, sized and kept inside what is visible on a wide screen, a sheet of two heights on a narrow one, folded to a pill. |
+| `FloatingWindow` | A part of a screen floating beside it: a window moved, sized and kept inside what is visible on a wide screen, a sheet of two heights on a narrow one, folded to a pill dragged like a picture-in-picture window. |
 | `GrowingTextarea` | A form's text box that grows with its text and never scrolls inside. |
 | `HintTip` | The shared tooltip for words that say more than what they stand on. |
 | `IconButton` | A button drawn as its icon alone, its one name heard and shown in the shared tooltip with the keys that press it, a held finger included. |
@@ -117,7 +117,8 @@ Each is named with everything it exports.
 | `dragselect` | `draggedSelection`, `edgeScroll`, `PressKind`, `DragSelectList`, `useDragSelect` |
 | `errors` | `failureText`, `answeredLate` |
 | `file-icons` | `fileIcon`, `folderIcon`, `iconNames` |
-| `floating-window` | `WindowRect`, `WindowFrame`, `WINDOW_GUTTER_PX`, `WINDOW_STEP_PX`, `WINDOW_LEAP_PX`, `WINDOW_MIN`, `WINDOW_SIZE`, `SHEET_HEIGHTS`, `SheetHeight`, `WidthClass`, `widthClass`, `visibleBox`, `clampRect`, `firstRect`, `stepOf`, `keptRect`, `keepRect`, `keptSheet`, `keepSheet` |
+| `floating-drag` | `DragPoint`, `DragBounds`, `DragSide`, `dragSlop`, `isDrag`, `clampTo`, `settledSide`, `glideFrom`, `FloatingDrag`, `FloatingDragHandle`, `useFloatingDrag` |
+| `floating-window` | `WindowRect`, `WindowFrame`, `WINDOW_GUTTER_PX`, `WINDOW_STEP_PX`, `WINDOW_LEAP_PX`, `WINDOW_MIN`, `WINDOW_SIZE`, `SHEET_HEIGHTS`, `SheetHeight`, `WidthClass`, `widthClass`, `visibleBox`, `clampRect`, `firstRect`, `stepOf`, `keptRect`, `keepRect`, `keptSheet`, `keepSheet`, `PillSpot`, `pillBounds`, `keptPill`, `keepPill` |
 | `foot` | `FootOptions`, `useFootInView` |
 | `form-save` | `FormPart`, `FormSave`, `OpenedWith`, `OpenedWithOptions`, `askDiscard`, `useCloseGuard`, `useFormSave`, `useFormPart`, `useLeaveGuard`, `useOpenedWith` |
 | `fullscreen` | `PutBack`, `TakePlace`, `keepPlace`, `holdThroughFullscreen` |
@@ -129,7 +130,7 @@ Each is named with everything it exports.
 | `list-place` | `scrollable`, `reached`, `useListPlace` |
 | `list-preview` | `PREVIEW_ITEM`, `HighlightedItem`, `ListPreview`, `useListPreview` |
 | `loading` | `useInitialRead`, `useLastRead`, `markPainted`, `usePainted` |
-| `longpress` | `HOLD_MS`, `TouchPoint`, `pressTravelled`, `stillGliding`, `LongPress`, `useLongPress`, `followSurface` |
+| `longpress` | `HOLD_MS`, `HOLD_SLOP_PX`, `TouchPoint`, `pressTravelled`, `stillGliding`, `LongPress`, `useLongPress`, `followSurface` |
 | `markup-buttons` | `MARKUP_BUTTON`, `markupButtonAt`, `markupButtonIn`, `markupButtonWords` |
 | `marquee` | `MARQUEE_SLACK_PX`, `MARQUEE_SPEED_PX_PER_SECOND`, `MARQUEE_TRAVEL_SHARE`, `MARQUEE_MIN_SECONDS`, `MarqueeVars`, `MarqueeMotion`, `marqueeDistance`, `marqueeSeconds`, `marqueeVars`, `useMarquee` |
 | `modality` | `InputModality`, `MODALITY_ATTRIBUTE`, `modalityOfKey`, `watchInputModality` |

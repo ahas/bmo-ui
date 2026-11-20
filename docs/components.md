@@ -664,7 +664,9 @@ default; a screen supplies what it holds and what a press means there. Every exp
   that close, or a pointer hovering it, brings its name up as it does for any other control.
 - **A finger has no hover.** Where a tap does nothing else, a tap brings it up; where a tap acts, a
   finger rests on it instead, by the one held finger, and lifting presses nothing. The next touch
-  anywhere puts it away.
+  anywhere puts it away, and so does the resting finger moving on past the held finger's ten pixels
+  while it is still down, as it does to drag what it rested on; a finger that moved on lifts as the
+  drag's, and the next tap on what it stands on presses it.
 - **What a tap acts on is named the shared tooltip's way too:** an icon button through the layer's
   icon button, a choice of the view switch shown as its icon alone through the shared tooltip
   marked as standing on a press, and a button a host writes as markup, or the library draws inside a
@@ -815,6 +817,30 @@ default; a screen supplies what it holds and what a press means there. Every exp
   mark. It is a layer of the back gesture and Esc as any other, but a tap away from it is no tap away:
   it closes nothing and the tap does what it points at.
 
+## Dragged like a picture-in-picture window
+
+The floating-drag module (`useFloatingDrag`) is the one reading of a small thing floating over the
+page that a pointer or a finger moves about, the way a picture-in-picture window is moved. Where the
+thing stands, how far it may go and where it settles are the host's; telling a press from a drag,
+following the pointer, the throw and the click a drag ends in are the module's.
+
+- **A press becomes a drag only once it has travelled:** past four pixels for a mouse, six for a
+  pen and ten for a finger, the distance a phone reads a touch as moving by and the one that ends a
+  held finger, so one press is never both a hold and a drag. Only the primary pointer's main button
+  moves it.
+- **A press that never travelled presses what it stands on; a drag never does.** The click a drag
+  ends in is swallowed, while a click the keyboard makes carries no pointer and is passed on.
+- **Dragged, it follows the pointer on no clock of its own,** held between the edges the host reads
+  as the drag begins.
+- **Let go, it settles where the host says.** The module hands over where it was let go and how fast
+  it was moving sideways at the end. A thing that settles on a side settles on the side its centre is
+  nearer to once fifteen hundredths of a second of that speed are carried on, so a quick throw toward
+  one side settles it there.
+- **It glides from where it was let go to where it settles,** at `pop` with the `enter` easing, and
+  stands there at once where less movement was asked for.
+- **What it moves takes no touch gesture of the browser's own,** so a finger dragging it never
+  scrolls or zooms the page.
+
 ## A window beside the page
 
 `FloatingWindow` holds a part of a screen taken out of the screen's flow, floating over it while the
@@ -857,9 +883,21 @@ component's.
     window's place is, under the narrow class.
   - It covers what stands at the screen's foot while it stands; folding it gives that back.
 - **Folded, it is a pill:** one small button showing what the host gives it and named by the host's
-  words in the shared tooltip. On a wide screen it stands at the top trailing corner of the place the
-  window stood, so the window unfolds out of it to where it was; on a narrow screen it stands at the
-  screen's leading foot, above the room the host says its foot keeps — an input bar, say.
+  words in the shared tooltip, which a finger reads by resting on it. A press unfolds the window. The
+  pill is dragged like a picture-in-picture window (「Dragged like a picture-in-picture window」), by
+  a pointer or a finger, and a drag never unfolds it.
+  - On a wide screen it stands at the top trailing corner of the place the window stood, so the
+    window unfolds out of it to where it was. Dragging the pill moves that place with it, between
+    the edges a drag of the title bar keeps, so the pill goes as far as the window's corner may and
+    the window unfolds where the pill was left. The place is kept as a move of the title bar keeps
+    it.
+  - On a narrow screen it first stands at the screen's leading foot, above the room the host says
+    its foot keeps — an input bar, say. Dragged, it stays a gutter in from every edge of what is
+    visible, inside the area the host names where it names one and above that foot; let go, it
+    settles on the nearer side, left or right, at the height it was let go at. The side and the
+    height are kept in the browser's storage under the window's name, apart from the sheet's height,
+    and a pill never dragged stands at its first place. A visible part too short for the height kept
+    shows it as low as it allows.
 - **Folding is the window's own close.** The close button at its header's end, Esc pressed inside it
   and the back gesture fold it; it stands as a layer of the gesture while it stands unfolded. Whether it
   stands unfolded is the host's to hold, so a host may unfold it again when something new arrives in it.

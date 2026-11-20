@@ -105,21 +105,31 @@
       </Transition>
 
       <!-- Folded: one small button, where the window's title bar ended on a wide screen and at the leading foot on a
-           narrow one. It comes and goes as it stands, with a fade. -->
+           narrow one, dragged like a picture-in-picture window from there. It comes and goes as it stands, with a
+           fade. A drag of it is heard before the tooltip and the button hear a press, so the click a drag ends in
+           presses nothing. -->
       <Transition :enter-active-class="FADING" :leave-active-class="FADING" :enter-from-class="FADED" :leave-to-class="FADED">
-        <div v-if="!props.open" class="pointer-events-none fixed flex" :class="narrow ? '' : 'justify-end'" :style="pillPlace">
-          <HintTip :text="props.pillLabel" press class="pointer-events-auto">
-            <UButton
-              ref="pill"
-              :color="props.pillColor"
-              variant="subtle"
-              class="shadow-lg"
-              :aria-label="props.pillLabel"
-              @click="unfold"
-            >
-              <slot name="pill" />
-            </UButton>
-          </HintTip>
+        <div v-if="!props.open" ref="pillFrame" class="pointer-events-none fixed flex" :class="narrow ? '' : 'justify-end'" :style="pillPlace">
+          <div
+            data-window-pill
+            class="pointer-events-auto flex touch-none select-none"
+            :class="pillDrag.dragging.value ? 'cursor-grabbing' : ''"
+            @pointerdown="pillDrag.grab"
+            @click.capture="pillDrag.swallow"
+          >
+            <HintTip :text="props.pillLabel" press :disabled="pillDrag.dragging.value">
+              <UButton
+                ref="pill"
+                :color="props.pillColor"
+                variant="subtle"
+                class="shadow-lg"
+                :aria-label="props.pillLabel"
+                @click="unfold"
+              >
+                <slot name="pill" />
+              </UButton>
+            </HintTip>
+          </div>
         </div>
       </Transition>
     </Teleport>
@@ -127,6 +137,7 @@
 </template>
 
 <script setup lang="ts">
+import { clampTo, settledSide, useFloatingDrag } from "../domain/floating-drag";
 import { useBackClose } from "../domain/layers";
 import { BESIDE_PAGE } from "../domain/overlays";
 import {
@@ -136,10 +147,13 @@ import {
   WINDOW_SIZE,
   clampRect,
   firstRect,
+  keepPill,
   keepRect,
   keepSheet,
+  keptPill,
   keptRect,
   keptSheet,
+  pillBounds,
   stepOf,
   visibleBox,
   widthClass
@@ -148,7 +162,8 @@ import { useNarrow } from "../domain/screen";
 
 import type { ButtonProps } from "@nuxt/ui";
 import type { ComponentPublicInstance } from "vue";
-import type { SheetHeight, WindowFrame, WindowRect } from "../domain/floating-window";
+import type { DragBounds, DragPoint } from "../domain/floating-drag";
+import type { PillSpot, SheetHeight, WindowFrame, WindowRect } from "../domain/floating-window";
 
 interface Props {
   // Whether it stands unfolded; folded, it is its pill. The host holds it, so it may unfold it again.
@@ -160,7 +175,8 @@ interface Props {
   // The pill's name, heard and shown in the shared tooltip.
   pillLabel: string;
   pillColor?: ButtonProps["color"];
-  // The area it first stands in on a wide screen, read when it first stands there; the visible window where none.
+  // The area it first stands in on a wide screen, read when it first stands there, and the area its pill is kept
+  // inside on a narrow one; the visible window where none.
   area?: () => WindowFrame | null;
   // The room the screen keeps at its foot, which the pill stands above on a narrow screen.
   foot?: number;
@@ -207,6 +223,7 @@ const grown = ref(false);
 const box = useTemplateRef<HTMLElement>("box");
 const bar = useTemplateRef<HTMLElement>("bar");
 const pill = useTemplateRef<ComponentPublicInstance>("pill");
+const pillFrame = useTemplateRef<HTMLElement>("pillFrame");
 const sheetBody = useTemplateRef<HTMLElement>("sheetBody");
 
 // The sheet's content as the drawer is handed it: the mark that leaves the page in use, and nothing outside it
@@ -218,15 +235,93 @@ const sheetContent = {
   onFocusOutside: (event: Event) => event.preventDefault()
 };
 
+// Where the pill stands on a narrow screen once dragged, null where it never was, and where it stands while a
+// finger or a pointer drags it there.
+const pillSpot = ref<PillSpot | null>(null);
+const pillAt = ref<DragPoint | null>(null);
+// Where it rests on a narrow screen, worked out from what is visible, the host's area and the pill's own size,
+// none of which a template can watch, so it is worked out again whenever any of them may have changed.
+const pillRest = ref<Record<string, string>>({ insetInlineStart: `${WINDOW_GUTTER_PX}px`, bottom: `${props.foot + WINDOW_GUTTER_PX}px` });
+
 // Where the pill stands: at the top trailing corner of the window's place on a wide screen, so the window unfolds
-// out of it; at the leading foot above the screen's own foot on a narrow one. On a wide screen its box spans the
-// window's width and lets presses through, the pill standing at the box's trailing end.
+// out of it; at the side and height it was left at on a narrow one, at first the leading foot above the screen's
+// own foot. On a wide screen its box spans the window's width and lets presses through, the pill standing at the
+// box's trailing end.
 const pillPlace = computed(() => {
   if (narrow.value) {
-    return { insetInlineStart: `${WINDOW_GUTTER_PX}px`, bottom: `${props.foot + WINDOW_GUTTER_PX}px` };
+    return pillAt.value === null ? pillRest.value : { left: `${pillAt.value.left}px`, top: `${pillAt.value.top}px` };
   }
 
   return { left: `${rect.value.x}px`, top: `${rect.value.y}px`, width: `${rect.value.width}px` };
+});
+
+function pillSize(): { width: number; height: number } {
+  const element = pillElement();
+
+  return { width: element?.offsetWidth ?? 0, height: element?.offsetHeight ?? 0 };
+}
+
+function narrowPillBounds(): DragBounds {
+  return pillBounds(visibleBox(), props.area?.() ?? null, props.foot, pillSize());
+}
+
+function placePill(): void {
+  if (!narrow.value) return;
+
+  const bounds = narrowPillBounds();
+  const side = pillSpot.value?.side ?? (rightToLeft.value ? "right" : "left");
+  const top = `${clampTo(pillSpot.value?.top ?? bounds.maxTop, bounds.minTop, bounds.maxTop)}px`;
+  const width = pillSize().width;
+
+  pillRest.value = side === "left" ? { left: `${bounds.minLeft}px`, top } : { right: `${document.documentElement.clientWidth - bounds.maxLeft - width}px`, top };
+}
+
+// The window's place on a wide screen, as the edges of its top leading corner, read after it is brought inside
+// what is visible so the pill moves it between the edges the title bar's drag keeps.
+function wideBounds(): DragBounds {
+  const frame = visibleBox();
+
+  rect.value = clampRect(rect.value, frame, props.floor);
+
+  return {
+    minLeft: frame.left + WINDOW_GUTTER_PX,
+    maxLeft: frame.left + frame.width - WINDOW_GUTTER_PX - rect.value.width,
+    minTop: frame.top + WINDOW_GUTTER_PX,
+    maxTop: frame.top + frame.height - WINDOW_GUTTER_PX - rect.value.height
+  };
+}
+
+// The pill dragged like a picture-in-picture window: on a wide screen it carries the window's place with it, and
+// on a narrow one it settles on the nearer side at the height it was let go at.
+const pillDrag = useFloatingDrag({
+  element: () => pillFrame.value,
+  begin: () => {
+    if (!narrow.value) return { from: { left: rect.value.x, top: rect.value.y }, bounds: wideBounds() };
+
+    const element = pillFrame.value;
+
+    if (element === null) return null;
+
+    const box = element.getBoundingClientRect();
+
+    return { from: { left: box.left, top: box.top }, bounds: narrowPillBounds() };
+  },
+  move: (at) => {
+    if (narrow.value) pillAt.value = at;
+    else rect.value = { ...rect.value, x: at.left, y: at.top };
+  },
+  settle: (at, bounds, speed) => {
+    if (!narrow.value) {
+      keep();
+
+      return;
+    }
+
+    pillSpot.value = { side: settledSide(at.left, pillSize().width, bounds, speed), top: Math.round(at.top) };
+    keepPill(props.name, pillSpot.value);
+    pillAt.value = null;
+    placePill();
+  }
 });
 
 function place(): void {
@@ -237,6 +332,8 @@ function place(): void {
 
   if (kind === "narrow") {
     sheet.value = keptSheet(props.name) ?? "short";
+    pillSpot.value = keptPill(props.name);
+    placePill();
 
     return;
   }
@@ -258,6 +355,7 @@ function keepInView(): void {
 
   if (narrow.value) {
     writeInView();
+    placePill();
 
     return;
   }
@@ -421,6 +519,10 @@ useBackClose(
 watch(narrow, () => {
   if (mounted.value) place();
 });
+
+// The pill is placed again once it is drawn, at its own size, and whenever the room kept at the screen's foot
+// changes under it.
+watch([pill, () => props.foot], () => void nextTick(placePill), { flush: "post" });
 
 // It is first placed a frame after it is set up, once whatever the screen laid out in the same turn — a band over
 // the screen standing for the same news — has taken its room, so the area the host names is read as it stands.
