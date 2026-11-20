@@ -288,5 +288,10 @@
     "sha256": "4ca617ccbf2f1416212479f99469b94fd803ac382d43a7c98124b5fbc8498e9a",
     "bound": "0.1.0-rev.23",
     "why": "Adds ChoiceSidebar, its side-parts entries and two wording keys; nothing an earlier bundle reads changes"
+  },
+  "bmo-ui-0.1.0-rev.58.tgz": {
+    "sha256": "401f5bbb9e1c321ee18482290ec8ceada5e31963c0e6a62a2a4509b3fb6f2409",
+    "bound": "0.1.0-rev.23",
+    "why": "The side list keeps its body standing as the list comes or goes; nothing an earlier bundle reads changes"
   }
 }
