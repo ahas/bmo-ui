@@ -253,5 +253,10 @@
     "sha256": "ee20e6c907830cb8e0979fae258f7593365569d9ff816c00fbda0bc458ad2227",
     "bound": "0.1.0-rev.23",
     "why": "Fixes the select's Enter so a word it takes lets no chosen value go, changing no export; every bundle built from 0.1.0-rev.23 runs on it unchanged"
+  },
+  "bmo-ui-0.1.0-rev.51.tgz": {
+    "sha256": "4045509f07a0e1683c29c15e9dcad83cbad9a9834afcb0d7de4a2b7c54134b0f",
+    "bound": "0.1.0-rev.23",
+    "why": "Every face of a row stands on the row's vertical centre at every size"
   }
 }
