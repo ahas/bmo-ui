@@ -348,6 +348,15 @@
   outline-style: none;
 }
 
+/* The focus a floating thing took up on its own as it opened, where no key opened it: a dialog opened
+   as the page loads, which the browser counts as the keyboard's. The overlays module marks the
+   element until the focus leaves it or a key is pressed, and it draws no ring meanwhile. */
+[data-unasked-focus]:focus-visible,
+[data-unasked-focus]:focus-visible::before,
+[data-unasked-focus]:focus-visible::after {
+  outline-style: none;
+}
+
 /* A field — a place a value is typed or chosen in — wears its focus on its own edge, which takes the
    accent, and draws no ring around it; one drawn with no edge takes the elevated background by its
    own class instead. A text box holds the caret however it was focused, so the browser counts every

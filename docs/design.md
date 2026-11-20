@@ -418,6 +418,15 @@ whole in `docs/boundary.md`; this document says what each is for and how the lay
   where that tell falls short: a dialog opened by a press on a control the keyboard had reached
   inherits the visible focus on its own close, so the close draws no ring for a focus no key moved,
   read off the page's modality mark, until that focus leaves it.
+- **The focus a floating thing takes up on its own as it opens draws no ring unless a key opened
+  it.** A dialog opened as the page loads, from the address, moves the focus onto its first control,
+  its close or its own box with no key pressed, and the browser counts a focus with nothing before
+  it as the keyboard's. The overlays module tells such a focus as it lands (`docs/components.md`,
+  "Tooltips") and marks the element it landed on, unless the reader's last key or press before the
+  floating thing opened was a key; the stylesheet draws no ring on a marked element, whatever ring
+  the library gives it. The mark goes the moment the focus leaves that element or the reader presses
+  a key, so Tab from there rings what it reaches, and a floating thing a key opened keeps its ring.
+  A field's edge is no ring and still shows.
 - **The ring is one style for every screen,** three tokens on the root.
 
   | Token | Value | For |

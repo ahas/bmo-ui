@@ -315,9 +315,37 @@ const handedBack = new WeakSet<Event>();
 let handing = 0;
 // The same, for the moves an opening layer made into itself.
 const takenOnOpen = new WeakSet<Event>();
-// The layers opened since the reader's last key or press, every move into which is the layer's own.
-let opening: Element[] = [];
+
+// A layer opened since the reader's last key or press, every move into which is the layer's own, and
+// whether the reader's last key or press before it opened was a key.
+interface Opening {
+  layer: Element;
+  keyOpened: boolean;
+}
+
+let opening: Opening[] = [];
+// Whether the reader's last key or press was a key; none has come while the page has just loaded.
+let lastWasKey = false;
 let telling = false;
+
+// What an element holding a focus an opening layer took up with no key opening it carries, while the
+// focus stays there and no key is pressed. The stylesheet draws no ring on it (`docs/design.md`,
+// "Focus"): the browser counts a focus with nothing before it, as on a page just loaded, as the
+// keyboard's.
+const UNASKED_FOCUS = "data-unasked-focus";
+let unasked: Element | null = null;
+
+function clearUnasked(): void {
+  unasked?.removeAttribute(UNASKED_FOCUS);
+  unasked = null;
+}
+
+function markUnasked(target: Element): void {
+  clearUnasked();
+  unasked = target;
+  target.setAttribute(UNASKED_FOCUS, "");
+  target.addEventListener("blur", () => { if (unasked === target) clearUnasked(); }, { once: true });
+}
 
 function tellLayerFocus(): void {
   if (telling) {
@@ -340,17 +368,36 @@ function tellLayerFocus(): void {
     OPENING,
     (event) => {
       if (event.target instanceof Element) {
-        opening.push(event.target);
+        opening.push({ layer: event.target, keyOpened: lastWasKey });
       }
     },
     true
   );
 
   // The reader's next key or press is theirs, a Tab or an arrow moving the focus on among them, and
-  // is caught before the browser moves anything for it.
-  for (const type of ["keydown", "pointerdown"]) {
-    window.addEventListener(type, () => { opening = []; }, true);
-  }
+  // is caught before the browser moves anything for it. A key the reader pressed also gives the ring
+  // back to wherever the focus stands; the Esc this module sends for the back gesture is no key of
+  // theirs.
+  window.addEventListener(
+    "keydown",
+    (event) => {
+      opening = [];
+
+      if (event.isTrusted) {
+        lastWasKey = true;
+        clearUnasked();
+      }
+    },
+    true
+  );
+  window.addEventListener(
+    "pointerdown",
+    () => {
+      opening = [];
+      lastWasKey = false;
+    },
+    true
+  );
 
   // Caught on the way down, so the mark stands before anything where the focus landed reads it.
   for (const type of ["focus", "focusin"]) {
@@ -362,9 +409,14 @@ function tellLayerFocus(): void {
         }
 
         const target = event.target;
+        const opened = target instanceof Element ? opening.find(({ layer }) => layer.isConnected && layer.contains(target)) : undefined;
 
-        if (target instanceof Node && opening.some((layer) => layer.isConnected && layer.contains(target))) {
+        if (target instanceof Element && opened !== undefined) {
           takenOnOpen.add(event);
+
+          if (!opened.keyOpened && target !== unasked) {
+            markUnasked(target);
+          }
         }
       },
       true

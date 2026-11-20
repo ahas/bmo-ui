@@ -651,6 +651,8 @@ default; a screen supplies what it holds and what a press means there. Every exp
   lands, and the shared tooltip and every page layer read both tells before anything else, since
   the browser's visible-focus tell names either focus the keyboard's once a key opened or closed the
   floating thing. A key moving the focus on from there, Tab or an arrow, is the keyboard's again.
+  The same tell keeps the ring off the focus an opening floating thing takes up where no key opened
+  it (`docs/design.md`, "Focus").
   The library's dialog close (`ShellClose`) also tells the shared tooltip which focus is the
   keyboard's where the browser's own tell cannot. The tooltip module's provider
   setting keeps every other tooltip the library draws from coming up for a focus the browser does
