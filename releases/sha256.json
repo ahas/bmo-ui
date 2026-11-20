@@ -278,5 +278,10 @@
     "sha256": "8d200529bd0b7bfc4a518e18f53184f36d9568e8c8d89ee4dfa2a84d9ac61d74",
     "bound": "0.1.0-rev.23",
     "why": "A shared tooltip switched off while it stands goes at once, so none stands over a dragged pill"
+  },
+  "bmo-ui-0.1.0-rev.56.tgz": {
+    "sha256": "582d90ee0dee0f5c1adc70b0e5f4802de4f39ee5b56e7b3189ffd52a8b1b1ee0",
+    "bound": "0.1.0-rev.23",
+    "why": "The picture viewer is set up afresh at each opening, so it stands over a sheet or dialog it was opened from"
   }
 }
