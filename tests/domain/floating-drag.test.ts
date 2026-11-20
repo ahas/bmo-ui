@@ -164,6 +164,24 @@ describe("a press on the thing", () => {
     expect(run.moved).toEqual([]);
   });
 
+  test("holds off the browser's own drag while it is pressed, and only then", () => {
+    const run = start();
+    const native = () => new Event("dragstart", { cancelable: true, bubbles: true });
+
+    run.drag.grab(pointer("pointerdown", 50, 50, { pointerType: "mouse" }));
+
+    const held = native();
+
+    window.dispatchEvent(held);
+    window.dispatchEvent(pointer("pointerup", 50, 50, { pointerType: "mouse" }));
+
+    const after = native();
+
+    window.dispatchEvent(after);
+    expect(held.defaultPrevented).toBe(true);
+    expect(after.defaultPrevented).toBe(false);
+  });
+
   test("ended by the browser settles as a letting go does", async () => {
     const run = start();
 

@@ -143,6 +143,7 @@ export function useFloatingDrag(spec: FloatingDrag): FloatingDragHandle {
       window.addEventListener("pointermove", follow);
       window.addEventListener("pointerup", release);
       window.addEventListener("pointercancel", release);
+      window.addEventListener("dragstart", holdNativeDrag, true);
 
       return;
     }
@@ -150,6 +151,13 @@ export function useFloatingDrag(spec: FloatingDrag): FloatingDragHandle {
     window.removeEventListener("pointermove", follow);
     window.removeEventListener("pointerup", release);
     window.removeEventListener("pointercancel", release);
+    window.removeEventListener("dragstart", holdNativeDrag, true);
+  }
+
+  // A mouse pressed on a link or a picture inside the thing would start the browser's own drag of it, which
+  // cancels the pointer the drag follows; while a press is held, none starts.
+  function holdNativeDrag(event: DragEvent): void {
+    event.preventDefault();
   }
 
   function grab(event: PointerEvent): void {

@@ -838,8 +838,9 @@ following the pointer, the throw and the click a drag ends in are the module's.
   one side settles it there.
 - **It glides from where it was let go to where it settles,** at `pop` with the `enter` easing, and
   stands there at once where less movement was asked for.
-- **What it moves takes no touch gesture of the browser's own,** so a finger dragging it never
-  scrolls or zooms the page.
+- **What it moves takes no gesture of the browser's own:** a finger dragging it never scrolls or
+  zooms the page, and while a press on it is held the browser starts no drag of its own of a link or
+  a picture inside it, which would take the pointer away mid-drag.
 
 ## A window beside the page
 
