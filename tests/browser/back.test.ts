@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
-import { chromium } from "playwright-core";
+import { chromium, devices } from "playwright-core";
 
 import { pressSystemBack, standInSystemBack } from "./system-back";
 import { BROWSER_HOOK_MS, touchReady } from "./touch";
@@ -209,10 +209,8 @@ describe.skipIf(!ready)("the back gesture over a tooltip standing on the control
 // Where the system's back is a close request, as on Android, a floating thing is heard through a close watcher
 // and pushes nothing, so the history keeps its length through an opening and a closing. Esc is the real key,
 // which this browser sends to close watchers too.
-const ANDROID = "Mozilla/5.0 (Linux; Android 14; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36";
-
 async function openAndroidPage(): Promise<Page> {
-  const context = await browser.newContext({ userAgent: ANDROID, viewport: { width: 360, height: 700 } });
+  const context = await browser.newContext({ userAgent: devices["Galaxy S24"]!.userAgent, viewport: { width: 360, height: 700 } });
   const page = await context.newPage();
 
   await page.setContent(`<style>${PAGE}</style><div id="box"></div>`);
