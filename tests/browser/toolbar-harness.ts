@@ -56,7 +56,9 @@ import type { CreateButtonHandle } from "../../app/domain/create-button";
 // the dialogs it opens over any screen; opened with `?window`, it holds a floating window, open and
 // drawn as the app is first mounted, and a dialog opened over it on the page's word. The page stands
 // outside Nuxt, so the library is installed as a Vue plugin and the words are handed over here, and
-// the router the floating window's Back reads stands in as one that changes nothing.
+// the router the floating window's Back reads stands in as one that changes nothing. Opened with
+// `?viewer-over-sheet`, it holds the picture viewer set up ahead of a sheet standing open, and a button in
+// the sheet opening the viewer, as a screen sets up its viewer beside a sheet it is opened from.
 
 Object.assign(globalThis, { useRouter: () => ({ options: {}, beforeEach: () => undefined }) });
 
@@ -266,6 +268,19 @@ const Page = defineComponent(() => {
     };
 
     return () => h(UApp, null, () => [h("div", { class: "markdown p-4 pt-16", innerHTML: MARKUP, onClick }), h(MarkupButtonTip)]);
+  }
+
+  if (new URLSearchParams(location.search).has("viewer-over-sheet")) {
+    const viewing = ref(false);
+    const sheet = ref(true);
+
+    return () =>
+      h(UApp, null, () => [
+        h(ImageViewer, { open: viewing.value, "onUpdate:open": (value: boolean) => (viewing.value = value), src: picture(), title: "Picture" }),
+        h(USlideover, { open: sheet.value, "onUpdate:open": (value: boolean) => (sheet.value = value), title: "Sheet" }, {
+          body: () => h(UButton, { id: "open-viewer", label: "Open picture", onClick: () => (viewing.value = true) })
+        })
+      ]);
   }
 
   if (new URLSearchParams(location.search).has("viewer")) {

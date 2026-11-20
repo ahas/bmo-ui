@@ -6,8 +6,11 @@
        either side of this one, the arrow keys, the arrows at its sides and a sideways stroke on a
        fitted picture go to them; what acts on the picture shown stands in its head beside the
        close. It covers the screen, so the back gesture closes it rather than leaving the screen
-       under it (`docs/components.md`, "Skeletons and loading"). -->
+       under it (`docs/components.md`, "Skeletons and loading"). It is set up afresh at each opening,
+       so it stands over whatever it was opened from, set up before it or after (`docs/components.md`,
+       "Floating things"). -->
   <UModal
+    :key="openings"
     v-model:open="open"
     :title="props.title"
     fullscreen
@@ -101,6 +104,7 @@
 </template>
 
 <script setup lang="ts">
+import { useOpenings } from "../domain/openings";
 import { FIT, MAX_SCALE, MIN_SCALE, fittedSize, moved, pinched, swipeStep, toggled, wheeled, zoomedTo } from "../domain/zoom";
 
 import type { Point, Size, ZoomView } from "../domain/zoom";
@@ -126,6 +130,7 @@ const emit = defineEmits<{
 }>();
 
 const open = defineModel<boolean>("open", { required: true });
+const openings = useOpenings(() => open.value);
 
 const stage = useTemplateRef<HTMLElement>("stage");
 const view = ref<ZoomView>(FIT);

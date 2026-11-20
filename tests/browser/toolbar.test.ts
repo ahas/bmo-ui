@@ -111,7 +111,9 @@ async function open(width: (typeof WIDTHS)[number], scheme: (typeof SCHEMES)[num
           ? WINDOW
           : query === "?icons"
             ? "#menu-opener"
-            : "[role=dialog] [data-slot=footer] [data-slot=base]"
+            : query === "?viewer-over-sheet"
+              ? "#open-viewer"
+              : "[role=dialog] [data-slot=footer] [data-slot=base]"
   );
   // The page eases into the scheme set as it opens, so nothing is read before its colours have settled;
   // what moves for ever, as a spinner does, is no easing and is not waited on.
@@ -1195,4 +1197,50 @@ describe.skipIf(!ready)("a floating window drawn as the app is first mounted, in
 
     expect((await page.screenshot({ clip })).equals(before)).toBe(false);
   });
+});
+
+// What opens over another stands over it (`docs/components.md`, "Floating things"): the picture viewer
+// set up ahead of the sheet it is opened from is drawn over the sheet, every time it opens, and Esc
+// closes the viewer alone. Which of the two the browser draws on top is only the browser's to say, so
+// it is asked at the sheet's centre, with every press let through, since the library holds presses off
+// what stands under its top layer.
+describe.skipIf(!ready)("the picture viewer opened from a sheet set up after it", () => {
+  const viewer = "[role=dialog]:has([data-image-stage])";
+  const sheet = "[role=dialog]:not(:has([data-image-stage]))";
+
+  async function topAtSheet(page: Page): Promise<string | null> {
+    return await page.evaluate((sheet) => {
+      const style = document.createElement("style");
+
+      style.textContent = "* { pointer-events: auto !important; }";
+      document.head.append(style);
+
+      const rect = document.querySelector(sheet)!.getBoundingClientRect();
+      const hit = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2)?.closest("[role=dialog]") ?? null;
+
+      style.remove();
+
+      return hit === null ? null : hit.querySelector("[data-image-stage]") !== null ? "viewer" : "sheet";
+    }, sheet);
+  }
+
+  for (const width of WIDTHS) {
+    test(`stands over the sheet and goes alone on Esc, at ${width.name}`, async () => {
+      const { context, page } = await open(width, "light", "?viewer-over-sheet");
+
+      try {
+        for (const opening of [1, 2]) {
+          await page.click("#open-viewer");
+          await page.waitForSelector(viewer);
+          expect({ opening, top: await topAtSheet(page) }).toEqual({ opening, top: "viewer" });
+
+          await page.keyboard.press("Escape");
+          await page.waitForSelector(viewer, { state: "detached" });
+          expect(await page.isVisible(sheet)).toBe(true);
+        }
+      } finally {
+        await context.close();
+      }
+    });
+  }
 });

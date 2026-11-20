@@ -764,8 +764,11 @@ default; a screen supplies what it holds and what a press means there. Every exp
 - **Leaving a state the screen entered does not move the keyboard.** Nothing rebuilt on the way out
   takes the focus for itself; the focus goes back only where it was before the state was entered.
 - **What opens over another stands over it.** The one opened last is drawn on top, takes the presses,
-  and is the one back and a tap away close first. A floating thing set up ahead of every screen is set
-  up afresh each time it opens, so it lands after everything already standing.
+  and is the one back and a tap away close first. A floating thing is drawn into the page's body at the
+  place its component took when it was set up, not when it opened, so one set up ahead of what it is
+  opened from is set up afresh each time it opens (`useOpenings`) and lands after everything already
+  standing: one set up ahead of every screen, and the picture viewer, which does so itself, so a viewer
+  a screen set up beside a sheet or a dialog still stands over it when opened from there.
 - **What floats keeps what it holds until it is off the screen** (`useHeldWhileClosing`). Closing is
   animated — half a second for a sheet, a fifth for a dialog — so what it draws is not emptied on the
   press that closed it.
