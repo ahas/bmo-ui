@@ -107,6 +107,20 @@ describe.skipIf(!ready)("the side list at a desk's width", () => {
     expect(sizes.head).toBe(48);
     expect(await page.locator("[data-choice-sidebar-open]").count()).toBe(0);
     expect(await page.getByLabel("Search Organisations").count()).toBe(1);
+
+    // The search box and the rows' words start on one line, and the rows scroll on the list's own edge.
+    const edges = await page.evaluate(() => {
+      const list = document.querySelector("[data-choice-sidebar-list]")!;
+      const search = document.querySelector("[data-choice-sidebar-search]")!.parentElement!.getBoundingClientRect();
+      const words = document.querySelector('[data-choice-sidebar-row="1"] span')!.getBoundingClientRect();
+      const scroller = list.lastElementChild!.getBoundingClientRect();
+      const box = list.getBoundingClientRect();
+
+      return { search: search.left, words: words.left, scrollerLeft: scroller.left, scrollerRight: scroller.right, listLeft: box.left, listRight: box.right };
+    });
+
+    expect(edges.words).toBe(edges.search);
+    expect([edges.scrollerLeft, edges.scrollerRight]).toEqual([edges.listLeft, edges.listRight]);
     await page.close();
   });
 
@@ -185,6 +199,25 @@ describe.skipIf(!ready)("the side list at a phone's width", () => {
     await page.waitForFunction(() => document.querySelector("[role=dialog]") === null);
     expect(await page.textContent("#chosen")).toBe("16");
     expect(await page.textContent("[data-choice-sidebar-open]")).toBe("Garnet");
+    await page.close();
+  });
+
+  test("closes its drawer on Back and on Esc alone, the page and the choice standing as they were", async () => {
+    const page = await opened(PHONE);
+    const address = page.url();
+
+    await page.waitForSelector("[data-choice-sidebar-open]");
+
+    for (const close of [() => page.goBack(), () => page.keyboard.press("Escape")]) {
+      await page.click("[data-choice-sidebar-open]");
+      await page.waitForSelector(`[role=dialog] ${LIST}`);
+      await close();
+      await page.waitForFunction(() => document.querySelector("[role=dialog]") === null);
+      expect(page.url()).toBe(address);
+      expect(await page.textContent("#chosen")).toBe("1");
+      expect(await page.textContent("[data-choice-sidebar-open]")).toBe("Northwind");
+    }
+
     await page.close();
   });
 });
