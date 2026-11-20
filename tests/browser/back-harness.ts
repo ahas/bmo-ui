@@ -18,7 +18,7 @@ import {
 } from "reka-ui";
 import { DrawerContent, DrawerOverlay, DrawerPortal, DrawerRoot } from "vaul-vue";
 
-import { layerCount } from "../../app/domain/layers";
+import { closeLayer, layerCount, openLayer } from "../../app/domain/layers";
 import { watchOverlays } from "../../app/domain/overlays";
 
 // The two floating things a back press meets with a tooltip standing over them: a dialog whose
@@ -43,6 +43,9 @@ export interface BackPage {
   layerCount: () => number;
   // The dialog and the drawer put up or taken down together, in the one turn a screen's own action does it in.
   stand: (dialog: boolean, drawer: boolean) => void;
+  // A layer registered by hand, as a screen registers a state it entered, and let go of by hand.
+  float: (close: () => void) => number;
+  land: (id: number) => void;
 }
 
 // A control named by a tooltip, as every icon button of a host's is.
@@ -123,6 +126,8 @@ export function mountBack(box: HTMLElement): BackPage {
     stand: (dialog, drawer) => {
       drawerOpen.value = drawer;
       dialogOpen.value = dialog;
-    }
+    },
+    float: openLayer,
+    land: closeLayer
   };
 }

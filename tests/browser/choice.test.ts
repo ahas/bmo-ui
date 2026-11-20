@@ -5,6 +5,7 @@ import { join } from "node:path";
 
 import { chromium } from "playwright-core";
 
+import { pressSystemBack, standInSystemBack } from "./system-back";
 import { BROWSER_HOOK_MS, centreOf, openTouch, touchReady } from "./touch";
 
 import type { TouchSession } from "./touch";
@@ -602,6 +603,7 @@ describe.skipIf(!ready)("the one select under a finger at a phone's width", () =
 
   beforeAll(async () => {
     touch = await openTouch({ device: "Galaxy S24" });
+    await standInSystemBack(touch.page);
     await serve(touch.page);
   }, BROWSER_HOOK_MS);
 
@@ -693,7 +695,7 @@ describe.skipIf(!ready)("the one select under a finger at a phone's width", () =
 
     await touch.tap(await centreOf(page, "#long"));
     await page.waitForSelector(FIELD);
-    await page.evaluate(() => history.back());
+    await pressSystemBack(page);
     await page.waitForSelector(LIST, { state: "detached", timeout: 3_000 });
     expect(page.url()).toBe(address);
     expect(await page.$("#long")).not.toBeNull();
@@ -706,7 +708,7 @@ describe.skipIf(!ready)("the one select under a finger at a phone's width", () =
     await page.waitForSelector(FIELD);
     await touch.tap(await centreOf(page, FIELD));
     await page.keyboard.type("Surfing");
-    await page.evaluate(() => history.back());
+    await pressSystemBack(page);
     await page.waitForSelector(LIST, { state: "detached", timeout: 3_000 });
     expect(JSON.parse((await page.textContent("#cut-value")) ?? "[]")).toContain("Surfing");
   });

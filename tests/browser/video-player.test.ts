@@ -5,6 +5,7 @@ import { join } from "node:path";
 
 import { chromium, devices } from "playwright-core";
 
+import { pressSystemBack, standInSystemBack } from "./system-back";
 import { BROWSER_HOOK_MS, touchReady } from "./touch";
 
 import type { Browser, BrowserContext, CDPSession, Page } from "playwright-core";
@@ -92,6 +93,7 @@ async function session(size: "still" | "full", width: Width, scheme: Scheme, opt
 
   if (options.clock) await page.clock.install();
 
+  await standInSystemBack(page);
   await page.goto(`${ORIGIN}/?size=${size}`);
   await page.evaluate((dark) => document.documentElement.classList.toggle("dark", dark), scheme === "dark");
   await page.locator(size === "still" ? STILL : PLAYER).first().waitFor();
@@ -306,7 +308,7 @@ describe.skipIf(!ready)("the still in a message bubble", () => {
 
         await page.click(still);
         await page.locator(`[role=dialog] ${PLAYER}`).waitFor();
-        await page.evaluate(() => history.back());
+        await pressSystemBack(page);
         await page.locator("[role=dialog]").waitFor({ state: "detached" });
         await context.close();
       });

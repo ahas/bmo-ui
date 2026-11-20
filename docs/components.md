@@ -774,9 +774,17 @@ are the component's.
 - **Back clears what floats first.** With something floating over the screen — a dialog, a sheet, a
   drawer, a popover, a dropdown menu, a select's list, a context menu, a picture opened whole — the
   back gesture closes that first, one at a time from the top, and only with nothing to clear does the
-  page move. The layers module keeps this with the page's own history: one entry pushed on opening
-  and taken back on closing, so opening and closing leaves history as it was, and the address stays,
-  since what is open is not a place.
+  page move. The address stays, since what is open is not a place. The layers module hears the
+  press in one of two ways, chosen once for the page:
+  - Where the system's back is a close request the page can hear, as on Android in a browser with
+    close watchers, each floating thing stands with a close watcher of its own and pushes nothing,
+    so opening and closing one leaves the history exactly as it was, its length among it. Esc there
+    stays the library's alone: while a floating thing stands, the key sends no close request on top
+    of what the library does with it, so it never closes a second one under the first.
+  - Everywhere else back is only a step through the page's history, so a floating thing pushes one
+    entry on opening and takes it back on closing. The page stands again where it stood, but the
+    entry it stepped back from stays ahead of it, one more in the history's length, until the next
+    move forward replaces it; a browser offers no way to remove it.
   - A screen may register a state it entered as a layer too, so back leaves it the same way.
   - A choice that closes one floating thing and opens another in the same press pushes the new entry
     only once the old one's step back has landed.

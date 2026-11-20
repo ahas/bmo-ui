@@ -1,6 +1,7 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { chromium } from "playwright-core";
 
+import { pressSystemBack, standInSystemBack } from "./system-back";
 import { BROWSER_HOOK_MS, touchReady } from "./touch";
 
 import type { Browser, Page } from "playwright-core";
@@ -205,3 +206,110 @@ describe.skipIf(!ready)("the back gesture over a tooltip standing on the control
   });
 });
 
+// Where the system's back is a close request, as on Android, a floating thing is heard through a close watcher
+// and pushes nothing, so the history keeps its length through an opening and a closing. Esc is the real key,
+// which this browser sends to close watchers too.
+const ANDROID = "Mozilla/5.0 (Linux; Android 14; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36";
+
+async function openAndroidPage(): Promise<Page> {
+  const context = await browser.newContext({ userAgent: ANDROID, viewport: { width: 360, height: 700 } });
+  const page = await context.newPage();
+
+  await page.setContent(`<style>${PAGE}</style><div id="box"></div>`);
+  await standInSystemBack(page);
+  await page.addScriptTag({ type: "module", content: `${script}\nwindow.back = mountBack(document.getElementById("box"));` });
+  await page.waitForFunction(() => "back" in window);
+
+  return page;
+}
+
+function historyLength(page: Page): Promise<number> {
+  return page.evaluate(() => history.length);
+}
+
+function layersAre(page: Page, count: number, sheets: string[]): Promise<unknown> {
+  return page.waitForFunction(
+    ([layers, open]) =>
+      (window as unknown as { back: { layerCount: () => number } }).back.layerCount() === layers &&
+      [...document.querySelectorAll("[data-sheet][data-state=open]")].map((element) => element.getAttribute("data-sheet")).sort().join() === [...(open as string[])].sort().join(),
+    [count, sheets] as const,
+    { timeout: 3000 }
+  );
+}
+
+describe.skipIf(!ready)("the back gesture where it is a close request", () => {
+  test("a drawer opened from a menu and closed by back leaves the history's length as it was", async () => {
+    const page = await openAndroidPage();
+    const before = await historyLength(page);
+
+    await page.click("#open-menu");
+    await page.click('[data-item="properties"]');
+    await layersAre(page, 1, ["drawer"]);
+
+    expect(await standing(page)).toMatchObject({ marked: false });
+    expect(await historyLength(page)).toBe(before);
+
+    await pressSystemBack(page);
+    await layersAre(page, 0, []);
+
+    expect(await historyLength(page)).toBe(before);
+    await page.context().close();
+  });
+
+  // The focus lands on the dialog's close control as it opens and its tooltip stands, so the first Esc is the
+  // tooltip's, as anywhere else.
+  test("each Esc closes the top floating thing alone, and the history keeps its length", async () => {
+    const page = await openAndroidPage();
+    const before = await historyLength(page);
+    const stand = (dialog: boolean, drawer: boolean): Promise<void> =>
+      page.evaluate(([one, other]) => (window as unknown as { back: { stand: (dialog: boolean, drawer: boolean) => void } }).back.stand(one!, other!), [dialog, drawer]);
+
+    await stand(false, true);
+    await layersAre(page, 1, ["drawer"]);
+    await stand(true, true);
+    await layersAre(page, 2, ["drawer", "dialog"]);
+    await page.waitForSelector('[data-tooltip="close"][data-state="instant-open"]');
+
+    await page.keyboard.press("Escape");
+    await page.waitForSelector('[data-tooltip="close"]', { state: "detached" });
+    await layersAre(page, 2, ["drawer", "dialog"]);
+
+    await page.keyboard.press("Escape");
+    await layersAre(page, 1, ["drawer"]);
+    // A floating thing drawing its leaving takes the key for that moment, wherever the key is pressed.
+    await page.waitForSelector('[data-sheet="dialog"]', { state: "detached" });
+
+    await page.keyboard.press("Escape");
+    await layersAre(page, 0, []);
+
+    expect(await historyLength(page)).toBe(before);
+    await page.context().close();
+  });
+
+  // Whatever answers Esc may let its layer go before the key is over, and the close request the key sends after it
+  // would then reach the watcher under it.
+  test("Esc a page answered by letting the top layer go closes nothing under it", async () => {
+    const page = await openAndroidPage();
+
+    await page.evaluate(() => {
+      const back = (window as unknown as { back: { float: (close: () => void) => number; land: (id: number) => void } }).back;
+      const closed: string[] = [];
+
+      back.float(() => closed.push("under"));
+
+      const top = back.float(() => closed.push("top"));
+
+      window.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") back.land(top);
+      });
+      Object.assign(window, { heardClosed: closed });
+    });
+
+    await page.keyboard.press("Escape");
+    await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+
+    expect(await page.evaluate(() => (window as unknown as { heardClosed: string[] }).heardClosed)).toEqual([]);
+    expect(await page.evaluate(() => (window as unknown as { back: { layerCount: () => number } }).back.layerCount())).toBe(1);
+    await page.context().close();
+  });
+});

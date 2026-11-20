@@ -15,20 +15,30 @@ import type { Ref } from "vue";
 // A tooltip is not a layer: it answers the pointer and the keyboard's focus rather than a press,
 // and it is gone the moment either moves on.
 //
-// The gesture is trapped with an entry of this app's own in the browser's history, pushed when a
-// layer opens and taken back when it closes, so the press that would have left the page lands on
-// that entry instead. The address never changes with it: what is open is not a place, and a
-// reload or a shared link should not try to open one.
+// The gesture reaches a layer by one of two roads, chosen for the page. Where the system's back is
+// a close request the page can hear, each layer stands with a close watcher of its own and the
+// history is never touched, so opening and closing a layer leaves it exactly as it was. Everywhere
+// else back is only a step through the history, so the gesture is trapped with an entry of this
+// app's own, pushed when a layer opens and taken back when it closes, and the press that would have
+// left the page lands on that entry instead; the entry stepped back from stays ahead of the page,
+// since a browser removes a forward entry only by pushing over it. Either way the address never
+// changes: what is open is not a place, and a reload or a shared link should not try to open one.
+
+// What a layer holds of the road that hears it, let go of once the layer no longer stands.
+interface Hold {
+  // Whether the layer stood at the top of the stack when it was let go of.
+  letGo: (top: boolean) => void;
+}
 
 interface Layer {
   id: number;
   close: () => void;
-  // Where the page stood when the entry was pushed. A layer left behind by a navigation — a link
-  // inside a drawer, the button on a dialog that opens the whole screen — must not take its
-  // entry back, since that entry is now behind the page the reader asked for.
-  href: string;
-  // Whether its entry is in the history yet; it waits while a step back is still on its way.
-  pushed: boolean;
+  hold: Hold;
+}
+
+// The road the gesture takes to the layers: it sets a standing layer up to be heard.
+interface BackRoad {
+  hold: (layer: Layer) => Hold;
 }
 
 // The mark this app writes on the entries it pushes, so an entry of its own is known again when
@@ -154,42 +164,120 @@ export function holdHistory(stand: LayerHistory | null): void {
   landed();
 }
 
-// Registers a layer as standing, and returns what to hand back when it is gone.
-export function openLayer(close: () => void): number {
-  const now = history();
+// The road through the history: an entry pushed for each layer, and taken back when it goes.
+const entryRoad: BackRoad = {
+  hold(layer) {
+    const now = history();
+    // Where the page stood when the entry was pushed. A layer left behind by a navigation — a link
+    // inside a drawer, the button on a dialog that opens the whole screen — must not take its
+    // entry back, since that entry is now behind the page the reader asked for.
+    const href = now.href;
+    // Whether its entry is in the history yet; it waits while a step back is still on its way.
+    let pushed = false;
 
-  counted += 1;
+    const push = (): void => {
+      if (!stack.includes(layer)) {
+        return;
+      }
 
-  const layer: Layer = { id: counted, close, href: now.href, pushed: false };
+      const state = now.state;
+      const carried = typeof state === "object" && state !== null ? state : {};
 
-  stack.push(layer);
+      now.pushState({ ...carried, [MARK]: markOf(layer.id) }, "");
+      pushed = true;
+    };
 
-  const push = (): void => {
-    if (!stack.includes(layer)) {
-      return;
+    // A layer opened in the same press that closed another — a menu's choice that opens a dialog —
+    // waits for that layer's step back to land. Pushed before it, the entry would be the one the
+    // step takes away.
+    if (ignoring === 0) {
+      push();
+    } else {
+      landing.push(push);
     }
 
-    const state = now.state;
-    const carried = typeof state === "object" && state !== null ? state : {};
+    return {
+      letGo(top) {
+        if (closing || !pushed || !top || history().href !== href) {
+          return;
+        }
 
-    now.pushState({ ...carried, [MARK]: markOf(layer.id) }, "");
-    layer.pushed = true;
-  };
-
-  // A layer opened in the same press that closed another — a menu's choice that opens a dialog —
-  // waits for that layer's step back to land. Pushed before it, the entry would be the one the
-  // step takes away.
-  if (ignoring === 0) {
-    push();
-  } else {
-    landing.push(push);
+        step();
+      }
+    };
   }
+};
+
+// The part of a close watcher this module uses. The platform's own type library does not name it yet.
+interface CloseWatcherLike {
+  onclose: ((event: Event) => void) | null;
+  destroy: () => void;
+}
+
+type CloseWatcherMaker = new () => CloseWatcherLike;
+
+function closeWatcherMaker(): CloseWatcherMaker | undefined {
+  return (globalThis as { CloseWatcher?: CloseWatcherMaker }).CloseWatcher;
+}
+
+// The road through close watchers: one for each layer, closed by the system's back and destroyed
+// when the layer goes any other way. The browser hands a press to the watcher made last, which is
+// the layer opened last.
+const watcherRoad: BackRoad = {
+  hold(layer) {
+    const Watcher = closeWatcherMaker() as CloseWatcherMaker;
+    const watcher = new Watcher();
+
+    watcher.onclose = () => heard(layer);
+
+    return { letGo: () => watcher.destroy() };
+  }
+};
+
+// Whether the system's back reaches the page as a close request. Every browser on Android that has
+// close watchers sends its back to them; elsewhere a close watcher hears only Esc, and the back
+// button still steps through the history.
+function backIsCloseRequest(): boolean {
+  return closeWatcherMaker() !== undefined && typeof navigator !== "undefined" && navigator.userAgent.includes("Android");
+}
+
+// The road this page's gesture takes. A history a test stands in is always heard through entries.
+function road(): BackRoad {
+  return held === null && backIsCloseRequest() ? watcherRoad : entryRoad;
+}
+
+// A press of back that reached a layer: it no longer stands, and it is closed its own way.
+function heard(layer: Layer): void {
+  const at = stack.indexOf(layer);
+
+  if (at === -1) {
+    return;
+  }
+
+  stack.splice(at, 1);
+  closing = true;
+
+  try {
+    layer.close();
+  } finally {
+    closing = false;
+  }
+}
+
+// Registers a layer as standing, and returns what to hand back when it is gone.
+export function openLayer(close: () => void): number {
+  counted += 1;
+
+  const layer: Layer = { id: counted, close, hold: { letGo: () => undefined } };
+
+  stack.push(layer);
+  layer.hold = road().hold(layer);
 
   return layer.id;
 }
 
-// Says a layer is no longer standing, whatever closed it. The entry pushed for it goes back with
-// it, so a layer opened and closed leaves the history as it found it.
+// Says a layer is no longer standing, whatever closed it. What its road holds for it goes with it,
+// so a layer opened and closed by its own controls leaves the history where it found it.
 export function closeLayer(id: number): void {
   const at = stack.findIndex((layer) => layer.id === id);
 
@@ -198,13 +286,8 @@ export function closeLayer(id: number): void {
   }
 
   const [layer] = stack.splice(at, 1);
-  const now = history();
 
-  if (closing || layer === undefined || !layer.pushed || at !== stack.length || now.href !== layer.href) {
-    return;
-  }
-
-  step();
+  layer?.hold.letGo(at === stack.length);
 }
 
 // Whether the entry arrived at is one of this app's own whose layer no longer stands: one a
@@ -226,8 +309,14 @@ function stepOver(): void {
 }
 
 // What the back gesture means here: the top layer if one stands, and nothing at all otherwise —
-// in which case the press is the reader's own and the page it leads to is where they go.
+// in which case the press is the reader's own and the page it leads to is where they go. Where the
+// gesture reaches the layers through close watchers, a pop is a move of the page's and never a press
+// meant for a layer.
 export function handlePop(state: unknown): void {
+  if (road() === watcherRoad) {
+    return;
+  }
+
   if (ignoring > 0) {
     ignoring = 0;
 
@@ -250,21 +339,34 @@ export function handlePop(state: unknown): void {
     return;
   }
 
-  const top = stack.pop();
+  const top = stack.at(-1);
 
   if (top !== undefined) {
-    closing = true;
-
-    try {
-      top.close();
-    } finally {
-      closing = false;
-    }
+    heard(top);
   }
 
   if (stale(state)) {
     stepOver();
   }
+}
+
+// Esc stays the library's: the layer it closes is the one the library answers it for. A key nobody
+// refused also goes on to the close watcher on top, which would close a second layer under the
+// first; so once everything on the page has had the key, it is refused, and no close request
+// follows it. The refusal is set on the way down and runs after every other listener on the way up.
+function keepEscapeOffWatchers(event: KeyboardEvent): void {
+  if (event.key !== "Escape" || !event.isTrusted || stack.length === 0 || road() !== watcherRoad) {
+    return;
+  }
+
+  const refuse = (later: Event): void => {
+    if (later === event) {
+      later.preventDefault();
+    }
+  };
+
+  window.addEventListener("keydown", refuse);
+  setTimeout(() => window.removeEventListener("keydown", refuse), 0);
 }
 
 // Starts listening for the gesture, once, for whatever registers first.
@@ -275,6 +377,7 @@ export function listenForBack(): void {
 
   listening = true;
   window.addEventListener("popstate", (event) => handlePop(event.state));
+  window.addEventListener("keydown", keepEscapeOffWatchers, true);
 
   // A step of this module's is taken through the router's history, told not to read the pop it
   // makes: read as a move, it would cancel whatever navigation was begun while it was on its way.
