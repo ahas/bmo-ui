@@ -40,6 +40,7 @@ wording keys listed here are the ones the layer's list holds.
 | `AvatarGroup` | The library's avatars overlapping in one moving row, each on a ring of its ground, the rest past a most counted in a cap. |
 | `CardRow` | A heading over one line of cards that scrolls sideways, paged by a pointer's buttons and swiped by a finger, with the link that opens it whole. |
 | `ChoiceSelect` | The one select a value is chosen from a list in, the library's select menu searching once it holds more than seven choices, or always over a road that finds them or in free entry, where words no choice shows are offered as a new value, and a list of several values may end one at the separators the screen names. |
+| `ChoiceSidebar` | The list a screen chooses what its body stands for from: the host's choices, headings and indented rows under a search box that narrows them, beside the body behind a splitter whose width is kept on a wide screen, and a bottom drawer opened from one button carrying the chosen label on a narrow one; laid aside where the reader has one choice or none. |
 | `ChooseAll` | The three-state checkbox that takes every row shown or gives the choice up. |
 | `ColumnResizeHandle` | The right edge of a column's name, dragged or moved with the arrow keys. |
 | `CreateButton` | The one button a screen creates from: a grey icon in its row on a wide screen, a floating primary icon on a phone drawn under every overlay, its key named in its tooltip; marked `contained`, an add that belongs to a row, a sidebar's or a list's head, a tab bar or a dialog's or a drawer's row, is that row's grey icon at every width, answering no key. |
@@ -149,7 +150,7 @@ Each is named with everything it exports.
 | `scroll-within` | `offsetFor`, `scrollWithin` |
 | `share-links` | `ShareLink`, `ShareSpan`, `ShareRoad`, `ShareMark`, `shareEnded`, `shareUntilText` |
 | `share-members` | `SharePerson`, `SHARE_PERMISSIONS`, `SharePermission`, `MEMBER_PERMISSION`, `ShareMember`, `ShareMemberRoad`, `MEMBER_SEARCH_PAUSE_MS`, `PermissionItem`, `permissionItems`, `ShareMembers`, `ShareMembersOptions`, `useShareMembers` |
-| `side-parts` | `SPLIT_HANDLE`, `FULL_SHEET` |
+| `side-parts` | `SPLIT_HANDLE`, `FULL_SHEET`, `SideChoice`, `SideHeading`, `SideEntry`, `SIDE_LIST_REGION`, `isSideHeading`, `sideEntriesMatching` |
 | `sound-tap` | `TAP_FFT`, `Tap`, `tapOf` |
 | `tab-slide` | `SlideDirection`, `slideDirection`, `useSlideDirection` |
 | `table-layout` | `TableLayout`, `TABLE_BOX`, `TABLE_HEAD`, `TABLE_ROW_HEIGHT` |
@@ -313,19 +314,19 @@ What a coding harness takes the layer through (`docs/harness.md`).
 
 ## Wording keys
 
-The layer reads these 147 keys and no others. The `wording-keys` shared module lists them, the one
+The layer reads these 149 keys and no others. The `wording-keys` shared module lists them, the one
 list a host's pack is held to. Placeholders are named after each key.
 
 - **`common.action`:** `add_choice` `{value}`, `cancel`, `choose_all`, `choose_none`, `close`, `close_all_tabs`,
   `close_other_tabs`, `close_right_tabs`, `collapse`, `copy`, `create_link`, `discard`,
   `exit_fullscreen`, `expand`, `fit_screen`, `fullscreen`, `more`, `mute`, `next_month`,
   `next_picture`, `next_year`, `next_years`, `page_back`, `page_forward`, `pause`, `pin`, `play`,
-  `play_now`, `previous_month`, `previous_picture`, `previous_year`, `previous_years`, `save`,
+  `play_now`, `previous_month`, `previous_picture`, `previous_year`, `previous_years`, `refresh`, `save`,
   `see_all`, `share`, `skip_back` `{n}`, `skip_forward` `{n}`, `subtitles`, `turn_picture`, `unmute`,
   `unpin`, `unshare`, `zoom_in`, `zoom_out`.
 - **`common.aria`:** `close_named` `{name}`, `column_width` `{name}`, `decrease`, `download_named`
   `{name}`, `image_zoom` `{title}`, `increase`, `member_permission` `{name}`, `more_notices` `{n}`,
-  `others_count` `{n}`, `pinned_named` `{name}`, `play_named` `{name}`, `player_named` `{name}`, `share_address`,
+  `others_count` `{n}`, `pinned_named` `{name}`, `play_named` `{name}`, `player_named` `{name}`, `search_named` `{name}`, `share_address`,
   `speed_named` `{speed}`, `window_move`, `window_resize`.
 - **`common.error`:** `choices_find_failed`, `editor_failed`, `link_copy_failed`, `member_change_failed`,
   `member_search_failed`, `member_share_failed`, `members_read_failed`, `picture_failed`,
@@ -354,7 +355,7 @@ list a host's pack is held to. Placeholders are named after each key.
 - **`files.message`:** `conflict`.
 - **`files.status`:** `uploading`.
 
-That is 37 actions, 15 accessible names, 11 errors, 38 labels, 6 messages, a placeholder, 18
+That is 38 actions, 16 accessible names, 11 errors, 38 labels, 6 messages, a placeholder, 18
 statuses and 2 titles under `common`, and 7 keys under `files`.
 
 ## Tokens

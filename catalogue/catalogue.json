@@ -532,6 +532,84 @@
       "example": "<div class=\"flex flex-wrap gap-4\">\n  <ChoiceSelect v-model=\"size\" :items=\"sizes\" value-key=\"value\" class=\"w-40\" />\n  <ChoiceSelect v-model=\"city\" :items=\"cities\" value-key=\"value\" class=\"w-56\" />\n  <ChoiceSelect v-model=\"role\" :items=\"roles\" value-key=\"value\" create-item class=\"w-48\" @create=\"addRole\" />\n</div>"
     },
     {
+      "name": "ChoiceSidebar",
+      "kind": "component",
+      "line": "The list a screen chooses what its body stands for from: the host's choices, headings and indented rows under a search box that narrows them, beside the body behind a splitter whose width is kept on a wide screen, and a bottom drawer opened from one button carrying the chosen label on a narrow one; laid aside where the reader has one choice or none.",
+      "props": [
+        {
+          "name": "label",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "entries",
+          "type": "readonly SideEntry[] | null",
+          "required": true
+        },
+        {
+          "name": "chosen",
+          "type": "string | number | null",
+          "required": true
+        },
+        {
+          "name": "saveId",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "listed",
+          "type": "boolean | undefined",
+          "required": false,
+          "default": "true"
+        },
+        {
+          "name": "failure",
+          "type": "string | undefined",
+          "required": false,
+          "default": "\"\""
+        },
+        {
+          "name": "reading",
+          "type": "boolean | undefined",
+          "required": false,
+          "default": "false"
+        },
+        {
+          "name": "emptyText",
+          "type": "string | undefined",
+          "required": false,
+          "default": "undefined"
+        },
+        {
+          "name": "noMatchText",
+          "type": "string | undefined",
+          "required": false,
+          "default": "undefined"
+        }
+      ],
+      "slots": [
+        {
+          "name": "default",
+          "type": "any"
+        },
+        {
+          "name": "actions",
+          "type": "any"
+        }
+      ],
+      "events": [
+        {
+          "name": "choose",
+          "type": "[value: string | number]"
+        },
+        {
+          "name": "retry",
+          "type": "[]"
+        }
+      ],
+      "example": "<div class=\"flex h-96 min-h-0 flex-col\">\n  <ChoiceSidebar :label=\"t('teams.label.list')\" :entries=\"entries\" :chosen=\"chosen\" save-id=\"teams-list\" @choose=\"chosen = $event\">\n    <template #actions>\n      <IconButton size=\"sm\" icon=\"i-material-symbols-add\" :label=\"t('teams.action.add')\" />\n    </template>\n\n    <p class=\"p-4 text-sm\">{{ chosen }}</p>\n  </ChoiceSidebar>\n</div>"
+    },
+    {
       "name": "ChooseAll",
       "kind": "component",
       "line": "The three-state checkbox that takes every row shown or gives the choice up.",

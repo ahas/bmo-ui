@@ -597,6 +597,44 @@ default; a screen supplies what it holds and what a press means there. Every exp
   the focus, so the preview hears the select's highlight; a list that moves its focus onto the
   choice it rests on is heard by the focus moving between its items.
 
+## Choosing from a side list
+
+`ChoiceSidebar` is how a screen chooses the one thing its body stands for out of many — an
+organisation, a unit, a box — where a select would hide a list that keeps growing behind one small
+control. It holds the list beside the body, searched as it is typed, and the screen's body in its
+default slot. What the list holds, which entry is chosen, what choosing does and what the body
+shows are the host's; how the list is searched, drawn, laid beside the body and opened on a phone
+are the component's.
+
+- **The list is the host's entries, in its order.** Each entry is a choice, by its value and the
+  label it is shown by, or a heading over the choices after it, written as the library's own items
+  write a label. A choice may stand indented by a depth, so a tree of units stands as its rows, and
+  may carry a muted line under its label. The chosen value is marked as the page's current one, and
+  choosing a row hands its value to the host, which chooses it in its own way — a step of the
+  history, a value of its own. Rows are the library's ghost buttons, the chosen one soft.
+- **A search box heads the list,** with the search icon leading and the host's name for the list in
+  its accessible name, and an action of the host's beside it at the head's trailing end, an add among
+  them. Typing narrows the rows to those whose label or line under it holds the words, through the
+  search module, the matched part marked where it stands (`SearchText`). A heading stays while any
+  choice under it does, and goes with the last. Nothing matching says so in one line, the host's own
+  words where it names them and the pack's otherwise.
+- **The list keeps its place while it is read and says why a read failed.** Until the host hands it
+  entries it stands as a skeleton of rows; a list the host says failed shows the reason in its place,
+  with a refresh that spins while the host reads it again and hands the press to the host. An empty
+  list says so, in the host's words where it names them.
+- **On a wide screen the list and the body stand side by side,** parted by a splitter whose hairline
+  is dragged to widen either (`SPLIT_HANDLE`): the list takes about a quarter of the width, at least
+  enough for its search and a name and at most two fifths, and the width is kept in the browser
+  under the key the host names. Each scrolls on its own, the list's scrollbar on the list's edge, and
+  the list's head stands as tall as a tab row, its line under it, so a row heading the body meets it.
+- **On a narrow screen the body fills the screen** and the list opens as a bottom drawer
+  (`FULL_SHEET`) from one button at the head of the body, which carries the chosen entry's label and
+  the unfolding mark; a label it cuts short reads whole in its tooltip. The drawer is titled by the
+  host's name for the list, its search heading it, and choosing a row closes it. With nothing
+  chosen the button carries the list's name, and while the list is unread it stands as a skeleton bar.
+- **A host whose reader has one choice or none may lay the list aside** (`listed` off): the body then
+  stands alone with no list, no splitter and no button, as it would with no component around it.
+
 ## Dates
 
 - **A date is chosen on one calendar** (`DateCalendar`), the component library's own calendar of
