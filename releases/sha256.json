@@ -298,5 +298,10 @@
     "sha256": "8dba91ba3af57002f6fc316aba2d368e45ea0e254b679f35fc3bc163bd706896",
     "bound": "0.1.0-rev.23",
     "why": "The side list stands on the 4px grid and its rows move as the search narrows them; nothing an earlier bundle reads changes"
+  },
+  "bmo-ui-0.1.0-rev.60.tgz": {
+    "sha256": "3e797f4a0c227cca94eac901e1f63900e52334f4878f7701cad1c90f16185e38",
+    "bound": "0.1.0-rev.23",
+    "why": "Layers hear Back through close watchers where it is a close request, so they leave the history length as it was; nothing an earlier bundle reads changes"
   }
 }
