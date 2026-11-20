@@ -273,5 +273,10 @@
     "sha256": "47eb6e2a5c868ee1812241b9cb17c719c46ae239a32992decdd856d9c4fba747",
     "bound": "0.1.0-rev.23",
     "why": "A floating thing's press holds off the browser's own drag, so a mouse drags a folded window's pill"
+  },
+  "bmo-ui-0.1.0-rev.55.tgz": {
+    "sha256": "8d200529bd0b7bfc4a518e18f53184f36d9568e8c8d89ee4dfa2a84d9ac61d74",
+    "bound": "0.1.0-rev.23",
+    "why": "A shared tooltip switched off while it stands goes at once, so none stands over a dragged pill"
   }
 }
