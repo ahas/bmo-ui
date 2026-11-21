@@ -564,7 +564,7 @@ describe.skipIf(!ready)("the full player", () => {
     await context.close();
   });
 
-  test("stays standing as its host hands it the next video, in full screen, telling where the last one stood", async () => {
+  test("stays standing as its host moves to the next video, in full screen, telling where the last one stood and going back where the host went", async () => {
     const { context, page } = await session("full", "desktop", "light");
     const video = `${PLAYER} video`;
 
@@ -580,6 +580,14 @@ describe.skipIf(!ready)("the full player", () => {
     expect((await calls(page)).filter((one) => one.name === "position").at(-1)).toEqual({ name: "position", args: [7, 30] });
     expect(await page.evaluate(() => document.fullscreenElement?.matches("[data-video-player]") === true)).toBe(true);
     expect(await page.locator("[data-video-start]").count()).toBe(1);
+
+    // Going back leaves full screen where the host went, not the address before it.
+    const moved = page.url();
+
+    await pressSystemBack(page);
+    await page.waitForFunction(() => document.fullscreenElement === null);
+
+    expect(page.url()).toBe(moved);
     await context.close();
   });
 

@@ -273,7 +273,7 @@ import { useI18n } from "vue-i18n";
 import { useBarGathers } from "../domain/actionbar";
 import { knownLength, playAlone, playClock } from "../domain/player";
 import { useNarrow } from "../domain/screen";
-import { useBackClose } from "../domain/layers";
+import { closeLayer, listenForBack, openLayer } from "../domain/layers";
 import { CONTROLS_IDLE_MS, CUE_LINE_OVER_CONTROLS, NUDGE_SECONDS, SAVE_EVERY_MS, SKIP_SECONDS, SPEEDS, VOLUME_STEP, firstFrameOf, hostControlFor, keyAction, nextCardLead, nextTurn, otherOrientation, skipTo, speedText, steppedVolume, stillBox, toggledTrack, turnedBox } from "../domain/video";
 import { overlayOpen, usePlayerGestures } from "../domain/video-gestures";
 import { useVolume } from "../domain/volume";
@@ -867,8 +867,34 @@ function onFullscreen(): void {
   }
 }
 
-// Full screen is a place the player has gone into, which the back gesture leaves as it closes any layer.
-if (!still) useBackClose(fullscreen, () => void leaveFullscreen());
+// Full screen is a place the player has gone into, which the back gesture leaves as it closes any layer. Its layer
+// stands at the address the player stood at as it went in; a host that moves to another address and hands the player
+// the video there stands it again at the new one, so going back leaves full screen and stays where the host went.
+let fullscreenLayer: number | null = null;
+
+function standFullscreenLayer(): void {
+  if (fullscreenLayer !== null) closeLayer(fullscreenLayer);
+
+  listenForBack();
+  fullscreenLayer = openLayer(() => void leaveFullscreen());
+}
+
+function dropFullscreenLayer(): void {
+  if (fullscreenLayer !== null) closeLayer(fullscreenLayer);
+
+  fullscreenLayer = null;
+}
+
+if (!still) {
+  watch(fullscreen, (standing) => (standing ? standFullscreenLayer() : dropFullscreenLayer()));
+  watch(
+    () => props.src,
+    () => {
+      if (fullscreen.value) standFullscreenLayer();
+    },
+    { flush: "post" }
+  );
+}
 
 async function leaveFullscreen(): Promise<void> {
   if (rootRef.value !== null && document.fullscreenElement === rootRef.value) await document.exitFullscreen().catch(() => undefined);
@@ -901,6 +927,7 @@ onBeforeUnmount(() => {
   window.removeEventListener("keydown", onKey);
   window.removeEventListener("pagehide", onLeave);
   document.removeEventListener("fullscreenchange", onFullscreen);
+  dropFullscreenLayer();
   // Going back from a turned player leaves no lock and no full screen behind on the screen it goes to.
   freeOrientation();
   if (rootRef.value !== null && document.fullscreenElement === rootRef.value) void document.exitFullscreen().catch(() => undefined);

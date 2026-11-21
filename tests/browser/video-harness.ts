@@ -204,7 +204,9 @@ const Page = defineComponent(() => {
   // A switch of the page's own in the player's bar, which names what a press does now.
   const wide = ref(false);
 
+  // As a host's router goes to the next video's own address before it hands the player that video.
   window.handOn = () => {
+    history.pushState({}, "", "/?size=full&video=8");
     shown.value = { video: 8, src: "/videos/harbour.mp4", title: "harbour.mp4" };
   };
 

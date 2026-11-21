@@ -1151,7 +1151,8 @@ a message holds, which opens the full player large.
 - **One player may stand from one video to the next.** A host that hands a standing player another
   video, by its source and what it is to the host, keeps the player where it stands: full screen, the
   volume and the speed stay, and the new video starts as a new player's would, from where the host
-  says, playing where the host asks. What a host keeps of a position, where a video starts and which subtitle shows first
+  says, playing where the host asks. A host that moves to the new video's own address first finds
+  full screen's layer standing at that address, so going back leaves full screen there. What a host keeps of a position, where a video starts and which subtitle shows first
   are the host's.
 - **One thing plays at a time.** The full player is one of the page's players: a video that starts
   stops every sound and video playing, and a sound that starts stops it. Its volume is the reader's
