@@ -73,7 +73,7 @@ export function sideEntriesMatching(entries: readonly SideEntry[], words: string
       continue;
     }
 
-    if (matchFields(sideFields(entry), words, locale) === null) continue;
+    if (!holdsWords(entry, words, locale)) continue;
 
     if (heading !== null) {
       kept.push(heading);
@@ -86,10 +86,70 @@ export function sideEntriesMatching(entries: readonly SideEntry[], words: string
   return kept;
 }
 
-// The texts a choice's row shows, each searched.
-function sideFields(choice: SideChoice): SearchField[] {
-  return [
-    { label: "", text: choice.label, shown: true },
-    { label: "", text: choice.line, shown: true }
+// Whether the texts a row shows, its label and the line under it, hold the words, through the one
+// search.
+function holdsWords(row: { label: string; line?: string }, words: string, locale?: string): boolean {
+  const fields: SearchField[] = [
+    { label: "", text: row.label, shown: true },
+    { label: "", text: row.line, shown: true }
   ];
+
+  return matchFields(fields, words, locale) !== null;
+}
+
+// The side tree a screen chooses what its body stands for from (`ChoiceTree`, `docs/components.md`,
+// "Choosing from a side tree"): each node by its key, the label it is shown by, the icon leading it
+// where it has one, and the nodes under it.
+export interface SideNode {
+  key: string | number;
+  label: string;
+  icon?: string;
+  children?: readonly SideNode[];
+}
+
+// Every node of a tree as a side list's choice, each before the nodes under it: what names the chosen
+// node and says whether the words leave anything.
+export function sideNodeChoices(nodes: readonly SideNode[]): SideChoice[] {
+  return nodes.flatMap((node) => [{ value: node.key, label: node.label }, ...sideNodeChoices(node.children ?? [])]);
+}
+
+// The tree the words keep, in its order: each node whose label holds them, through the one search, and
+// each node above one that stays, holding only the nodes under it that stay.
+export function sideNodesMatching(nodes: readonly SideNode[], words: string, locale?: string): SideNode[] {
+  if (searchPhrase(words) === "") return [...nodes];
+
+  return nodes.flatMap((node) => {
+    const children = sideNodesMatching(node.children ?? [], words, locale);
+
+    if (children.length > 0) return [{ ...node, children }];
+    if (!holdsWords(node, words, locale)) return [];
+
+    // A match none of whose nodes stays stands as a leaf.
+    const { children: _left, ...leaf } = node;
+
+    return [leaf];
+  });
+}
+
+// The keys from the top of the tree down to the node of the key, its own last; none where no node
+// holds the key.
+export function sideNodePath(nodes: readonly SideNode[], key: string | number | null): (string | number)[] {
+  for (const node of nodes) {
+    if (node.key === key) return [node.key];
+
+    const below = sideNodePath(node.children ?? [], key);
+
+    if (below.length > 0) return [node.key, ...below];
+  }
+
+  return [];
+}
+
+// The keys of every node that holds others, each before the nodes under it.
+export function sideNodeParents(nodes: readonly SideNode[]): (string | number)[] {
+  return nodes.flatMap((node) => {
+    const children = node.children ?? [];
+
+    return children.length > 0 ? [node.key, ...sideNodeParents(children)] : [];
+  });
 }

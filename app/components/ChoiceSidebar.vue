@@ -24,6 +24,8 @@
           </template>
         </ContentSkeleton>
         <p v-else-if="shown.length === 0" class="px-3 py-2 text-sm text-muted" data-choice-sidebar-empty>{{ emptyWords }}</p>
+        <!-- Another part may draw the rows in their place, handed the choosing. -->
+        <slot v-else-if="slots.list" name="list" :choose="choose" />
         <MovingList v-else tag="div" class="flex flex-col">
           <template v-for="entry in shown" :key="isSideHeading(entry) ? `heading-${entry.label}` : `choice-${entry.value}`">
             <p v-if="isSideHeading(entry)" class="px-3 pt-3 pb-1 text-sm font-semibold text-muted first:pt-1" data-choice-sidebar-heading>{{ entry.label }}</p>
@@ -111,7 +113,10 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), { listed: true, failure: "", reading: false, emptyText: undefined, noMatchText: undefined });
 const emit = defineEmits<{ choose: [value: string | number]; retry: [] }>();
 
-defineSlots<{ default(): unknown; actions?(): unknown }>();
+const slots = defineSlots<{ default(): unknown; actions?(): unknown; list?(props: { choose: (value: string | number) => void }): unknown }>();
+
+// The search's words, which a part drawing the rows in the list's place may hold itself.
+const words = defineModel<string>("words", { default: "" });
 
 const SEARCH_ICON = "i-material-symbols-search";
 const REFRESH_ICON = "i-material-symbols-refresh";
@@ -123,7 +128,6 @@ const DEPTH_INDENT_PX = 16;
 
 const { t } = useI18n();
 const narrow = useNarrow();
-const words = ref("");
 const open = ref(false);
 
 const shown = computed(() => sideEntriesMatching(props.entries ?? [], words.value, countLocale()));

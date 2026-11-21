@@ -40,7 +40,8 @@ wording keys listed here are the ones the layer's list holds.
 | `AvatarGroup` | The library's avatars overlapping in one moving row, each on a ring of its ground, the rest past a most counted in a cap. |
 | `CardRow` | A heading over one line of cards that scrolls sideways, paged by a pointer's buttons and swiped by a finger, with the link that opens it whole. |
 | `ChoiceSelect` | The one select a value is chosen from a list in, the library's select menu searching once it holds more than seven choices, or always over a road that finds them or in free entry, where words no choice shows are offered as a new value, and a list of several values may end one at the separators the screen names. |
-| `ChoiceSidebar` | The list a screen chooses what its body stands for from: the host's choices, headings and indented rows under a search box that narrows them, beside the body behind a splitter whose width is kept on a wide screen, and a bottom drawer opened from one button carrying the chosen label on a narrow one; laid aside where the reader has one choice or none. |
+| `ChoiceSidebar` | The list a screen chooses what its body stands for from: the host's choices, headings and indented rows under a search box that narrows them, beside the body behind a splitter whose width is kept on a wide screen, and a bottom drawer opened from one button carrying the chosen label on a narrow one; laid aside where the reader has one choice or none; its rows may be drawn by another part standing in their place, the search's words bound both ways. |
+| `ChoiceTree` | The side list for a tree: the host's nodes as the library's tree in the side list's place, each opened and closed by its chevron, the way to the chosen node standing open and marked, the search keeping the nodes above every match, and nothing moving as the choice or the nodes change. |
 | `ChooseAll` | The three-state checkbox that takes every row shown or gives the choice up. |
 | `ColumnResizeHandle` | The right edge of a column's name, dragged or moved with the arrow keys. |
 | `CreateButton` | The one button a screen creates from: a grey icon in its row on a wide screen, a floating primary icon on a phone drawn under every overlay, its key named in its tooltip; marked `contained`, an add that belongs to a row, a sidebar's or a list's head, a tab bar or a dialog's or a drawer's row, is that row's grey icon at every width, answering no key. |
@@ -150,7 +151,7 @@ Each is named with everything it exports.
 | `scroll-within` | `offsetFor`, `scrollWithin` |
 | `share-links` | `ShareLink`, `ShareSpan`, `ShareRoad`, `ShareMark`, `shareEnded`, `shareUntilText` |
 | `share-members` | `SharePerson`, `SHARE_PERMISSIONS`, `SharePermission`, `MEMBER_PERMISSION`, `ShareMember`, `ShareMemberRoad`, `MEMBER_SEARCH_PAUSE_MS`, `PermissionItem`, `permissionItems`, `ShareMembers`, `ShareMembersOptions`, `useShareMembers` |
-| `side-parts` | `SPLIT_HANDLE`, `FULL_SHEET`, `SIDE_HEAD`, `SideChoice`, `SideHeading`, `SideEntry`, `SIDE_LIST_REGION`, `isSideHeading`, `sideEntriesMatching` |
+| `side-parts` | `SPLIT_HANDLE`, `FULL_SHEET`, `SIDE_HEAD`, `SideChoice`, `SideHeading`, `SideEntry`, `SIDE_LIST_REGION`, `isSideHeading`, `sideEntriesMatching`, `SideNode`, `sideNodeChoices`, `sideNodesMatching`, `sideNodePath`, `sideNodeParents` |
 | `sound-tap` | `TAP_FFT`, `Tap`, `tapOf` |
 | `tab-slide` | `SlideDirection`, `slideDirection`, `useSlideDirection` |
 | `table-layout` | `TableLayout`, `TABLE_BOX`, `TABLE_HEAD`, `TABLE_HEAD_LINE`, `TABLE_ROW_HEIGHT` |
@@ -326,7 +327,8 @@ list a host's pack is held to. Placeholders are named after each key.
   `see_all`, `share`, `skip_back` `{n}`, `skip_forward` `{n}`, `subtitles`, `turn_picture`, `unmute`,
   `unpin`, `unshare`, `zoom_in`, `zoom_out`.
 - **`common.aria`:** `close_named` `{name}`, `column_width` `{name}`, `decrease`, `download_named`
-  `{name}`, `image_zoom` `{title}`, `increase`, `member_permission` `{name}`, `more_notices` `{n}`,
+  `{name}`, `holds_chosen`, `image_zoom` `{title}`, `increase`, `member_permission` `{name}`,
+  `more_notices` `{n}`,
   `others_count` `{n}`, `pinned_named` `{name}`, `play_named` `{name}`, `player_named` `{name}`, `search_named` `{name}`, `share_address`,
   `speed_named` `{speed}`, `window_move`, `window_resize`.
 - **`common.error`:** `choices_find_failed`, `editor_failed`, `link_copy_failed`, `member_change_failed`,
@@ -356,7 +358,7 @@ list a host's pack is held to. Placeholders are named after each key.
 - **`files.message`:** `conflict`.
 - **`files.status`:** `uploading`.
 
-That is 38 actions, 16 accessible names, 11 errors, 38 labels, 6 messages, a placeholder, 18
+That is 38 actions, 17 accessible names, 11 errors, 38 labels, 6 messages, a placeholder, 18
 statuses and 2 titles under `common`, and 7 keys under `files`.
 
 ## Tokens

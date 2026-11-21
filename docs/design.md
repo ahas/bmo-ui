@@ -225,7 +225,11 @@ whole in `docs/boundary.md`; this document says what each is for and how the lay
     unfold as the words typed change them, and a group the words leave no choice in folds as one,
     its heading with it. The component library draws that list itself, so the layer's patch of its
     select menu has the menu draw its groups and choices through Vue's `TransitionGroup` with the
-    moving-list module's `MOVING_LIST`, the same engine `MovingList` is.
+    moving-list module's `MOVING_LIST`, the same engine `MovingList` is. The side tree's rows
+    (`ChoiceTree`) are the component library's tree laid out flat, each row keyed by its node, and
+    the tree is handed a `TransitionGroup` as the list its rows stand in: `MOVING_LIST` while the
+    words typed narrow it, and `STANDING_LIST` for every other change, so a new choice or new nodes
+    stand at once.
 - **A box that changes size around what it holds unfolds to its new size** (`UnfoldingBox`). Its
   ground alone changes box: what it holds is laid out at its final size from the first frame and
   only moves, the box hiding what lies past its edge while it is smaller. A change that comes at

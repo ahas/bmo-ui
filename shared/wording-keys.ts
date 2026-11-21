@@ -51,6 +51,7 @@ export const WORDING_KEYS = [
   "common.aria.column_width",
   "common.aria.decrease",
   "common.aria.download_named",
+  "common.aria.holds_chosen",
   "common.aria.image_zoom",
   "common.aria.increase",
   "common.aria.member_permission",

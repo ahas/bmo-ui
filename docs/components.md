@@ -648,6 +648,52 @@ are the component's.
 - **The body stays standing whatever the list does.** It is drawn once and kept as the width crosses
   from wide to narrow and as the list comes or goes, so a host that learns only after its first read
   whether to lay the list aside reads nothing of its body again.
+- **Its rows may be drawn by another part standing in their place** (the `list` slot), as the side
+  tree's are: that part is handed the choosing, which closes the drawer and hands the value over as a
+  row does, and may hold the search's words itself (`words`, bound both ways). Everything around the
+  rows stays the list's: the head, the search box, the skeleton, the failure and the empty lines, the
+  button and the drawer. The entries it is handed still name the chosen label and say whether the
+  words leave anything, so the part standing in is drawn only where they do.
+
+## Choosing from a side tree
+
+`ChoiceTree` is the side list for a host whose choices are a tree — an organisation's parts, each
+inside the one above it — where the body stands for one node of it. It is a `ChoiceSidebar` whose
+rows are the component library's tree: everything the side list does around its rows it does here
+in the same way, from the same component, and the props it shares with the side list mean the same
+there. What the tree holds, which node is chosen, what choosing does and what the body shows are the
+host's; how the tree is searched, drawn, opened and laid beside the body are the component's.
+
+- **The tree is the host's nodes, in its order.** Each node is a key, the label it is shown by, an
+  icon leading it where the host names one, and the nodes under it. How far a row stands in comes
+  from its depth in the tree alone, at the library's own step for each level; the host computes no
+  indent. The rows' words at the top level start on the search box's line, as the side list's do.
+- **A node holding others opens and closes** by the chevron at its row's trailing end, which turns
+  to say which, or by the library's own keys. The chevron is the only part of the row a press opens
+  and closes it by.
+- **Choosing a row hands its key to the host,** which chooses it in its own way, a step of the
+  history among them, and closes the drawer it was made in; the press itself neither opens nor
+  closes the row, which stands open once the host has chosen it, as the next point says. Enter and
+  Space choose the row the focus stands on, and the arrows walk, open and close the tree, the
+  library's own keys. The chosen node is the tree's selected one, said to a screen reader as
+  selected, and drawn as the library draws a selected row.
+- **The way to the chosen node stands open and marked.** Each node above the chosen one stands open,
+  and the chosen one too, so the nodes under it stand in view; this holds when the host chooses
+  another node and when it hands new nodes, such as the parts of another node read only once it is
+  chosen. Each node above the chosen one carries a dot of the primary colour at its trailing end
+  and its label in heavier, highlighted words, and a screen reader hears it as holding the chosen
+  one, in the pack's words (`common.aria.holds_chosen`), so the way down to the chosen node reads at
+  a glance. A node the reader closes stays closed until the chosen node or the nodes change.
+- **Nothing moves as the choice or the nodes change.** A row is known by its node's key, its depth
+  is drawn with it, and the rows stand at once in their new places with no transition of their own,
+  no colour fading and no chevron turning, so a row never stands at a wrong depth or slides for a
+  moment. A row opened or closed by the reader stands at once as well.
+- **The search narrows the tree** to the nodes whose label holds the words, through the search
+  module, the matched part marked where it stands (`SearchText`), and keeps every node above one
+  that stays, so each match stands in its place in the tree, the nodes over it open. While words are
+  typed the tree's rows move as the side list's do as the words narrow them and give them back, the
+  rows that stay sliding and the rest folding and unfolding; this is the one change that moves them.
+  Clearing the words gives back the tree as the reader had opened it.
 
 ## Dates
 

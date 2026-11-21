@@ -1,0 +1,12 @@
+/* The harness page's sheet: the layer's own stylesheet with the utility classes the side tree, the
+   side list it stands in and the hits it marks are drawn with. */
+@import "../../app/assets/css/main.css";
+
+@source "../../app/components/ChoiceTree.vue";
+@source "../../app/components/ChoiceSidebar.vue";
+@source "../../app/components/SearchText.vue";
+@source "../../app/components/HintTip.vue";
+@source "../../app/components/ContentSkeleton.vue";
+@source "../../app/components/SkeletonBar.vue";
+@source "../../app/domain/side-parts.ts";
+@source "./choice-tree-harness.ts";
