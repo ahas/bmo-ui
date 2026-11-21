@@ -303,5 +303,10 @@
     "sha256": "3e797f4a0c227cca94eac901e1f63900e52334f4878f7701cad1c90f16185e38",
     "bound": "0.1.0-rev.23",
     "why": "Layers hear Back through close watchers where it is a close request, so they leave the history length as it was; nothing an earlier bundle reads changes"
+  },
+  "bmo-ui-0.1.0-rev.61.tgz": {
+    "sha256": "d52a56604df71c0108d941d35c4bd9495a82ed4767d0eec818d1731d6acd831e",
+    "bound": "0.1.0-rev.23",
+    "why": "A side list tells its body its head's height, and the shared table's column names and their placeholder's take it there, so the two lines meet"
   }
 }
