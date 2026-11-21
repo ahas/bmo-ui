@@ -318,5 +318,10 @@
     "sha256": "ea92ee940a172f06e5816d59a7b043eaa004b67b8971adae44d0ced09348eb1f",
     "bound": "0.1.0-rev.23",
     "why": "Only adds: an optional controls prop and the PlayerControl type and hostControlFor export; Escape and the back gesture leave full screen; a player handed another video stays standing."
+  },
+  "bmo-ui-0.1.0-rev.64.tgz": {
+    "sha256": "7a0d9e768ac694d25409fae5ee208063cab63ab5c2154c93825c55ede722fd9d",
+    "bound": "0.1.0-rev.23",
+    "why": "Only mends: full screen back layer stands again at the address a host moved to before handing the standing player its next video."
   }
 }
