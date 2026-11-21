@@ -47,7 +47,35 @@ function cuts(element: Element): element is HTMLElement {
   return element instanceof HTMLElement && boxCuts(lineBox(element));
 }
 
-// The cut line a pointer or a finger stands on: the element under it or the nearest one holding it.
+// A press laid over the whole of the box it stands in, as a card whose face is one link drawn over its words:
+// the element stretched over that box, inside a link or a button. Such a face holds none of the words it covers,
+// so it stands for its box, and the box's own cut line is the one a pointer on it or a focus on its link reads.
+function faceOf(element: Element): HTMLElement | null {
+  if (!(element instanceof HTMLElement) || element.closest("a, button") === null || getComputedStyle(element).position !== "absolute") {
+    return null;
+  }
+
+  const box = element.offsetParent;
+
+  if (!(box instanceof HTMLElement)) {
+    return null;
+  }
+
+  const face = element.getBoundingClientRect();
+  const under = box.getBoundingClientRect();
+
+  return Math.abs(face.width - under.width) < 1 && Math.abs(face.height - under.height) < 1 ? box : null;
+}
+
+// The first cut line among a box's own few elements, outside any tooltip of its own.
+function firstCutIn(box: Element): HTMLElement | null {
+  const inside = Array.from(box.querySelectorAll("*")).slice(0, FOCUS_REACH);
+
+  return inside.find((element): element is HTMLElement => cuts(element) && element.closest(OWN_TOOLTIP) === null) ?? null;
+}
+
+// The cut line a pointer or a finger stands on: the element under it or the nearest one holding it, and on a
+// face laid over a box, the box's own cut line.
 export function cutLineAt(target: EventTarget | null): HTMLElement | null {
   for (let element = target instanceof Element ? target : null; element !== null; element = element.parentElement) {
     if (element.matches(OWN_TOOLTIP)) {
@@ -59,7 +87,9 @@ export function cutLineAt(target: EventTarget | null): HTMLElement | null {
     }
   }
 
-  return null;
+  const box = target instanceof Element ? faceOf(target) : null;
+
+  return box === null ? null : firstCutIn(box);
 }
 
 // The cut line a keyboard focus brings up: the one holding what took it, else the first one inside.
@@ -71,8 +101,16 @@ export function cutLineIn(focused: Element): HTMLElement | null {
   }
 
   const inside = Array.from(focused.querySelectorAll("*")).slice(0, FOCUS_REACH);
+  const line = inside.find((element): element is HTMLElement => cuts(element) && element.closest(OWN_TOOLTIP) === null);
 
-  return inside.find((element): element is HTMLElement => cuts(element) && element.closest(OWN_TOOLTIP) === null) ?? null;
+  if (line !== undefined) {
+    return line;
+  }
+
+  // A link whose face lies over a box of words reads that box's cut line.
+  const box = inside.map(faceOf).find((one) => one !== null) ?? null;
+
+  return box === null ? null : firstCutIn(box);
 }
 
 // The words a cut line holds, as one line of reading.

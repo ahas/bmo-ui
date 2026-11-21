@@ -2745,6 +2745,13 @@
           "description": "The video's shape where the host knows it before the file answers, so the still stands in it from the start."
         },
         {
+          "name": "controls",
+          "type": "PlayerControl[] | undefined",
+          "required": false,
+          "default": "[]",
+          "description": "The host's own controls, standing in the bar after turning the picture and before full screen."
+        },
+        {
           "name": "track",
           "type": "number | null | undefined",
           "required": false,

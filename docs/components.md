@@ -693,6 +693,9 @@ are the component's.
   goes are the tooltip's, stated once in the tooltip module.
 - **A pointer brings it up on hover and the keyboard on focus,** including a focus landing on a
   control inside what it stands on. It grows out of what it stands on at `quick`.
+- **A card whose face is one link laid over its words** reads its own cut line: a pointer on that
+  face, or the keyboard's focus on its link, brings up the page's tooltip over the card's first cut
+  line, as if it stood on the line itself.
 - **A focus the keyboard did not bring brings up no tooltip.** Two arrivals are not the keyboard's:
   the focus a closing floating thing hands back to the control it was opened from, and the focus a
   floating thing takes up on its own as it opens, until the reader's next key or press: on its first

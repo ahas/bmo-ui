@@ -31,6 +31,8 @@ const FIXTURE = `<meta name="viewport" content="width=device-width,initial-scale
     <span id="own-tip" data-grace-area-trigger style="display:block"><p id="inside-tip" style="${CUT}">${LONG}</p></span>
     <button id="row" type="button"><b>Label</b><p id="row-line" style="${CUT};margin:0">${LONG}</p></button>
     <button id="plain" type="button">short</button>
+    <div id="card" style="position:relative"><a id="card-link" href="#card"><span id="card-face" style="position:absolute;inset:0"></span></a><b>Mark</b><p id="card-line" style="${CUT};margin:0">${LONG}</p></div>
+    <div id="whole-card" style="position:relative"><a id="whole-link" href="#whole-card"><span id="whole-face" style="position:absolute;inset:0"></span></a><p style="${CUT};margin:0">short</p></div>
   </div>`;
 
 let browser: Browser;
@@ -79,6 +81,11 @@ describe.skipIf(!ready)("finding a line cut to fit its box", () => {
   test("a focus finds the cut line inside what took it, and nothing where none is cut", async () => {
     expect(await within("row")).toBe("row-line");
     expect(await within("plain")).toBeNull();
+  });
+
+  test("a link's face laid over a card reads the card's cut line, by the pointer and by the focus", async () => {
+    expect([await at("card-face"), await within("card-link")]).toEqual(["card-line", "card-line"]);
+    expect([await at("whole-face"), await within("whole-link")]).toEqual([null, null]);
   });
 
   test("its words are the line's own, read as one line", async () => {
