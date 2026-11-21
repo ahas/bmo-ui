@@ -333,5 +333,10 @@
     "sha256": "9a9783aeaa6223ae8253e83a14c93e56a32baf672cb59da869ead4fa36cf9c98",
     "bound": "0.1.0-rev.23",
     "why": "Only mends: the stylesheet no longer spins a progress-activity mark of its own accord; every deployed bundle that shows a live mark spins it itself, and the reduced-motion stop stands."
+  },
+  "bmo-ui-0.1.0-rev.67.tgz": {
+    "sha256": "339680855737df01ea5b1e13caee4a9474acdf0f3df5471e26cc0e4012682999",
+    "bound": "0.1.0-rev.23",
+    "why": "A side tree chooses one node of a tree in the side list's place, and the side list takes rows drawn by another part; nothing an earlier bundle reads changes"
   }
 }
