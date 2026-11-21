@@ -313,5 +313,10 @@
     "sha256": "f5d62d0a82ca4161cf94574565ea4de614ad580cea02b6a8dd227d6147aeea99",
     "bound": "0.1.0-rev.23",
     "why": "Adds pushPlaces to the manifest and noticePlace, so a notice opens the place its bundle names for its kind"
+  },
+  "bmo-ui-0.1.0-rev.63.tgz": {
+    "sha256": "ea92ee940a172f06e5816d59a7b043eaa004b67b8971adae44d0ced09348eb1f",
+    "bound": "0.1.0-rev.23",
+    "why": "Only adds: an optional controls prop and the PlayerControl type and hostControlFor export; Escape and the back gesture leave full screen; a player handed another video stays standing."
   }
 }
