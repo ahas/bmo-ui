@@ -338,5 +338,10 @@
     "sha256": "339680855737df01ea5b1e13caee4a9474acdf0f3df5471e26cc0e4012682999",
     "bound": "0.1.0-rev.23",
     "why": "A side tree chooses one node of a tree in the side list's place, and the side list takes rows drawn by another part; nothing an earlier bundle reads changes"
+  },
+  "bmo-ui-0.1.0-rev.68.tgz": {
+    "sha256": "bf278ecd1aaf450e4cc2769696bfce4e54f9144790b09c09d7dbccb34e3552f0",
+    "bound": "0.1.0-rev.23",
+    "why": "Back over a page form's discard question keeps the address and the change, the side tree's search lines up with its rows, and a side list's body may place the phone's opener in its own toolbar row"
   }
 }
