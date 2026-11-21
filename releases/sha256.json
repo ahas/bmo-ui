@@ -308,5 +308,10 @@
     "sha256": "d52a56604df71c0108d941d35c4bd9495a82ed4767d0eec818d1731d6acd831e",
     "bound": "0.1.0-rev.23",
     "why": "A side list tells its body its head's height, and the shared table's column names and their placeholder's take it there, so the two lines meet"
+  },
+  "bmo-ui-0.1.0-rev.62.tgz": {
+    "sha256": "f5d62d0a82ca4161cf94574565ea4de614ad580cea02b6a8dd227d6147aeea99",
+    "bound": "0.1.0-rev.23",
+    "why": "Adds pushPlaces to the manifest and noticePlace, so a notice opens the place its bundle names for its kind"
   }
 }
