@@ -9,6 +9,7 @@ import {
   SHARE_HEAD_LANGUAGE_QUERY,
   consoleManifest,
   movedScreenAddress,
+  noticePlace,
   onThisLayer,
   relaysRoute,
   roleAllows,
@@ -58,6 +59,7 @@ describe("a service's manifest", () => {
       events: false,
       websocket: false,
       pushKinds: [],
+      pushPlaces: {},
       calls: [],
       relays: [],
       shareReads: []
@@ -279,13 +281,44 @@ describe("the manifest's JSON Schema", () => {
     expect(CONSOLE_MANIFEST_SCHEMA.required).toEqual(["name", "title", "icon", "screenPath", "serviceName", "layer", "bundle", "words", "role"]);
     expect(CONSOLE_MANIFEST_SCHEMA.additionalProperties).toBe(false);
     expect(Object.keys(CONSOLE_MANIFEST_SCHEMA.properties as object).toSorted()).toEqual(
-      [...Object.keys(answered), "formerScreenPaths", "stylesheet", "apiPrefix", "ownerKey", "events", "websocket", "pushKinds", "sidebarUnread", "sidebarSection", "calls", "relays", "shareReads", "shareHead"].toSorted()
+      [...Object.keys(answered), "formerScreenPaths", "stylesheet", "apiPrefix", "ownerKey", "events", "websocket", "pushKinds", "pushPlaces", "sidebarUnread", "sidebarSection", "calls", "relays", "shareReads", "shareHead"].toSorted()
     );
     expect((CONSOLE_MANIFEST_SCHEMA.properties as Record<string, { enum?: unknown }>).role!.enum).toEqual(["administrator", "member"]);
     expect((CONSOLE_MANIFEST_SCHEMA.properties as Record<string, unknown>).sidebarSection).toMatchObject({
       enum: ["administration", "application"],
       default: "application"
     });
+  });
+});
+
+describe("a notice's place", () => {
+  const notes = { ...answered, pushKinds: ["note.created", "note.changed"], pushPlaces: { "note.created": "/notes/{bookName}/open/{noteId}" } };
+
+  test("is named per kind under pushKinds, as a pattern at or below the screen path", () => {
+    expect(consoleManifest(notes).pushPlaces).toEqual({ "note.created": "/notes/{bookName}/open/{noteId}" });
+    expect(faultsOf({ ...notes, pushPlaces: { "note.deleted": "/notes/{noteId}" } })).toContain("pushPlaces: places of kinds under pushKinds");
+    expect(faultsOf({ ...notes, pushPlaces: { "note.created": "/books/{noteId}" } })).toContain("pushPlaces: patterns at or below the screen path");
+    expect(faultsOf({ ...notes, pushPlaces: { "note.created": "/notes/../{noteId}" } })).toContain("pushPlaces");
+    expect(faultsOf({ ...notes, pushPlaces: { "note.created": "/notes/{NoteId}" } })).toContain("pushPlaces");
+    expect(faultsOf({ ...notes, pushPlaces: { created: "/notes" } })).toContain("pushPlaces");
+  });
+
+  test("is the pattern with each placeholder filled from the member and escaped as one segment", () => {
+    const read = consoleManifest(notes);
+
+    expect(noticePlace(read, "note.created", { bookName: "home", noteId: "a/b c" })).toBe("/notes/home/open/a%2Fb%20c");
+    expect(noticePlace(read, "note.created", { bookName: "home", noteId: 42 })).toBe("/notes/home/open/42");
+  });
+
+  test("is the screen path for a kind with no place, and where a placeholder's field cannot fill its segment", () => {
+    const read = consoleManifest(notes);
+
+    expect(noticePlace(read, "note.changed", { bookName: "home", noteId: "n1" })).toBe("/notes");
+    expect(noticePlace(consoleManifest(answered), "note.created", { noteId: "n1" })).toBe("/notes");
+
+    for (const noteId of [undefined, "", "  ", ".", "..", null, true, Number.NaN, { name: "n1" }]) {
+      expect(noticePlace(read, "note.created", { bookName: "home", noteId })).toBe("/notes");
+    }
   });
 });
 

@@ -81,6 +81,7 @@ none of them a dot or two standing for a folder.
 | `events` | Whether the screens read the service's event stream through the console. | no, false |
 | `websocket` | Whether the screens open a WebSocket to the service through the console. | no, false |
 | `pushKinds` | The service's event kinds a console may raise as a notice to a reader who is not on the screen, each written as the stream names it, a resource and its change. | no, none |
+| `pushPlaces` | The place on the bundle's screen a notice of a kind under `pushKinds` opens, by kind: each key one of those kinds, each value a place pattern, a path at or below the screen path whose segments stand as written or as a placeholder, a name in camelCase in braces matching any one segment, which a console fills from the event's member ("How a bundle mounts", notices). | no, none |
 | `sidebarUnread` | The route a console reads a sidebar unread count from: `path`, a path of the service's API under the API prefix, whose JSON answer holds the count at its root under `field`, a camelCase name, as a whole number nought or more. A console draws a positive count on the bundle's sidebar entry. | no, none |
 | `calls` | The other services the screens call through the console, each by the service name its own manifest gives it, or `people`, the company's members a console answers itself ("How a bundle mounts", the company's members), in kebab-case; never the bundle's own service, and none twice. | no, none |
 | `relays` | The service's own routes outside the API prefix that a console relays as well, each its `method` (`GET`, `POST`, `PUT`, `PATCH` or `DELETE`) and its `path`, one whole path of the service's API; none twice. | no, none |
@@ -256,7 +257,14 @@ on any release from that bound up to its own.
   stands above every element so marked, so it never covers that bar until the reader moves it there.
 - **Notices.** A console that raises notices reads the service's event stream for the kinds under
   `pushKinds` and raises each in the words the bundle's words give that kind, under the bundle's
-  namespace, to the readers whose role allows the manifest's.
+  namespace, to the readers whose role allows the manifest's. The words' placeholders, and those of the
+  place below, are filled from the event's member, the record the event carries under `data`: a placeholder
+  names a field of it, text or a number.
+  - **Pressing a notice opens its place.** Where `pushPlaces` names a place for the kind, the notice opens
+    that pattern with each placeholder replaced by its field, escaped as one segment of an address; where it
+    names none, or a placeholder's field is absent, empty, a dot or two, or neither text nor a number, the
+    notice opens the screen path. The place is a screen address and calls nothing, so a bundle names there only what its own
+    routes answer, and the screen reads what the address names as it reads any address a reader opens.
 - **The sidebar section.** A console whose sidebar parts its entries into sections draws a bundle's entry in
   the section its manifest names under `sidebarSection`: `administration` among the services an administrator
   runs the system with, `application` among the applications a reader works in. The section places the entry

@@ -78,6 +78,16 @@ const SHARE_PATTERN = /^(?:\/(?:\{[a-z][A-Za-z0-9]*\}|(?!\.\.?(?:\/|$))[\w.~-]+)
 // The share head's pattern: a path of the service's API whose segments stand as written, but one that is `{token}`.
 const SHARE_HEAD_PATTERN = /^(?:\/(?:\{token\}|(?!\.\.?(?:\/|$))[\w.~-]+))+$/;
 
+// An event kind as the stream names it: a resource and its change.
+const EVENT_KIND = /^[a-z][a-z0-9-]*\.[a-z][a-z0-9-]*$/;
+
+// A notice's place pattern: a path of the console's own whose segments stand as written or as a placeholder, a
+// camelCase name in braces matching any one segment.
+const PLACE_PATTERN = SHARE_PATTERN;
+
+// A placeholder segment of a pattern, and the field it names.
+const PLACEHOLDER_SEGMENT = /^\{([a-z][A-Za-z0-9]*)\}$/;
+
 // A screen path: one or more kebab-case segments, each led by a slash.
 const SCREEN_PATH = /^(?:\/[a-z0-9]+(?:-[a-z0-9]+)*)+$/;
 
@@ -132,9 +142,16 @@ const manifest = z
     events: z.boolean().default(false).describe("Whether the screens read the service's event stream."),
     websocket: z.boolean().default(false).describe("Whether the screens open a WebSocket to the service."),
     pushKinds: z
-      .array(z.string().regex(/^[a-z][a-z0-9-]*\.[a-z][a-z0-9-]*$/, "an event kind, a resource and its change"))
+      .array(z.string().regex(EVENT_KIND, "an event kind, a resource and its change"))
       .default([])
       .describe("The event kinds a console may raise as a notice to a reader not on the screen."),
+    pushPlaces: z
+      .record(
+        z.string().regex(EVENT_KIND, "an event kind, a resource and its change"),
+        z.string().regex(PLACE_PATTERN, "a path pattern of the console's, its placeholders camelCase names in braces")
+      )
+      .default({})
+      .describe("The place on the screen a notice of a kind under pushKinds opens, by kind: a path pattern at or below the screen path, its placeholders filled from the event's member."),
     sidebarUnread: z
       .object({
         path: apiPath("The path of the service's API the count is answered at."),
@@ -192,6 +209,14 @@ const manifest = z
   .refine((one) => one.shareReads.every((pattern) => under(one.apiPrefix, pattern)), { path: ["shareReads"], message: "patterns under the API prefix" })
   .refine((one) => new Set(one.shareReads).size === one.shareReads.length, { path: ["shareReads"], message: "each pattern named once" })
   .refine((one) => one.shareHead === undefined || under(one.apiPrefix, one.shareHead), { path: ["shareHead"], message: "a pattern under the API prefix" })
+  .refine((one) => Object.keys(one.pushPlaces).every((kind) => one.pushKinds.includes(kind)), {
+    path: ["pushPlaces"],
+    message: "places of kinds under pushKinds"
+  })
+  .refine((one) => Object.values(one.pushPlaces).every((pattern) => atOrBelow(one.screenPath, pattern)), {
+    path: ["pushPlaces"],
+    message: "patterns at or below the screen path"
+  })
   .refine((one) => one.formerScreenPaths.every((former) => !overlap(former, one.screenPath)), {
     path: ["formerScreenPaths"],
     message: "paths neither the screen path nor under or over it"
@@ -340,6 +365,40 @@ export function shareHead(value: unknown): ShareHead {
   const faults = read.error.issues.map((issue) => `${issue.path.join(".") || "the head"}: ${issue.message}`);
 
   throw new Error(`The share head does not keep the contract: ${faults.join("; ")}`);
+}
+
+// A member's field as a place carries it: text that holds more than blanks and is no dot or two standing for a folder,
+// or a finite number; null for anything else.
+function placeField(member: Readonly<Record<string, unknown>>, name: string): string | null {
+  const value = Object.hasOwn(member, name) ? member[name] : undefined;
+
+  if (typeof value === "string") return value.trim() === "" || value === "." || value === ".." ? null : value;
+  if (typeof value === "number" && Number.isFinite(value)) return String(value);
+
+  return null;
+}
+
+// The place a notice of a kind opens, read as a console's own path from the app's base path: the manifest's place
+// pattern for the kind with each placeholder replaced by the member's field of its name, escaped as one segment, or the
+// screen path where the manifest names no place for the kind or a placeholder's field is absent, empty or neither text
+// nor a number.
+export function noticePlace(manifest: ConsoleManifest, kind: string, member: Readonly<Record<string, unknown>>): string {
+  const pattern = Object.hasOwn(manifest.pushPlaces, kind) ? manifest.pushPlaces[kind] : undefined;
+
+  if (pattern === undefined) return manifest.screenPath;
+
+  const segments: string[] = [];
+
+  for (const segment of segmentsOf(pattern)) {
+    const name = PLACEHOLDER_SEGMENT.exec(segment)?.[1];
+    const field = name === undefined ? segment : placeField(member, name);
+
+    if (field === null) return manifest.screenPath;
+
+    segments.push(name === undefined ? field : encodeURIComponent(field));
+  }
+
+  return `/${segments.join("/")}`;
 }
 
 // The address a path under one of the manifest's former screen paths moved to: the same path with that former screen
