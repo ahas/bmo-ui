@@ -1,5 +1,5 @@
-/* The harness page's sheet: the layer's own stylesheet with the utility classes the side list and
-   the hits it marks are drawn with. */
+/* The harness page's sheet: the layer's own stylesheet with the utility classes the side list, the
+   hits it marks and the shared table heading its body are drawn with. */
 @import "../../app/assets/css/main.css";
 
 @source "../../app/components/ChoiceSidebar.vue";
@@ -7,4 +7,9 @@
 @source "../../app/components/HintTip.vue";
 @source "../../app/components/ContentSkeleton.vue";
 @source "../../app/components/SkeletonBar.vue";
+@source "../../app/components/DataTable.vue";
+@source "../../app/components/DataTableSkeleton.vue";
+@source "../../app/components/ColumnResizeHandle.vue";
+@source "../../app/domain/side-parts.ts";
+@source "../../app/domain/table-layout.ts";
 @source "./choice-sidebar-harness.ts";

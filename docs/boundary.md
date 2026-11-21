@@ -150,10 +150,10 @@ Each is named with everything it exports.
 | `scroll-within` | `offsetFor`, `scrollWithin` |
 | `share-links` | `ShareLink`, `ShareSpan`, `ShareRoad`, `ShareMark`, `shareEnded`, `shareUntilText` |
 | `share-members` | `SharePerson`, `SHARE_PERMISSIONS`, `SharePermission`, `MEMBER_PERMISSION`, `ShareMember`, `ShareMemberRoad`, `MEMBER_SEARCH_PAUSE_MS`, `PermissionItem`, `permissionItems`, `ShareMembers`, `ShareMembersOptions`, `useShareMembers` |
-| `side-parts` | `SPLIT_HANDLE`, `FULL_SHEET`, `SideChoice`, `SideHeading`, `SideEntry`, `SIDE_LIST_REGION`, `isSideHeading`, `sideEntriesMatching` |
+| `side-parts` | `SPLIT_HANDLE`, `FULL_SHEET`, `SIDE_HEAD`, `SideChoice`, `SideHeading`, `SideEntry`, `SIDE_LIST_REGION`, `isSideHeading`, `sideEntriesMatching` |
 | `sound-tap` | `TAP_FFT`, `Tap`, `tapOf` |
 | `tab-slide` | `SlideDirection`, `slideDirection`, `useSlideDirection` |
-| `table-layout` | `TableLayout`, `TABLE_BOX`, `TABLE_HEAD`, `TABLE_ROW_HEIGHT` |
+| `table-layout` | `TableLayout`, `TABLE_BOX`, `TABLE_HEAD`, `TABLE_HEAD_LINE`, `TABLE_ROW_HEIGHT` |
 | `table-sections` | `TableSection`, `SectionHeading`, `sectionHeading`, `headingOf`, `sectionedRows`, `sectionedRowId` |
 | `tabs` | `TAB_ROW_UI`, `TAB_ROW_LINE`, `BarTab`, `BarMenuItem`, `BarAction`, `BarProperty`, `SwitchItem`, `SeenTab`, `openInTabs`, `mergeTabs`, `pinTab`, `pinnedFirst`, `lastSeen`, `moveTab`, `othersOf`, `rightOf`, `allOf`, `fileTabLabel`, `baseName` |
 | `time` | `FOREVER_LABEL`, `formatClock`, `formatDay`, `formatShortDay`, `formatDayClock`, `clockUnder`, `formatDateClock`, `formatStamp`, `formatTime`, `dayKey`, `spanClock`, `elapsedText`, `timerClock`, `remainingText`, `useNowSeconds`, `toUnixSeconds` |
@@ -378,6 +378,9 @@ Every token is a custom property stated by the layer's stylesheet on the root un
 - **Width:** `--ui-container`, 48rem, the reading width; `--bmo-inset`, a container's own side room,
   added outside the reading width.
 - **Height:** the library's `--ui-header-height`, 3rem, one height for a top bar and a panel's head.
+- **Side list head:** `--bmo-list-head`, the height of a side list's head, a tab row's 3rem, stated on
+  the body of a `ChoiceSidebar` while the list stands beside it and nowhere else; the shared table's
+  column names take it, and a row a screen draws to head that body takes it as its height.
 - **Screen:** `--bmo-screen`, the visible height, `100dvh` while nothing overlays; `--bmo-screen-top`,
   where the visible screen starts, `0px` while nothing overlays.
 - **Safe area:** `--bmo-safe-top` and `--bmo-safe-bottom`, the device's insets, nought where it

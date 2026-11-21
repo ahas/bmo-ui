@@ -1,18 +1,20 @@
 <!-- The place a table keeps while its rows are being read. Which columns the table has and what
-     they are called is settled by the screen and not by the answer, so the head stands at once and
-     only the cells under it wait; the placeholder rows are the table's own rows, in the table's own
-     box and at the table's own height, so the head does not move when they land. The box scrolls
-     sideways at a narrow width exactly as the table's does, so no column name is cut. -->
+     they are called is settled by the screen and not by the answer, so the head stands at once, with
+     the table's own line under it, and only the cells under it wait; the placeholder rows are the
+     table's own rows, in the table's own box and at the table's own height, so the head does not move
+     when they land. The box scrolls sideways at a narrow width exactly as the table's does, so no
+     column name is cut. -->
 <template>
   <ContentSkeleton :label="label" :class="box.root">
     <table :class="box.base">
-      <thead class="bg-elevated">
+      <thead class="relative bg-elevated">
         <tr>
           <th v-for="(name, at) in standing" :key="at" :class="head">
             <span v-if="name === ''" class="flex h-5 items-center"><SkeletonBar class="h-4 w-2/3" /></span>
             <template v-else>{{ name }}</template>
           </th>
         </tr>
+        <tr :class="TABLE_HEAD_LINE" />
       </thead>
       <tbody class="divide-y divide-default">
         <tr v-for="n in rows" :key="n">
@@ -25,7 +27,7 @@
   </ContentSkeleton>
 </template>
 <script setup lang="ts">
-import { TABLE_BOX, TABLE_HEAD, TABLE_ROW_HEIGHT } from "../domain/table-layout";
+import { TABLE_BOX, TABLE_HEAD, TABLE_HEAD_LINE, TABLE_ROW_HEIGHT } from "../domain/table-layout";
 
 import type { TableLayout } from "../domain/table-layout";
 

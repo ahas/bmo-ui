@@ -6,7 +6,7 @@
        crosses from one to the other and as the list comes or goes. -->
   <DefineList v-slot="{ drawer }">
     <nav class="flex min-h-0 min-w-0 flex-1 flex-col" :aria-label="props.label" data-choice-sidebar-list>
-      <div class="flex h-12 shrink-0 items-center gap-2 px-4" :class="drawer ? '' : TAB_ROW_LINE">
+      <div class="flex shrink-0 items-center gap-2 px-4" :class="[SIDE_HEAD.height, drawer ? '' : TAB_ROW_LINE]">
         <UInput v-model="words" :icon="SEARCH_ICON" :placeholder="$t('common.placeholder.search')" :aria-label="$t('common.aria.search_named', { name: props.label })" class="min-w-0 flex-1" data-choice-sidebar-search />
         <slot name="actions" />
       </div>
@@ -54,7 +54,8 @@
     </template>
 
     <template #body>
-      <div class="flex min-h-0 min-w-0 flex-1 flex-col" data-choice-sidebar-body>
+      <!-- Beside the list the body is told the list head's height, which a row heading it takes. -->
+      <div class="flex min-h-0 min-w-0 flex-1 flex-col" :class="narrow || !props.listed ? '' : SIDE_HEAD.told" data-choice-sidebar-body>
         <!-- On a phone the chosen label opens the list's drawer; a label the button cuts short reads whole
              in its tooltip, a finger resting on it to read it. -->
         <div v-if="narrow && props.listed" class="flex h-12 shrink-0 items-center px-2">
@@ -82,7 +83,7 @@ import { useI18n } from "vue-i18n";
 
 import { countLocale } from "../domain/numbers";
 import { useNarrow } from "../domain/screen";
-import { FULL_SHEET, SIDE_LIST_REGION, SPLIT_HANDLE, isSideHeading, sideEntriesMatching } from "../domain/side-parts";
+import { FULL_SHEET, SIDE_HEAD, SIDE_LIST_REGION, SPLIT_HANDLE, isSideHeading, sideEntriesMatching } from "../domain/side-parts";
 import { TAB_ROW_LINE } from "../domain/tabs";
 
 import type { SplitterItem } from "@nuxt/ui";

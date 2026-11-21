@@ -39,7 +39,7 @@
 
 <script setup lang="ts" generic="T">
 import { useColumnWidths } from "../domain/column-widths";
-import { TABLE_BOX, TABLE_HEAD, TABLE_ROW_HEIGHT } from "../domain/table-layout";
+import { TABLE_BOX, TABLE_HEAD, TABLE_HEAD_LINE, TABLE_ROW_HEIGHT } from "../domain/table-layout";
 import { headingOf, sectionedRowId, sectionedRows } from "../domain/table-sections";
 
 import type { TableColumn, TableRow } from "@nuxt/ui";
@@ -197,6 +197,7 @@ const tableUi = computed(() => {
     // The head row draws no line of its own: the table already draws the separator under the head.
     thead: "bg-elevated [&>tr]:border-b-0",
     th: TABLE_HEAD[dense ? "dense" : "own"],
+    separator: TABLE_HEAD_LINE,
     // A cell of a column held by hand is cut with an ellipsis, so the line is one the shared tooltip
     // layer finds and shows whole; until then the box scrolls sideways and cuts nothing.
     td: dense

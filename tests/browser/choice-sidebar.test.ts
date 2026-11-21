@@ -13,7 +13,8 @@ import type { Browser, Page } from "playwright-core";
 // width the list stands beside the body behind a one-pixel splitter, its head as tall as a tab row; typing
 // narrows it to the choices whose label or line holds the words, the hits marked and each heading kept
 // while a choice under it stays, a tree's rows standing in by their depth; a row chosen is handed to the
-// host and marked current. At a phone's width the body fills the screen and one button carrying the chosen
+// host and marked current, and the line under the column names of a table heading the body runs on from
+// the line under the list's head. At a phone's width the body fills the screen and one button carrying the chosen
 // label opens the list as a bottom drawer, which closes as a row is chosen. Unread entries stand as a
 // skeleton, a failed read says why with a refresh handed to the host, and a list laid aside leaves the body
 // alone, the same body standing as the list goes and comes back. Which entries the words keep is the
@@ -178,6 +179,48 @@ describe.skipIf(!ready)("the side list at a desk's width", () => {
     await setState(page, { listed: true });
     await page.waitForSelector("[data-choice-sidebar-list]");
     expect(await page.$eval("#chosen", (body) => (body as HTMLElement & { kept?: boolean }).kept === true)).toBe(true);
+    await page.close();
+  });
+});
+
+// Where the line under the list's head and the line under the column names heading the body each
+// stand, as the top and the bottom of the pixel row each takes: the head's line is drawn over the
+// head's last pixel, and the names' line is the separator row under them. Null for a line not standing.
+async function headLines(page: Page): Promise<{ list: number[] | null; names: number[] | null; namesHeight: number }> {
+  return await page.evaluate(() => {
+    const head = document.querySelector("[data-choice-sidebar-list]")?.firstElementChild?.getBoundingClientRect();
+    const thead = document.querySelector("[data-choice-sidebar-body] thead")!;
+    const line = thead.lastElementChild!.getBoundingClientRect();
+
+    return { list: head ? [head.bottom - 1, head.bottom] : null, names: line.height === 1 ? [line.top, line.bottom] : null, namesHeight: thead.firstElementChild!.getBoundingClientRect().height };
+  });
+}
+
+describe.skipIf(!ready)("the side list beside a table heading its body", () => {
+  test("meets the line under the column names in one line, the placeholder's as the table's, and with no list beside it the names keep their own height", async () => {
+    const page = await opened(DESK);
+
+    for (const body of ["table", "skeleton"]) {
+      await setState(page, { body });
+      await page.waitForSelector(`[data-choice-sidebar-body] ${body === "table" ? "[data-slot=separator]" : "[aria-busy=true] thead"}`);
+
+      const lines = await headLines(page);
+
+      expect(lines.names).toEqual(lines.list);
+    }
+
+    await setState(page, { body: "table", listed: false });
+    await page.waitForFunction(() => document.querySelector("[data-choice-sidebar-list]") === null);
+    expect((await headLines(page)).namesHeight).toBe(36);
+    await page.close();
+  });
+
+  test("leaves the column names their own height on a phone, where no list stands beside the body", async () => {
+    const page = await opened(PHONE);
+
+    await setState(page, { body: "table" });
+    await page.waitForSelector("[data-choice-sidebar-body] [data-slot=separator]");
+    expect((await headLines(page)).namesHeight).toBe(36);
     await page.close();
   });
 });

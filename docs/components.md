@@ -631,7 +631,13 @@ are the component's.
   is dragged to widen either (`SPLIT_HANDLE`): the list takes about a quarter of the width, at least
   enough for its search and a name and at most two fifths, and the width is kept in the browser
   under the key the host names. Each scrolls on its own, the list's scrollbar on the list's edge, and
-  the list's head stands as tall as a tab row, its line under it, so a row heading the body meets it.
+  the list's head stands as tall as a tab row, its line under it.
+- **A row heading the body meets the list's head in one line.** While the list stands beside it, the
+  body is told the head's height (`--bmo-list-head`): the shared table's column names stand that tall
+  inside it ("Tables"), and a heading row a screen draws itself, such as the weekdays over a month,
+  takes the same height, so its line runs on from the line under the list's head. A tab row heading
+  the body is already that tall. With no list beside it the body is told nothing, and such a row keeps
+  its own height.
 - **On a narrow screen the body fills the screen** and the list opens as a bottom drawer
   (`FULL_SHEET`) from one button at the head of the body, which carries the chosen entry's label and
   the unfolding mark; a label it cuts short reads whole in its tooltip. The drawer is titled by the
@@ -972,6 +978,9 @@ component's.
   sideways.
 - **Column names are stuck.** Rows scroll within the box, so the column of the cell being read stays
   named above; a name stands over its own background, and pushed sideways it moves with its column.
+- **Column names stand as tall as the row they meet.** In the body beside a side list they take the
+  list head's height (`--bmo-list-head`, "Choosing from a side list"), so the line under them runs on
+  from the line under the list's head; elsewhere they stand as tall as their words and padding.
 - **Column widths move** (`ColumnResizeHandle`, the column-widths module). Dragging the right edge of
   a column's name, or pressing the arrow keys on that edge, widens or narrows that column. The first
   move holds every column at the width it stood at, so only the one moved changes. Another set of
@@ -989,9 +998,9 @@ component's.
 - **A screen may mark a row** with classes of its own, such as the one chosen, and may key rows itself
   where one row stands in two parts.
 - **Its placeholder** (`DataTableSkeleton`) takes the same column names and the same layout, so the
-  head stands at once and only the cells wait. It stands in the table's own box and at the table's
-  own head and row heights, so nothing moves when the rows land; at a narrow width the box scrolls
-  sideways as the table's does, and no column name is cut.
+  head stands at once and only the cells wait. It stands in the table's own box, at the table's own
+  head and row heights and with the table's line under its head, so nothing moves when the rows land;
+  at a narrow width the box scrolls sideways as the table's does, and no column name is cut.
   - A column whose name is not known yet waits with a bar in the head, in its own column.
 
 ## Skeletons and loading

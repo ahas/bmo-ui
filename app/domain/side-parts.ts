@@ -27,6 +27,11 @@ export const FULL_SHEET = {
   body: "flex min-h-0 flex-1 flex-col"
 };
 
+// The side list's head, as tall as a tab row, and the same height told to the body beside it as
+// `--bmo-list-head`, which a row heading the body takes, so its line runs on from the head's
+// (`docs/components.md`, "Choosing from a side list").
+export const SIDE_HEAD = { height: "h-12", told: "[--bmo-list-head:calc(var(--spacing)*12)]" } as const;
+
 // The side list a screen chooses what its body stands for from (`ChoiceSidebar`,
 // `docs/components.md`, "Choosing from a side list"). An entry is a choice, by its value and the
 // label it is shown by, standing indented by its depth and with a muted line under its label where
