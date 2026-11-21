@@ -587,6 +587,12 @@
           "default": "undefined"
         },
         {
+          "name": "leadingIcons",
+          "type": "boolean | undefined",
+          "required": false,
+          "default": "false"
+        },
+        {
           "name": "words",
           "type": "string | undefined",
           "required": false,
