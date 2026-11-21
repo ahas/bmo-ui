@@ -43,6 +43,20 @@ export interface PlayerTrack {
   language: string;
 }
 
+/**
+ * A control the host stands in the player's bar, after turning the picture and before full screen. A control that
+ * switches between two states names what a press does now, as full screen does.
+ */
+export interface PlayerControl {
+  id: string;
+  /** What a press does, in the host's words: its tooltip, its accessible name and its choice in a gathered menu. */
+  label: string;
+  icon: string;
+  /** The one key that presses it, never one the player answers itself. */
+  key?: string;
+  onSelect: () => void;
+}
+
 /** A video's own width and height, or any two numbers in the same ratio. */
 export interface VideoShape {
   width: number;
@@ -82,6 +96,15 @@ export function keyAction(key: string): PlayerAction | null {
     default:
       return null;
   }
+}
+
+/** The host's control a key presses: none for a key the player answers itself, else the control naming that key. */
+export function hostControlFor(key: string, controls: readonly PlayerControl[]): PlayerControl | null {
+  if (keyAction(key) !== null) return null;
+
+  const pressed = key.toLowerCase();
+
+  return controls.find((one) => one.key !== undefined && one.key.toLowerCase() === pressed) ?? null;
 }
 
 /**

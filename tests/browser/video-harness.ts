@@ -15,7 +15,8 @@ import type { Ref } from "vue";
 // The video player (`docs/components.md`, "The video player") on a page that says nothing else, in the size the
 // page's address names. As a still it stands in four message bubbles — a wide video and a tall one whose shapes
 // the page knows, one whose shape only its file says, and one whose file refuses — beside a sound already playing;
-// full, it fills a stage of a video's own shape. Every media element's clock, length, shape and playing are the
+// full, it fills a stage of a video's own shape,
+// with a switch of the page's own in its bar and a way to hand it the next video. Every media element's clock, length, shape and playing are the
 // page's own, so nothing is fetched and nothing is played: a picture's file answers its metadata the moment it
 // stands, the refusing one excepted, and what the player tells its host is written down where the test reads it.
 // The page stands outside Nuxt, so it wires itself as a host's page is wired: the library's app root holding the
@@ -83,6 +84,8 @@ export interface VideoCall {
 declare global {
   interface Window {
     videoCalls: VideoCall[];
+    /** Hands the standing full player the next video, as a host going on to it does. */
+    handOn: () => void;
   }
 }
 
@@ -196,6 +199,14 @@ const still = new URLSearchParams(window.location.search).get("size") === "still
 
 const Page = defineComponent(() => {
   const track = ref<number | null>(null);
+  // The video the full player stands for: the walk, and the harbour once the page hands it on.
+  const shown = ref({ video: 7, src: "/videos/walk.mp4", title: "walk.mp4" });
+  // A switch of the page's own in the player's bar, which names what a press does now.
+  const wide = ref(false);
+
+  window.handOn = () => {
+    shown.value = { video: 8, src: "/videos/harbour.mp4", title: "harbour.mp4" };
+  };
 
   return () =>
     h(UApp, { tooltip: TOOLTIP_PROVIDER }, () =>
@@ -209,10 +220,20 @@ const Page = defineComponent(() => {
           ])
         : h("div", { "data-stage": "", class: "aspect-video w-full max-w-3xl" }, [
             h(VideoPlayer, {
-              video: 7,
-              src: "/videos/walk.mp4",
-              title: "walk.mp4",
+              ...shown.value,
               next: "harbour.mp4",
+              controls: [
+                {
+                  id: "wide",
+                  label: wide.value ? "Narrow view" : "Wide view",
+                  icon: wide.value ? "i-material-symbols-width-normal-outline" : "i-material-symbols-width-wide-outline",
+                  key: "t",
+                  onSelect: () => {
+                    wide.value = !wide.value;
+                    called("control", "wide");
+                  }
+                }
+              ],
               tracks: [{ id: 1, src: "/videos/walk.en.vtt", label: "English", language: "en" }],
               track: track.value,
               "onUpdate:track": (value: number | null) => (track.value = value),

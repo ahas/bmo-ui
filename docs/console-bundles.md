@@ -214,6 +214,10 @@ on any release from that bound up to its own.
   draws no bar of its own. Found without the key — on its service's own page, or under a console that draws
   no shared bar — it draws its own bar with its name and mark alone. A route that does not ask stands as its
   bundle draws it.
+- **A screen that stays across addresses.** A console stands a new copy of a screen whenever the address
+  changes what its route's path names. A route that keeps one copy standing across such changes — a player
+  going on to the next video at its own address — names the copy in its meta, `key`, as one fixed word, and
+  the console keeps the screen standing while the word stays the same, reading the new address in place.
 - **The screen's own row.** What acts on a screen as a whole stands at the right end of the screen's own row
   directly under the title bar, and its way back to the screen it was opened from at that row's left end,
   under the console's bar and its own alike. Where the screen already has a row there, its tab bar or its

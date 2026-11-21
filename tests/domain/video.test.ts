@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 
-import { firstFrameOf, keyAction, nextCardLead, nextTurn, otherOrientation, skipTo, steppedVolume, stillBox, toggledTrack, turnedBox } from "~/domain/video";
+import { firstFrameOf, hostControlFor, keyAction, nextCardLead, nextTurn, otherOrientation, skipTo, steppedVolume, stillBox, toggledTrack, turnedBox } from "~/domain/video";
 
 // How the video player behaves apart from the element it drives: its keys, its skips, its volume steps, the
 // subtitle the captions key turns to, how a picture is turned, and the box its still stands in.
@@ -29,6 +29,19 @@ describe("the keys", () => {
   test("answer no other key", () => {
     expect(keyAction("Enter")).toBeNull();
     expect(keyAction("x")).toBeNull();
+  });
+});
+
+describe("a host's control", () => {
+  const wide = { id: "wide", label: "Wide view", icon: "i-wide", key: "t", onSelect: () => undefined };
+  const bare = { id: "bare", label: "No key", icon: "i-bare", onSelect: () => undefined };
+
+  test("answers its own key in either case", () => {
+    expect([hostControlFor("t", [bare, wide]), hostControlFor("T", [bare, wide])]).toEqual([wide, wide]);
+  });
+
+  test("never answers a key the player keeps for itself, nor a key no control names", () => {
+    expect([hostControlFor("f", [{ ...wide, key: "f" }]), hostControlFor("x", [bare, wide])]).toEqual([null, null]);
   });
 });
 

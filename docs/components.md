@@ -1089,13 +1089,20 @@ a message holds, which opens the full player large.
   theme, so its words and marks are fixed light ones. Under the picture stand its controls: the
   position bar with the time played and the length, play and pause, ten seconds back and forward, the
   next video where the host names one, mute and the volume slider, the subtitles where the video has
-  any, the speed, turning the picture and full screen. Each is an icon button named in the shared
-  tooltip with the key that presses it, a finger's size on a touch screen. A menu or a tooltip opened
+  any, the speed, turning the picture, the host's own controls and full screen. Each is an icon button
+  named in the shared tooltip with the key that presses it, a finger's size on a touch screen. A menu or a tooltip opened
   in full screen stands inside the player, which is all the browser shows then.
 - **A player short of room gathers its bar.** Narrower than the room every bar of actions needs
   before it stands them all (the action bar module), it leaves the volume slider off and gathers the
-  subtitles, the speed and turning into one more menu before full screen, so no control runs off its
-  edge. It reads its own width, never the window's.
+  subtitles, the speed, turning and the host's own controls into one more menu before full screen, so
+  no control runs off its edge. It reads its own width, never the window's.
+- **A host may stand controls of its own in the bar** (`PlayerControl`): each with its words, its mark
+  and, where the host names one, the one key that presses it. Like full screen, a control that
+  switches between two states names what a press does now, its words and mark changing with the
+  state the host holds. They stand after turning the picture and before full screen, in the host's
+  order, and a gathered bar holds each as a choice of its more menu. A press or its key hands the
+  press to the host, which decides what it does. A host's key answers as the player's own keys
+  answer, and a key the player answers itself is never a host's.
 - **The controls come and go.** Before the first play they stand under one large play mark over the
   picture. While it plays they stand for two and a half seconds after the pointer last moved, a press
   or a focus, and stay while a control holds the keyboard's focus. A mouse press on the picture plays
@@ -1111,7 +1118,8 @@ a message holds, which opens the full player large.
   a screen reader hears what it did once it has ended. A mouse drag moves nothing.
 - **The keys:** space or k plays and pauses, the left and right arrows skip five seconds and j and l
   ten, the up and down arrows move the volume a tenth, f takes it to full screen, m mutes, c turns the
-  subtitles off and back to the last one shown, and r turns the picture. They answer while the full
+  subtitles off and back to the last one shown, r turns the picture, and a host's control answers its
+  own key. They answer while the full
   player stands, except a key a field or a control keeps for itself. Each control a key presses names
   that key in its tooltip; the arrows, which no control stands for, are named on the volume and the
   position bars to a screen reader.
@@ -1123,6 +1131,9 @@ a message holds, which opens the full player large.
   for; cancel takes the card away and lets the video end where it is, and moving back before the card's
   moment brings it back. A video shorter than ten minutes asks for the next as it ends, with no card.
   Where the host does not ask, the video ends and only says so.
+- **Full screen is left as it was entered or by going back:** by its button, by f, by Escape, and by
+  the back gesture, which the player's full screen answers as a layer of its own (the layers module):
+  it leaves full screen and the page stays where it stands.
 - **Nothing answers through a layer over it.** No key and no gesture reaches the player while a
   dialog, a drawer or a menu stands open over it. The layer the player itself stands in, as the
   dialog that shows it large, is not over it.
@@ -1133,10 +1144,14 @@ a message holds, which opens the full player large.
 - **Subtitles are text tracks the host names,** each by a number of its own; the one shown is a model
   the host binds, and none shows unless the host says so. They stand above the controls while the
   controls stand, and at the picture's foot once they go.
-- **What it tells its host:** where the video stands every five seconds while it plays, as it pauses
-  and as the player goes, and again as the page itself goes away, each named by what the video is to
-  the host, since the screen may have moved on to another by then; that it ended; and that the next
-  was asked for. What a host keeps of a position, where a video starts and which subtitle shows first
+- **What it tells its host:** where the video stands every five seconds while it plays, as it pauses,
+  as the player goes and as the host hands it another video, and again as the page itself goes away,
+  each named by what the video is to the host, since the screen may have moved on to another by then;
+  that it ended; and that the next was asked for.
+- **One player may stand from one video to the next.** A host that hands a standing player another
+  video, by its source and what it is to the host, keeps the player where it stands: full screen, the
+  volume and the speed stay, and the new video starts as a new player's would, from where the host
+  says, playing where the host asks. What a host keeps of a position, where a video starts and which subtitle shows first
   are the host's.
 - **One thing plays at a time.** The full player is one of the page's players: a video that starts
   stops every sound and video playing, and a sound that starts stops it. Its volume is the reader's

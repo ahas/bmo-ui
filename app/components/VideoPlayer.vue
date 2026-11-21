@@ -6,6 +6,8 @@
        full screen. A finger on the picture takes the player's gestures, its cue standing over the picture. It
        stands on a black ground of its own whatever the theme, so its words and marks are fixed light ones. The
        keys answer while it stands and nothing is open over it: space and k, the arrows, j and l, f, m, c and r.
+       The host may stand controls of its own before full screen, each with the key that presses it. Escape and
+       the back gesture leave full screen, and the player stays standing as its host hands it another video.
        Where the host asks for the next video to follow, a long video offers it on a card near its end.
 
        The still, the size a message holds: the first frame, a play mark over its middle and the length at its top
@@ -234,6 +236,19 @@
           <IconButton icon="i-material-symbols-speed-outline" v-bind="BUTTON" :portal="portal" :label="$t('common.aria.speed_named', { speed: speedText(speed) })" />
         </UDropdownMenu>
         <IconButton v-if="!gathers" icon="i-material-symbols-screen-rotation-outline" v-bind="BUTTON" :portal="portal" :label="$t('common.action.turn_picture')" :kbds="['r']" @click="turn" />
+        <template v-if="!gathers">
+          <IconButton
+            v-for="one in props.controls"
+            :key="one.id"
+            :data-video-control="one.id"
+            :icon="one.icon"
+            v-bind="BUTTON"
+            :portal="portal"
+            :label="one.label"
+            :kbds="one.key ? [one.key] : undefined"
+            @click="one.onSelect()"
+          />
+        </template>
         <IconButton
           data-video-fullscreen
           :icon="fullscreen ? 'i-material-symbols-fullscreen-exit' : 'i-material-symbols-fullscreen'"
@@ -258,11 +273,12 @@ import { useI18n } from "vue-i18n";
 import { useBarGathers } from "../domain/actionbar";
 import { knownLength, playAlone, playClock } from "../domain/player";
 import { useNarrow } from "../domain/screen";
-import { CONTROLS_IDLE_MS, CUE_LINE_OVER_CONTROLS, NUDGE_SECONDS, SAVE_EVERY_MS, SKIP_SECONDS, SPEEDS, VOLUME_STEP, firstFrameOf, keyAction, nextCardLead, nextTurn, otherOrientation, skipTo, speedText, steppedVolume, stillBox, toggledTrack, turnedBox } from "../domain/video";
+import { useBackClose } from "../domain/layers";
+import { CONTROLS_IDLE_MS, CUE_LINE_OVER_CONTROLS, NUDGE_SECONDS, SAVE_EVERY_MS, SKIP_SECONDS, SPEEDS, VOLUME_STEP, firstFrameOf, hostControlFor, keyAction, nextCardLead, nextTurn, otherOrientation, skipTo, speedText, steppedVolume, stillBox, toggledTrack, turnedBox } from "../domain/video";
 import { overlayOpen, usePlayerGestures } from "../domain/video-gestures";
 import { useVolume } from "../domain/volume";
 
-import type { PlayerTrack, VideoShape } from "../domain/video";
+import type { PlayerControl, PlayerTrack, VideoShape } from "../domain/video";
 import type { PlayerCue } from "../domain/video-gestures";
 
 import type { DropdownMenuItem } from "@nuxt/ui";
@@ -287,11 +303,13 @@ interface Props {
   size?: "full" | "still";
   /** The video's shape where the host knows it before the file answers, so the still stands in it from the start. */
   shape?: VideoShape | null;
+  /** The host's own controls, standing in the bar after turning the picture and before full screen. */
+  controls?: PlayerControl[];
 }
 
 defineOptions({ inheritAttrs: false });
 
-const props = withDefaults(defineProps<Props>(), { video: 0, poster: null, tracks: () => [], start: 0, autoplay: false, next: null, autoNext: false, size: "full", shape: null });
+const props = withDefaults(defineProps<Props>(), { video: 0, poster: null, tracks: () => [], start: 0, autoplay: false, next: null, autoNext: false, size: "full", shape: null, controls: () => [] });
 
 const emit = defineEmits<{
   /**
@@ -404,7 +422,8 @@ const speedItems = computed<DropdownMenuItem[]>(() =>
 const moreItems = computed<DropdownMenuItem[]>(() => [
   ...(props.tracks.length ? [{ label: t("common.action.subtitles"), icon: track.value === null ? "i-material-symbols-subtitles-off-outline" : "i-material-symbols-subtitles", children: trackItems.value }] : []),
   { label: t("common.aria.speed_named", { speed: speedText(speed.value) }), icon: "i-material-symbols-speed-outline", children: speedItems.value },
-  { label: t("common.action.turn_picture"), icon: "i-material-symbols-screen-rotation-outline", onSelect: () => void turn() }
+  { label: t("common.action.turn_picture"), icon: "i-material-symbols-screen-rotation-outline", onSelect: () => void turn() },
+  ...props.controls.map((one) => ({ label: one.label, icon: one.icon, ...(one.key ? { kbds: [one.key] } : {}), onSelect: () => one.onSelect() }))
 ]);
 
 // The still learns its length, and its shape where the host did not give one, from what the file says first.
@@ -445,9 +464,16 @@ function dismissNext(): void {
 
 watch(controlsShown, () => placeCues());
 
+// Another video handed to the standing player: the one it leaves is told where it stood, named by what it was to the
+// host, before the player starts over on the new one; full screen, the volume and the speed stay as they are.
 watch(
-  () => props.src,
-  () => {
+  () => [props.src, props.video] as const,
+  (_now, [, left]) => {
+    if (started.value) emit("position", left, videoRef.value?.currentTime ?? current.value);
+
+    stopSaving();
+    playing.value = false;
+    waiting.value = false;
     started.value = false;
     failed.value = false;
     current.value = 0;
@@ -754,9 +780,29 @@ function onKey(event: KeyboardEvent): void {
   if (keptBy(target) || overlayOpen(document, rootRef.value)) return;
   if ((event.key === " " || event.key === "Enter") && target?.closest("button, a")) return;
 
+  // Escape leaves the player's full screen, as the browser's own does; anywhere else it is not the player's key.
+  if (event.key === "Escape") {
+    if (fullscreen.value) {
+      event.preventDefault();
+      void leaveFullscreen();
+    }
+
+    return;
+  }
+
   const action = keyAction(event.key);
 
-  if (action === null) return;
+  if (action === null) {
+    const control = hostControlFor(event.key, props.controls);
+
+    if (control === null) return;
+
+    event.preventDefault();
+    wake();
+    control.onSelect();
+
+    return;
+  }
 
   event.preventDefault();
   wake();
@@ -819,6 +865,13 @@ function onFullscreen(): void {
     freeOrientation();
     turned.value = 0;
   }
+}
+
+// Full screen is a place the player has gone into, which the back gesture leaves as it closes any layer.
+if (!still) useBackClose(fullscreen, () => void leaveFullscreen());
+
+async function leaveFullscreen(): Promise<void> {
+  if (rootRef.value !== null && document.fullscreenElement === rootRef.value) await document.exitFullscreen().catch(() => undefined);
 }
 
 function onLeave(): void {

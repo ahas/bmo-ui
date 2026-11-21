@@ -483,7 +483,8 @@ describe.skipIf(!ready)("the full player", () => {
 
         const items = await page.getByRole("menuitem").allTextContents();
 
-        expect(items.map((item) => item.trim())).toEqual(["Subtitles", "Playback speed 1×", "Turn the picture"]);
+        // A choice's words run straight into the key that presses it, which the menu draws after them.
+        expect(items.map((item) => item.trim())).toEqual(["Subtitles", "Playback speed 1×", "Turn the picture", "Wide viewt"]);
       } else {
         expect(await page.locator("[data-video-more]").count()).toBe(0);
         expect(await page.getByRole("slider", { name: "Volume" }).count()).toBe(1);
@@ -514,6 +515,71 @@ describe.skipIf(!ready)("the full player", () => {
     await page.locator(`${PLAYER} [role=tooltip]`).first().waitFor();
 
     expect(await page.getAttribute("[data-video-fullscreen]", "aria-label")).toBe("Exit full screen");
+    await context.close();
+  });
+
+  test("leaves full screen on the back gesture and on Escape, the page staying where it stands", async () => {
+    const { context, page } = await session("full", "desktop", "light");
+    const address = page.url();
+    const inFullscreen = () => page.waitForFunction(() => document.fullscreenElement?.matches("[data-video-player]") === true);
+    const outOfFullscreen = () => page.waitForFunction(() => document.fullscreenElement === null);
+
+    await page.click("[data-video-fullscreen]");
+    await inFullscreen();
+    await pressSystemBack(page);
+    await outOfFullscreen();
+
+    expect(page.url()).toBe(address);
+    expect(await page.getAttribute("[data-video-fullscreen]", "aria-label")).toBe("Full screen");
+
+    await page.keyboard.press("f");
+    await inFullscreen();
+    await page.keyboard.press("Escape");
+    await outOfFullscreen();
+
+    expect(page.url()).toBe(address);
+    await context.close();
+  });
+
+  test("stands the host's control before full screen, pressed by a press and by its key, and named by what it does now", async () => {
+    const { context, page } = await session("full", "desktop", "light");
+    const control = `${PLAYER} [data-video-control='wide']`;
+    const buttons = await page.$$eval(`${PLAYER} ${CONTROLS} button`, (found) => found.map((one) => one.getAttribute("data-video-control") ?? (one.hasAttribute("data-video-fullscreen") ? "fullscreen" : "")));
+
+    expect(buttons.slice(-2)).toEqual(["wide", "fullscreen"]);
+    expect(await page.getAttribute(control, "aria-label")).toBe("Wide view");
+
+    await page.click(control);
+
+    expect(await page.getAttribute(control, "aria-label")).toBe("Narrow view");
+
+    await page.keyboard.press("t");
+
+    expect(await page.getAttribute(control, "aria-label")).toBe("Wide view");
+    expect((await calls(page)).filter((one) => one.name === "control")).toHaveLength(2);
+
+    await page.hover(control);
+
+    expect((await page.locator("[role=tooltip]").first().textContent())?.replace(/\s+/g, " ").trim()).toBe("Wide view t");
+    await context.close();
+  });
+
+  test("stays standing as its host hands it the next video, in full screen, telling where the last one stood", async () => {
+    const { context, page } = await session("full", "desktop", "light");
+    const video = `${PLAYER} video`;
+
+    await page.click("[data-video-start]");
+    await page.$eval(video, (element) => {
+      (element as HTMLMediaElement).currentTime = 30;
+    });
+    await page.click("[data-video-fullscreen]");
+    await page.waitForFunction(() => document.fullscreenElement?.matches("[data-video-player]") === true);
+    await page.evaluate(() => window.handOn());
+    await page.waitForFunction(() => document.querySelector("[data-video-player] video")?.getAttribute("src") === "/videos/harbour.mp4");
+
+    expect((await calls(page)).filter((one) => one.name === "position").at(-1)).toEqual({ name: "position", args: [7, 30] });
+    expect(await page.evaluate(() => document.fullscreenElement?.matches("[data-video-player]") === true)).toBe(true);
+    expect(await page.locator("[data-video-start]").count()).toBe(1);
     await context.close();
   });
 
