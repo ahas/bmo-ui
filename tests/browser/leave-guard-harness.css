@@ -1,0 +1,6 @@
+/* The harness page's sheet: the layer's own stylesheet with the utility classes the question and the
+   page itself are drawn with. */
+@import "../../app/assets/css/main.css";
+
+@source "../../app/components/QuestionDialog.vue";
+@source "./leave-guard-harness.ts";

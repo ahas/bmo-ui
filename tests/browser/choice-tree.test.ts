@@ -10,8 +10,8 @@ import { BROWSER_HOOK_MS, touchReady } from "./touch";
 import type { Browser, Page } from "playwright-core";
 
 // The side tree drawn by a real browser (`docs/components.md`, "Choosing from a side tree"). At a desk's
-// width the tree stands beside the body, its top-level words on the search box's line and each level
-// standing in by the tree's own step; the way down to the chosen node stands open, each node above it
+// width the tree stands beside the body, the search sharing one padding with its rows, its box, icon
+// and words on a row's leading with an icon, and each level standing in by the tree's own step; the way down to the chosen node stands open, each node above it
 // marked and heard as holding it. Choosing another company and then handing that company its units
 // moves nothing: no row runs a transition or an animation, and every row stands at its own depth in
 // every frame, while the words narrowing the tree move its rows. The chevron alone opens and closes a
@@ -104,6 +104,46 @@ async function rows(page: Page, scope = TREE): Promise<Row[]> {
 
 const labels = (standing: Row[]): string[] => standing.map((row) => row.label);
 
+interface Lines {
+  searchBox: number;
+  searchIcon: number;
+  searchWords: number;
+  rowBox: number;
+  rowIcon: number;
+  rowWords: number;
+  plainWords: number;
+}
+
+// Where the search and the top-level rows of the list in the scope start: the search's box, its icon
+// and its words; the box, the icon and the words of a row leading with an icon; and the words of one
+// with none.
+async function lines(page: Page, scope: string): Promise<Lines> {
+  return await page.$eval(scope, (list) => {
+    const left = (element: Element | null | undefined): number => element!.getBoundingClientRect().left;
+    const input = list.querySelector<HTMLInputElement>("[data-choice-sidebar-search]")!;
+    const iconRow = list.querySelector('[data-choice-tree-row="string:atlas"]')!.closest("[role=treeitem]")!;
+
+    return {
+      searchBox: left(input),
+      searchIcon: left(input.parentElement!.querySelector("[data-slot=leadingIcon]")),
+      searchWords: left(input) + Number.parseFloat(getComputedStyle(input).paddingInlineStart),
+      rowBox: left(iconRow),
+      rowIcon: left(iconRow.querySelector("[data-choice-tree-icon]")),
+      rowWords: left(iconRow.querySelector("[data-choice-tree-row]")),
+      plainWords: left(list.querySelector('[data-choice-tree-row="string:north"]'))
+    };
+  });
+}
+
+// The search and the rows share one padding: the search's box stands on the rows' box, its icon on
+// the rows' icons and its words on their words, and a row with no icon has its words on the icon line.
+function linedUp(at: Lines): void {
+  expect(at.searchBox).toBe(at.rowBox);
+  expect(at.searchIcon).toBe(at.rowIcon);
+  expect(at.searchWords).toBe(at.rowWords);
+  expect(at.plainWords).toBe(at.searchIcon);
+}
+
 async function setState(page: Page, change: Record<string, unknown>): Promise<void> {
   await page.evaluate((next) => Object.assign((window as unknown as { tree: Record<string, unknown> }).tree, next), change);
 }
@@ -176,21 +216,19 @@ async function watched(page: Page): Promise<{ motions: string[]; moving: string[
 }
 
 describe.skipIf(!ready)("the side tree at a desk's width", () => {
-  test("stands beside the body, its words on the search box's line, the way to the chosen node open and marked", async () => {
+  test("stands beside the body, its search lined up with its rows, the way to the chosen node open and marked", async () => {
     const page = await opened(DESK);
     const sizes = await page.evaluate(() => {
       const list = document.querySelector("[data-choice-sidebar-list]")!.getBoundingClientRect();
       const body = document.querySelector("[data-choice-sidebar-body]")!.getBoundingClientRect();
-      const search = document.querySelector("[data-choice-sidebar-search]")!.parentElement!.getBoundingClientRect();
-      const words = document.querySelector("[data-choice-tree-row]")!.getBoundingClientRect();
 
-      return { listLeft: list.left, listRight: list.right, bodyLeft: body.left, bodyRight: body.right, search: search.left, words: words.left };
+      return { listLeft: list.left, listRight: list.right, bodyLeft: body.left, bodyRight: body.right };
     });
 
     expect(sizes.listLeft).toBe(0);
     expect(sizes.bodyLeft).toBe(sizes.listRight + 1);
     expect(sizes.bodyRight).toBe(DESK.width);
-    expect(sizes.words).toBe(sizes.search);
+    linedUp(await lines(page, "[data-choice-sidebar-list]"));
     expect(await page.locator("[data-choice-sidebar-open]").count()).toBe(0);
     expect(await page.getAttribute(`${TREE}`, "role")).toBe("tree");
     expect(await page.getAttribute(`${TREE}`, "aria-label")).toBe("Organisations");
@@ -347,6 +385,7 @@ describe.skipIf(!ready)("the side tree at a phone's width", () => {
     await page.click("[data-choice-sidebar-open]");
     await page.waitForSelector(`[role=dialog] ${TREE}`);
     expect(labels(await rows(page, `[role=dialog] ${TREE}`))).toEqual(["Northwind", "Sales", "Field team", "Support", "Atlas", "Beacon"]);
+    linedUp(await lines(page, "[role=dialog] [data-choice-sidebar-list]"));
 
     await row(page, "Beacon", `[role=dialog] ${TREE}`).click();
     await page.waitForFunction(() => document.querySelector("[role=dialog]") === null);

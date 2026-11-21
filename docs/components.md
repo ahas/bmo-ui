@@ -480,6 +480,13 @@ default; a screen supplies what it holds and what a press means there. Every exp
   press outside, the back gesture — and leaving the page ask first, in the question dialog, whether to
   throw the unsaved changes away: discard drops them and goes, and every way out of the question
   stays. With nothing changed it goes at once.
+- **Back leaving a page with changes keeps the address until the reader discards.** The browser has
+  already moved the address when back reaches the page, so the move is refused at once and the
+  address returns to the form before the question opens. The question then stands as any floating
+  thing does, with an entry of its own, so back on it puts it away and leaves the form with every
+  change as written and the address unmoved. Discard goes where back was going, back through the
+  history, so the page left stands ahead of it as after any back. A move back to where the reader
+  already stands, as back taking a floating thing's entry away, is no move and asks nothing.
 - **A dialog never closes itself past the question.** The component library's modal closes on its
   own when the close in its corner is pressed, beside whatever the close says to the screen. So a
   dialog with a close guard (`useCloseGuard`, which the settings dialog holds) takes every request
@@ -653,7 +660,10 @@ are the component's.
   row does, and may hold the search's words itself (`words`, bound both ways). Everything around the
   rows stays the list's: the head, the search box, the skeleton, the failure and the empty lines, the
   button and the drawer. The entries it is handed still name the chosen label and say whether the
-  words leave anything, so the part standing in is drawn only where they do.
+  words leave anything, so the part standing in is drawn only where they do. A part whose rows lead
+  with an icon says so (`leadingIcons`), and the search lines up with those rows part for part: its
+  box stands on the rows' own box at the rows' size, its icon on their icons and its words on their
+  words.
 
 ## Choosing from a side tree
 
@@ -667,7 +677,10 @@ host's; how the tree is searched, drawn, opened and laid beside the body are the
 - **The tree is the host's nodes, in its order.** Each node is a key, the label it is shown by, an
   icon leading it where the host names one, and the nodes under it. How far a row stands in comes
   from its depth in the tree alone, at the library's own step for each level; the host computes no
-  indent. The rows' words at the top level start on the search box's line, as the side list's do.
+  indent. Where a node at the top level leads with an icon, the search and the rows share one
+  padding: the search's box stands on the rows' box, its icon on the rows' icons and its words on
+  their words, and a row with no icon has its words on the icon line. With no icon at the top level
+  the rows' words start on the search box's line, as the side list's do.
 - **A node holding others opens and closes** by the chevron at its row's trailing end, which turns
   to say which, or by the library's own keys. The chevron is the only part of the row a press opens
   and closes it by.
@@ -914,9 +927,10 @@ host's; how the tree is searched, drawn, opened and laid beside the body are the
 - **What floats over every layer is under none.** A region standing over whatever is open — the
   message pill over a dialog — carries the overlays module's `OVER_LAYERS` mark; a press, a tap or a
   focus there is outside no floating thing and closes nothing.
-- **What floats while the page is being left takes no entry.** It is holding a navigation, and an
-  entry pushed for it would move at the same moment the navigation moves the history, leaving the
-  address and the page saying different things. It carries the overlays module's `OFF_HISTORY` mark
+- **What floats while the page is being left takes no entry.** It is holding a navigation, a move of
+  the router's own whose address has not moved yet, and an entry pushed for it would move at the same
+  moment the navigation moves the history, leaving the address and the page saying different things.
+  A question raised by back is not one: back is refused before it is asked. It carries the overlays module's `OFF_HISTORY` mark
   and is no layer of the back gesture; Esc and a press outside still close it.
 - **One context menu at a time.** A right click elsewhere closes it before opening the menu of the
   place pressed, and a tap elsewhere only closes it.

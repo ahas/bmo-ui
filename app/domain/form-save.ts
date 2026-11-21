@@ -1,6 +1,7 @@
 import { computed, getCurrentScope, inject, nextTick, onScopeDispose, provide, ref, shallowRef, toRaw, toValue, watch } from "vue";
-import { onBeforeRouteLeave, onBeforeRouteUpdate } from "vue-router";
+import { onBeforeRouteLeave, onBeforeRouteUpdate, useRouter } from "vue-router";
 
+import { stepsLanded } from "./layers";
 import { askQuestion } from "./question";
 
 import type { ComputedRef, InjectionKey, MaybeRefOrGetter, Ref } from "vue";
@@ -348,23 +349,100 @@ export function useFormPart(part: FormPart): boolean {
   return true;
 }
 
+// How long a refused back waits for the router to bring the address back before it asks anyway. The
+// step lands within a frame or two; one that never arrives must not leave the question unasked.
+const RETURN_WAIT_MS = 1000;
+
+// Resolves once the next step through the history has landed, or once the wait for it is over.
+function nextPop(): Promise<void> {
+  return new Promise((resolve) => {
+    const landed = (): void => {
+      clearTimeout(timer);
+      window.removeEventListener("popstate", landed);
+      resolve();
+    };
+    const timer = setTimeout(landed, RETURN_WAIT_MS);
+
+    window.addEventListener("popstate", landed);
+  });
+}
+
+// Where an entry stands in the history, as the router numbers its own entries.
+function positionOf(state: unknown): number | null {
+  const position = typeof state === "object" && state !== null ? (state as Record<string, unknown>).position : undefined;
+
+  return typeof position === "number" ? position : null;
+}
+
 // A page or a tab holding a form asks before the reader leaves it with changes, whether to another
 // page or to another tab of the same page. One press may set off more than one move — a tab is
 // chosen as it takes the focus and again as it is clicked — and every move waiting meanwhile has the
 // one question's answer. The focus handed back once the question is answered chooses that tab
 // again with no press of the reader's, so a move just refused is refused again without asking until
 // the reader presses something.
+//
+// Back reaches the page with the address already moved, so it is refused at once, which has the
+// router bring the address back, and the question is asked only once it has: a floating thing like
+// any other, with an entry of its own, so back on it is a way out that stays. Discard goes where back
+// was going, through the history again, and the guard lets that one move pass.
 export function useLeaveGuard(dirty: Readonly<Ref<boolean>>, t: Translate): void {
+  const router = useRouter();
+  const history = router.options.history;
   let asking: Promise<boolean> | null = null;
   let refused: string | null = null;
+  // The move a discard after back sets off, which passes once.
+  let passing: string | null = null;
 
   const pressed = (): void => {
     refused = null;
   };
 
-  const guard = (to: RouteLocationNormalized): boolean | Promise<boolean> => {
-    if (!dirty.value) return true;
+  // Asks once the address stands at the form again, and on discard steps the history to where back
+  // took it. Every move waiting on the answer meanwhile is refused, since the discard goes on its own.
+  const askAfterBack = (to: RouteLocationNormalized): void => {
+    const arrived = positionOf(history.state);
+
+    asking = (async () => {
+      await nextPop();
+
+      const stood = positionOf(history.state);
+
+      if (!(await askDiscard(t))) return false;
+
+      // The question's entry is taken back as it goes, once the page has drawn it gone.
+      await nextTick();
+      await new Promise((turn) => setTimeout(turn, 0));
+      await stepsLanded();
+
+      passing = to.fullPath;
+
+      if (arrived !== null && stood !== null && arrived !== stood) router.go(arrived - stood);
+      else await router.push(to.fullPath);
+
+      return false;
+    })().finally(() => {
+      asking = null;
+    });
+  };
+
+  const guard = (to: RouteLocationNormalized, from: RouteLocationNormalized): boolean | Promise<boolean> => {
+    if (!dirty.value || to.fullPath === from.fullPath) return true;
+
+    if (passing === to.fullPath) {
+      passing = null;
+
+      return true;
+    }
+
     if (refused === to.fullPath) return false;
+
+    // The address already says where the move goes only where back or forward made it. One made while
+    // a question stands is refused with no question of its own.
+    if (router.resolve(history.location).fullPath === to.fullPath) {
+      if (asking === null) askAfterBack(to);
+
+      return false;
+    }
 
     asking ??= askDiscard(t, true).then((taken) => {
       refused = taken ? null : to.fullPath;

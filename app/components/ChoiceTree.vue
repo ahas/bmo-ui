@@ -14,6 +14,7 @@
     :reading="props.reading"
     :empty-text="props.emptyText"
     :no-match-text="props.noMatchText"
+    :leading-icons="leadingIcons"
     @choose="(key) => emit('choose', key)"
     @retry="emit('retry')"
   >
@@ -41,7 +42,7 @@
         <!-- A node's own icon alone, never the library's folder; a slot drawing nothing would hand the
              library back its own, so a node with none draws a part that takes no room. -->
         <template #item-leading="{ item }">
-          <UIcon v-if="item.icon" :name="item.icon" class="size-5 shrink-0" />
+          <UIcon v-if="item.icon" :name="item.icon" class="size-5 shrink-0" data-choice-tree-icon />
           <span v-else class="hidden" />
         </template>
 
@@ -112,9 +113,9 @@ const emit = defineEmits<{ choose: [key: string | number]; retry: [] }>();
 defineSlots<{ default(): unknown; actions?(): unknown }>();
 
 const CHEVRON_ICON = "i-material-symbols-keyboard-arrow-down";
-// The library's tree, its rows' words starting on the search box's line at the top level, and
-// nothing on a row moving of its own: no colour fading, no chevron turning. A chosen row takes a
-// step more under the pointer, as every row does; a label wraps as the side list's do.
+// The library's tree at the size whose rows the search lines up with, and nothing on a row moving of
+// its own: no colour fading, no chevron turning. A chosen row takes a step more under the pointer, as
+// every row does; a label wraps as the side list's do.
 const TREE_UI = {
   link: "transition-none before:transition-none data-selected:hover:before:bg-accented/75",
   linkLabel: "text-clip whitespace-normal text-start break-keep [overflow-wrap:anywhere]",
@@ -133,6 +134,8 @@ const shown = computed(() => sideNodesMatching(props.nodes ?? [], words.value, c
 const rows = computed(() => shown.value.map(rowOf));
 const choices = computed(() => (props.nodes === null ? null : sideNodeChoices(props.nodes)));
 const expanded = computed(() => (searching.value ? searchOpened.value : opened.value));
+// Whether a row at the top level leads with an icon, which the search then lines up with.
+const leadingIcons = computed(() => (props.nodes ?? []).some((node) => node.icon !== undefined));
 // The way down to the chosen node, its own row last.
 const path = computed(() => sideNodePath(props.nodes ?? [], props.chosen).map(idOf));
 // The rows above the chosen one, each marked.

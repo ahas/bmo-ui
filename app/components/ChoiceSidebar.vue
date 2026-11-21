@@ -6,8 +6,18 @@
        crosses from one to the other and as the list comes or goes. -->
   <DefineList v-slot="{ drawer }">
     <nav class="flex min-h-0 min-w-0 flex-1 flex-col" :aria-label="props.label" data-choice-sidebar-list>
-      <div class="flex shrink-0 items-center gap-2 px-4" :class="[SIDE_HEAD.height, drawer ? '' : TAB_ROW_LINE]">
-        <UInput v-model="words" :icon="SEARCH_ICON" :placeholder="$t('common.placeholder.search')" :aria-label="$t('common.aria.search_named', { name: props.label })" class="min-w-0 flex-1" data-choice-sidebar-search />
+      <!-- Over rows leading with an icon the search stands on the rows' own box at their size, so its icon
+           and its words stand on theirs; over words alone its box stands on the words' line. -->
+      <div class="flex shrink-0 items-center gap-2" :class="[SIDE_HEAD.height, drawer ? '' : TAB_ROW_LINE, props.leadingIcons ? 'ps-1 pe-4' : 'px-4']">
+        <UInput
+          v-model="words"
+          :icon="SEARCH_ICON"
+          :size="props.leadingIcons ? 'lg' : 'md'"
+          :placeholder="$t('common.placeholder.search')"
+          :aria-label="$t('common.aria.search_named', { name: props.label })"
+          class="min-w-0 flex-1"
+          data-choice-sidebar-search
+        />
         <slot name="actions" />
       </div>
 
@@ -108,9 +118,12 @@ interface Props {
   // The host's words for an empty list and for a search nothing matched, the pack's otherwise.
   emptyText?: string;
   noMatchText?: string;
+  // Whether the rows a part draws in the list's place lead with an icon, as the library's tree rows
+  // at their large size do, so the search lines up with them part for part.
+  leadingIcons?: boolean;
 }
 
-const props = withDefaults(defineProps<Props>(), { listed: true, failure: "", reading: false, emptyText: undefined, noMatchText: undefined });
+const props = withDefaults(defineProps<Props>(), { listed: true, failure: "", reading: false, emptyText: undefined, noMatchText: undefined, leadingIcons: false });
 const emit = defineEmits<{ choose: [value: string | number]; retry: [] }>();
 
 const slots = defineSlots<{ default(): unknown; actions?(): unknown; list?(props: { choose: (value: string | number) => void }): unknown }>();
