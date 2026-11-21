@@ -306,18 +306,18 @@ describe("a notice's place", () => {
   test("is the pattern with each placeholder filled from the member and escaped as one segment", () => {
     const read = consoleManifest(notes);
 
-    expect(noticePlace(read, "note.created", { bookName: "home", noteId: "a/b c" })).toBe("/notes/home/open/a%2Fb%20c");
-    expect(noticePlace(read, "note.created", { bookName: "home", noteId: 42 })).toBe("/notes/home/open/42");
+    expect(noticePlace(read, "note.created", { bookName: "daily", noteId: "a/b c" })).toBe("/notes/daily/open/a%2Fb%20c");
+    expect(noticePlace(read, "note.created", { bookName: "daily", noteId: 42 })).toBe("/notes/daily/open/42");
   });
 
   test("is the screen path for a kind with no place, and where a placeholder's field cannot fill its segment", () => {
     const read = consoleManifest(notes);
 
-    expect(noticePlace(read, "note.changed", { bookName: "home", noteId: "n1" })).toBe("/notes");
+    expect(noticePlace(read, "note.changed", { bookName: "daily", noteId: "n1" })).toBe("/notes");
     expect(noticePlace(consoleManifest(answered), "note.created", { noteId: "n1" })).toBe("/notes");
 
     for (const noteId of [undefined, "", "  ", ".", "..", null, true, Number.NaN, { name: "n1" }]) {
-      expect(noticePlace(read, "note.created", { bookName: "home", noteId })).toBe("/notes");
+      expect(noticePlace(read, "note.created", { bookName: "daily", noteId })).toBe("/notes");
     }
   });
 });
