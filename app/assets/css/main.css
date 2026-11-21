@@ -740,12 +740,9 @@
   height: 1rem;
 }
 
-/* The mark for work in progress always turns, wherever it stands — a chip, a row, a tab — so it
-   reads as a spinner and never as a still circle. */
-[class*="progress-activity"] {
-  animation: spin 1s linear infinite;
-}
-
+/* The mark for work in progress turns only where its screen spins it while the work runs
+   (`docs/design.md`, "Motion"); wherever it turns, it stands still where less movement was asked
+   for, the library's own loading icons among them. */
 @media (prefers-reduced-motion: reduce) {
   [class*="progress-activity"] {
     animation: none;

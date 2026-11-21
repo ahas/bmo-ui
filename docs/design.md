@@ -239,6 +239,11 @@ whole in `docs/boundary.md`; this document says what each is for and how the lay
   old one leaves to the other side, both together, at `unfold` eased by `move`. The rows inside move
   with their panel and have no movement of their own, and the new panel opens at its own top. A tab
   bar whose tabs are pages of their own changes page and moves nothing.
+- **A mark turns only while the work it stands for runs.** The work-in-progress mark spins where the
+  screen drawing it says so, for as long as the request, the save or the run it marks is under way;
+  drawn for a state at rest, or kept in the page hidden, it stands still. The component library's
+  own loading icons spin themselves while they load. The layer's stylesheet stands the mark still
+  wherever less movement was asked for.
 - **A number that changes while it is read turns only its changed characters** (`RollingNumber`).
   - Each character stands in a window of its own, one character wide and one line high, the places
     counted from the right so the ones stay over the ones. Where the number grew, the new character

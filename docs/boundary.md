@@ -427,8 +427,9 @@ Every token is a custom property stated by the layer's stylesheet on the root un
   (`MarkupButtonTip`) names every `button` that carries it in the shared tooltip, one the library
   draws inside a component of its own and that is handed the two attributes as much as one the
   host writes, and the stylesheet draws no name of its own for it.
-- **The work-in-progress mark** — an icon of the progress-activity kind — always turns, and stands
-  still where less movement was asked for.
+- **The work-in-progress mark** — an icon of the progress-activity kind — turns only where the screen
+  drawing it spins it, with `animate-spin`, while the work it marks runs; the stylesheet turns none of
+  its own accord. Wherever one turns, the stylesheet stands it still where less movement was asked for.
 - **Keyframes:** `bmo-dialog-in`, `bmo-dialog-out`, `marquee-slide`.
 - **Scrollbars** are thin, in the border colour, on no track.
 
