@@ -323,5 +323,10 @@
     "sha256": "7a0d9e768ac694d25409fae5ee208063cab63ab5c2154c93825c55ede722fd9d",
     "bound": "0.1.0-rev.23",
     "why": "Only mends: full screen back layer stands again at the address a host moved to before handing the standing player its next video."
+  },
+  "bmo-ui-0.1.0-rev.65.tgz": {
+    "sha256": "1efa064bb1b1dd7d182e89375206af38262aa1567201ffeaf3d0cb1489d48a07",
+    "bound": "0.1.0-rev.23",
+    "why": "Only adds and mends: the page cut-line tooltip reads a card cut line from the link face laid over it, and the catalogue carries the video player controls prop."
   }
 }
