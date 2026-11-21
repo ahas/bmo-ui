@@ -15,7 +15,8 @@ import type { Browser, Page } from "playwright-core";
 // while a choice under it stays, a tree's rows standing in by their depth; a row chosen is handed to the
 // host and marked current, and the line under the column names of a table heading the body runs on from
 // the line under the list's head. At a phone's width the body fills the screen and one button carrying the chosen
-// label opens the list as a bottom drawer, which closes as a row is chosen. Unread entries stand as a
+// label opens the list as a bottom drawer, which closes as a row is chosen; the button stands in a row of
+// its own unless the body places it in its own toolbar row, and draws nothing there at a desk's width. Unread entries stand as a
 // skeleton, a failed read says why with a refresh handed to the host, and a list laid aside leaves the body
 // alone, the same body standing as the list goes and comes back. Which entries the words keep is the
 // side-parts module's own test (`tests/domain/side-parts.test.ts`). Skipped where the browser build is not on
@@ -266,6 +267,42 @@ describe.skipIf(!ready)("the side list at a phone's width", () => {
       expect(await page.textContent("[data-choice-sidebar-open]")).toBe("Northwind");
     }
 
+    await page.close();
+  });
+
+  test("stands its button in a row of its own by default, and in the body's toolbar row where the body places it, with no row of its own", async () => {
+    const page = await opened(PHONE);
+    // The body's rows top to bottom, each by its height and whether it holds the button, then where the
+    // words under them start.
+    const rowsOfBody = (): Promise<{ rows: { height: number; opener: boolean; toolbar: boolean }[]; words: number }> =>
+      page.$eval("[data-choice-sidebar-body]", (body) => {
+        const top = body.getBoundingClientRect().top;
+        const rows = Array.from(body.children)
+          .filter((child) => child.id !== "chosen")
+          .map((child) => ({ height: child.getBoundingClientRect().height, opener: child.querySelector("[data-choice-sidebar-open]") !== null, toolbar: child.hasAttribute("data-toolbar") }));
+
+        return { rows, words: body.querySelector("#chosen")!.getBoundingClientRect().top - top };
+      });
+
+    await page.waitForSelector("[data-choice-sidebar-open]");
+    expect(await rowsOfBody()).toEqual({ rows: [{ height: 48, opener: true, toolbar: false }], words: 48 });
+
+    await setState(page, { openerInBody: true });
+    await page.waitForSelector("[data-toolbar] [data-choice-sidebar-open]");
+    expect(await rowsOfBody()).toEqual({ rows: [{ height: 48, opener: true, toolbar: true }], words: 48 });
+    expect(await page.locator("[data-choice-sidebar-open]").count()).toBe(1);
+
+    await page.click("[data-choice-sidebar-open]");
+    await page.waitForSelector(`[role=dialog] ${LIST}`);
+    await page.click(`[role=dialog] ${ROW}[data-choice-sidebar-row="16"]`);
+    await page.waitForFunction(() => document.querySelector("[role=dialog]") === null);
+    expect(await page.textContent("[data-toolbar] [data-choice-sidebar-open]")).toBe("Garnet");
+
+    // Beside the list at a desk's width the placed button draws nothing, and the toolbar stands on.
+    await page.setViewportSize(DESK);
+    await page.waitForSelector(LIST);
+    expect(await page.locator("[data-choice-sidebar-open]").count()).toBe(0);
+    expect(await page.locator("[data-toolbar] [data-filter]").count()).toBe(1);
     await page.close();
   });
 });

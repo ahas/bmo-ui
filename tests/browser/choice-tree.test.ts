@@ -16,8 +16,8 @@ import type { Browser, Page } from "playwright-core";
 // moves nothing: no row runs a transition or an animation, and every row stands at its own depth in
 // every frame, while the words narrowing the tree move its rows. The chevron alone opens and closes a
 // node; the keys walk the tree and choose; the search keeps the nodes over each match, open. At a
-// phone's width one button carrying the chosen label opens the tree as a bottom drawer, which Back and
-// Esc close alone and a choice closes. What the side list does around its rows is its own browser test
+// phone's width one button carrying the chosen label, in a row of its own or in a toolbar row the body
+// places it in, opens the tree as a bottom drawer, which Back and Esc close alone and a choice closes. What the side list does around its rows is its own browser test
 // (`tests/browser/choice-sidebar.test.ts`), and which nodes the words keep the side-parts module's
 // (`tests/domain/side-parts.test.ts`). Skipped where the browser build is not on the machine.
 
@@ -374,6 +374,22 @@ describe.skipIf(!ready)("the side tree at a desk's width", () => {
 });
 
 describe.skipIf(!ready)("the side tree at a phone's width", () => {
+  test("hands its body the button to place in a toolbar row of the body's own, drawing no row for it", async () => {
+    const page = await opened(PHONE, "reduce");
+
+    await setState(page, { openerInBody: true });
+    await page.waitForSelector("[data-toolbar] [data-choice-sidebar-open]");
+    expect(await page.$$eval("[data-choice-sidebar-body] > *", (rows) => rows.map((element) => (element.hasAttribute("data-toolbar") ? "toolbar" : element.id)))).toEqual(["toolbar", "chosen"]);
+    expect(await page.locator("[data-choice-sidebar-open]").count()).toBe(1);
+
+    await page.click("[data-choice-sidebar-open]");
+    await page.waitForSelector(`[role=dialog] ${TREE}`);
+    await row(page, "Beacon", `[role=dialog] ${TREE}`).click();
+    await page.waitForFunction(() => document.querySelector("[role=dialog]") === null);
+    expect(await page.textContent("[data-toolbar] [data-choice-sidebar-open]")).toBe("Beacon");
+    await page.close();
+  });
+
   test("leaves the body the screen and opens the tree from one button carrying the chosen label, closing as a node is chosen", async () => {
     const page = await opened(PHONE, "reduce");
 

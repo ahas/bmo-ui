@@ -10,13 +10,14 @@ import { watchOverlays } from "../../app/domain/overlays";
 import sheet from "./choice-tree-harness.css?inline";
 
 import type { SideNode } from "../../app/domain/side-parts";
+import type { Component } from "vue";
 
 // The side tree (`docs/components.md`, "Choosing from a side tree") on a page that says nothing else:
 // three companies, the first holding a unit with a team under it and a second unit, the second named
 // with an icon and holding nothing until the test hands it its units, the key chosen written in the
 // body. The test reaches the page's state through `window.tree`: it hands the second company its
-// units, takes the nodes away as unread, says the read failed, and counts the choices and the refreshes
-// handed over. The page stands outside Nuxt, so the library is installed as a Vue plugin and the words
+// units, takes the nodes away as unread, says the read failed, has the body place the phone's opener
+// in a toolbar row of its own, and counts the choices and the refreshes handed over. The page stands outside Nuxt, so the library is installed as a Vue plugin and the words
 // are handed over here.
 
 Object.assign(globalThis, {
@@ -58,13 +59,15 @@ function nodesOf(atlasUnits: readonly SideNode[] | null): SideNode[] {
 
 interface TreeState {
   unread: boolean;
+  // Whether the body places the phone's opener in a toolbar row of its own.
+  openerInBody: boolean;
   atlasUnits: boolean;
   failure: string;
   choices: (string | number)[];
   retries: number;
 }
 
-const state = ref<TreeState>({ unread: false, atlasUnits: false, failure: "", choices: [], retries: 0 });
+const state = ref<TreeState>({ unread: false, openerInBody: false, atlasUnits: false, failure: "", choices: [], retries: 0 });
 const chosen = ref<string | number>(3);
 
 const Page = defineComponent(() => {
@@ -84,13 +87,19 @@ const Page = defineComponent(() => {
             saveId: "harness-tree",
             failure: state.value.failure,
             reading: false,
+            openerInBody: state.value.openerInBody,
             onChoose: (key: string | number) => {
               state.value.choices.push(key);
               chosen.value = key;
             },
             onRetry: () => (state.value.retries += 1)
           },
-          { default: () => h("p", { id: "chosen", class: "p-4 text-sm" }, String(chosen.value)) }
+          {
+            default: ({ opener }: { opener: Component }) => [
+              state.value.openerInBody ? h("div", { class: "flex h-12 shrink-0 items-center px-2", "data-toolbar": "" }, [h(opener)]) : null,
+              h("p", { id: "chosen", class: "p-4 text-sm" }, String(chosen.value))
+            ]
+          }
         )
       ])
     );

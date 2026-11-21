@@ -4,6 +4,15 @@
        one button carrying the chosen label on a narrow one. The body is the default slot, held by the
        one splitter at every width and whether the list stands or not, so it stays standing as the width
        crosses from one to the other and as the list comes or goes. -->
+  <!-- On a phone the chosen label opens the list's drawer; a label the button cuts short reads whole
+       in its tooltip, a finger resting on it to read it. -->
+  <DefineOpener>
+    <UButton v-if="openerLabel !== null" color="neutral" variant="ghost" class="max-w-full font-semibold text-highlighted" :trailing-icon="UNFOLD_ICON" aria-haspopup="dialog" data-choice-sidebar-open @click="open = true">
+      <HintTip :text="openerLabel" cut press class="block min-w-0 truncate">{{ openerLabel }}</HintTip>
+    </UButton>
+    <SkeletonBar v-else class="ms-2.5 h-4 w-1/2" />
+  </DefineOpener>
+
   <DefineList v-slot="{ drawer }">
     <nav class="flex min-h-0 min-w-0 flex-1 flex-col" :aria-label="props.label" data-choice-sidebar-list>
       <!-- Over rows leading with an icon the search stands on the rows' own box at their size, so its icon
@@ -68,16 +77,12 @@
     <template #body>
       <!-- Beside the list the body is told the list head's height, which a row heading it takes. -->
       <div class="flex min-h-0 min-w-0 flex-1 flex-col" :class="narrow || !props.listed ? '' : SIDE_HEAD.told" data-choice-sidebar-body>
-        <!-- On a phone the chosen label opens the list's drawer; a label the button cuts short reads whole
-             in its tooltip, a finger resting on it to read it. -->
-        <div v-if="narrow && props.listed" class="flex h-12 shrink-0 items-center px-2">
-          <UButton v-if="openerLabel !== null" color="neutral" variant="ghost" class="max-w-full font-semibold text-highlighted" :trailing-icon="UNFOLD_ICON" aria-haspopup="dialog" data-choice-sidebar-open @click="open = true">
-            <HintTip :text="openerLabel" cut press class="block min-w-0 truncate">{{ openerLabel }}</HintTip>
-          </UButton>
-          <SkeletonBar v-else class="ms-2.5 h-4 w-1/2" />
+        <!-- The opener in a row of its own, unless the body places it in a row of its own making. -->
+        <div v-if="narrow && props.listed && !props.openerInBody" class="flex h-12 shrink-0 items-center px-2">
+          <Opener />
         </div>
 
-        <slot />
+        <slot :opener="Opener" />
       </div>
     </template>
   </USplitter>
@@ -100,7 +105,7 @@ import { TAB_ROW_LINE } from "../domain/tabs";
 
 import type { SplitterItem } from "@nuxt/ui";
 import type { SideChoice, SideEntry } from "../domain/side-parts";
-import type { Slot } from "vue";
+import type { Component, Slot } from "vue";
 
 interface Props {
   // The host's name for the list: the list's accessible name, its search's, and its drawer's title.
@@ -121,12 +126,15 @@ interface Props {
   // Whether the rows a part draws in the list's place lead with an icon, as the library's tree rows
   // at their large size do, so the search lines up with them part for part.
   leadingIcons?: boolean;
+  // Whether the body places the phone's opener itself, taken from its slot's `opener`, so the list
+  // draws no row of its own for it.
+  openerInBody?: boolean;
 }
 
-const props = withDefaults(defineProps<Props>(), { listed: true, failure: "", reading: false, emptyText: undefined, noMatchText: undefined, leadingIcons: false });
+const props = withDefaults(defineProps<Props>(), { listed: true, failure: "", reading: false, emptyText: undefined, noMatchText: undefined, leadingIcons: false, openerInBody: false });
 const emit = defineEmits<{ choose: [value: string | number]; retry: [] }>();
 
-const slots = defineSlots<{ default(): unknown; actions?(): unknown; list?(props: { choose: (value: string | number) => void }): unknown }>();
+const slots = defineSlots<{ default(props: { opener: Component }): unknown; actions?(): unknown; list?(props: { choose: (value: string | number) => void }): unknown }>();
 
 // The search's words, which a part drawing the rows in the list's place may hold itself.
 const words = defineModel<string>("words", { default: "" });
@@ -196,6 +204,24 @@ const UseList = defineComponent({
   props: { drawer: { type: Boolean, required: true } },
   setup(listProps) {
     return () => listTemplate.value?.({ drawer: listProps.drawer });
+  }
+});
+
+// The phone's opener, kept as a template the same way and drawn wherever it stands: in the list's own
+// row or where the body places it. It draws nothing where no drawer opens from it.
+const openerTemplate = shallowRef<Slot | undefined>();
+const DefineOpener = defineComponent({
+  setup(_, { slots }) {
+    return () => {
+      openerTemplate.value = slots.default;
+
+      return null;
+    };
+  }
+});
+const Opener = defineComponent({
+  setup() {
+    return () => (narrow.value && props.listed ? openerTemplate.value?.() : null);
   }
 });
 </script>

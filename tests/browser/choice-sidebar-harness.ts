@@ -13,14 +13,16 @@ import { watchOverlays } from "../../app/domain/overlays";
 import sheet from "./choice-sidebar-harness.css?inline";
 
 import type { SideEntry } from "../../app/domain/side-parts";
+import type { Component } from "vue";
 
 // The side list (`docs/components.md`, "Choosing from a side list") on a page that says nothing else:
 // two companies under their headings, the first with a unit and a team under it indented by depth and
 // the team carrying a line under its label, then nine more companies, with an add at the head and the
 // value chosen written in the body. The test reaches the page's state through `window.sidebar`: it
-// lays the list aside, takes the entries away as unread, says the read failed, counts the refreshes
-// asked for, and heads the body with the shared table or its placeholder above the words. The page
-// stands outside Nuxt, so the library is installed as a Vue plugin and the words are handed over here.
+// lays the list aside, has the body place the phone's opener in a toolbar row of its own, takes the
+// entries away as unread, says the read failed, counts the refreshes asked for, and heads the body
+// with the shared table or its placeholder above the words. The page stands outside Nuxt, so the
+// library is installed as a Vue plugin and the words are handed over here.
 
 Object.assign(globalThis, {
   watch,
@@ -61,12 +63,14 @@ const COLUMNS = [
 interface SidebarState {
   body: SidebarBody;
   listed: boolean;
+  // Whether the body places the phone's opener in a toolbar row of its own.
+  openerInBody: boolean;
   entries: SideEntry[] | null;
   failure: string;
   retries: number;
 }
 
-const state = ref<SidebarState>({ body: "words", listed: true, entries: ENTRIES, failure: "", retries: 0 });
+const state = ref<SidebarState>({ body: "words", listed: true, openerInBody: false, entries: ENTRIES, failure: "", retries: 0 });
 const chosen = ref<string | number>(1);
 
 const Page = defineComponent(() => {
@@ -85,6 +89,7 @@ const Page = defineComponent(() => {
             chosen: chosen.value,
             saveId: "harness-sidebar",
             listed: state.value.listed,
+            openerInBody: state.value.openerInBody,
             failure: state.value.failure,
             reading: false,
             onChoose: (value: string | number) => (chosen.value = value),
@@ -92,7 +97,8 @@ const Page = defineComponent(() => {
           },
           {
             actions: () => h(IconButton, { size: "sm", icon: "i-material-symbols-search", label: "Add", "data-add": "" }),
-            default: () => [
+            default: ({ opener }: { opener: Component }) => [
+              state.value.openerInBody ? h("div", { class: "flex h-12 shrink-0 items-center gap-2 px-2", "data-toolbar": "" }, [h(opener), h(IconButton, { size: "sm", icon: "i-material-symbols-search", label: "Filter", "data-filter": "" })]) : null,
               state.value.body === "table" ? h(DataTable, { data: MORE.map((label, index) => ({ label, value: 10 + index })), columns: COLUMNS, layout: "fill" }) : null,
               state.value.body === "skeleton" ? h(DataTableSkeleton, { headers: COLUMNS.map((column) => column.header), layout: "fill", label: "Loading" }) : null,
               h("p", { id: "chosen", class: "p-4 text-sm" }, String(chosen.value))

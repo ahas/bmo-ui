@@ -534,7 +534,7 @@
     {
       "name": "ChoiceSidebar",
       "kind": "component",
-      "line": "The list a screen chooses what its body stands for from: the host's choices, headings and indented rows under a search box that narrows them, beside the body behind a splitter whose width is kept on a wide screen, and a bottom drawer opened from one button carrying the chosen label on a narrow one; laid aside where the reader has one choice or none; its rows may be drawn by another part standing in their place, the search's words bound both ways.",
+      "line": "The list a screen chooses what its body stands for from: the host's choices, headings and indented rows under a search box that narrows them, beside the body behind a splitter whose width is kept on a wide screen, and a bottom drawer opened from one button carrying the chosen label on a narrow one, in a row of its own or placed by the body in a row of the body's; laid aside where the reader has one choice or none; its rows may be drawn by another part standing in their place, the search's words bound both ways.",
       "props": [
         {
           "name": "label",
@@ -593,6 +593,12 @@
           "default": "false"
         },
         {
+          "name": "openerInBody",
+          "type": "boolean | undefined",
+          "required": false,
+          "default": "false"
+        },
+        {
           "name": "words",
           "type": "string | undefined",
           "required": false,
@@ -602,7 +608,7 @@
       "slots": [
         {
           "name": "default",
-          "type": "any"
+          "type": "{ opener: globalThis.Component; }"
         },
         {
           "name": "actions",
@@ -683,12 +689,18 @@
           "type": "string | undefined",
           "required": false,
           "default": "undefined"
+        },
+        {
+          "name": "openerInBody",
+          "type": "boolean | undefined",
+          "required": false,
+          "default": "false"
         }
       ],
       "slots": [
         {
           "name": "default",
-          "type": "any"
+          "type": "{ opener: globalThis.Component; }"
         },
         {
           "name": "actions",

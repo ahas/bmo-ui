@@ -650,6 +650,11 @@ are the component's.
   the unfolding mark; a label it cuts short reads whole in its tooltip. The drawer is titled by the
   host's name for the list, its search heading it, and choosing a row closes it. With nothing
   chosen the button carries the list's name, and while the list is unread it stands as a skeleton bar.
+- **The button stands in a row of its own unless the body places it.** By default it heads the body
+  in a row that holds it alone. A body with a toolbar row of its own takes the button from the body
+  slot (`opener`, a component that draws the button on a narrow screen and nothing on a wide one) and
+  places it there, and says so (`openerInBody`): the list then draws no row of its own, so the phone's
+  toolbar stays one row and the body keeps the room.
 - **A host whose reader has one choice or none may lay the list aside** (`listed` off): the body then
   stands alone with no list, no splitter's line and no button, as it would with no component around it.
 - **The body stays standing whatever the list does.** It is drawn once and kept as the width crosses

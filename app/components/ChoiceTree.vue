@@ -15,6 +15,7 @@
     :empty-text="props.emptyText"
     :no-match-text="props.noMatchText"
     :leading-icons="leadingIcons"
+    :opener-in-body="props.openerInBody"
     @choose="(key) => emit('choose', key)"
     @retry="emit('retry')"
   >
@@ -64,7 +65,9 @@
       </UTree>
     </template>
 
-    <slot />
+    <template #default="{ opener }">
+      <slot :opener="opener" />
+    </template>
   </ChoiceSidebar>
 </template>
 
@@ -79,6 +82,7 @@ import { sideNodeChoices, sideNodeParents, sideNodePath, sideNodesMatching } fro
 import type { TreeItem } from "@nuxt/ui";
 import type { TreeItemSelectEvent, TreeItemToggleEvent } from "reka-ui";
 import type { SideNode } from "../domain/side-parts";
+import type { Component } from "vue";
 
 interface Props {
   // The host's name for the tree: the tree's accessible name, its search's, and its drawer's title.
@@ -96,6 +100,8 @@ interface Props {
   // The host's words for an empty tree and for a search nothing matched, the pack's otherwise.
   emptyText?: string;
   noMatchText?: string;
+  // Whether the body places the phone's opener itself, as the side list's body does.
+  openerInBody?: boolean;
 }
 
 // A row of the library's tree: the node it draws, by the id the tree knows it by.
@@ -107,10 +113,10 @@ interface TreeRow extends TreeItem {
   children?: TreeRow[];
 }
 
-const props = withDefaults(defineProps<Props>(), { listed: true, failure: "", reading: false, emptyText: undefined, noMatchText: undefined });
+const props = withDefaults(defineProps<Props>(), { listed: true, failure: "", reading: false, emptyText: undefined, noMatchText: undefined, openerInBody: false });
 const emit = defineEmits<{ choose: [key: string | number]; retry: [] }>();
 
-defineSlots<{ default(): unknown; actions?(): unknown }>();
+defineSlots<{ default(props: { opener: Component }): unknown; actions?(): unknown }>();
 
 const CHEVRON_ICON = "i-material-symbols-keyboard-arrow-down";
 // The library's tree at the size whose rows the search lines up with, and nothing on a row moving of
