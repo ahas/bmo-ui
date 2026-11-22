@@ -353,5 +353,10 @@
     "sha256": "0a68cc7d4b550fa6db3d08f252c62c2d6bd36f96eb75869649ce8cb23c32a1a2",
     "bound": "0.1.0-rev.23",
     "why": "A side tree's chevron names what a press does, expand or collapse, in the shared tooltip; additions only"
+  },
+  "bmo-ui-0.1.0-rev.71.tgz": {
+    "sha256": "8287d7c9a61df36a3453f49de61455134881cb1b5a5f8e3bdddcd441a66735d0",
+    "bound": "0.1.0-rev.23",
+    "why": "The catalogue names the side tree's dropTypes, dropTakes and drop event, which 0.1.0-rev.69 and 0.1.0-rev.70 shipped without; additions only"
   }
 }
