@@ -2984,6 +2984,42 @@
       "dark": "2px",
       "source": "layer"
     },
+    "--bmo-ink-error": {
+      "group": "ink",
+      "light": "var(--ui-color-error-800)",
+      "dark": "var(--ui-color-error-300)",
+      "source": "layer"
+    },
+    "--bmo-ink-info": {
+      "group": "ink",
+      "light": "var(--ui-color-info-700)",
+      "dark": "var(--ui-color-info-300)",
+      "source": "layer"
+    },
+    "--bmo-ink-primary": {
+      "group": "ink",
+      "light": "var(--ui-color-primary-800)",
+      "dark": "var(--ui-color-primary-300)",
+      "source": "layer"
+    },
+    "--bmo-ink-secondary": {
+      "group": "ink",
+      "light": "var(--ui-color-secondary-700)",
+      "dark": "var(--ui-color-secondary-300)",
+      "source": "layer"
+    },
+    "--bmo-ink-success": {
+      "group": "ink",
+      "light": "var(--ui-color-success-800)",
+      "dark": "var(--ui-color-success-400)",
+      "source": "layer"
+    },
+    "--bmo-ink-warning": {
+      "group": "ink",
+      "light": "var(--ui-color-warning-800)",
+      "dark": "var(--ui-color-warning-400)",
+      "source": "layer"
+    },
     "--bmo-motion-pop": {
       "group": "motion",
       "light": "200ms",
@@ -3400,9 +3436,9 @@
     },
     "--ui-text-muted": {
       "group": "text",
-      "light": "var(--ui-color-neutral-500)",
+      "light": "var(--ui-color-neutral-600)",
       "dark": "var(--ui-color-neutral-400)",
-      "source": "library"
+      "source": "layer"
     },
     "--ui-text-toned": {
       "group": "text",

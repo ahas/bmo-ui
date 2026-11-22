@@ -375,9 +375,15 @@ Every token is a custom property stated by the layer's stylesheet on the root un
   and `.light` to the light values and on `.dark` to the dark ones.
 - **Words:** `--bmo-ink-primary`, `--bmo-ink-secondary`, `--bmo-ink-success`, `--bmo-ink-info`,
   `--bmo-ink-warning` and `--bmo-ink-error`, the step a coloured word is drawn at. The layer states
-  none on the root: its theme states `--text-color-<colour>` for each colour as the colour's word token
-  falling back to the colour itself, which the colour's text utilities read, while its fill, edge and
-  ring utilities read the colour alone. `badge-ink` states each at its 800 in the light mode.
+  each in its stylesheet's theme cascade layer on the root and `.light` and on `.dark`: the light
+  mode's 800 for the primary, the success, the warning and the error and its 700 for the secondary
+  and the info; the dark mode's 300 for the primary, the secondary, the info and the error and its
+  400 for the success and the warning. A host's own statement outside a cascade layer stands over
+  them. Its theme states `--text-color-<colour>` for each colour as the colour's word token falling
+  back to the colour itself, which the colour's text utilities read, while its fill, edge and ring
+  utilities read the colour alone. `badge-ink` states each at its 800 in the light mode.
+- **Muted words:** the library's `--ui-text-muted`, which the layer states in the same theme cascade
+  layer as the neutral's 600 in the light mode and its 400 in the dark.
 - **Width:** `--ui-container`, 48rem, the reading width; `--bmo-inset`, a container's own side room,
   added outside the reading width.
 - **Height:** the library's `--ui-header-height`, 3rem, one height for a top bar and a panel's head.

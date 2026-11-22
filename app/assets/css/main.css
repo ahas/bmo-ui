@@ -170,6 +170,39 @@
   --text-color-error: var(--bmo-ink-error, var(--ui-error));
 }
 
+/* The step each colour's words and the muted words are drawn at (`docs/design.md`, "Colour"). The library
+   paints a word in a colour's fill step, the light mode's 500 and the dark mode's 400, and in the light mode
+   those read between about 1.8:1 (the warning's yellow) and 3.8:1 (the blue and the red) on the page, less on a
+   muted or raised surface and less again under the colour's own tint; in the dark the 400 of the blue and the red
+   falls short under that tint on a muted or raised surface. So each word token takes the step at which every
+   theme's colour reads at 4.5:1 on every surface under its own tint, in each mode. The library's muted words, the
+   neutral's 500 in the light mode, fall short on a raised surface and take the 600; the dark mode's 400 reads.
+   They stand in the theme layer, under every rule a host writes outside a layer, so a host that states a step of
+   its own has it whatever order the stylesheets load in; and each mode states them on its own class, so a box
+   drawn in a mode the page is not in reads them against its own tokens. */
+@layer theme {
+  :root,
+  .light {
+    --ui-text-muted: var(--ui-color-neutral-600);
+    --bmo-ink-primary: var(--ui-color-primary-800);
+    --bmo-ink-secondary: var(--ui-color-secondary-700);
+    --bmo-ink-success: var(--ui-color-success-800);
+    --bmo-ink-info: var(--ui-color-info-700);
+    --bmo-ink-warning: var(--ui-color-warning-800);
+    --bmo-ink-error: var(--ui-color-error-800);
+  }
+
+  .dark {
+    --ui-text-muted: var(--ui-color-neutral-400);
+    --bmo-ink-primary: var(--ui-color-primary-300);
+    --bmo-ink-secondary: var(--ui-color-secondary-300);
+    --bmo-ink-success: var(--ui-color-success-400);
+    --bmo-ink-info: var(--ui-color-info-300);
+    --bmo-ink-warning: var(--ui-color-warning-400);
+    --bmo-ink-error: var(--ui-color-error-300);
+  }
+}
+
 /* How long movements take and how they ease (`docs/design.md`, "Motion"). Every movement the layer
    draws or retimes names one of these rather than a number of its own, so a kind of movement is
    the same length wherever it happens.

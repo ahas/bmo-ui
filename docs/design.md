@@ -327,19 +327,28 @@ whole in `docs/boundary.md`; this document says what each is for and how the lay
 - **The colours are the library's semantic tokens** — primary, secondary, success, info, warning,
   error and a neutral grey, the primary and the neutral named by the theme. A light screen paints
   each from its 500 shade and a dark one from its 400.
-- **A coloured word can take a step of its own.** The step a colour is filled at need not read as a
-  word, so each semantic colour has a word token, `--bmo-ink-<colour>`, which the colour's text
-  utilities read, every variant of them included; where a host states none, they read the colour
-  itself. Fills, edges, rings and tints keep reading the colour. A host that wants its words darker
-  than its fills states the word tokens alone, and the look of its fills stays as it is.
+- **A coloured word reads at 4.5:1 or better on every surface, in both modes, under every theme.**
+  The step a colour is filled at does not read as a word, so each semantic colour has a word token,
+  `--bmo-ink-<colour>`, which the colour's text utilities read, every variant of them included,
+  while fills, edges, rings and tints keep reading the colour and keep the library's look. The layer
+  states each word token in each mode at the step that reads on the page, the muted and the
+  elevated surface under the colour's own tint of up to 15%: in the light mode the 800 for the
+  primary, the success, the warning and the error and the 700 for the secondary and the info; in
+  the dark mode the 300 for the primary, the secondary, the info and the error and the 400 for the
+  success and the warning. They stand under every rule a host writes outside a cascade layer, so a
+  host that wants another step states its own and has it; where a word token resolves to nothing,
+  the words read the colour itself.
+- **The muted words read at 4.5:1 or better on every surface too.** The light mode draws them in the
+  neutral's 600, the library's 500 falling under 4.5:1 on the elevated surface; the dark mode keeps
+  the library's 400.
 - **A coloured badge's words read at 4.5:1 or better in both modes.** The light mode's 500 shade is a
   fill colour: as text on white or on its own tint it reads at 1.8 to 3.3, and a white word on it at
   under 4. So in the light mode every badge takes its colour tokens from the 800 shade, the step at
   which every colour still reads on the elevated surface under its own tint, and its words take the
   same step over any word step a host states, so a badge reads the same on every host. It is set once
   on the `badge-ink` class, which the layer's badge override puts on every badge. Each of the four
-  shapes — solid, outline, soft and subtle — stays the shape it is. The dark mode's 400 already reads
-  at 5 or better and is left as it is.
+  shapes — solid, outline, soft and subtle — stays the shape it is. In the dark mode a badge keeps
+  the 400 for its fill, edge and tint, and its words read the colour's dark word step.
 - **A soft or subtle alert's words read at 4.5:1 or better the same way.** Those two shapes draw an
   alert's title and description in its colour on its own tint, as a badge of the same shape does,
   so the layer's alert override puts the `badge-ink` class on both, for every colour. It also draws
@@ -348,7 +357,10 @@ whole in `docs/boundary.md`; this document says what each is for and how the lay
 - A check paints every colour in every badge shape, and in an alert's soft and subtle shapes, on each
   surface either is read on — the page, the muted one and the elevated one — in both modes and under
   every theme, under a host whose word tokens stand at the fill's own step, and measures the words as
-  the browser drew them. Another compiles the layer's theme and reads which token each colour's text,
+  the browser drew them. Another paints every colour's words bare and under its own tint of 5, 10 and
+  15%, and the muted words, on the same three surfaces in both modes under every theme, at a desk's
+  width and a phone's, over the library's own surfaces with no word step a host states, and measures
+  them the same way. Another compiles the layer's theme and reads which token each colour's text,
   fill, edge and ring utilities draw with.
 
 ## Themes

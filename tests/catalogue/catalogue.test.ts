@@ -76,7 +76,8 @@ describe("the tokens", () => {
   test("answer each property in both modes, by who states it", () => {
     const all = tokens().tokens;
 
-    expect(all["--ui-text-muted"]).toEqual({ group: "text", light: "var(--ui-color-neutral-500)", dark: "var(--ui-color-neutral-400)", source: "library" });
+    expect(all["--ui-text-dimmed"]).toEqual({ group: "text", light: "var(--ui-color-neutral-400)", dark: "var(--ui-color-neutral-500)", source: "library" });
+    expect(all["--ui-text-muted"]).toEqual({ group: "text", light: "var(--ui-color-neutral-600)", dark: "var(--ui-color-neutral-400)", source: "layer" });
     expect(all["--ui-container"]).toEqual({ group: "container", light: "48rem", dark: "48rem", source: "layer" });
     expect(all["--bmo-focus"]?.dark).toBe("var(--ui-color-primary-400)");
   });
