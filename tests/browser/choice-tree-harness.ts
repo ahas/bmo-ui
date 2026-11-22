@@ -30,7 +30,7 @@ Object.assign(globalThis, {
 
 const WORDS = {
   common: {
-    action: { refresh: "Refresh" },
+    action: { refresh: "Refresh", expand: "Expand", collapse: "Collapse" },
     aria: { search_named: "Search {name}", holds_chosen: "Holds the chosen" },
     placeholder: { search: "Search" },
     status: { loading: "Loading", no_choices: "No choices", no_match: "Nothing found" }

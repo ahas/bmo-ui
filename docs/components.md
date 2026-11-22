@@ -690,7 +690,9 @@ host's; how the tree is searched, drawn, opened and laid beside the body are the
   the rows' words start on the search box's line, as the side list's do.
 - **A node holding others opens and closes** by the chevron at its row's trailing end, which turns
   to say which, or by the library's own keys. The chevron is the only part of the row a press opens
-  and closes it by.
+  and closes it by. Its tooltip, the shared one (`HintTip`), names what a press does, in the pack's
+  words: `common.action.expand` on a closed node and `common.action.collapse` on an open one; a
+  finger brings it up by resting on the chevron, since a tap there acts.
 - **Choosing a row hands its key to the host,** which chooses it in its own way, a step of the
   history among them, and closes the drawer it was made in; the press itself neither opens nor
   closes the row, which stands open once the host has chosen it, as the next point says. Enter and

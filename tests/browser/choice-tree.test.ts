@@ -17,7 +17,7 @@ import type { Browser, Page } from "playwright-core";
 // as it stands and as the host chooses another. Choosing another company and then handing that company its units
 // moves nothing: no row runs a transition or an animation, and every row stands at its own depth in
 // every frame, while the words narrowing the tree move its rows. The chevron alone opens and closes a
-// node; the keys walk the tree and choose; the search keeps the nodes over each match, open. At a
+// node, its tooltip naming which; the keys walk the tree and choose; the search keeps the nodes over each match, open. At a
 // phone's width one button carrying the chosen label, in a row of its own or in a toolbar row the body
 // places it in, opens the tree as a bottom drawer, which Back and Esc close alone and a choice closes. What the side list does around its rows is its own browser test
 // (`tests/browser/choice-sidebar.test.ts`), and which nodes the words keep the side-parts module's
@@ -382,6 +382,27 @@ describe.skipIf(!ready)("the side tree at a desk's width", () => {
     await page.waitForFunction(() => document.querySelector("#chosen")?.textContent === "2");
     expect((await rows(page)).find((one) => one.label === "Sales")).toMatchObject({ expanded: "true", selected: "true" });
     expect(await choices(page)).toEqual([2]);
+    await page.close();
+  });
+
+  test("names what a press on the chevron does in its tooltip, collapse on an open node and expand on a closed one", async () => {
+    const page = await opened(DESK);
+    const chevron = row(page, "Northwind").locator("[data-choice-tree-toggle]");
+    const tip = async (): Promise<string> => {
+      await chevron.hover();
+
+      const text = await page.locator('[role="tooltip"]').first().innerText({ timeout: 5_000 });
+
+      await page.mouse.move(0, 0);
+      await page.locator('[role="tooltip"]').waitFor({ state: "detached", timeout: 5_000 });
+
+      return text.trim();
+    };
+
+    expect(await tip()).toBe("Collapse");
+    await chevron.click();
+    await page.waitForFunction(() => document.querySelectorAll("[data-choice-tree] [role=treeitem]").length === 3);
+    expect(await tip()).toBe("Expand");
     await page.close();
   });
 

@@ -60,15 +60,23 @@
           </template>
 
           <!-- The mark of a node above the chosen one, heard as well as seen, and the chevron that opens
-               and closes a node holding others. -->
-          <template #item-trailing="{ item }">
+               and closes a node holding others, its tooltip naming what a press does. -->
+          <template #item-trailing="{ item, expanded: open }">
             <template v-if="way.has(item.id)">
               <span class="size-2 shrink-0 rounded-full bg-primary" aria-hidden="true" data-choice-tree-way />
               <span class="sr-only">{{ $t("common.aria.holds_chosen") }}</span>
             </template>
-            <span v-if="item.children?.length" class="-m-1 inline-flex shrink-0 rounded-sm p-1 text-dimmed hover:text-highlighted" aria-hidden="true" data-choice-tree-toggle>
+            <HintTip
+              v-if="item.children?.length"
+              as="span"
+              :text="$t(open ? 'common.action.collapse' : 'common.action.expand')"
+              press
+              class="-m-1 inline-flex shrink-0 rounded-sm p-1 text-dimmed hover:text-highlighted"
+              aria-hidden="true"
+              data-choice-tree-toggle
+            >
               <UIcon :name="CHEVRON_ICON" class="size-5 group-data-expanded:rotate-180" />
-            </span>
+            </HintTip>
           </template>
         </UTree>
       </div>
