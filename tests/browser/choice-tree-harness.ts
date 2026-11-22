@@ -13,11 +13,12 @@ import type { SideNode } from "../../app/domain/side-parts";
 import type { Component } from "vue";
 
 // The side tree (`docs/components.md`, "Choosing from a side tree") on a page that says nothing else:
-// three companies, the first holding a unit with a team under it and a second unit, the second named
+// three companies, the first holding a unit with a team under it and a second unit wearing a badge, the second named
 // with an icon and holding nothing until the test hands it its units, the key chosen written in the
 // body. The test reaches the page's state through `window.tree`: it hands the second company its
-// units, takes the nodes away as unread, says the read failed, has the body place the phone's opener
-// in a toolbar row of its own, and counts the choices and the refreshes handed over. The page stands outside Nuxt, so the library is installed as a Vue plugin and the words
+// units, chooses another node of its own accord, takes the nodes away as unread, says the read failed, has the body place the phone's opener
+// in a toolbar row of its own, and counts the choices, the refreshes and the drops handed over; the rows
+// take a drag of the harness's own kind, every row but the third company's. The page stands outside Nuxt, so the library is installed as a Vue plugin and the words
 // are handed over here.
 
 Object.assign(globalThis, {
@@ -36,6 +37,9 @@ const WORDS = {
   }
 };
 
+// The kind of data a drag carries that the rows take.
+const HARNESS_DRAG = "application/x-harness-rows";
+
 // The second company's units, handed over by the test once the company is chosen.
 const ATLAS_UNITS: SideNode[] = [
   { key: 6, label: "Harbor", children: [{ key: 8, label: "Night shift" }] },
@@ -49,7 +53,7 @@ function nodesOf(atlasUnits: readonly SideNode[] | null): SideNode[] {
       label: "Northwind",
       children: [
         { key: 2, label: "Sales", children: [{ key: 3, label: "Field team" }] },
-        { key: 4, label: "Support" }
+        { key: 4, label: "Support", badge: "Desk" }
       ]
     },
     { key: "atlas", label: "Atlas", icon: "i-material-symbols-domain", ...(atlasUnits === null ? {} : { children: [...atlasUnits] }) },
@@ -65,14 +69,17 @@ interface TreeState {
   failure: string;
   choices: (string | number)[];
   retries: number;
+  drops: (string | number)[];
 }
 
-const state = ref<TreeState>({ unread: false, openerInBody: false, atlasUnits: false, failure: "", choices: [], retries: 0 });
+const state = ref<TreeState>({ unread: false, openerInBody: false, atlasUnits: false, failure: "", choices: [], retries: 0, drops: [] });
 const chosen = ref<string | number>(3);
 
 const Page = defineComponent(() => {
   onMounted(() => {
     (window as unknown as { tree: typeof state.value }).tree = state.value;
+    // The host choosing another node of its own accord, as an address it follows would.
+    (window as unknown as { choose: (key: string | number) => void }).choose = (key) => (chosen.value = key);
   });
 
   return () =>
@@ -92,7 +99,10 @@ const Page = defineComponent(() => {
               state.value.choices.push(key);
               chosen.value = key;
             },
-            onRetry: () => (state.value.retries += 1)
+            onRetry: () => (state.value.retries += 1),
+            dropTypes: [HARNESS_DRAG],
+            dropTakes: (key: string | number) => key !== "beacon",
+            onDrop: (key: string | number) => state.value.drops.push(key)
           },
           {
             default: ({ opener }: { opener: Component }) => [

@@ -680,7 +680,9 @@ there. What the tree holds, which node is chosen, what choosing does and what th
 host's; how the tree is searched, drawn, opened and laid beside the body are the component's.
 
 - **The tree is the host's nodes, in its order.** Each node is a key, the label it is shown by, an
-  icon leading it where the host names one, and the nodes under it. How far a row stands in comes
+  icon leading it where the host names one, a badge after its label where the host names one — a
+  word saying what kind of node it is, drawn as a small neutral badge on the label's line — and the
+  nodes under it. How far a row stands in comes
   from its depth in the tree alone, at the library's own step for each level; the host computes no
   indent. Where a node at the top level leads with an icon, the search and the rows share one
   padding: the search's box stands on the rows' box, its icon on the rows' icons and its words on
@@ -702,16 +704,25 @@ host's; how the tree is searched, drawn, opened and laid beside the body are the
   and its label in heavier, highlighted words, and a screen reader hears it as holding the chosen
   one, in the pack's words (`common.aria.holds_chosen`), so the way down to the chosen node reads at
   a glance. A node the reader closes stays closed until the chosen node or the nodes change.
+- **The chosen node stands in view.** As the tree first stands with its nodes, as its drawer opens and
+  whenever the host chooses another node or hands new nodes, the chosen node's row is scrolled into
+  the list's view, the list moving no further than it must; a row already in view moves nothing.
+  While words narrow the tree nothing is scrolled for the reader.
 - **Nothing moves as the choice or the nodes change.** A row is known by its node's key, its depth
   is drawn with it, and the rows stand at once in their new places with no transition of their own,
   no colour fading and no chevron turning, so a row never stands at a wrong depth or slides for a
   moment. A row opened or closed by the reader stands at once as well.
-- **The search narrows the tree** to the nodes whose label holds the words, through the search
-  module, the matched part marked where it stands (`SearchText`), and keeps every node above one
+- **The search narrows the tree** to the nodes whose label or badge holds the words, through the
+  search module, the matched part marked where it stands (`SearchText`), and keeps every node above one
   that stays, so each match stands in its place in the tree, the nodes over it open. While words are
   typed the tree's rows move as the side list's do as the words narrow them and give them back, the
   rows that stay sliding and the rest folding and unfolding; this is the one change that moves them.
   Clearing the words gives back the tree as the reader had opened it.
+- **A row takes a drop where the host asks for one.** The host names the kinds of data a drag
+  carries that its rows take, and may refuse a row. While a drag carrying one of them stands over a
+  row the host takes, that row's label stands lit in the primary colour, and a drop there hands the
+  row's key and the drop to the host, which acts on it. A row the host refuses, and every row while
+  the drag carries none of the kinds named, takes nothing and stays as it is.
 
 ## Dates
 

@@ -24,45 +24,54 @@
     </template>
 
     <template #list="{ choose }">
-      <UTree
-        :items="rows"
-        :get-key="idOfRow"
-        :model-value="chosenRow"
-        :expanded="expanded"
-        :nested="false"
-        :as="TreeRows"
-        color="neutral"
-        size="lg"
-        :ui="TREE_UI"
-        :aria-label="props.label"
-        data-choice-tree
-        :on-select="(event: TreeItemSelectEvent<TreeRow>, row: TreeRow) => selected(event, row, choose)"
-        :on-toggle="toggled"
-        @update:expanded="setExpanded"
-      >
-        <!-- A node's own icon alone, never the library's folder; a slot drawing nothing would hand the
-             library back its own, so a node with none draws a part that takes no room. -->
-        <template #item-leading="{ item }">
-          <UIcon v-if="item.icon" :name="item.icon" class="size-5 shrink-0" data-choice-tree-icon />
-          <span v-else class="hidden" />
-        </template>
-
-        <template #item-label="{ item }">
-          <SearchText :class="way.has(item.id) ? 'font-semibold text-highlighted' : ''" :text="item.label" :query="words" :data-choice-tree-row="item.id" />
-        </template>
-
-        <!-- The mark of a node above the chosen one, heard as well as seen, and the chevron that opens
-             and closes a node holding others. -->
-        <template #item-trailing="{ item }">
-          <template v-if="way.has(item.id)">
-            <span class="size-2 shrink-0 rounded-full bg-primary" aria-hidden="true" data-choice-tree-way />
-            <span class="sr-only">{{ $t("common.aria.holds_chosen") }}</span>
+      <!-- A drag of a kind the host names lights the row it stands over, where the host takes it, and
+           hands that row's key to the host on its drop. -->
+      <div :ref="holdList" class="contents" @dragover="dragOver" @dragleave="dragLeave" @drop="dropped">
+        <UTree
+          :items="rows"
+          :get-key="idOfRow"
+          :model-value="chosenRow"
+          :expanded="expanded"
+          :nested="false"
+          :as="TreeRows"
+          color="neutral"
+          size="lg"
+          :ui="TREE_UI"
+          :aria-label="props.label"
+          data-choice-tree
+          :on-select="(event: TreeItemSelectEvent<TreeRow>, row: TreeRow) => selected(event, row, choose)"
+          :on-toggle="toggled"
+          @update:expanded="setExpanded"
+        >
+          <!-- A node's own icon alone, never the library's folder; a slot drawing nothing would hand the
+               library back its own, so a node with none draws a part that takes no room. -->
+          <template #item-leading="{ item }">
+            <UIcon v-if="item.icon" :name="item.icon" class="size-5 shrink-0" data-choice-tree-icon />
+            <span v-else class="hidden" />
           </template>
-          <span v-if="item.children?.length" class="-m-1 inline-flex shrink-0 rounded-sm p-1 text-dimmed hover:text-highlighted" aria-hidden="true" data-choice-tree-toggle>
-            <UIcon :name="CHEVRON_ICON" class="size-5 group-data-expanded:rotate-180" />
-          </span>
-        </template>
-      </UTree>
+
+          <template #item-label="{ item }">
+            <span class="inline-flex max-w-full flex-wrap items-center gap-x-2 gap-y-1 rounded-sm" :class="lit === item.id ? 'bg-primary/15 ring-1 ring-primary' : ''" :data-choice-tree-lit="lit === item.id ? '' : undefined">
+              <SearchText :class="way.has(item.id) ? 'font-semibold text-highlighted' : ''" :text="item.label" :query="words" :data-choice-tree-row="item.id" />
+              <UBadge v-if="item.badge" color="neutral" variant="subtle" size="sm" data-choice-tree-badge>
+                <SearchText :text="item.badge" :query="words" />
+              </UBadge>
+            </span>
+          </template>
+
+          <!-- The mark of a node above the chosen one, heard as well as seen, and the chevron that opens
+               and closes a node holding others. -->
+          <template #item-trailing="{ item }">
+            <template v-if="way.has(item.id)">
+              <span class="size-2 shrink-0 rounded-full bg-primary" aria-hidden="true" data-choice-tree-way />
+              <span class="sr-only">{{ $t("common.aria.holds_chosen") }}</span>
+            </template>
+            <span v-if="item.children?.length" class="-m-1 inline-flex shrink-0 rounded-sm p-1 text-dimmed hover:text-highlighted" aria-hidden="true" data-choice-tree-toggle>
+              <UIcon :name="CHEVRON_ICON" class="size-5 group-data-expanded:rotate-180" />
+            </span>
+          </template>
+        </UTree>
+      </div>
     </template>
 
     <template #default="{ opener }">
@@ -82,7 +91,7 @@ import { sideNodeChoices, sideNodeParents, sideNodePath, sideNodesMatching } fro
 import type { TreeItem } from "@nuxt/ui";
 import type { TreeItemSelectEvent, TreeItemToggleEvent } from "reka-ui";
 import type { SideNode } from "../domain/side-parts";
-import type { Component } from "vue";
+import type { Component, ComponentPublicInstance } from "vue";
 
 interface Props {
   // The host's name for the tree: the tree's accessible name, its search's, and its drawer's title.
@@ -102,6 +111,10 @@ interface Props {
   noMatchText?: string;
   // Whether the body places the phone's opener itself, as the side list's body does.
   openerInBody?: boolean;
+  // The kinds of data a drag carries that the rows take, none taking any where none is named, and
+  // whether a row takes it, every row where the host says nothing.
+  dropTypes?: readonly string[];
+  dropTakes?: (key: string | number) => boolean;
 }
 
 // A row of the library's tree: the node it draws, by the id the tree knows it by.
@@ -110,11 +123,21 @@ interface TreeRow extends TreeItem {
   key: string | number;
   label: string;
   icon?: string;
+  badge?: string;
   children?: TreeRow[];
 }
 
-const props = withDefaults(defineProps<Props>(), { listed: true, failure: "", reading: false, emptyText: undefined, noMatchText: undefined, openerInBody: false });
-const emit = defineEmits<{ choose: [key: string | number]; retry: [] }>();
+const props = withDefaults(defineProps<Props>(), {
+  listed: true,
+  failure: "",
+  reading: false,
+  emptyText: undefined,
+  noMatchText: undefined,
+  openerInBody: false,
+  dropTypes: () => [],
+  dropTakes: () => true
+});
+const emit = defineEmits<{ choose: [key: string | number]; retry: []; drop: [key: string | number, event: DragEvent] }>();
 
 defineSlots<{ default(props: { opener: Component }): unknown; actions?(): unknown }>();
 
@@ -160,7 +183,7 @@ function idOfRow(row: TreeRow): string {
 function rowOf(node: SideNode): TreeRow {
   const children = node.children?.map(rowOf);
 
-  return { id: idOf(node.key), key: node.key, label: node.label, icon: node.icon, ...(children === undefined || children.length === 0 ? {} : { children }) };
+  return { id: idOf(node.key), key: node.key, label: node.label, icon: node.icon, badge: node.badge, ...(children === undefined || children.length === 0 ? {} : { children }) };
 }
 
 function findRow(among: readonly TreeRow[], id: string): TreeRow | undefined {
@@ -228,6 +251,76 @@ function selected(event: TreeItemSelectEvent<TreeRow>, row: TreeRow, choose: (ke
 // chooses it alone.
 function toggled(event: TreeItemToggleEvent<TreeRow>): void {
   if (event.detail.originalEvent.type === "click" && !onChevron(event)) event.preventDefault();
+}
+
+// Each list the tree stands in, beside the body and in the drawer, whose chosen row is kept in view.
+const lists = new Set<Element>();
+
+function reveal(list: Element): void {
+  if (!searching.value) list.querySelector('[role="treeitem"][aria-selected="true"]')?.scrollIntoView({ block: "nearest" });
+}
+
+// A list coming to stand, the drawer's as it opens, brings its chosen row into view once its rows are drawn.
+function holdList(element: Element | ComponentPublicInstance | null): void {
+  if (!(element instanceof Element)) {
+    for (const one of [...lists]) if (!one.isConnected) lists.delete(one);
+
+    return;
+  }
+
+  if (lists.has(element)) return;
+  lists.add(element);
+  void nextTick(() => reveal(element));
+}
+
+// Another node chosen, or new nodes, bring the chosen row into view in every list standing.
+watch(
+  [() => props.nodes, () => props.chosen],
+  () => {
+    for (const list of lists) reveal(list);
+  },
+  { flush: "post" }
+);
+
+// The row a drag the host takes stands over, by row id; none while no such drag stands over a row.
+const lit = ref<string | null>(null);
+
+// The row under a drag of a kind the host names, where the host takes it.
+function rowUnder(event: DragEvent): TreeRow | null {
+  if (!props.dropTypes.some((type) => event.dataTransfer?.types.includes(type) ?? false)) return null;
+
+  const link = event.target instanceof Element ? event.target.closest('[data-slot="link"]') : null;
+  const id = link?.querySelector<HTMLElement>("[data-choice-tree-row]")?.dataset.choiceTreeRow;
+  const row = id === undefined ? undefined : findRow(rows.value, id);
+
+  return row !== undefined && props.dropTakes(row.key) ? row : null;
+}
+
+function dragOver(event: DragEvent): void {
+  const row = rowUnder(event);
+
+  lit.value = row?.id ?? null;
+  if (row === null) return;
+
+  event.preventDefault();
+  event.dataTransfer!.dropEffect = "move";
+}
+
+// A drag leaving the tree's list altogether lights no row.
+function dragLeave(event: DragEvent): void {
+  const into = event.relatedTarget instanceof Node ? event.relatedTarget : null;
+
+  if (!(event.currentTarget instanceof Element) || into === null || !event.currentTarget.contains(into)) lit.value = null;
+}
+
+function dropped(event: DragEvent): void {
+  const row = rowUnder(event);
+
+  lit.value = null;
+  if (row === null) return;
+
+  event.preventDefault();
+  emit("drop", row.key, event);
 }
 
 // The list the tree's rows stand in: moving as the words narrow it, standing at once otherwise.

@@ -46,7 +46,7 @@ const TREE: SideNode[] = [
     label: "Northwind",
     children: [
       { key: 2, label: "Sales", children: [{ key: 3, label: "Field team" }] },
-      { key: 4, label: "Support" }
+      { key: 4, label: "Support", badge: "Help line" }
     ]
   },
   { key: "atlas", label: "Atlas", icon: "i-material-symbols-domain", children: [{ key: 5, label: "Sales desk" }] },
@@ -69,6 +69,10 @@ describe("the nodes a side tree's search keeps", () => {
       ["Atlas", ["Sales desk"]]
     ]);
     expect(outline(sideNodesMatching(TREE, "field"))).toEqual([["Northwind", [["Sales", ["Field team"]]]]]);
+  });
+
+  test("keep a node whose badge holds the words as one whose label does", () => {
+    expect(outline(sideNodesMatching(TREE, "help"))).toEqual([["Northwind", ["Support"]]]);
   });
 
   test("leave a match none of whose nodes stays standing as a leaf, and nothing where nothing holds the words", () => {

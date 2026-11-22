@@ -12,7 +12,9 @@ import type { Browser, Page } from "playwright-core";
 // The side tree drawn by a real browser (`docs/components.md`, "Choosing from a side tree"). At a desk's
 // width the tree stands beside the body, the search sharing one padding with its rows, its box, icon
 // and words on a row's leading with an icon, and each level standing in by the tree's own step; the way down to the chosen node stands open, each node above it
-// marked and heard as holding it. Choosing another company and then handing that company its units
+// marked and heard as holding it. A node's badge stands on its label's line, and a drag of the host's kind lights the row it
+// stands over where the host takes it and hands its key over on the drop. The chosen row stands in the list's view
+// as it stands and as the host chooses another. Choosing another company and then handing that company its units
 // moves nothing: no row runs a transition or an animation, and every row stands at its own depth in
 // every frame, while the words narrowing the tree move its rows. The chevron alone opens and closes a
 // node; the keys walk the tree and choose; the search keeps the nodes over each match, open. At a
@@ -246,6 +248,76 @@ describe.skipIf(!ready)("the side tree at a desk's width", () => {
     // Each node above the chosen one is heard as holding it, and no other.
     expect(await page.getByRole("treeitem", { name: /Holds the chosen/ }).count()).toBe(2);
     expect(await page.getByRole("treeitem", { name: /^Northwind\s*Holds the chosen$/ }).count()).toBe(1);
+    await page.close();
+  });
+
+  test("draws a node's badge on its label's line, and lights the row a drag of the host's kind stands over, handing its key on the drop", async () => {
+    const page = await opened(DESK);
+    const line = await page.evaluate(() => {
+      const label = document.querySelector('[data-choice-tree-row="number:4"]')!.getBoundingClientRect();
+      const badge = document.querySelector("[data-choice-tree-badge]")!;
+      const box = badge.getBoundingClientRect();
+
+      return { text: badge.textContent?.trim(), apart: Math.abs((label.top + label.bottom) / 2 - (box.top + box.bottom) / 2), gap: box.left - label.right };
+    });
+
+    expect(line).toEqual({ text: "Desk", apart: expect.any(Number), gap: 8 });
+    expect(line.apart).toBeLessThanOrEqual(1);
+
+    // A drag event of a kind, dispatched on a row's words, and whether the tree took it.
+    const drag = async (row: string, type: string, kind: "dragover" | "drop"): Promise<boolean> =>
+      await page.evaluate(
+        ([row, type, kind]) => {
+          const data = new DataTransfer();
+
+          data.setData(type!, "rows");
+
+          const event = new DragEvent(kind!, { bubbles: true, cancelable: true, dataTransfer: data });
+
+          document.querySelector(`[data-choice-tree-row="${row}"]`)!.dispatchEvent(event);
+
+          return event.defaultPrevented;
+        },
+        [row, type, kind]
+      );
+    const litRows = async (): Promise<string[]> => await page.$$eval("[data-choice-tree-lit] [data-choice-tree-row]", (marks) => marks.map((mark) => mark.textContent ?? ""));
+    const HARNESS_DRAG = "application/x-harness-rows";
+
+    expect(await drag("number:4", HARNESS_DRAG, "dragover")).toBe(true);
+    await page.waitForSelector("[data-choice-tree-lit]");
+    expect(await litRows()).toEqual(["Support"]);
+
+    // A row the host refuses, and a drag of another kind, take nothing and light nothing.
+    expect(await drag("string:beacon", HARNESS_DRAG, "dragover")).toBe(false);
+    await page.waitForSelector("[data-choice-tree-lit]", { state: "detached" });
+    expect(await drag("number:2", "text/plain", "dragover")).toBe(false);
+    expect(await litRows()).toEqual([]);
+
+    expect(await drag("number:4", HARNESS_DRAG, "drop")).toBe(true);
+    expect(await page.evaluate(() => [...(window as unknown as { tree: { drops: (string | number)[] } }).tree.drops])).toEqual([4]);
+    expect(await choices(page)).toEqual([]);
+    expect(await litRows()).toEqual([]);
+    await page.close();
+  });
+
+  test("brings the chosen row into the list's view as it stands and as the host chooses another", async () => {
+    const page = await opened({ width: 1280, height: 220 });
+    // Whether a row stands whole inside the list's visible box, and how far the list is scrolled.
+    const inView = async (row: string) =>
+      await page.evaluate((row) => {
+        const item = document.querySelector(`[data-choice-tree-row="${row}"]`)!.closest("[role=treeitem]")!.getBoundingClientRect();
+        const scroller = document.querySelector("[data-choice-tree]")!.closest(".overflow-y-auto")!;
+        const box = scroller.getBoundingClientRect();
+
+        return { whole: item.top >= box.top - 0.5 && item.bottom <= box.bottom + 0.5, scrolled: scroller.scrollTop > 0 };
+      }, row);
+
+    expect(await inView("number:3")).toEqual({ whole: true, scrolled: false });
+    expect((await inView("string:beacon")).whole).toBe(false);
+    await page.evaluate(() => (window as unknown as { choose: (key: string) => void }).choose("beacon"));
+    await page.waitForFunction(() => document.querySelector('[data-choice-tree-row="string:beacon"]')!.closest("[role=treeitem]")!.getAttribute("aria-selected") === "true");
+    await page.waitForFunction(() => document.querySelector("[data-choice-tree]")!.closest(".overflow-y-auto")!.scrollTop > 0, null, { timeout: 5_000 });
+    expect(await inView("string:beacon")).toEqual({ whole: true, scrolled: true });
     await page.close();
   });
 

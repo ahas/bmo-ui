@@ -99,11 +99,13 @@ function holdsWords(row: { label: string; line?: string }, words: string, locale
 
 // The side tree a screen chooses what its body stands for from (`ChoiceTree`, `docs/components.md`,
 // "Choosing from a side tree"): each node by its key, the label it is shown by, the icon leading it
-// where it has one, and the nodes under it.
+// where it has one, the word of its kind drawn as a badge after the label where it has one, and the
+// nodes under it.
 export interface SideNode {
   key: string | number;
   label: string;
   icon?: string;
+  badge?: string;
   children?: readonly SideNode[];
 }
 
@@ -113,7 +115,7 @@ export function sideNodeChoices(nodes: readonly SideNode[]): SideChoice[] {
   return nodes.flatMap((node) => [{ value: node.key, label: node.label }, ...sideNodeChoices(node.children ?? [])]);
 }
 
-// The tree the words keep, in its order: each node whose label holds them, through the one search, and
+// The tree the words keep, in its order: each node whose label or badge holds them, through the one search, and
 // each node above one that stays, holding only the nodes under it that stay.
 export function sideNodesMatching(nodes: readonly SideNode[], words: string, locale?: string): SideNode[] {
   if (searchPhrase(words) === "") return [...nodes];
@@ -122,7 +124,7 @@ export function sideNodesMatching(nodes: readonly SideNode[], words: string, loc
     const children = sideNodesMatching(node.children ?? [], words, locale);
 
     if (children.length > 0) return [{ ...node, children }];
-    if (!holdsWords(node, words, locale)) return [];
+    if (!holdsWords({ label: node.label, line: node.badge }, words, locale)) return [];
 
     // A match none of whose nodes stays stands as a leaf.
     const { children: _left, ...leaf } = node;
