@@ -348,5 +348,10 @@
     "sha256": "0448388730b377f3a6534ed7e12c73570ca3fa72ff9532a0d867c3aa1d7a3d0f",
     "bound": "0.1.0-rev.23",
     "why": "A side tree's node may wear a badge the search matches, its rows take a drop of the kinds the host names, and the chosen row is kept in view; additions only"
+  },
+  "bmo-ui-0.1.0-rev.70.tgz": {
+    "sha256": "0a68cc7d4b550fa6db3d08f252c62c2d6bd36f96eb75869649ce8cb23c32a1a2",
+    "bound": "0.1.0-rev.23",
+    "why": "A side tree's chevron names what a press does, expand or collapse, in the shared tooltip; additions only"
   }
 }
