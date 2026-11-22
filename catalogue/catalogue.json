@@ -638,7 +638,7 @@
     {
       "name": "ChoiceTree",
       "kind": "component",
-      "line": "The side list for a tree: the host's nodes as the library's tree in the side list's place, each opened and closed by its chevron, the way to the chosen node standing open and marked, the search keeping the nodes above every match, and nothing moving as the choice or the nodes change.",
+      "line": "The side list for a tree: the host's nodes as the library's tree in the side list's place, each opened and closed by its chevron, the way to the chosen node standing open and marked, the search matching a label or a badge and keeping the nodes above every match, a row taking a drop of the kinds the host names, and nothing moving as the choice or the nodes change.",
       "props": [
         {
           "name": "label",
@@ -695,6 +695,18 @@
           "type": "boolean | undefined",
           "required": false,
           "default": "false"
+        },
+        {
+          "name": "dropTypes",
+          "type": "readonly string[] | undefined",
+          "required": false,
+          "default": "[]"
+        },
+        {
+          "name": "dropTakes",
+          "type": "((key: string | number) => boolean) | undefined",
+          "required": false,
+          "default": "true"
         }
       ],
       "slots": [
@@ -715,6 +727,10 @@
         {
           "name": "retry",
           "type": "[]"
+        },
+        {
+          "name": "drop",
+          "type": "[key: string | number, event: DragEvent]"
         }
       ],
       "example": "<div class=\"flex h-96 min-h-0 flex-col\">\n  <ChoiceTree :label=\"t('teams.label.tree')\" :nodes=\"nodes\" :chosen=\"chosen\" save-id=\"teams-tree\" @choose=\"chosen = $event\">\n    <p class=\"p-4 text-sm\">{{ chosen }}</p>\n  </ChoiceTree>\n</div>"
