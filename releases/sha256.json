@@ -343,5 +343,10 @@
     "sha256": "bf278ecd1aaf450e4cc2769696bfce4e54f9144790b09c09d7dbccb34e3552f0",
     "bound": "0.1.0-rev.23",
     "why": "Back over a page form's discard question keeps the address and the change, the side tree's search lines up with its rows, and a side list's body may place the phone's opener in its own toolbar row"
+  },
+  "bmo-ui-0.1.0-rev.69.tgz": {
+    "sha256": "0448388730b377f3a6534ed7e12c73570ca3fa72ff9532a0d867c3aa1d7a3d0f",
+    "bound": "0.1.0-rev.23",
+    "why": "A side tree's node may wear a badge the search matches, its rows take a drop of the kinds the host names, and the chosen row is kept in view; additions only"
   }
 }
