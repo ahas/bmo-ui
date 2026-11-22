@@ -358,5 +358,10 @@
     "sha256": "8287d7c9a61df36a3453f49de61455134881cb1b5a5f8e3bdddcd441a66735d0",
     "bound": "0.1.0-rev.23",
     "why": "The catalogue names the side tree's dropTypes, dropTakes and drop event, which 0.1.0-rev.69 and 0.1.0-rev.70 shipped without; additions only"
+  },
+  "bmo-ui-0.1.0-rev.72.tgz": {
+    "sha256": "4f8d1260ed4ddd147ff84b0486870117849c8a64261397a6e3621e6a743ccd0f",
+    "bound": "0.1.0-rev.23",
+    "why": "every coloured word and the muted words read at 4.5:1 on every surface in both modes"
   }
 }
