@@ -363,5 +363,10 @@
     "sha256": "4f8d1260ed4ddd147ff84b0486870117849c8a64261397a6e3621e6a743ccd0f",
     "bound": "0.1.0-rev.23",
     "why": "every coloured word and the muted words read at 4.5:1 on every surface in both modes"
+  },
+  "bmo-ui-0.1.0-rev.73.tgz": {
+    "sha256": "63d1b3515013e6ff1b4fc63d55e6e4c0f6ce8f7c9395c81959e66ed32a6543a4",
+    "bound": "0.1.0-rev.23",
+    "why": "Only adds: an account section, sections by role, notice readers per kind and the host's consoleVersion, each optional"
   }
 }
