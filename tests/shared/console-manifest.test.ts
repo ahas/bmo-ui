@@ -340,7 +340,7 @@ describe("a notice's readers", () => {
   const reports = {
     ...answered,
     pushKinds: ["report.received", "report.answered", "report.changed"],
-    pushReaders: { "report.received": { role: "administrator" }, "report.answered": { field: "sender" } }
+    pushReaders: { "report.received": { role: "administrator" as const }, "report.answered": { field: "sender" } }
   };
 
   test("are named per kind under pushKinds, as a role or a member's field", () => {
