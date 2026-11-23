@@ -10,10 +10,12 @@ import {
   consoleManifest,
   movedScreenAddress,
   noticePlace,
+  noticeReaders,
   onThisLayer,
   relaysRoute,
   roleAllows,
   screensCall,
+  sectionFor,
   shareHead,
   shareHeadPath,
   shareRead
@@ -53,6 +55,7 @@ describe("a service's manifest", () => {
       ...answered,
       role: "member",
       sidebarSection: "application",
+      sidebarSections: {},
       formerScreenPaths: [],
       apiPrefix: "/",
       ownerKey: false,
@@ -60,6 +63,7 @@ describe("a service's manifest", () => {
       websocket: false,
       pushKinds: [],
       pushPlaces: {},
+      pushReaders: {},
       calls: [],
       relays: [],
       shareReads: []
@@ -96,8 +100,18 @@ describe("a service's manifest", () => {
   });
 
   test("keeps the sidebar section it names, and refuses one the contract does not name", () => {
-    expect(CONSOLE_SIDEBAR_SECTIONS.map((sidebarSection) => consoleManifest({ ...answered, sidebarSection }).sidebarSection)).toEqual(["administration", "application"]);
+    expect(CONSOLE_SIDEBAR_SECTIONS.map((sidebarSection) => consoleManifest({ ...answered, sidebarSection }).sidebarSection)).toEqual(["administration", "application", "account"]);
     expect(faultsOf({ ...answered, sidebarSection: "settings" })).toContain("sidebarSection:");
+  });
+
+  test("stands its entry in the section named for the role a reader holds, else in its sidebar section", () => {
+    const read = consoleManifest({ ...answered, sidebarSection: "account", sidebarSections: { administrator: "administration" } });
+
+    expect(sectionFor(read, "administrator")).toBe("administration");
+    expect(sectionFor(read, "member")).toBe("account");
+    expect(sectionFor(consoleManifest(answered), "administrator")).toBe("application");
+    expect(faultsOf({ ...answered, sidebarSections: { owner: "account" } })).toContain("sidebarSections");
+    expect(faultsOf({ ...answered, sidebarSections: { member: "settings" } })).toContain("sidebarSections");
   });
 
   test("is refused naming each field at fault", () => {
@@ -281,11 +295,11 @@ describe("the manifest's JSON Schema", () => {
     expect(CONSOLE_MANIFEST_SCHEMA.required).toEqual(["name", "title", "icon", "screenPath", "serviceName", "layer", "bundle", "words", "role"]);
     expect(CONSOLE_MANIFEST_SCHEMA.additionalProperties).toBe(false);
     expect(Object.keys(CONSOLE_MANIFEST_SCHEMA.properties as object).toSorted()).toEqual(
-      [...Object.keys(answered), "formerScreenPaths", "stylesheet", "apiPrefix", "ownerKey", "events", "websocket", "pushKinds", "pushPlaces", "sidebarUnread", "sidebarSection", "calls", "relays", "shareReads", "shareHead"].toSorted()
+      [...Object.keys(answered), "formerScreenPaths", "stylesheet", "apiPrefix", "ownerKey", "events", "websocket", "pushKinds", "pushPlaces", "pushReaders", "sidebarUnread", "sidebarSection", "sidebarSections", "calls", "relays", "shareReads", "shareHead"].toSorted()
     );
     expect((CONSOLE_MANIFEST_SCHEMA.properties as Record<string, { enum?: unknown }>).role!.enum).toEqual(["administrator", "member"]);
     expect((CONSOLE_MANIFEST_SCHEMA.properties as Record<string, unknown>).sidebarSection).toMatchObject({
-      enum: ["administration", "application"],
+      enum: ["administration", "application", "account"],
       default: "application"
     });
   });
@@ -318,6 +332,39 @@ describe("a notice's place", () => {
 
     for (const noteId of [undefined, "", "  ", ".", "..", null, true, Number.NaN, { name: "n1" }]) {
       expect(noticePlace(read, "note.created", { bookName: "daily", noteId })).toBe("/notes");
+    }
+  });
+});
+
+describe("a notice's readers", () => {
+  const reports = {
+    ...answered,
+    pushKinds: ["report.received", "report.answered", "report.changed"],
+    pushReaders: { "report.received": { role: "administrator" }, "report.answered": { field: "sender" } }
+  };
+
+  test("are named per kind under pushKinds, as a role or a member's field", () => {
+    expect(consoleManifest(reports).pushReaders).toEqual(reports.pushReaders);
+    expect(faultsOf({ ...reports, pushReaders: { "report.closed": { role: "administrator" } } })).toContain("pushReaders: readers of kinds under pushKinds");
+    expect(faultsOf({ ...reports, pushReaders: { "report.received": { role: "owner" } } })).toContain("pushReaders");
+    expect(faultsOf({ ...reports, pushReaders: { "report.answered": { field: "Sender" } } })).toContain("pushReaders");
+    expect(faultsOf({ ...reports, pushReaders: { "report.answered": { field: "sender", role: "member" } } })).toContain("pushReaders");
+  });
+
+  test("are the role named, the account the member's field holds, or every reader the role allows", () => {
+    const read = consoleManifest(reports);
+
+    expect(noticeReaders(read, "report.received", { sender: "7" })).toEqual({ role: "administrator" });
+    expect(noticeReaders(read, "report.answered", { sender: "7" })).toEqual({ account: "7" });
+    expect(noticeReaders(read, "report.answered", { sender: 7 })).toEqual({ account: "7" });
+    expect(noticeReaders(read, "report.changed", { sender: "7" })).toEqual({ allowed: "member" });
+  });
+
+  test("are nobody where the member's field holds no account key", () => {
+    const read = consoleManifest(reports);
+
+    for (const sender of [undefined, "", "u7", -1, 1.5, null, { user: "7" }]) {
+      expect(noticeReaders(read, "report.answered", { sender })).toEqual({ account: null });
     }
   });
 });

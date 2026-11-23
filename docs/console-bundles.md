@@ -76,12 +76,14 @@ none of them a dot or two standing for a folder.
 | `words` | The path of the service's API its words are answered at. | yes |
 | `apiPrefix` | The path of the service's API every call the screens make stands under. A console relays nothing of the service outside it but the module, the stylesheet and the routes under `relays`. | no, `/` |
 | `role` | The least role a reader holds to open the screen: `administrator` or `member`. | yes |
-| `sidebarSection` | The section of a console's sidebar the bundle's entry stands in: `administration`, among the services an administrator runs the system with, or `application`, among the applications a reader works in ("How a bundle mounts", the sidebar section). | no, `application` |
+| `sidebarSection` | The section of a console's sidebar the bundle's entry stands in: `administration`, among the services an administrator runs the system with, `application`, among the applications a reader works in, or `account`, in the reader's own menu, among what concerns the reader's own account and their use of the console ("How a bundle mounts", the sidebar section). | no, `application` |
+| `sidebarSections` | The section the entry stands in for a reader by the role they hold, where it is not `sidebarSection`: each key a role, each value a section ("How a bundle mounts", the sidebar section). | no, none |
 | `ownerKey` | Whether every call the screens make needs the reader's owner key. | no, false |
 | `events` | Whether the screens read the service's event stream through the console. | no, false |
 | `websocket` | Whether the screens open a WebSocket to the service through the console. | no, false |
 | `pushKinds` | The service's event kinds a console may raise as a notice to a reader who is not on the screen, each written as the stream names it, a resource and its change. | no, none |
 | `pushPlaces` | The place on the bundle's screen a notice of a kind under `pushKinds` opens, by kind: each key one of those kinds, each value a place pattern, a path at or below the screen path whose segments stand as written or as a placeholder, a name in camelCase in braces matching any one segment, which a console fills from the event's member ("How a bundle mounts", notices). | no, none |
+| `pushReaders` | The readers a notice of a kind under `pushKinds` rings, by kind: `{"role": …}`, the readers holding that role, or `{"field": …}`, the one account whose key the event's member holds under that camelCase field ("How a bundle mounts", notices). | no, none |
 | `sidebarUnread` | The route a console reads a sidebar unread count from: `path`, a path of the service's API under the API prefix, whose JSON answer holds the count at its root under `field`, a camelCase name, as a whole number nought or more. A console draws a positive count on the bundle's sidebar entry. | no, none |
 | `calls` | The other services the screens call through the console, each by the service name its own manifest gives it, or `people`, the company's members a console answers itself ("How a bundle mounts", the company's members), in kebab-case; never the bundle's own service, and none twice. | no, none |
 | `relays` | The service's own routes outside the API prefix that a console relays as well, each its `method` (`GET`, `POST`, `PUT`, `PATCH` or `DELETE`) and its `path`, one whole path of the service's API; none twice. | no, none |
@@ -261,9 +263,14 @@ on any release from that bound up to its own.
   stands above every element so marked, so it never covers that bar until the reader moves it there.
 - **Notices.** A console that raises notices reads the service's event stream for the kinds under
   `pushKinds` and raises each in the words the bundle's words give that kind, under the bundle's
-  namespace, to the readers whose role allows the manifest's. The words' placeholders, and those of the
+  namespace, to the readers whose role allows the manifest's, or to the readers `pushReaders` names for the kind. The
+  words' placeholders, and those of the
   place below, are filled from the event's member, the record the event carries under `data`: a placeholder
   names a field of it, text or a number.
+  - **Who a notice rings.** Where `pushReaders` names readers for the kind, a notice rings them alone: the readers
+    holding the role it names, or the one account whose key the member's field it names holds, written as the
+    console writes the owner key; a member whose field holds no key rings nobody. Where it names none, the notice
+    rings every reader the manifest's role allows. The shared module's `noticeReaders` answers which.
   - **Pressing a notice opens its place.** Where `pushPlaces` names a place for the kind, the notice opens
     that pattern with each placeholder replaced by its field, escaped as one segment of an address; where it
     names none, or a placeholder's field is absent, empty, a dot or two, or neither text nor a number, the
@@ -271,9 +278,15 @@ on any release from that bound up to its own.
     routes answer, and the screen reads what the address names as it reads any address a reader opens.
 - **The sidebar section.** A console whose sidebar parts its entries into sections draws a bundle's entry in
   the section its manifest names under `sidebarSection`: `administration` among the services an administrator
-  runs the system with, `application` among the applications a reader works in. The section places the entry
-  and opens it to no one: who sees it is the manifest's `role`. A console that draws one list draws every entry
-  in it alike.
+  runs the system with, `application` among the applications a reader works in, `account` in the reader's own
+  menu, the menu a console keeps of what concerns the reader's own account and their use of the console. The
+  section places the entry and opens it to no one: who sees it is the manifest's `role`. A console that draws one
+  list draws every entry in it alike, and one that keeps no menu of the reader's own draws an `account` entry in
+  that list too.
+  - **A section by role.** Where `sidebarSections` names a section for the role a reader holds — the role itself,
+    never one it allows — the entry stands there for that reader instead; the shared module's `sectionFor`
+    answers it. So one screen whose face differs by role, a sender's road for a member and an inbox for an
+    administrator, stands where each reader looks for it, and a reader meets one entry of it only.
 - **The sidebar count.** Where a manifest names a `sidebarUnread`, a console reads the count for the
   reader whose sidebar it draws, with its own credential and that reader's owner key and role, and draws
   a positive count on the bundle's sidebar entry. It reads the count again as it chooses; one that did
@@ -448,8 +461,14 @@ under `calls`, and its screens hand the module texts and a language.
   element carrying `data-screen-foot` ("How a bundle mounts", the screen's foot), so it does not cover a screen's
   foot bar until the reader moves it there.
 - **It places a bundle's entry in the section its manifest names,** where its sidebar parts entries into sections
-  ("How a bundle mounts", the sidebar section), reading the section from the manifest alone and keeping no list of
-  its own of which bundle stands where.
+  ("How a bundle mounts", the sidebar section), for each reader the section named for the role they hold where the
+  manifest names one, reading the section from the manifest alone and keeping no list of its own of which bundle
+  stands where.
+- **It rings a notice for the readers the manifest names for its kind** ("How a bundle mounts", notices), and for
+  every reader the manifest's role allows where it names none.
+- **It states its version, where its deployment names one,** in its app configuration under `bmoUi`, as
+  `consoleVersion` (`docs/boundary.md`, "What the host owes"), so a screen that carries where it was used from,
+  a report a reader sends among them, names the console it was used in.
 - **It draws the sidebar count a bundle declares** ("How a bundle mounts", the sidebar count), reading it for the
   reader whose sidebar it draws and leaving the last count where a read does not answer.
 - **It answers a moved screen's addresses** ("A screen that moved"): every address under a bundle's former

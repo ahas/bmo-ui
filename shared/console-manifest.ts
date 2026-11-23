@@ -23,8 +23,9 @@ export const CONSOLE_ROLES = ["administrator", "member"] as const;
 export type ConsoleRole = (typeof CONSOLE_ROLES)[number];
 
 // The sections of a console's sidebar a bundle's entry stands in: among the services an administrator runs the
-// system with, or among the applications a reader works in.
-export const CONSOLE_SIDEBAR_SECTIONS = ["administration", "application"] as const;
+// system with, among the applications a reader works in, or in the reader's own menu, among what concerns the
+// reader's own account and their use of the console.
+export const CONSOLE_SIDEBAR_SECTIONS = ["administration", "application", "account"] as const;
 
 export type ConsoleSidebarSection = (typeof CONSOLE_SIDEBAR_SECTIONS)[number];
 
@@ -85,6 +86,9 @@ const EVENT_KIND = /^[a-z][a-z0-9-]*\.[a-z][a-z0-9-]*$/;
 // camelCase name in braces matching any one segment.
 const PLACE_PATTERN = SHARE_PATTERN;
 
+// A member's field a manifest names: a camelCase name.
+const FIELD_NAME = /^[a-z][A-Za-z0-9]*$/;
+
 // A placeholder segment of a pattern, and the field it names.
 const PLACEHOLDER_SEGMENT = /^\{([a-z][A-Za-z0-9]*)\}$/;
 
@@ -137,7 +141,11 @@ const manifest = z
     sidebarSection: z
       .enum(CONSOLE_SIDEBAR_SECTIONS)
       .default("application")
-      .describe("The section of a console's sidebar the bundle's entry stands in: administration, among the services an administrator runs the system with, or application, among the applications a reader works in."),
+      .describe("The section of a console's sidebar the bundle's entry stands in: administration, among the services an administrator runs the system with, application, among the applications a reader works in, or account, in the reader's own menu."),
+    sidebarSections: z
+      .partialRecord(z.enum(CONSOLE_ROLES), z.enum(CONSOLE_SIDEBAR_SECTIONS))
+      .default({})
+      .describe("The section the entry stands in for a reader by the role they hold, where it is not the sidebarSection: each key a role, each value a section."),
     ownerKey: z.boolean().default(false).describe("Whether every call the screens make needs the reader's owner key."),
     events: z.boolean().default(false).describe("Whether the screens read the service's event stream."),
     websocket: z.boolean().default(false).describe("Whether the screens open a WebSocket to the service."),
@@ -152,12 +160,29 @@ const manifest = z
       )
       .default({})
       .describe("The place on the screen a notice of a kind under pushKinds opens, by kind: a path pattern at or below the screen path, its placeholders filled from the event's member."),
+    pushReaders: z
+      .record(
+        z.string().regex(EVENT_KIND, "an event kind, a resource and its change"),
+        z.union([
+          z.object({ role: z.enum(CONSOLE_ROLES).describe("The role every reader the notice rings holds.") }).strict(),
+          z
+            .object({
+              field: z
+                .string()
+                .regex(FIELD_NAME, "a field in camelCase")
+                .describe("The member's field holding the account key of the one reader the notice rings.")
+            })
+            .strict()
+        ])
+      )
+      .default({})
+      .describe("The readers a notice of a kind under pushKinds rings, by kind: those holding a role, or the one account a field of the event's member names; every reader the manifest's role allows where a kind names none."),
     sidebarUnread: z
       .object({
         path: apiPath("The path of the service's API the count is answered at."),
         field: z
           .string()
-          .regex(/^[a-z][A-Za-z0-9]*$/, "a field in camelCase")
+          .regex(FIELD_NAME, "a field in camelCase")
           .describe("The answer's field holding the count, a whole number nought or more.")
       })
       .strict()
@@ -213,6 +238,10 @@ const manifest = z
     path: ["pushPlaces"],
     message: "places of kinds under pushKinds"
   })
+  .refine((one) => Object.keys(one.pushReaders).every((kind) => one.pushKinds.includes(kind)), {
+    path: ["pushReaders"],
+    message: "readers of kinds under pushKinds"
+  })
   .refine((one) => Object.values(one.pushPlaces).every((pattern) => atOrBelow(one.screenPath, pattern)), {
     path: ["pushPlaces"],
     message: "patterns at or below the screen path"
@@ -256,6 +285,12 @@ export function onThisLayer(manifest: ConsoleManifest, range: readonly string[] 
 // Whether a reader holding one role may open a screen needing another.
 export function roleAllows(held: ConsoleRole, needed: ConsoleRole): boolean {
   return CONSOLE_ROLES.indexOf(held) <= CONSOLE_ROLES.indexOf(needed);
+}
+
+// The section a bundle's entry stands in for a reader holding a role: the section the manifest names for that role, else
+// its sidebar section.
+export function sectionFor(manifest: ConsoleManifest, held: ConsoleRole): ConsoleSidebarSection {
+  return manifest.sidebarSections[held] ?? manifest.sidebarSection;
 }
 
 // Whether a bundle's screens call a service: their own, or one their manifest names under `calls`.
@@ -399,6 +434,25 @@ export function noticePlace(manifest: ConsoleManifest, kind: string, member: Rea
   }
 
   return `/${segments.join("/")}`;
+}
+
+// The readers a notice of a kind rings: those holding a role, the one account a field of the member names, or every
+// reader the manifest's role allows. A field that holds no account key, absent, empty or neither text nor a whole
+// number, rings nobody.
+export type NoticeReaders = { role: ConsoleRole } | { account: string | null } | { allowed: ConsoleRole };
+
+export function noticeReaders(manifest: ConsoleManifest, kind: string, member: Readonly<Record<string, unknown>>): NoticeReaders {
+  const named = Object.hasOwn(manifest.pushReaders, kind) ? manifest.pushReaders[kind] : undefined;
+
+  if (named === undefined) return { allowed: manifest.role };
+  if ("role" in named) return { role: named.role };
+
+  const value = Object.hasOwn(member, named.field) ? member[named.field] : undefined;
+
+  if (typeof value === "string" && /^[0-9]+$/.test(value)) return { account: value };
+  if (typeof value === "number" && Number.isSafeInteger(value) && value >= 0) return { account: String(value) };
+
+  return { account: null };
 }
 
 // The address a path under one of the manifest's former screen paths moved to: the same path with that former screen

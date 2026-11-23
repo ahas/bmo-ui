@@ -209,7 +209,7 @@ Each is named with everything it exports.
 | `files` | `FileConflict` |
 | `code-language` | `codeLanguage` |
 | `screen-mode` | `DocumentScheme`, `DEFAULT_SCHEME`, `SCHEME_COOKIE`, `isDocumentScheme` |
-| `console-manifest` | `CONSOLE_MANIFEST_ROUTE`, `OWNER_KEY_HEADER`, `OWNER_ROLE_HEADER`, `CONSOLE_ROLES`, `ConsoleRole`, `CONSOLE_SIDEBAR_SECTIONS`, `ConsoleSidebarSection`, `RELAY_METHODS`, `RelayMethod`, `LAYER_VERSION`, `LAYER_BOUND`, `LAYER_RANGE`, `CONSOLE_SHARED_LIBRARIES`, `ConsoleManifest`, `CONSOLE_MANIFEST_SCHEMA`, `consoleManifest`, `onThisLayer`, `roleAllows`, `screensCall`, `relaysRoute`, `shareRead`, `ShareHead`, `SHARE_HEAD_LANGUAGE_QUERY`, `shareHeadPath`, `shareHead`, `noticePlace`, `movedScreenAddress`, `ConsoleWords`, `ConsoleBundleModule` |
+| `console-manifest` | `CONSOLE_MANIFEST_ROUTE`, `OWNER_KEY_HEADER`, `OWNER_ROLE_HEADER`, `CONSOLE_ROLES`, `ConsoleRole`, `CONSOLE_SIDEBAR_SECTIONS`, `ConsoleSidebarSection`, `RELAY_METHODS`, `RelayMethod`, `LAYER_VERSION`, `LAYER_BOUND`, `LAYER_RANGE`, `CONSOLE_SHARED_LIBRARIES`, `ConsoleManifest`, `CONSOLE_MANIFEST_SCHEMA`, `consoleManifest`, `onThisLayer`, `roleAllows`, `sectionFor`, `screensCall`, `relaysRoute`, `shareRead`, `ShareHead`, `SHARE_HEAD_LANGUAGE_QUERY`, `shareHeadPath`, `shareHead`, `noticePlace`, `NoticeReaders`, `noticeReaders`, `movedScreenAddress`, `ConsoleWords`, `ConsoleBundleModule` |
 
 - **`search` folds letter case in the locale each call is handed,** the runtime's own where none is.
   It reads no app configuration, so it runs alike in a browser and on a server; a host searching in
@@ -487,7 +487,9 @@ Every token is a custom property stated by the layer's stylesheet on the root un
     default dayjs's built-in one;
   - `relayBase`, the path a console relays every service under, which the relay module's addresses
     start with after the app's base path; by default none, so a service is called at its name from
-    the app's base path.
+    the app's base path;
+  - `consoleVersion`, the version of the console a reader uses, which a screen may show or carry in
+    what it sends, as the console's deployment names it; by default none.
   The layer's own app configuration states the setting with nothing in it, so each default stands
   until the host states a value. A host that renders on the server states the first three, since the
   server's runtime and the browser's need not agree.

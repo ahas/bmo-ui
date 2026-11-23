@@ -439,5 +439,7 @@ export default defineAppConfig({
     // The path, from the app's base path, every service a console bundle calls is relayed under
     // (`docs/console-bundles.md`).
     relayBase?: string;
+    // The version of the console a reader uses, as its deployment names it; none where the host states none.
+    consoleVersion?: string;
   }
 });
