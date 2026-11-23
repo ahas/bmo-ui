@@ -368,5 +368,10 @@
     "sha256": "63d1b3515013e6ff1b4fc63d55e6e4c0f6ce8f7c9395c81959e66ed32a6543a4",
     "bound": "0.1.0-rev.23",
     "why": "Only adds: an account section, sections by role, notice readers per kind and the host's consoleVersion, each optional"
+  },
+  "bmo-ui-0.2.0-nightly.20261123.tgz": {
+    "sha256": "3a7b26b370ecab9ec890f03cbf6dbc3e31f2c04f54f1a8894cc7ef7d56e1a3a1",
+    "bound": "0.1.0-rev.23",
+    "why": "Only adds: a bundle that differs per reader in the console contract, and Japanese and Chinese typefaces and line breaks read from the page's language"
   }
 }
