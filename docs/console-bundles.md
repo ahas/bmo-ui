@@ -408,6 +408,9 @@ under `calls`, and its screens hand the module texts and a language.
   notice for anyone else. A bundle's share page is the one exception: its module, its stylesheet and its words
   are given to whoever opens its address, with no session ("Share pages"). This spares a reader a screen that
   would refuse them; it guards nothing.
+- **A console may withhold a screen by a policy of its own** — a setting of the reader's organisation that turns the
+  service off for them, say — and then offers that reader no menu entry, no module and no notice, and refuses
+  the calls it would relay for them; the service learns nothing of the policy and guards every route as ever.
 - **The service is the guard.** On every route the screens use, its module, its stylesheet and the
   routes under `relays` among them, a service refuses a call that lacks the console's credential with
   a 401, and a call whose `Owner-Role` is missing or does not allow the manifest's role, or, where
