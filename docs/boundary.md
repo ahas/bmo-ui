@@ -561,9 +561,12 @@ Every token is a custom property stated by the layer's stylesheet on the root un
   Nuxt UI, so the patches it applies meet the files they were cut from. The command and its MCP
   server run under Bun 1.3 or later, on the MCP SDK 1.32 or later within 1 and zod 4.
 - **It stands on registry packages alone;** no other repository is a dependency.
-- **One version for the whole repository,** the manifest's; the README states what may change at
-  which release.
-- **One packed file per version,** written by the release verb alone under `releases/`, its sha256
+- **One version for the whole repository,** the manifest's, which is the BMO set's and moves only at
+  a set release; the README states what may change at which release.
+- **One packed file per pack,** under the set's release on the commit its `v<version>` tag names and
+  under the day's nightly, `<next minor>-nightly.<YYYYMMDD>` with `.<n>` from 2 for a later pack of
+  the same day, on any other commit (the README, "Version"). Each is written by the release verb alone
+  under `releases/`, its sha256
   in the ledger `releases/sha256.json`: a JSON object holding, under each packed file's name, an
   object of its `sha256` written in lowercase hexadecimal, its `bound`, the version of the oldest
   release whose bundles still run on it unchanged, and `why`, the reason for that bound, in the order

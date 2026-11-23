@@ -81,24 +81,31 @@ testbed declaration, the Korean ledger the quick checks read, `CLAUDE.md`, and t
 
 ## Version
 
-- **One version for the whole repository,** the manifest's, following semantic versioning over the
-  boundary that `docs/boundary.md` states.
-- **Until the owner declares the first stable release the base stays 0.1.0,** and each later
-  version carries a `-rev.N` suffix. The first 0.1.0 is the base and no revision; each version after
-  it is one revision, N counting them from 1. Any revision may change the boundary, which changes
-  nearly every week; the revision count says so, where a minor number would promise a boundary held
-  between minors. `docs/boundary.md` names the revision each packed file under an earlier numbering
-  holds; a host pins a version by its exact name and sha256, never by its order.
-- **From the first stable release,** while the major is 0, a minor release may change the boundary;
-  from 1 on, only a major may.
-- **A version is one packed file,** written once by the release verb, `bun run release --bound
-  <version> --why <reason>`. The verb refuses a release that names no bound or no reason, a bound the
-  ledger does not name at or before this version or that is earlier than the last release's, a
-  working tree with changes and a version that already has a file or a ledger line; it exports the
-  committed tree (`git archive`) into a scratch folder, installs it, writes the version, the bound and
-  the releases from the bound up to this one into the layer's version file there, packs it once into
-  `releases/` under the version's name, and adds the file's sha256, its bound and the reason to the
-  ledger `releases/sha256.json`, saying all three. A version's file is never written again.
+- **One version for the whole repository,** the manifest's, and it is the BMO set's: the layer stands at
+  the version every unit of the set stands at (bmo-chat's `docs/conventions.md`, "Versions"), following
+  semantic versioning over the boundary that `docs/boundary.md` states.
+- **The manifest's version moves only at a set release,** the owner's word for the whole set, in the
+  commit that releases it, which is tagged `v<version>`. An export, prop, wording key or token taken
+  away or changed anywhere in the set makes the release a major one, an addition a minor one, and fixes
+  alone a patch.
+- **Between releases a packed file is the day's nightly,** named `<next minor>-nightly.<YYYYMMDD>`: the
+  minor above the manifest's version, then the day it was packed in the platform's time zone,
+  Asia/Seoul, as `1.1.0-nightly.20261124` after `1.0.0`. A second pack the same day is
+  `1.1.0-nightly.20261124.2`, a third `.3`, and so on. The nightly's name stands in its packed file
+  alone, in the manifest and the layer's version file packed there, never in the committed manifest;
+  semver orders every nightly after the release before it and before the release it leads to. A host
+  still pins a pack by its exact name and sha256, never by its order. `docs/boundary.md` names what
+  each packed file under an earlier numbering holds.
+- **A pack is one packed file,** written once by the release verb, `bun run release --bound <pack>
+  --why <reason>`, where `--bound this` names the pack being made. The verb packs under the
+  manifest's version where the committed tree is the commit its `v<version>` tag names, and under the
+  day's nightly otherwise. It refuses a pack that names no bound or no reason, a bound the ledger does
+  not name at or before this pack or that is earlier than the last pack's, a working tree with changes
+  and a name that already has a file or a ledger line; it exports the committed tree (`git archive`)
+  into a scratch folder, installs it, writes the pack's version into the manifest there and the
+  version, the bound and the packs from the bound up to this one into the layer's version file there,
+  packs it once into `releases/` under the pack's name, and adds the file's sha256, its bound and the
+  reason to the ledger `releases/sha256.json`, saying all three. A pack's file is never written again.
 - **Every release names its bound:** the oldest release whose bundles still run on it unchanged. A
   release that only adds keeps the bound before it; one that takes away or changes what an earlier
   bundle reads raises the bound to itself. A console attaches a bundle built on any release from its

@@ -102,9 +102,11 @@ on any release from that bound up to its own.
 
 - **One file per version.** The layer is taken as the one packed file its release verb writes for a
   version, kept under the layer's `releases/` by the version's name, beside a ledger of each file's
-  sha256 and bound (the README, "Version"). A service and a console vendor that file as it stands,
-  checked against the ledger, and never pack the layer from its source; so one version names one set
-  of bytes wherever it runs.
+  sha256 and bound (the README, "Version"). Every packed file is a release in this document's sense:
+  the set's release, packed from the commit its tag names, or a day's nightly packed between releases,
+  as `1.1.0-nightly.20261124` and `1.1.0-nightly.20261124.2` after `1.0.0`. A service and a console
+  vendor that file as it stands, checked against the ledger, and never pack the layer from its source;
+  so one version names one set of bytes wherever it runs.
 - **The bundle build names the layer.** A bundle is built with the layer's bundle build
   (`docs/boundary.md`, "The bundle build"), which leaves the shared libraries unbundled and writes
   the layer's version into `layer.json` beside the module. The service answers that version as the
@@ -141,7 +143,7 @@ on any release from that bound up to its own.
   clean; one newer than the console's may reach for what the console's release does not have yet.
 - **The range is a list, never an order.** Which releases stand inside it is the list the release
   names, never an order read off the version strings, since the layer's earlier numbering does not
-  sort with its later one.
+  sort with its later one, and a nightly packed before a patch release sorts after it.
 - **A layer taken from its source is no release.** Installed from its source rather than from a
   release's file, the layer names its version marked `+source` and no release but itself, so a bundle
   built on it stands inside no console's range.

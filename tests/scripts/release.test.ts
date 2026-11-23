@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { readdirSync } from "node:fs";
 
-import { LEDGER, boundAsked, boundRefusal, rangeFrom, released, releaseFile, sha256, sourceLayer, versionOf } from "../../scripts/release";
+import { LEDGER, THIS_PACK, boundAsked, boundRefusal, nightly, packVersion, platformDay, rangeFrom, released, releaseFile, sha256, sourceLayer, versionOf } from "../../scripts/release";
 import { LAYER_BOUND, LAYER_RANGE, LAYER_VERSION } from "../../shared/console-manifest";
 
 import type { Ledger } from "../../scripts/release";
@@ -55,6 +55,44 @@ describe("the packed files under releases/", () => {
   });
 });
 
+describe("the version a pack takes", () => {
+  test("is the package's version where the committed tree is that release's tagged commit", () => {
+    expect(packVersion("1.0.0", ["v1.0.0"], "20261124", standing)).toBe("1.0.0");
+    expect(packVersion("1.0.0", ["v0.9.0", "v1.0.0", "other"], "20261124", standing)).toBe("1.0.0");
+  });
+
+  test("is the day's nightly, the minor above the last release, on a commit no release tag names", () => {
+    expect(packVersion("1.0.0", [], "20261124", standing)).toBe("1.1.0-nightly.20261124");
+    expect(packVersion("1.0.0", ["v0.9.0"], "20261124", standing)).toBe("1.1.0-nightly.20261124");
+    expect(nightly("1.2.3", "20270102")).toBe("1.3.0-nightly.20270102");
+    expect(nightly("0.1.0-rev.73", "20261124")).toBe("0.2.0-nightly.20261124");
+  });
+
+  test("counts a second pack of the same day from 2", () => {
+    const once: Ledger = { ...standing, [releaseFile("1.1.0-nightly.20261124")]: entry("1.0.0-rev.3") };
+    const twice: Ledger = { ...once, [releaseFile("1.1.0-nightly.20261124.2")]: entry("1.0.0-rev.3") };
+
+    expect(packVersion("1.0.0", [], "20261124", once)).toBe("1.1.0-nightly.20261124.2");
+    expect(packVersion("1.0.0", [], "20261124", twice)).toBe("1.1.0-nightly.20261124.3");
+    expect(packVersion("1.0.0", [], "20261125", twice)).toBe("1.1.0-nightly.20261125");
+  });
+
+  test("orders every nightly after the last release and before the release it leads to", () => {
+    const ordered = ["1.0.0", "1.1.0-nightly.20261124", "1.1.0-nightly.20261124.2", "1.1.0-nightly.20261125", "1.1.0"];
+
+    expect([...ordered].reverse().sort(Bun.semver.order)).toEqual(ordered);
+  });
+
+  test("names its day in the platform's time zone", () => {
+    expect(platformDay(new Date("2026-11-23T14:59:59Z"))).toBe("20261123");
+    expect(platformDay(new Date("2026-11-23T15:00:00Z"))).toBe("20261124");
+  });
+
+  test("is refused where the package's version is no semantic version", () => {
+    expect(() => nightly("next", "20261124")).toThrow("no semantic version");
+  });
+});
+
 describe("a release's bound", () => {
   test("attaches the releases from it up to the new version, in the order they went out", () => {
     expect(rangeFrom(standing, "1.0.0-rev.3", "1.0.0-rev.4")).toEqual(["1.0.0-rev.3", "1.0.0-rev.4"]);
@@ -74,6 +112,8 @@ describe("a release's bound", () => {
     expect(boundAsked([])).toContain("--bound");
     expect(boundAsked(["--bound", "1.0.0-rev.3"])).toContain("--why");
     expect(boundAsked(["--bound", "1.0.0-rev.3", "--why", " "])).toContain("--why");
+    expect(boundAsked(["--bound", THIS_PACK, "--why", "raises it"])).toEqual({ bound: THIS_PACK, why: "raises it" });
+    expect(boundAsked([])).toContain(THIS_PACK);
   });
 
   test("is asked for by the verb before it reads anything else", () => {

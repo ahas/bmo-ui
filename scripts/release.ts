@@ -5,12 +5,15 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { parseArgs } from "node:util";
 
+import { parse } from "semver";
+
 // The release verb (the README, "Version"): the one way a packed file comes to exist. It packs the
-// committed tree once, from a scratch export, under the version's name in `releases/`, and adds the
-// file's sha256 to the ledger beside it with the release's bound: the oldest release whose bundles
-// still run on it unchanged (`docs/console-bundles.md`, "The layer a bundle is built on"). It is handed
-// the bound and the reason for it, and writes the bound and the releases from it up to this one into
-// the layer's version file it packs, which the shared module answers a console from.
+// committed tree once, from a scratch export, under the pack's version in `releases/`, and adds the
+// file's sha256 to the ledger beside it with the pack's bound: the oldest pack whose bundles still run
+// on it unchanged (`docs/console-bundles.md`, "The layer a bundle is built on"). The pack's version is
+// the set's release where the committed tree is that release's tagged commit, else the day's nightly.
+// It is handed the bound and the reason for it, and writes the bound and the packs from it up to this
+// one into the layer's version file it packs, which the shared module answers a console from.
 
 const SOURCE_MARK = "+source";
 
@@ -22,6 +25,44 @@ export function sourceLayer(version: string): string {
 /** Whether a tree may be packed: its layer names the package's version, as the verb alone writes it. */
 export function packable(layer: string, version: string): boolean {
   return layer === version;
+}
+
+/** The time zone the platform's days are counted in, which names a nightly's day. */
+export const PLATFORM_TIME_ZONE = "Asia/Seoul";
+
+/** The bound word that names the pack being made, whose version the caller cannot know before the verb runs. */
+export const THIS_PACK = "this";
+
+/** The day a moment falls on in the platform's time zone, written `YYYYMMDD`. */
+export function platformDay(at: Date): string {
+  const parts = new Intl.DateTimeFormat("en-CA", { timeZone: PLATFORM_TIME_ZONE, year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(at);
+  const part = (type: string): string => parts.find((one) => one.type === type)?.value ?? "";
+
+  return `${part("year")}${part("month")}${part("day")}`;
+}
+
+/** The nightly a day's first pack is named for: the minor above the last release, then the day. */
+export function nightly(released: string, day: string): string {
+  const last = parse(released);
+
+  if (last === null) throw new Refused(`${released} is no semantic version; the package's version names the set's last release.`);
+
+  return `${last.major}.${last.minor + 1}.0-nightly.${day}`;
+}
+
+/**
+ * The version the committed tree packs under: the package's version where the tree is that release's commit,
+ * tagged `v<version>`, else the day's nightly, with `.<n>` from 2 for each later pack of the same day.
+ */
+export function packVersion(declared: string, tags: string[], day: string, ledger: Ledger): string {
+  if (tags.includes(`v${declared}`)) return declared;
+
+  const first = nightly(declared, day);
+  let version = first;
+
+  for (let n = 2; releaseFile(version) in ledger; n += 1) version = `${first}.${n}`;
+
+  return version;
 }
 
 /** The name a version's packed file stands under in `releases/`. */
@@ -101,7 +142,7 @@ export function boundAsked(args: string[]): { bound: string; why: string } | str
   const why = values.why?.trim() ?? "";
 
   if (bound === "" || why === "") {
-    return "Name the release's bound and why: bun run release --bound <the oldest release whose bundles still run on it unchanged> --why <the reason, read off its change against the boundary>.";
+    return `Name the pack's bound and why: bun run release --bound <the oldest pack whose bundles still run on it unchanged, or ${THIS_PACK} for the pack being made> --why <the reason, read off its change against the boundary>.`;
   }
 
   return { bound, why };
@@ -145,35 +186,43 @@ async function release(root: string, args: string[]): Promise<string> {
     run(["git", "archive", "--format=tar", `--output=${join(scratch, "tree.tar")}`, "HEAD"], root);
     run(["tar", "-xf", join(scratch, "tree.tar"), "-C", tree], root);
 
-    const { version } = (await Bun.file(join(tree, "package.json")).json()) as { version: string };
-    const file = releaseFile(version);
+    const manifestPath = join(tree, "package.json");
+    const manifest = (await Bun.file(manifestPath).json()) as { version: string };
+    const declared = manifest.version;
     const ledgerPath = join(releases, LEDGER);
     const ledger = (await Bun.file(ledgerPath).json()) as Ledger;
+    const tags = run(["git", "tag", "--points-at", "HEAD"], root).split("\n").map((tag) => tag.trim());
+    const version = packVersion(declared, tags, platformDay(new Date()), ledger);
+    const file = releaseFile(version);
 
     if (file in ledger || (await Bun.file(join(releases, file)).exists())) {
-      throw new Refused(`${version} has a packed file already; a version is released once. Raise the version first.`);
+      throw new Refused(`${version} has a packed file already; a release is packed once.`);
     }
 
-    const refused = boundRefusal(ledger, asked.bound, version);
+    const bound = asked.bound === THIS_PACK ? version : asked.bound;
+    const refused = boundRefusal(ledger, bound, version);
 
     if (refused !== null) throw new Refused(refused);
 
     const layerPath = join(tree, "shared", "layer.json");
     const layer = (await Bun.file(layerPath).json()) as { layer: string };
 
-    if (layer.layer !== sourceLayer(version)) {
-      throw new Refused(`The layer's version file names ${layer.layer} where the package's version is ${version}; it names ${sourceLayer(version)} in the source.`);
+    if (layer.layer !== sourceLayer(declared)) {
+      throw new Refused(`The layer's version file names ${layer.layer} where the package's version is ${declared}; it names ${sourceLayer(declared)} in the source.`);
     }
 
-    await Bun.write(layerPath, `${JSON.stringify({ ...layer, layer: version, bound: asked.bound, range: rangeFrom(ledger, asked.bound, version) }, null, 2)}\n`);
+    await Bun.write(layerPath, `${JSON.stringify({ ...layer, layer: version, bound, range: rangeFrom(ledger, bound, version) }, null, 2)}\n`);
     runShown(["bun", "install", "--frozen-lockfile"], tree);
+    // The pack's own version stands in the export alone, where the manifest and the version file it packs both
+    // name it; the committed tree keeps the last release's.
+    await Bun.write(manifestPath, `${JSON.stringify({ ...manifest, version }, null, 2)}\n`);
     runShown(["bun", "pm", "pack", "--destination", packed], tree);
 
     const target = join(releases, file);
 
     await copyFile(join(packed, file), target);
 
-    const entry: LedgerEntry = { sha256: sha256(await Bun.file(target).bytes()), bound: asked.bound, why: asked.why };
+    const entry: LedgerEntry = { sha256: sha256(await Bun.file(target).bytes()), bound, why: asked.why };
 
     await Bun.write(ledgerPath, `${JSON.stringify({ ...ledger, [file]: entry }, null, 2)}\n`);
 
