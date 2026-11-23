@@ -263,6 +263,28 @@ describe.skipIf(!ready)("a diagram in a text", () => {
     expect(breaks.every((pair) => pair.startsWith(" |") || pair.endsWith("| "))).toBe(true);
   }, 60_000);
 
+  // Japanese and Chinese write no spaces between words, so a label kept whole there could break
+  // nowhere; it breaks as its own language's rules allow.
+  test("keeps a label's words whole, but not in a page in Japanese or Chinese", async () => {
+    const breakIn = async (language: string | null): Promise<string> => {
+      await page.evaluate((lang) => {
+        const out = document.getElementById("out")!;
+
+        if (lang === null) out.removeAttribute("lang");
+        else out.lang = lang;
+      }, language);
+      await drawn(diagramPlace(["flowchart TD", "  A[a label] --> B"].join("\n")), false);
+
+      return page.evaluate(() => getComputedStyle(document.querySelector("#out .nodeLabel")!).wordBreak);
+    };
+
+    expect(await breakIn(null)).toBe("keep-all");
+    expect(await breakIn("ko")).toBe("keep-all");
+    expect(await breakIn("ja")).toBe("normal");
+    expect(await breakIn("zh-CN")).toBe("normal");
+    expect(await breakIn(null)).toBe("keep-all");
+  }, 60_000);
+
   test("is drawn again in the dark theme when the page switches to it", async () => {
     await drawn(diagramPlace(FLOW), false);
 

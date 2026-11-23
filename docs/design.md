@@ -297,6 +297,17 @@ whole in `docs/boundary.md`; this document says what each is for and how the lay
     to the faces behind.
   - Should a face arrive late, letters stand first in the font behind and are swapped in place when
     it arrives.
+- **A page in Japanese or Chinese names its own language's faces where the Korean ones stand.** A
+  Korean face holds kana and Han as well, drawn in Korean shapes, so the stacks above hold for every
+  page but one whose root names Japanese or Chinese as its language. Such a page reads Hiragino Sans
+  first for Japanese and PingFang SC first for Chinese, then the system's own faces, then its
+  language's faces on Windows and Linux (Yu Gothic UI, Meiryo and Noto Sans JP; Microsoft YaHei and
+  Noto Sans SC), with Pretendard and the system's sans serif behind, and names no Korean face. The
+  fixed-width stack names the same faces of its language right behind CaskaydiaCove. The layer
+  carries none of these faces.
+- **Words kept whole stay whole in Korean alone.** A place that keeps a word from breaking inside it —
+  a diagram's label, a side list's line — keeps Korean words whole, while in a page in Japanese or
+  Chinese, which put no spaces between words, it breaks as that language's own rules allow.
 - **Monospace letters stand in CaskaydiaCove,** Cascadia Code from Nerd Fonts, carried and served
   with the layer. One weight is carried, cut to letters, digits, punctuation, arrows and
   box-drawing, 36KB: the icon glyphs are not carried, since icons are drawn as pictures and carrying

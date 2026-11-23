@@ -406,7 +406,9 @@ Every token is a custom property stated by the layer's stylesheet on the root un
   rest as on focus and over every class, so an outline on a screen is the focus ring alone.
 - **Type:** `--text-xs` is 0.875rem. `--font-sans` is Apple SD Gothic Neo, Pretendard, then the
   system's sans serif; `--font-mono` is CaskaydiaCove NFM, Apple SD Gothic Neo, Pretendard, then the
-  system's monospace.
+  system's monospace. On a root whose language is Japanese or Chinese both stacks name that
+  language's faces in place of the Korean ones (`docs/design.md`, "Fonts"), and `break-keep` breaks
+  words as that language's rules allow.
 - **Radius:** the library's `--ui-radius`, 4px, the base of the four corner tiers.
 
 ## Classes and keyframes
@@ -479,6 +481,9 @@ Every token is a custom property stated by the layer's stylesheet on the root un
   the layer's components import `useI18n` from it by name. `@nuxtjs/i18n` depends on it, so a host
   installing the module brings it; the layer names it as a peer so a package manager that does not
   hoist still resolves it to that copy.
+- **The page's language.** The host names the language a page is shown in on its root element's
+  `lang`, as the i18n module's locale head does; the layer's typefaces and line breaking read it for
+  Japanese and Chinese, and a root that names none reads as Korean and English do.
 - **The locale and the time zone.** The host states them in its app configuration, under `bmoUi`:
   - `zone`, an IANA zone name every time is shown in; by default the runtime's own zone;
   - `locale`, a BCP 47 tag figures are written in and letter case is folded in; by default the

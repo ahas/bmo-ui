@@ -25,9 +25,24 @@ function field(rule: Container, name: string): string {
   return value;
 }
 
-// The families a stack names, in order, as written.
-function stack(name: string): string[] {
-  return postcss.list.comma(field(sheet, name));
+// The first rule written that names a selector among its own.
+function ruleOf(selector: string): Container {
+  let found: Container | undefined;
+  sheet.walkRules((rule) => {
+    if (found === undefined && rule.selectors.includes(selector)) found = rule;
+  });
+  return found!;
+}
+
+// The stacks the theme states on the root, which every page reads unless its language names its own.
+let rootTheme: Container | undefined;
+sheet.walkAtRules("theme", (theme) => {
+  if (rootTheme === undefined && field(theme, "--font-sans") !== "") rootTheme = theme;
+});
+
+// The families a stack names, in order, as written: the root's, or the one a rule states.
+function stack(name: string, rule: Container = rootTheme!): string[] {
+  return postcss.list.comma(field(rule, name));
 }
 
 function familyOf(face: AtRule): string {
@@ -103,6 +118,38 @@ describe("the fixed-width typeface", () => {
   // hand over on a phone.
   test("at one weight", () => {
     expect(facesOf('"CaskaydiaCove NFM"').map((face) => field(face, "font-weight"))).toEqual(["400"]);
+  });
+});
+
+// A Korean face holds kana and Han as well, drawn in Korean shapes, so a page in Japanese or Chinese
+// names its own language's faces where the root names the Korean ones, and leaves those out.
+describe.each([
+  ["Japanese", ":root:lang(ja)", '"Hiragino Sans"'],
+  ["Chinese", ":root:lang(zh)", '"PingFang SC"']
+])("a page in %s", (_, selector, own) => {
+  const korean = ['"Apple SD Gothic Neo"', '"Noto Sans KR"', '"Malgun Gothic"'];
+
+  test("reads its interface in its own language's face, with no Korean face in the stack", () => {
+    const sans = stack("--font-sans", ruleOf(selector));
+
+    expect(sans[0]).toBe(own);
+    expect(sans.at(-1)).toBe("sans-serif");
+    expect(sans.filter((family) => korean.includes(family))).toEqual([]);
+  });
+
+  test("reads its fixed-width places in CaskaydiaCove, with its own language's face right behind", () => {
+    const mono = stack("--font-mono", ruleOf(selector));
+
+    expect(mono.slice(0, 2)).toEqual(['"CaskaydiaCove NFM"', own]);
+    expect(mono.at(-1)).toBe("monospace");
+    expect(mono.filter((family) => korean.includes(family))).toEqual([]);
+  });
+
+  // Words kept whole in a language with no spaces between them could break nowhere.
+  test("breaks the words a class keeps whole as its own language's rules allow", () => {
+    const language = selector.slice(":root".length);
+
+    expect(field(ruleOf(`.break-keep${language}`), "word-break")).toBe("normal");
   });
 });
 

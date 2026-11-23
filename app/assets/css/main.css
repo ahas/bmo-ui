@@ -226,6 +226,46 @@
   --bmo-ease-move: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* The stacks a page in Japanese or Chinese reads (`docs/design.md`, "Fonts"). The faces the root's
+   stacks name first are Korean ones, and a Korean face holds kana and Han too, drawn as Korean draws
+   them; a page whose root names Japanese or Chinese as its language would read its own letters in
+   another language's shapes. So such a page names its own language's faces first, in the role Apple
+   SD Gothic Neo holds for Korean, and leaves the Korean faces out. They stand in the theme layer, so a
+   host's own stack outside a layer still wins. */
+@layer theme {
+  :root:lang(ja) {
+    --font-sans:
+      "Hiragino Sans", "Hiragino Kaku Gothic ProN", -apple-system, BlinkMacSystemFont, system-ui, "Segoe UI",
+      Roboto, "Helvetica Neue", "Yu Gothic UI", "Meiryo", "Noto Sans JP", "Noto Sans CJK JP", "Pretendard",
+      "Apple Color Emoji", "Segoe UI Emoji", sans-serif;
+    --font-mono:
+      "CaskaydiaCove NFM", "Hiragino Sans", "Yu Gothic UI", "Meiryo", "Noto Sans JP", "Noto Sans CJK JP",
+      "Pretendard", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New",
+      monospace;
+  }
+
+  :root:lang(zh) {
+    --font-sans:
+      "PingFang SC", -apple-system, BlinkMacSystemFont, system-ui, "Segoe UI", Roboto, "Helvetica Neue",
+      "Microsoft YaHei UI", "Microsoft YaHei", "Noto Sans SC", "Noto Sans CJK SC", "Pretendard",
+      "Apple Color Emoji", "Segoe UI Emoji", sans-serif;
+    --font-mono:
+      "CaskaydiaCove NFM", "PingFang SC", "Microsoft YaHei UI", "Microsoft YaHei", "Noto Sans SC",
+      "Noto Sans CJK SC", "Pretendard", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+      "Liberation Mono", "Courier New", monospace;
+  }
+}
+
+/* Words kept whole by `break-keep` break between any two letters in Japanese or Chinese, which
+   write no spaces between words: kept whole there, a line could break nowhere until it overflowed.
+   Korean keeps its words whole; the other two break as their own rules allow. */
+@layer utilities {
+  .break-keep:lang(ja),
+  .break-keep:lang(zh) {
+    word-break: normal;
+  }
+}
+
 /* The palette's two grounds in the mode they are read in (`docs/design.md`, "Palettes"). The
    palettes module states both modes' grounds; each mode resolves its own pair on its own class as
    well as on the root, so a box drawn in a mode the page is not in reads its mode's grounds. */

@@ -158,9 +158,14 @@ let queue: Promise<void> = Promise.resolve();
 let drawings = 0;
 
 // A label breaks between words, never inside one: Korean may otherwise break between any two
-// syllables. Mermaid measures a label under the diagram's own stylesheet, so the boxes are sized
-// for the lines as they break here.
-const LABELS = ".nodeLabel, .edgeLabel, .label, .messageText, .noteText, .actor, .loopText { word-break: keep-all; overflow-wrap: anywhere; }";
+// syllables. Japanese and Chinese write no spaces between words, so a label in either breaks as its
+// own rules allow, read from the language the page names. Mermaid measures a label under the
+// diagram's own stylesheet, so the boxes are sized for the lines as they break here.
+const LABEL_CLASSES = [".nodeLabel", ".edgeLabel", ".label", ".messageText", ".noteText", ".actor", ".loopText"];
+const UNSPACED_LABELS = LABEL_CLASSES.flatMap((label) => [`${label}:lang(ja)`, `${label}:lang(zh)`]);
+const LABELS =
+  `${LABEL_CLASSES.join(", ")} { word-break: keep-all; overflow-wrap: anywhere; } ` +
+  `${UNSPACED_LABELS.join(", ")} { word-break: normal; }`;
 
 // The size Mermaid measured the diagram at, taken off its view box.
 function naturalWidth(svg: SVGSVGElement): number | null {
