@@ -53,8 +53,34 @@ afterAll(async () => {
   if (out !== "") rmSync(out, { recursive: true, force: true });
 });
 
-function square(side: number, colour: string): string {
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${side}" height="${side}"><rect width="${side}" height="${side}" fill="${colour}"/></svg>`;
+// A square of one colour as an uncompressed 24-bit BMP, which every browser decodes and which names no host.
+function square(side: number, colour: string): Buffer {
+  const [red, green, blue] = [1, 3, 5].map((at) => Number.parseInt(colour.slice(at, at + 2), 16)) as [number, number, number];
+  const row = Math.ceil((side * 3) / 4) * 4;
+  const pixels = row * side;
+  const file = Buffer.alloc(54 + pixels);
+
+  file.write("BM", 0, "ascii");
+  file.writeUInt32LE(54 + pixels, 2);
+  file.writeUInt32LE(54, 10);
+  file.writeUInt32LE(40, 14);
+  file.writeInt32LE(side, 18);
+  file.writeInt32LE(side, 22);
+  file.writeUInt16LE(1, 26);
+  file.writeUInt16LE(24, 28);
+  file.writeUInt32LE(pixels, 34);
+
+  for (let y = 0; y < side; y += 1) {
+    for (let x = 0; x < side; x += 1) {
+      const at = 54 + y * row + x * 3;
+
+      file[at] = blue;
+      file[at + 1] = green;
+      file[at + 2] = red;
+    }
+  }
+
+  return file;
 }
 
 // The colour drawn at the middle of a picture.
@@ -89,8 +115,8 @@ describe.skipIf(!ready)("a loading picture handed copies of itself", () => {
 
         if (url.pathname === "/picture-copies-harness.js") return route.fulfill({ contentType: "text/javascript", body: script });
         if (url.pathname === "/picture-copies-harness.css") return route.fulfill({ contentType: "text/css", body: sheet });
-        if (url.pathname === "/whole") return route.fulfill({ contentType: "image/svg+xml", body: square(1024, "#ff0000") });
-        if (url.pathname === "/copy") return route.fulfill({ contentType: "image/svg+xml", body: square(Number(url.searchParams.get("w")), "#0000ff") });
+        if (url.pathname === "/whole") return route.fulfill({ contentType: "image/bmp", body: square(1024, "#ff0000") });
+        if (url.pathname === "/copy") return route.fulfill({ contentType: "image/bmp", body: square(Number(url.searchParams.get("w")), "#0000ff") });
         if (url.pathname === "/") return route.fulfill({ contentType: "text/html; charset=utf-8", body: PAGE });
 
         return route.fulfill({ status: 404, body: "" });
