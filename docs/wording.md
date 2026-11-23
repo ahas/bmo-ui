@@ -58,6 +58,9 @@ list; `docs/boundary.md` names every one of them.
 - **The layer holds no words at all,** so it holds no Hangul and no text in any other language. The
   only Hangul in its tests is input for what a test shows of Hangul, written as `\u` escapes; the
   quick checks' ledger names the three test files that hold it and allows every other file none.
+- **The README alone is also read in other languages:** `README.ko.md`, `README.ja.md` and
+  `README.zh-CN.md` translate it, and the language line atop each README names every language in its
+  own script. The guard's Hangul rule reads neither the translations nor that line.
 
 ## The guard
 

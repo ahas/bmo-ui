@@ -1,3 +1,5 @@
+**English** | [한국어](README.ko.md) | [日本語](README.ja.md) | [简体中文](README.zh-CN.md)
+
 # bmo-ui
 
 The foundation UI library: design tokens, the component library's overrides, and the common
@@ -55,7 +57,7 @@ components and behaviours every screen is built from. It is a Nuxt layer, built 
 
 | Folder | What it holds |
 |---|---|
-| `app/` | The layer's app code: the stylesheet and the fonts with their licences under `assets/`, the components under `components/`, the domain modules under `domain/`, the custom elements' entries under `elements/`, the app configuration holding the library's overrides and the host's setting with nothing in it, and the declaration typing templates by the host's i18n module |
+| `app/` | The layer's app code: the stylesheet and the fonts with their licences under `assets/`, the components under `components/`, the domain modules under `domain/`, the custom elements' entries under `elements/`, the page plugins under `plugins/`, the app configuration holding the library's overrides and the host's setting with nothing in it, and the declaration typing templates by the host's i18n module |
 | `bin/` | The package's command |
 | `bundle/` | The bundle build a service builds its console bundle with |
 | `catalogue/` | The catalogue module with its data file, the generator writing that file, and every component's example under `examples/` |

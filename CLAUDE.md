@@ -18,7 +18,9 @@ These rules hold every change to this repository.
 
 - Everything in this repository is English: code, comments, strings, tests, documents, commit messages
   and branch names. No Korean in code or tests; the quick checks' ledger names the test files that
-  hold Hangul input written as escapes and allows every other file none.
+  hold Hangul input written as escapes and allows every other file none. The README's translations
+  (`README.ko.md`, `README.ja.md`, `README.zh-CN.md`) and the language line atop each README are the one
+  exception.
 - Test input is neutral English. Where a test is about how Hangul behaves, the Hangul is written as
   `\u` escapes and its file's count stands in the ledger.
 - No personal data: no user names, home directories, machine names, host names or addresses, and no

@@ -216,6 +216,7 @@ function lines(pattern: RegExp, files: { path: string; text: string }[]): string
 // publisher's, whose words are carried as they stand.
 const RESERVED_HOST = /(^|\.)(example\.(com|net|org)|test|example|invalid)$/;
 const LICENCE = /^app\/assets\/fonts\/LICENSE-[^/]+\.txt$/;
+const README_TRANSLATION = /^README\.[A-Za-z-]+\.md$/;
 
 describe("what the layer says", () => {
   test("is read off every file of the repository", () => {
@@ -224,7 +225,13 @@ describe("what the layer says", () => {
   });
 
   test("holds no Hangul", () => {
-    expect(lines(/\p{Script=Hangul}/u, textFiles)).toEqual([]);
+    // The README's translations are read in their own languages, and the language line atop each
+    // README names every language in its own script (`docs/wording.md`, "What is not wording").
+    const english = textFiles
+      .filter(({ path }) => !README_TRANSLATION.test(path))
+      .map(({ path, text }) => (path === "README.md" ? { path, text: text.replace(/^[^\n]*/, "") } : { path, text }));
+
+    expect(lines(/\p{Script=Hangul}/u, english)).toEqual([]);
   });
 
   test("names no agent, no person and no machine", () => {
