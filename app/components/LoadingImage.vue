@@ -2,7 +2,7 @@
   <span :class="fill ? 'relative block size-full' : 'relative inline-block max-w-full align-middle'" :aria-busy="!ready && !broken">
     <SkeletonStatus v-if="!ready && !broken && !standIn" class="absolute inset-0 flex min-h-20 min-w-20" :label="$t('common.status.picture_loading')"><SkeletonBar class="size-full" :class="fill ? '' : 'rounded-lg'" /></SkeletonStatus>
     <img v-if="!ready && !broken && standIn" data-stand-in :src="standIn" alt="" class="absolute inset-0 size-full object-cover" :class="fill ? '' : 'rounded-lg'">
-    <img v-if="!broken" ref="picture" :key="src" :src="src" :alt="alt" :loading="eager ? 'eager' : 'lazy'" :class="[imageClass, !ready && aspect === undefined ? 'min-h-20 min-w-20 opacity-0' : !ready ? 'opacity-0' : '']" :style="aspect === undefined ? undefined : { aspectRatio: aspect }" @load="onLoad" @error="broken = true">
+    <img v-if="!broken" ref="picture" :key="src" :src="src" :srcset="sources" :sizes="sources ? sizes : undefined" :alt="alt" :loading="eager ? 'eager' : 'lazy'" :class="[imageClass, !ready && aspect === undefined ? 'min-h-20 min-w-20 opacity-0' : !ready ? 'opacity-0' : '']" :style="aspect === undefined ? undefined : { aspectRatio: aspect }" @load="onLoad" @error="broken = true">
     <span v-else role="alert" class="text-sm text-dimmed">{{ $t("common.error.picture_failed") }}</span>
   </span>
 </template>
@@ -11,8 +11,13 @@
 // `shape` is the picture's known shape, which keeps its room before it has loaded; `loaded` says the
 // shape it turned out to have. `standIn` is a picture already drawn for this one — a preview the page
 // already holds — standing where it will until it has loaded and been decoded, so it takes its
-// place in one frame rather than over a blank.
-const props = defineProps<{ src: string; alt: string; imageClass?: string; eager?: boolean; fill?: boolean; shape?: { width: number; height: number } | null; standIn?: string | null }>();
+// place in one frame rather than over a blank. `sources` names copies of the picture made at
+// smaller widths, as an image's candidate list, and `sizes` the width it is drawn at, so the browser
+// draws it from the first copy covering that width at the screen's density rather than shrinking the
+// whole picture by a large step (`docs/components.md`, "Skeletons and loading"); `src` stays the whole
+// picture. Drawn from a copy, the shape it says it loaded at is the copy's as drawn, at the picture's
+// ratio.
+const props = defineProps<{ src: string; alt: string; imageClass?: string; eager?: boolean; fill?: boolean; shape?: { width: number; height: number } | null; standIn?: string | null; sources?: string; sizes?: string }>();
 const emit = defineEmits<{ loaded: [shape: { width: number; height: number }] }>();
 const aspect = computed(() => (props.shape ? `${props.shape.width} / ${props.shape.height}` : undefined));
 

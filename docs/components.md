@@ -1101,6 +1101,14 @@ component's.
   when it failed; **`ImageViewer`** opens a picture whole, zoomed by wheel, pinch, double press or its
   buttons; **`AudioPlayer`** plays a sound over its own waveform; **`VideoPlayer`** plays a video
   (see The video player).
+- **A picture drawn small is drawn from a copy the host made near that size.** A browser shrinks a
+  picture by halving it as many times as fit and sampling the rest with no filter, so a picture drawn
+  between one and four times smaller than its file breaks into jagged edges, and no stylesheet setting
+  changes that. `LoadingImage` takes the copies a host serves as an image's candidate list, each named by
+  its width, and the width the picture is drawn at; the browser draws it from the first copy covering
+  that width at the screen's density, and the address it was handed whole stays the picture's own, the
+  one `ImageViewer` opens. Making the copies, and the widths they come at, is the host's. A picture
+  handed no copies is drawn from its own file.
 - **`AudioPlayer`'s waveform is the sound's own loudness,** read in the browser once the player comes
   near the screen. The file is fetched once per address and read no further than the waveform's
   fetch limit, whether or not the server says the length before it sends the bytes; the browser

@@ -1941,6 +1941,16 @@
           "name": "standIn",
           "type": "string | null | undefined",
           "required": false
+        },
+        {
+          "name": "sources",
+          "type": "string | undefined",
+          "required": false
+        },
+        {
+          "name": "sizes",
+          "type": "string | undefined",
+          "required": false
         }
       ],
       "slots": [],
