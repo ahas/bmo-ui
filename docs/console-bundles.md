@@ -294,6 +294,31 @@ on any release from that bound up to its own.
   a positive count on the bundle's sidebar entry. It reads the count again as it chooses; one that did
   not answer leaves the last count standing, and none is drawn before one has.
 
+## A bundle that differs per reader
+
+A console may attach, beside the bundles the services it asks serve to every reader their role allows, bundles
+that stand for one reader alone: screens of that reader's own, which no other reader is ever handed. Such a bundle
+is a bundle in every sense this contract gives the word, and differs only in who it is read for and handed to.
+
+- **It is built and read as every bundle is.** The same bundle build, on a release inside the console's range,
+  names the layer and holds the screens to their words; the console reads it through the same manifest shape and
+  the same reading, and leaves it out on the same grounds, for that reader. Its addresses follow its bytes.
+- **It is read for its reader, and handed to that reader alone.** The console finds it from wherever it keeps that
+  reader's own screens, asked for that reader, and never offers it, its words, its module or a notice of it to
+  another reader, whatever role they hold. Two readers may each hold a bundle of the same name; neither is ever
+  the other's.
+- **Its names stand where no service's do.** Its name, screen path and service name stand in a namespace the
+  console keeps for readers' own screens, which it names, and a manifest of a service standing there is left out
+  as one that clashes, so a reader's bundle never displaces a service's screen nor a service's a reader's.
+- **Its calls are relayed for its reader alone,** to whatever answers that reader's screens, on that reader's
+  behalf: no call made under another reader's sign-in reaches it, and its page reaches no service but its own.
+- **What it calls is its own, held to its own guard.** Whatever answers a reader's bundle holds the reader's
+  calls to what that reader may do there, as every service holds its routes; the console's relay spares a
+  reader a screen that would refuse them and guards nothing.
+- **A bundle whose source does not answer for its reader** is absent for that reader alone, as a service that
+  does not answer is absent; a console may say so on the screen's address in its own words, since the reader
+  knows the screen is theirs.
+
 ## A screen that moved
 
 A bundle whose screens stood under another path names that path under `formerScreenPaths`, so every address
@@ -438,6 +463,9 @@ under `calls`, and its screens hand the module texts and a language.
   own and its bound where its administrator reads them ("The layer a bundle is built on").
 - **It finds the services** as the contract states: its own list, every manifest read through the
   shared module, the absent left out and the conflicting refused.
+- **It keeps a reader's own bundles to that reader, where it attaches any** ("A bundle that differs per
+  reader"): read for the reader, handed to them alone, named in a namespace no service's manifest stands in,
+  and relayed on their behalf alone.
 - **It attaches each bundle by its manifest alone:** an entry under its title and icon leading to its
   screen path, for the readers its role allows; a relay of its service under the relay base, for the
   service's API prefix, the routes under `relays`, its module and its stylesheet; the stream and the
@@ -521,7 +549,7 @@ under `calls`, and its screens hand the module texts and a language.
 
 - **This document is the contract's one statement.** A repository whose service has a bundle, and a
   console, name this document in their own documents with the parts of it they use (a share page, a
-  sidebar count, a sidebar section, the people directory, the company's members, sharing with members, a translator) and what they add of their own. They do not copy
+  sidebar count, a sidebar section, the people directory, the company's members, sharing with members, a translator, a bundle that differs per reader) and what they add of their own. They do not copy
   its rules, its fields or its headers: a copy trails this document as soon as it changes.
 - **Conformance is held by shared checks,** never by a repository's own prose: the console face of
   the base library the services build on, which serves the manifest, the module, the stylesheet, the
