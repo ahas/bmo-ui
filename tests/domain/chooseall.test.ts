@@ -63,12 +63,14 @@ describe("what a press means", () => {
 
 describe("the line the choosing controls stand on", () => {
   // The one thing a reader takes in at a glance from a list being chosen is whether the marks
-  // stand straight. A row holds its box to the leading edge of its mark's cell, so it lands
-  // wherever the row's own leading room puts it — where the control over the list stands its box
-  // too — rather than half a cell further in.
-  test("a row holds the box to the leading edge of its cell", () => {
-    expect(CHOOSE_CELL).toContain("justify-start");
-    expect(CHOOSE_CELL).not.toContain("justify-center");
+  // stand straight, and a pressed mark's colour is read as even round it. A row centres its box in
+  // its mark's cell and hangs the cell out before the row by the room round the box, so the box
+  // lands on the row's leading line — where the control over the list stands its box too.
+  test("a row centres the box in its cell and hangs the cell out by the room round it", () => {
+    expect(CHOOSE_CELL).toContain("justify-center");
+    expect(CHOOSE_CELL).not.toContain("justify-start");
+    expect(CHOOSE_CELL).toContain("-ms-2.5 ");
+    expect(CHOOSE_CELL).toContain("pointer-coarse:-ms-3 ");
   });
 
   test("a row's mark cell is as wide as a row of one line is tall, on a finger too", () => {

@@ -46,15 +46,16 @@ export function chooseAllLabel(t: Translate, state: ChooseAllState): string {
 }
 
 // The cell a row stands its own mark in. The box is a checkbox's own size, smaller than a finger,
-// so it stands in a cell as wide as a row of one line is tall.
+// so it stands in a cell as wide as a row of one line is tall, and the hover and press colours fill
+// that cell.
 //
-// Inside that cell the box is held to the cell's leading edge rather than centred in it. Centred,
-// the box on a row would sit half a cell further in than the box of the choosing control over the
-// list, and the column of them would read as bent — the one thing a reader takes in at a glance
-// from a list being chosen is whether the marks stand straight. Held to the edge, the box lands
-// wherever the row's own leading room puts it, which is where the choosing control stands its box
-// too, so the two stand on one vertical line with nothing measured per screen.
-export const CHOOSE_CELL = "flex size-9 shrink-0 items-center justify-start rounded-md transition-colors pointer-coarse:size-10";
+// Inside that cell the box is centred, so the colour keeps the same room on every side of it. The
+// cell then hangs out before the row by that same room — half of what the cell is wider than the
+// box, on a finger too — so the box itself lands on the row's own leading line rather than half a
+// cell further in. That is where the choosing control over the list stands its box too, so the two
+// stand on one vertical line with nothing measured per screen: the one thing a reader takes in at a
+// glance from a list being chosen is whether the marks stand straight.
+export const CHOOSE_CELL = "-ms-2.5 flex size-9 shrink-0 items-center justify-center rounded-md transition-colors pointer-coarse:-ms-3 pointer-coarse:size-10";
 
 // How far a choosing control hangs outside the column its list reads in. A row's box reaches
 // outside that column by the row's own side room and insets the mark into itself by what it insets

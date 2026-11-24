@@ -1,0 +1,7 @@
+/* The harness page's sheet: the layer's own stylesheet with the utility classes the choose-all
+   control, the rows' mark cells and the page itself are drawn with. */
+@import "../../app/assets/css/main.css";
+
+@source "../../app/components/ChooseAll.vue";
+@source "../../app/domain/chooseall.ts";
+@source "./choose-cell-harness.ts";

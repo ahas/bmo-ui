@@ -135,7 +135,11 @@ whole in `docs/boundary.md`; this document says what each is for and how the lay
     `common.action.choose_all` and `common.action.choose_none` — name that end, so its words and its
     accessible name say what pressing would do.
   - A row of such a list marks itself chosen with a checkbox's own square, so one list is not read as
-    two ways of choosing.
+    two ways of choosing. The square is centred in a cell as wide as a row of one line is tall, at
+    least 40 pixels under a finger, which the hover and press colours fill with the same room on
+    every side of the box; the cell hangs out before the row by that room, so the box stands on the
+    row's leading line, on one vertical line with the box of the choosing control over the list
+    (`CHOOSE_CELL`).
   - The box is smaller than a finger, so the box and its words stand as one pressable control of the
     library's checkbox: a press on the box, on the words or on the room round them is one press, and
     the hover and press colours fill that control's own rounded shape, as a small button's do, never
