@@ -35,6 +35,16 @@ describe("the error screen", () => {
     expect(screen).toContain("await clearError({ redirect: props.home });");
   });
 
+  test("leaves the error once the router has gone back", () => {
+    expect(screen).toContain('@click="goBack"');
+    expect(screen).toMatch(/const moved = router\.afterEach\(\(\) => \{\n    moved\(\);\n    void clearError\(\);\n  \}\);\n\n  router\.back\(\);/);
+  });
+
+  test("names everything it uses, so a host that does not extend the layer can draw it", () => {
+    expect(screen).toContain('import { computed, onBeforeUnmount, onMounted, ref } from "vue";');
+    expect(screen).toContain('import { clearError, useHead } from "#imports";');
+  });
+
   test("offers going back only where the router holds the page before", () => {
     expect(screen).toContain('v-if="shown.second === \'back\' && canGoBack"');
     expect(screen).toContain("(window.history.state as { back?: unknown } | null)?.back === \"string\"");

@@ -23,7 +23,7 @@
           :label="$t('common.action.go_back')"
           class="whitespace-nowrap"
           data-error-action="back"
-          @click="router.back()"
+          @click="goBack"
         />
         <UButton
           v-else-if="shown.second === 'retry'"
@@ -54,8 +54,11 @@
 </template>
 
 <script setup lang="ts">
+import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
+
+import { clearError, useHead } from "#imports";
 
 import { ERROR_CASES, errorKind } from "../domain/error-page";
 
@@ -103,6 +106,17 @@ onBeforeUnmount(() => {
 
 async function goHome(): Promise<void> {
   await clearError({ redirect: props.home });
+}
+
+// The page before, the error left once the router has moved there: the framework keeps an error standing over every
+// page until it is cleared.
+function goBack(): void {
+  const moved = router.afterEach(() => {
+    moved();
+    void clearError();
+  });
+
+  router.back();
 }
 
 function retry(): void {
