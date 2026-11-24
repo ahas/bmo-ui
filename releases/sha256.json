@@ -388,5 +388,10 @@
     "sha256": "078a2d2cd1372b6f8f79f92a35d1937ee350eaa62d27d5cdc2824dbc9be9287f",
     "bound": "0.1.0-rev.23",
     "why": "The layer brings the app's error page, ErrorScreen and its module, and the eleven keys its words stand under; an addition that changes no export a bundle reads, so the bound stays."
+  },
+  "bmo-ui-1.0.0-0.nightly.20261124.2.tgz": {
+    "sha256": "d7ddeaa4d19be58079c7c209060add5e5b11ace25da9e047d792d56a84215732",
+    "bound": "0.1.0-rev.23",
+    "why": "The error page leaves once going back has moved and names what it uses; a fix that changes no export, so the bound stays."
   }
 }
