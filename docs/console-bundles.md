@@ -104,7 +104,7 @@ on any release from that bound up to its own.
   version, kept under the layer's `releases/` by the version's name, beside a ledger of each file's
   sha256 and bound (the README, "Version"). Every packed file is a release in this document's sense:
   the set's release, packed from the commit its tag names, or a day's nightly packed between releases,
-  as `1.1.0-nightly.20261124` and `1.1.0-nightly.20261124.2` after `1.0.0`. A service and a console
+  as `1.1.0-0.nightly.20261124` and `1.1.0-0.nightly.20261124.2` after `1.0.0`. A service and a console
   vendor that file as it stands, checked against the ledger, and never pack the layer from its source;
   so one version names one set of bytes wherever it runs.
 - **The bundle build names the layer.** A bundle is built with the layer's bundle build

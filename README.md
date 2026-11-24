@@ -88,20 +88,30 @@ testbed declaration, the Korean ledger the quick checks read, `CLAUDE.md`, and t
   commit that releases it, which is tagged `v<version>`. An export, prop, wording key or token taken
   away or changed anywhere in the set makes the release a major one, an addition a minor one, and fixes
   alone a patch.
-- **Between releases a packed file is the day's nightly,** named `<next minor>-nightly.<YYYYMMDD>`: the
-  minor above the manifest's version, then the day it was packed in the platform's time zone,
-  Asia/Seoul, as `1.1.0-nightly.20261124` after `1.0.0`. A second pack the same day is
-  `1.1.0-nightly.20261124.2`, a third `.3`, and so on. The nightly's name stands in its packed file
-  alone, in the manifest and the layer's version file packed there, never in the committed manifest;
-  semver orders every nightly after the release before it and before the release it leads to. A host
-  still pins a pack by its exact name and sha256, never by its order. `docs/boundary.md` names what
-  each packed file under an earlier numbering holds.
+- **At every set release the layer packs under the set's version:** an alpha `X.Y.Z-alpha.<N>`, a
+  beta `X.Y.Z-beta.<N>`, a release candidate `X.Y.Z-rc.<N>`, a stable release `X.Y.Z` or a patch,
+  on the commit its `v<version>` tag names.
+- **Between releases a packed file is the day's nightly,** named `X.Y.Z-0.nightly.<YYYYMMDD>`: the
+  version main leads to from the manifest's, then the day it was packed in the platform's time zone,
+  Asia/Seoul. Main leads to the minor above a stable release, as `1.1.0-0.nightly.20261124` after
+  `1.0.0`; to `X.Y.Z` itself while an alpha of `X.Y.Z` is the last release; to the minor above
+  while a beta or a release candidate of `X.Y.Z` is, since its first beta cut `release/X.Y`; and to
+  `0.2.0` before the set's first release, from `0.1.0` or a `0.1.0-rev.<n>` revision. A second pack the same
+  day is `1.1.0-0.nightly.20261124.2`, a third `.3`, and so on. The nightly's name stands in its
+  packed file alone, in the manifest and the layer's version file packed there, never in the
+  committed manifest; semver orders every nightly after the release before it and before every
+  alpha, beta, release candidate and stable release of the version it leads to. A pack named in the
+  earlier nightly form, `X.Y.Z-nightly.<YYYYMMDD>[.<n>]`, keeps its name, is ordered as the same
+  day's pack of the present form and counts among that day's packs. A host still pins a pack by its
+  exact name and sha256, never by its order. `docs/boundary.md` names what each packed file under an
+  earlier numbering holds.
 - **A pack is one packed file,** written once by the release verb, `bun run release --bound <pack>
   --why <reason>`, where `--bound this` names the pack being made. The verb packs under the
   manifest's version where the committed tree is the commit its `v<version>` tag names, and under the
   day's nightly otherwise. It refuses a pack that names no bound or no reason, a bound the ledger does
-  not name at or before this pack or that is earlier than the last pack's, a working tree with changes
-  and a name that already has a file or a ledger line; it exports the committed tree (`git archive`)
+  not name at or before this pack or that is earlier than the last pack's, a nightly that does not
+  stand after the last nightly the ledger names in that order, a working tree with changes and a name
+  that already has a file or a ledger line; it exports the committed tree (`git archive`)
   into a scratch folder, installs it, writes the pack's version into the manifest there and the
   version, the bound and the packs from the bound up to this one into the layer's version file there,
   packs it once into `releases/` under the pack's name, and adds the file's sha256, its bound and the

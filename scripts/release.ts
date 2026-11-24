@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { parseArgs } from "node:util";
 
-import { parse } from "semver";
+import { compare, parse } from "semver";
 
 // The release verb (the README, "Version"): the one way a packed file comes to exist. It packs the
 // committed tree once, from a scratch export, under the pack's version in `releases/`, and adds the
@@ -41,28 +41,83 @@ export function platformDay(at: Date): string {
   return `${part("year")}${part("month")}${part("day")}`;
 }
 
-/** The nightly a day's first pack is named for: the minor above the last release, then the day. */
-export function nightly(released: string, day: string): string {
+/**
+ * The version main's nightly leads to from the set's last release, the package's version: the minor above a stable
+ * release, a beta or a release candidate, whose first beta cut the release line's branch; the alpha's own version
+ * while an alpha is the last release; and the minor above `0.1.0` before the set's first release, from the base or
+ * one of its `0.1.0-rev.<n>` revisions.
+ */
+export function leadsTo(released: string): string {
   const last = parse(released);
 
   if (last === null) throw new Refused(`${released} is no semantic version; the package's version names the set's last release.`);
 
-  return `${last.major}.${last.minor + 1}.0-nightly.${day}`;
+  const minorAbove = `${last.major}.${last.minor + 1}.0`;
+  const kind = last.prerelease[0];
+
+  if (kind === undefined) return minorAbove;
+  if (kind === "alpha") return `${last.major}.${last.minor}.${last.patch}`;
+  if (kind === "beta" || kind === "rc" || kind === "rev") return minorAbove;
+
+  throw new Refused(`${released} is no release the set makes; the package's version names a stable release, an alpha, a beta, a release candidate or a 0.1.0-rev revision.`);
+}
+
+/** The nightly a day's first pack is named for: the version main leads to, then the day. */
+export function nightly(released: string, day: string): string {
+  return `${leadsTo(released)}-0.nightly.${day}`;
+}
+
+/**
+ * A version read in the present nightly form: a pack named in the earlier form, `X.Y.Z-nightly.<YYYYMMDD>[.<n>]`,
+ * stands as the same day's pack of the present form, `X.Y.Z-0.nightly.<YYYYMMDD>[.<n>]`; every other version as it
+ * is. Its file keeps the name it was packed under.
+ */
+export function presentForm(version: string): string {
+  const read = parse(version);
+
+  if (read === null || read.prerelease[0] !== "nightly") return version;
+
+  return `${read.major}.${read.minor}.${read.patch}-0.${read.prerelease.join(".")}`;
+}
+
+/** Whether a version is a day's nightly, in either form. */
+export function isNightly(version: string): boolean {
+  const read = parse(presentForm(version));
+
+  return read !== null && read.prerelease[0] === 0 && read.prerelease[1] === "nightly";
+}
+
+/** The order of two packs' versions: semver's, each read in the present nightly form. */
+export function packOrder(left: string, right: string): number {
+  return compare(presentForm(left), presentForm(right));
 }
 
 /**
  * The version the committed tree packs under: the package's version where the tree is that release's commit,
- * tagged `v<version>`, else the day's nightly, with `.<n>` from 2 for each later pack of the same day.
+ * tagged `v<version>`, else the day's nightly, with `.<n>` from 2 for each later pack of the same day in either
+ * nightly form.
  */
 export function packVersion(declared: string, tags: string[], day: string, ledger: Ledger): string {
   if (tags.includes(`v${declared}`)) return declared;
 
   const first = nightly(declared, day);
+  const packed = new Set(released(ledger).map(presentForm));
   let version = first;
 
-  for (let n = 2; releaseFile(version) in ledger; n += 1) version = `${first}.${n}`;
+  for (let n = 2; packed.has(version); n += 1) version = `${first}.${n}`;
 
   return version;
+}
+
+/** Why a nightly cannot be packed, or null where it can: it stands after the last nightly the ledger names. */
+export function nightlyRefusal(ledger: Ledger, version: string): string | null {
+  if (!isNightly(version)) return null;
+
+  const last = released(ledger).filter(isNightly).at(-1);
+
+  if (last === undefined || packOrder(version, last) > 0) return null;
+
+  return `${version} does not stand after ${last}, the last nightly packed; a nightly is later than every nightly before it.`;
 }
 
 /** The name a version's packed file stands under in `releases/`. */
@@ -198,6 +253,10 @@ async function release(root: string, args: string[]): Promise<string> {
     if (file in ledger || (await Bun.file(join(releases, file)).exists())) {
       throw new Refused(`${version} has a packed file already; a release is packed once.`);
     }
+
+    const behind = nightlyRefusal(ledger, version);
+
+    if (behind !== null) throw new Refused(behind);
 
     const bound = asked.bound === THIS_PACK ? version : asked.bound;
     const refused = boundRefusal(ledger, bound, version);

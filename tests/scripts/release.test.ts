@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { readdirSync } from "node:fs";
 
-import { LEDGER, THIS_PACK, boundAsked, boundRefusal, nightly, packVersion, platformDay, rangeFrom, released, releaseFile, sha256, sourceLayer, versionOf } from "../../scripts/release";
+import { LEDGER, THIS_PACK, boundAsked, boundRefusal, isNightly, leadsTo, nightly, nightlyRefusal, packOrder, packVersion, platformDay, presentForm, rangeFrom, released, releaseFile, sha256, sourceLayer, versionOf } from "../../scripts/release";
 import { LAYER_BOUND, LAYER_RANGE, LAYER_VERSION } from "../../shared/console-manifest";
 
 import type { Ledger } from "../../scripts/release";
@@ -61,26 +61,62 @@ describe("the version a pack takes", () => {
     expect(packVersion("1.0.0", ["v0.9.0", "v1.0.0", "other"], "20261124", standing)).toBe("1.0.0");
   });
 
-  test("is the day's nightly, the minor above the last release, on a commit no release tag names", () => {
-    expect(packVersion("1.0.0", [], "20261124", standing)).toBe("1.1.0-nightly.20261124");
-    expect(packVersion("1.0.0", ["v0.9.0"], "20261124", standing)).toBe("1.1.0-nightly.20261124");
-    expect(nightly("1.2.3", "20270102")).toBe("1.3.0-nightly.20270102");
-    expect(nightly("0.1.0-rev.73", "20261124")).toBe("0.2.0-nightly.20261124");
+  test("is the day's nightly of the version main leads to, on a commit no release tag names", () => {
+    expect(packVersion("1.0.0", [], "20261124", standing)).toBe("1.1.0-0.nightly.20261124");
+    expect(packVersion("1.0.0", ["v0.9.0"], "20261124", standing)).toBe("1.1.0-0.nightly.20261124");
+    expect(nightly("1.2.3", "20270102")).toBe("1.3.0-0.nightly.20270102");
   });
 
-  test("counts a second pack of the same day from 2", () => {
-    const once: Ledger = { ...standing, [releaseFile("1.1.0-nightly.20261124")]: entry("1.0.0-rev.3") };
-    const twice: Ledger = { ...once, [releaseFile("1.1.0-nightly.20261124.2")]: entry("1.0.0-rev.3") };
-
-    expect(packVersion("1.0.0", [], "20261124", once)).toBe("1.1.0-nightly.20261124.2");
-    expect(packVersion("1.0.0", [], "20261124", twice)).toBe("1.1.0-nightly.20261124.3");
-    expect(packVersion("1.0.0", [], "20261125", twice)).toBe("1.1.0-nightly.20261125");
+  test("leads to the minor above a stable release, a beta or a release candidate, and to an alpha's own version", () => {
+    expect(leadsTo("1.0.0")).toBe("1.1.0");
+    expect(leadsTo("1.0.1")).toBe("1.1.0");
+    expect(leadsTo("1.1.0-alpha.2")).toBe("1.1.0");
+    expect(leadsTo("1.1.0-beta.1")).toBe("1.2.0");
+    expect(leadsTo("1.1.0-rc.3")).toBe("1.2.0");
   });
 
-  test("orders every nightly after the last release and before the release it leads to", () => {
-    const ordered = ["1.0.0", "1.1.0-nightly.20261124", "1.1.0-nightly.20261124.2", "1.1.0-nightly.20261125", "1.1.0"];
+  test("leads to 0.2.0 before the set's first release", () => {
+    expect(leadsTo("0.1.0")).toBe("0.2.0");
+    expect(leadsTo("0.1.0-rev.73")).toBe("0.2.0");
+  });
+
+  test("counts a second pack of the same day from 2, among the day's packs in either nightly form", () => {
+    const once: Ledger = { ...standing, [releaseFile("1.1.0-0.nightly.20261124")]: entry("1.0.0-rev.3") };
+    const twice: Ledger = { ...once, [releaseFile("1.1.0-0.nightly.20261124.2")]: entry("1.0.0-rev.3") };
+    const earlier: Ledger = { ...standing, [releaseFile("1.1.0-nightly.20261124")]: entry("1.0.0-rev.3"), [releaseFile("1.1.0-nightly.20261124.2")]: entry("1.0.0-rev.3") };
+
+    expect(packVersion("1.0.0", [], "20261124", once)).toBe("1.1.0-0.nightly.20261124.2");
+    expect(packVersion("1.0.0", [], "20261124", twice)).toBe("1.1.0-0.nightly.20261124.3");
+    expect(packVersion("1.0.0", [], "20261125", twice)).toBe("1.1.0-0.nightly.20261125");
+    expect(packVersion("1.0.0", [], "20261124", earlier)).toBe("1.1.0-0.nightly.20261124.3");
+  });
+
+  test("orders every nightly after the last release and before every alpha, beta, candidate and the release it leads to", () => {
+    const ordered = ["1.0.0", "1.1.0-0.nightly.20261124", "1.1.0-0.nightly.20261124.2", "1.1.0-0.nightly.20261125", "1.1.0-alpha.1", "1.1.0-beta.1", "1.1.0-rc.1", "1.1.0"];
 
     expect([...ordered].reverse().sort(Bun.semver.order)).toEqual(ordered);
+    expect([...ordered].reverse().sort(packOrder)).toEqual(ordered);
+  });
+
+  test("orders a pack in the earlier nightly form as the same day's pack of the present form", () => {
+    const ordered = ["0.1.0-rev.73", "0.2.0-nightly.20261124", "0.2.0-nightly.20261124.2", "0.2.0-0.nightly.20261124.3", "0.2.0-0.nightly.20261125", "0.2.0"];
+
+    expect([...ordered].reverse().sort(packOrder)).toEqual(ordered);
+    expect(presentForm("0.2.0-nightly.20261124.2")).toBe("0.2.0-0.nightly.20261124.2");
+    expect(presentForm("1.1.0-beta.1")).toBe("1.1.0-beta.1");
+    expect([isNightly("0.2.0-nightly.20261124"), isNightly("0.2.0-0.nightly.20261124"), isNightly("0.2.0-alpha.1"), isNightly("0.2.0")]).toEqual([true, true, false, false]);
+  });
+
+  test("stands after the last nightly packed, and is refused where it does not", () => {
+    const earlier: Ledger = { ...standing, [releaseFile("0.2.0-nightly.20261124.2")]: entry("1.0.0-rev.3") };
+    const alpha: Ledger = { ...standing, [releaseFile("1.1.0-0.nightly.20261124")]: entry("1.0.0-rev.3"), [releaseFile("1.1.0-alpha.1")]: entry("1.0.0-rev.3") };
+
+    expect(nightlyRefusal(standing, "0.2.0-0.nightly.20261124")).toBeNull();
+    expect(nightlyRefusal(earlier, "0.2.0-0.nightly.20261124.3")).toBeNull();
+    expect(nightlyRefusal(earlier, "0.2.0-0.nightly.20261125")).toBeNull();
+    expect(nightlyRefusal(earlier, "0.2.0-0.nightly.20261123")).toContain("does not stand after 0.2.0-nightly.20261124.2");
+    expect(nightlyRefusal(alpha, "1.1.0-0.nightly.20261125")).toBeNull();
+    expect(nightlyRefusal(earlier, "0.1.1")).toBeNull();
   });
 
   test("names its day in the platform's time zone", () => {
@@ -88,8 +124,9 @@ describe("the version a pack takes", () => {
     expect(platformDay(new Date("2026-11-23T15:00:00Z"))).toBe("20261124");
   });
 
-  test("is refused where the package's version is no semantic version", () => {
+  test("is refused where the package's version is no semantic version or no release the set makes", () => {
     expect(() => nightly("next", "20261124")).toThrow("no semantic version");
+    expect(() => leadsTo("1.1.0-preview.1")).toThrow("no release the set makes");
   });
 });
 

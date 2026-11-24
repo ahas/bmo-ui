@@ -568,10 +568,12 @@ Every token is a custom property stated by the layer's stylesheet on the root un
 - **It stands on registry packages alone;** no other repository is a dependency.
 - **One version for the whole repository,** the manifest's, which is the BMO set's and moves only at
   a set release; the README states what may change at which release.
-- **One packed file per pack,** under the set's release on the commit its `v<version>` tag names and
-  under the day's nightly, `<next minor>-nightly.<YYYYMMDD>` with `.<n>` from 2 for a later pack of
-  the same day, on any other commit (the README, "Version"). Each is written by the release verb alone
-  under `releases/`, its sha256
+- **One packed file per pack,** under the set's release, an alpha, a beta, a release candidate, a
+  stable release or a patch, on the commit its `v<version>` tag names, and under the day's nightly,
+  `X.Y.Z-0.nightly.<YYYYMMDD>` of the version main leads to with `.<n>` from 2 for a later pack of the
+  same day, on any other commit (the README, "Version"). A pack named in the earlier nightly form,
+  `X.Y.Z-nightly.<YYYYMMDD>[.<n>]`, keeps its name and is read as the same day's pack of the present
+  form. Each is written by the release verb alone under `releases/`, its sha256
   in the ledger `releases/sha256.json`: a JSON object holding, under each packed file's name, an
   object of its `sha256` written in lowercase hexadecimal, its `bound`, the version of the oldest
   release whose bundles still run on it unchanged, and `why`, the reason for that bound, in the order
