@@ -31,10 +31,12 @@
               :class="[wide ? 'min-w-[16rem]' : '', inline ? 'flex items-center' : '']"
             >
               <!-- A notice of one line keeps its keys on that line, centred on it; one that says more
-                   lays them under its words. -->
+                   lays them under its words. The words' hover and press colour the whole pill, edge to
+                   edge and behind the keys, rather than a block of its own that would end against
+                   them; a key keeps its own colours over it. -->
               <button
                 type="button"
-                class="flex cursor-pointer items-start gap-3 p-4 text-start transition-colors hover:bg-white/10 active:bg-white/20 focus-inset"
+                class="bmo-island-words flex cursor-pointer items-start gap-3 p-4 text-start focus-inset"
                 :class="inline ? 'min-w-0 flex-1' : 'w-full'"
                 @click="press()"
               >
@@ -176,6 +178,19 @@ async function take(action: IslandAction): Promise<void> {
   transition:
     width var(--bmo-motion-unfold) var(--bmo-ease-move),
     height var(--bmo-motion-unfold) var(--bmo-ease-move);
+}
+
+/* Pressing the words is pressing the notice, so their hover and press tint the whole pill: one layer
+   of white over whichever surface the mode draws, the keys standing on it with their own colours. A
+   hover is drawn only where a pointer hovers, as the library's own hover is. */
+@media (hover: hover) {
+  .bmo-island:has(.bmo-island-words:hover) {
+    background-image: linear-gradient(rgb(255 255 255 / 0.1), rgb(255 255 255 / 0.1));
+  }
+}
+
+.bmo-island:has(.bmo-island-words:active) {
+  background-image: linear-gradient(rgb(255 255 255 / 0.2), rgb(255 255 255 / 0.2));
 }
 
 /* It comes out of no place in particular, so it does not grow out of one: it unfolds sideways from

@@ -131,8 +131,11 @@ describe("what pressing it does", () => {
     expect(island).toContain("await navigateTo(now.to)");
   });
 
-  test("and being pressable it carries a hover and a press colour, neither of them its resting one", () => {
-    expect(island).toContain("hover:bg-white/10 active:bg-white/20");
+  // The colour is the whole pill's, so no block of the words' own ends against a key beside them.
+  test("and being pressable it carries a hover and a press colour over the whole pill, neither its resting one", () => {
+    expect(island).toContain(".bmo-island:has(.bmo-island-words:hover)");
+    expect(island).toContain(".bmo-island:has(.bmo-island-words:active)");
+    expect(island).not.toContain("hover:bg-white/10 active:bg-white/20");
     expect(island).toContain("focus-inset");
   });
 
