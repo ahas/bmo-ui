@@ -81,9 +81,9 @@ testbed declaration, the Korean ledger the quick checks read, `CLAUDE.md`, and t
 
 ## Version
 
-- **One version for the whole repository,** the manifest's, and it is the BMO set's: the layer stands at
-  the version every unit of the set stands at (bmo-chat's `docs/conventions.md`, "Versions"), following
-  semantic versioning over the boundary that `docs/boundary.md` states.
+- **One version for the whole repository,** the manifest's, and it is the set's: the layer stands at the
+  version every unit of the set stands at, following semantic versioning over the boundary that
+  `docs/boundary.md` states.
 - **The manifest's version moves only at a set release,** the owner's word for the whole set, in the
   commit that releases it, which is tagged `v<version>`. An export, prop, wording key or token taken
   away or changed anywhere in the set makes the release a major one, an addition a minor one, and fixes
