@@ -50,6 +50,7 @@ wording keys listed here are the ones the layer's list holds.
 | `DataTable` | The shared table: sideways scroll, stuck names, movable widths, labelled parts, three layouts. |
 | `DataTableSkeleton` | The shared table's placeholder, its head and rows in the table's own columns, box and height. |
 | `DateCalendar` | The one calendar a date is chosen on, the library's own, each paging button named in the host's words in the shared tooltip. |
+| `ErrorScreen` | A page that cannot be shown, as one of four cases read off its status: the case's icon, the status small, its title and line, and the way to the app's start beside going back or loading again; the error's own message and stack in development alone. |
 | `FilesConflictDialog` | The one question when a change would land on names already taken. |
 | `FilesNameField` | A name renamed in place, chosen up to its ending. |
 | `FilesProgress` | An upload's progress, by files and by bytes, with a bar. |
@@ -117,6 +118,7 @@ Each is named with everything it exports.
 | `diagram` | `isDiagram`, `drawDiagrams` |
 | `dialog-origin` | `Press`, `originOf`, `watchDialogOrigins` |
 | `dragselect` | `draggedSelection`, `edgeScroll`, `PressKind`, `DragSelectList`, `useDragSelect` |
+| `error-page` | `ErrorKind`, `ErrorCase`, `ERROR_CASES`, `errorKind` |
 | `errors` | `failureText`, `answeredLate` |
 | `file-icons` | `fileIcon`, `folderIcon`, `iconNames` |
 | `floating-drag` | `DragPoint`, `DragBounds`, `DragSide`, `dragSlop`, `isDrag`, `clampTo`, `settledSide`, `glideFrom`, `FloatingDrag`, `FloatingDragHandle`, `useFloatingDrag` |
@@ -192,6 +194,9 @@ Each is named with everything it exports.
   as untranslated readings, each its original, not whole, with `untranslated` set. Any other refusal,
   a call that fails and a host naming no translator are each an `Untranslated` failure; the batches
   answered before a failure stay kept.
+- **`error-page` reads a page's error as one of its four cases** (`docs/components.md`, "The error
+  page"): `errorKind` takes the error's status and whether the browser reports itself offline, and
+  `ERROR_CASES` gives each case its icon, the keys of its title and its line, and its second action.
 - **`numbers` and `time` read the host's locale and zone** (see What the host owes) each time they
   write, so they import no locale and nothing is read before the app stands. `countLocale` answers
   the locale figures are written in: the host's tag, or nothing where none is set, which is the
@@ -316,14 +321,14 @@ What a coding harness takes the layer through (`docs/harness.md`).
 
 ## Wording keys
 
-The layer reads these 149 keys and no others. The `wording-keys` shared module lists them, the one
+The layer reads these 161 keys and no others. The `wording-keys` shared module lists them, the one
 list a host's pack is held to. Placeholders are named after each key.
 
 - **`common.action`:** `add_choice` `{value}`, `cancel`, `choose_all`, `choose_none`, `close`, `close_all_tabs`,
   `close_other_tabs`, `close_right_tabs`, `collapse`, `copy`, `create_link`, `discard`,
-  `exit_fullscreen`, `expand`, `fit_screen`, `fullscreen`, `more`, `mute`, `next_month`,
+  `exit_fullscreen`, `expand`, `fit_screen`, `fullscreen`, `go_back`, `go_home`, `more`, `mute`, `next_month`,
   `next_picture`, `next_year`, `next_years`, `page_back`, `page_forward`, `pause`, `pin`, `play`,
-  `play_now`, `previous_month`, `previous_picture`, `previous_year`, `previous_years`, `refresh`, `save`,
+  `play_now`, `previous_month`, `previous_picture`, `previous_year`, `previous_years`, `refresh`, `retry`, `save`,
   `see_all`, `share`, `skip_back` `{n}`, `skip_forward` `{n}`, `subtitles`, `turn_picture`, `unmute`,
   `unpin`, `unshare`, `zoom_in`, `zoom_out`.
 - **`common.aria`:** `close_named` `{name}`, `column_width` `{name}`, `decrease`, `download_named`
@@ -344,22 +349,24 @@ list a host's pack is held to. Placeholders are named after each key.
   module's short day is written in, the year in two figures), `speed_normal` `{speed}`,
   `subtitles_off`, `theme_forest`, `theme_sea`, `theme_sunset`, `theme_teal`, `theme_violet`,
   `unplayable`, `volume`.
-- **`common.message`:** `link_copied`, and the theme preview's words:
-  `preview_badge`, `preview_field`, `preview_link`, `preview_meta`, `preview_note`.
+- **`common.message`:** `link_copied`, the theme preview's words:
+  `preview_badge`, `preview_field`, `preview_link`, `preview_meta`, `preview_note`, and the error
+  page's lines: `no_permission`, `page_failed`, `page_not_found`, `unreachable`.
 - **`common.placeholder`:** `member_search`, `search`.
 - **`common.status`:** `brightness` `{n}`, `copied`, `loading`, `members_loading`, `muted`,
   `next_in` `{n}`, `no_choices`, `no_match`, `no_members`, `picture_loading`, `share_loading`, `speed` `{speed}`, `subtitles_off`,
   `subtitles_on` `{name}`, `turned` `{degrees}`, `unmuted`, `video_loading`, `volume` `{n}`,
   `went_back` `{n}`, `went_forward` `{n}`.
-- **`common.title`:** `discard_changes`, `share`.
+- **`common.title`:** `discard_changes`, `share`, and the error page's titles: `no_permission`,
+  `page_failed`, `page_not_found`, `unreachable`.
 - **`files.action`:** `keep_both`, `replace`, `skip`.
 - **`files.aria`:** `name_field`.
 - **`files.label`:** `progress` `{done}` `{all}` `{percent}`.
 - **`files.message`:** `conflict`.
 - **`files.status`:** `uploading`.
 
-That is 38 actions, 17 accessible names, 11 errors, 38 labels, 6 messages, a placeholder, 18
-statuses and 2 titles under `common`, and 7 keys under `files`.
+That is 48 actions, 18 accessible names, 12 errors, 38 labels, 10 messages, 2 placeholders, 20
+statuses and 6 titles under `common`, and 7 keys under `files`.
 
 ## Tokens
 
@@ -468,6 +475,8 @@ Every token is a custom property stated by the layer's stylesheet on the root un
   and foot at every width, and their close in the head's row on the title's centre line; sheets
   clear of the safe area; popovers held to their room; the message bar's focus on its bar; text
   areas at full width.
+- **The layer's error page** (`docs/components.md`, "The error page") stands in place of the
+  framework's own in every host that brings none of its own.
 - **The layer's Nuxt configuration** brings the library as its module with its semantic colours, the
   layer's stylesheet, the viewport meta (`viewport-fit=cover`, the keyboard resizing the content), the
   screen mode (dark until a reader chooses another, kept for a year in the cookie `screen-mode`

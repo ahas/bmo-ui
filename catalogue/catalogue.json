@@ -1221,6 +1221,44 @@
       "example": "<UPopover>\n  <UButton color=\"neutral\" variant=\"outline\" icon=\"i-material-symbols-calendar-today-outline\" :label=\"day?.toString() ?? t('notes.placeholder.day')\" />\n\n  <template #content>\n    <DateCalendar v-model=\"day\" class=\"p-2\" />\n  </template>\n</UPopover>"
     },
     {
+      "name": "ErrorScreen",
+      "kind": "component",
+      "line": "A page that cannot be shown, as one of four cases read off its status: the case's icon, the status small, its title and line, and the way to the app's start beside going back or loading again; the error's own message and stack in development alone.",
+      "props": [
+        {
+          "name": "status",
+          "type": "number | undefined",
+          "required": false,
+          "default": "undefined",
+          "description": "The error's status, where it has one."
+        },
+        {
+          "name": "home",
+          "type": "string | undefined",
+          "required": false,
+          "default": "\"/\"",
+          "description": "The path of the app's start the primary action goes to, under the app's base path."
+        },
+        {
+          "name": "message",
+          "type": "string | undefined",
+          "required": false,
+          "default": "undefined",
+          "description": "The error's own message, drawn in development alone."
+        },
+        {
+          "name": "stack",
+          "type": "string | undefined",
+          "required": false,
+          "default": "undefined",
+          "description": "The error's own stack, drawn in development alone."
+        }
+      ],
+      "slots": [],
+      "events": [],
+      "example": "<UApp :tooltip=\"TOOLTIP_PROVIDER\" :toaster=\"null\">\n  <ErrorScreen :status=\"error.statusCode\" home=\"/notes\" />\n</UApp>"
+    },
+    {
       "name": "FilesConflictDialog",
       "kind": "component",
       "line": "The one question when a change would land on names already taken.",

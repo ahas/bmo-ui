@@ -1086,6 +1086,32 @@ component's.
   at a narrow width the box scrolls sideways as the table's does, and no column name is cut.
   - A column whose name is not known yet waits with a bar in the head, in its own column.
 
+## The error page
+
+- **A page that cannot be shown is shown as the layer's error page, never the framework's.** The layer
+  brings the app's error page, Nuxt's `error.vue` in its source folder, so every host extending the layer
+  shows it for any error that stands in place of a page: a path no page answers, a refusal, a server's
+  failure, on the server's first answer and in the browser alike. A host's own error page stands over the
+  layer's. The app's root is not drawn while the error page stands, so the page stands the library's
+  `UApp` of its own, handed the tooltip module's setting, and draws `ErrorScreen` filling the screen.
+- **`ErrorScreen` says what happened as one of four cases,** read off the error's status by the
+  error-page module: not found (404, 410), no permission (401, 403), unreachable (502, 503 and 504, and
+  any error while the browser reports itself offline), and every other failure. Each case has its
+  Material Symbols icon, its title, one line saying what happened and its second action; the status
+  stands small above the title, as figures. A component that knows no status draws the failure.
+- **A person never reads the error's own message or its stack.** Only in development does the page hold
+  them, under a fold below the actions, in the monospace face, the message as the fold's summary.
+- **Two actions, the second first and the primary last, at the right end of their row.** The primary
+  goes to the app's start, the root of its base path unless the host hands the screen another path,
+  clearing the error as it goes. The second goes back where the browser holds a page of this app to go
+  back to, for not found and no permission, and loads the page again for unreachable and failure. Where
+  the browser holds no such page the primary stands alone.
+- **One block, centred on the screen both ways,** its words starting at its left edge, at most 448
+  pixels wide, with the panel's own gutter of 16 pixels on a phone and 24 wider round it; a screen
+  shorter than the block scrolls it. Its ground is the screen mode's own, in the light mode and the
+  dark alike, and its words are the host's pack's (`docs/boundary.md`, "Wording keys"). The browser
+  tab carries the case's title.
+
 ## Skeletons and loading
 
 - **`SkeletonBar`** is the one shimmering bar every placeholder is drawn from. It hides itself from
