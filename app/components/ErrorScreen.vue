@@ -3,7 +3,7 @@
        page"): one block centred on the screen, its words from its left edge, its actions at the right end of
        their row with the primary last. A person reads the case alone; the error's own message and stack stand
        under a fold in development and nowhere else. -->
-  <main class="flex min-h-dvh overflow-y-auto bg-default p-4 sm:p-6" data-error-screen :data-error-kind="kind">
+  <main class="flex min-h-(--bmo-screen) overflow-y-auto bg-default p-4 sm:p-6" data-error-screen :data-error-kind="kind">
     <div class="m-auto flex w-full max-w-md flex-col gap-6">
       <div class="flex flex-col gap-3">
         <UIcon :name="shown.icon" class="size-10 text-muted" aria-hidden="true" />
