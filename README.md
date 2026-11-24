@@ -96,7 +96,7 @@ testbed declaration, the Korean ledger the quick checks read, `CLAUDE.md`, and t
   Asia/Seoul. Main leads to the minor above a stable release, as `1.1.0-0.nightly.20261124` after
   `1.0.0`; to `X.Y.Z` itself while an alpha of `X.Y.Z` is the last release; to the minor above
   while a beta or a release candidate of `X.Y.Z` is, since its first beta cut `release/X.Y`; and to
-  `0.2.0` before the set's first release, from `0.1.0` or a `0.1.0-rev.<n>` revision. A second pack the same
+  `1.0.0`, the set's first release, before it, from `0.1.0` or a `0.1.0-rev.<n>` revision. A second pack the same
   day is `1.1.0-0.nightly.20261124.2`, a third `.3`, and so on. The nightly's name stands in its
   packed file alone, in the manifest and the layer's version file packed there, never in the
   committed manifest; semver orders every nightly after the release before it and before every

@@ -44,13 +44,15 @@ export function platformDay(at: Date): string {
 /**
  * The version main's nightly leads to from the set's last release, the package's version: the minor above a stable
  * release, a beta or a release candidate, whose first beta cut the release line's branch; the alpha's own version
- * while an alpha is the last release; and the minor above `0.1.0` before the set's first release, from the base or
- * one of its `0.1.0-rev.<n>` revisions.
+ * while an alpha is the last release; and `1.0.0`, the set's first release, before it, from a version of major 0, the
+ * base or one of its `0.1.0-rev.<n>` revisions.
  */
 export function leadsTo(released: string): string {
   const last = parse(released);
 
   if (last === null) throw new Refused(`${released} is no semantic version; the package's version names the set's last release.`);
+
+  if (last.major === 0) return "1.0.0";
 
   const minorAbove = `${last.major}.${last.minor + 1}.0`;
   const kind = last.prerelease[0];

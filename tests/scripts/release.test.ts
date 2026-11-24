@@ -75,9 +75,9 @@ describe("the version a pack takes", () => {
     expect(leadsTo("1.1.0-rc.3")).toBe("1.2.0");
   });
 
-  test("leads to 0.2.0 before the set's first release", () => {
-    expect(leadsTo("0.1.0")).toBe("0.2.0");
-    expect(leadsTo("0.1.0-rev.73")).toBe("0.2.0");
+  test("leads to 1.0.0, the set's first release, before it", () => {
+    expect(leadsTo("0.1.0")).toBe("1.0.0");
+    expect(leadsTo("0.1.0-rev.73")).toBe("1.0.0");
   });
 
   test("counts a second pack of the same day from 2, among the day's packs in either nightly form", () => {
