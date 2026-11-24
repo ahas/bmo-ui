@@ -378,5 +378,10 @@
     "sha256": "aaf9b2df7e4fb4ff5013d7f8979045f4f2f66cbeb8a1cbada88d150d4d595222",
     "bound": "0.1.0-rev.23",
     "why": "The message island tints as a whole when its words are hovered or pressed; a styling fix that changes no export, so the bound stays."
+  },
+  "bmo-ui-0.2.0-nightly.20261124.2.tgz": {
+    "sha256": "ae3eb7eae04b721e20dff29d2b800fd1721747bb733207c3da1ffd55190d41b1",
+    "bound": "0.1.0-rev.23",
+    "why": "A row's mark stands centred in its cell, which hangs out by the room round the box; a styling fix that changes no export, so the bound stays."
   }
 }
