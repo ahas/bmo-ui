@@ -398,5 +398,10 @@
     "sha256": "5ed016b38264a3f845337e47d69c1a36d6409781984c10f2a50e9483d9d31412",
     "bound": "0.1.0-rev.23",
     "why": "A tab row's active line stands at the row's bottom edge before the sliding line stands, so the row never scrolls vertically; a fix that changes no export, so the bound stays."
+  },
+  "bmo-ui-1.1.0-0.nightly.20261125.tgz": {
+    "sha256": "e558df94169424c1257ac23b17a1871388b8564f71511cc24813a9ae3a3ae14c",
+    "bound": "0.1.0-rev.23",
+    "why": "The layer brings the next-pages module and NextPageFoot, the foot of a list read a page at a time with a failed page's retry; an addition that changes no export a bundle reads, so the bound stays."
   }
 }
