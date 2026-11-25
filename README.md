@@ -81,22 +81,26 @@ testbed declaration, the Korean ledger the quick checks read, `CLAUDE.md`, and t
 
 ## Version
 
-- **One version for the whole repository,** the manifest's, and it is the set's: the layer stands at the
-  version every unit of the set stands at, following semantic versioning over the boundary that
-  `docs/boundary.md` states.
-- **The manifest's version moves only at a set release,** the owner's word for the whole set, in the
-  commit that releases it, which is tagged `v<version>`. An export, prop, wording key or token taken
-  away or changed anywhere in the set makes the release a major one, an addition a minor one, and fixes
-  alone a patch.
-- **At every set release the layer packs under the set's version:** an alpha `X.Y.Z-alpha.<N>`, a
-  beta `X.Y.Z-beta.<N>`, a release candidate `X.Y.Z-rc.<N>`, a stable release `X.Y.Z` or a patch,
-  on the commit its `v<version>` tag names.
-- **Between releases a packed file is the day's nightly,** named `X.Y.Z-0.nightly.<YYYYMMDD>`: the
-  version main leads to from the manifest's, then the day it was packed in the platform's time zone,
+- **One version for the whole repository,** and it is the set's: the layer stands at the version every
+  unit of the set stands at, following semantic versioning over the boundary that `docs/boundary.md`
+  states. It is read off the git tags, never off a committed file (bmo-chat's `docs/conventions.md`,
+  「Versions」); the manifest's version and the source's layer version are a placeholder that never
+  moves.
+- **A version moves only at a set release,** the owner's word for the whole set, which tags the commit
+  main stands at `v<version>` and commits nothing. An export, prop, wording key or token taken away or
+  changed anywhere in the set makes the release a major one, an addition a minor one, and fixes alone a
+  patch.
+- **A pack made on a release's tagged commit packs under the release's version:** an alpha
+  `X.Y.Z-alpha.<N>`, a beta `X.Y.Z-beta.<N>`, a release candidate `X.Y.Z-rc.<N>`, a stable release
+  `X.Y.Z` or a patch. Writing it is a commit of this repository's own after the tag, and no part of the
+  release.
+- **Any other packed file is the day's nightly,** named `X.Y.Z-0.nightly.<YYYYMMDD>`: the version main
+  leads to from the newest release tag the commit reaches, then the day it was packed in the platform's time zone,
   Asia/Seoul. Main leads to the minor above a stable release, as `1.1.0-0.nightly.20261124` after
   `1.0.0`; to `X.Y.Z` itself while an alpha of `X.Y.Z` is the last release; to the minor above
   while a beta or a release candidate of `X.Y.Z` is, since its first beta cut `release/X.Y`; and to
-  `1.0.0`, the set's first release, before it, from `0.1.0` or a `0.1.0-rev.<n>` revision. A second pack the same
+  `1.0.0`, the set's first release, before any release tag. A tag of major 0 or of another pre-release word,
+  an upstream's among them, names no release. A second pack the same
   day is `1.1.0-0.nightly.20261124.2`, a third `.3`, and so on. The nightly's name stands in its
   packed file alone, in the manifest and the layer's version file packed there, never in the
   committed manifest; semver orders every nightly after the release before it and before every
@@ -106,9 +110,9 @@ testbed declaration, the Korean ledger the quick checks read, `CLAUDE.md`, and t
   exact name and sha256, never by its order. `docs/boundary.md` names what each packed file under an
   earlier numbering holds.
 - **A pack is one packed file,** written once by the release verb, `bun run release --bound <pack>
-  --why <reason>`, where `--bound this` names the pack being made. The verb packs under the
-  manifest's version where the committed tree is the commit its `v<version>` tag names, and under the
-  day's nightly otherwise. It refuses a pack that names no bound or no reason, a bound the ledger does
+  --why <reason>`, where `--bound this` names the pack being made. The verb packs under the release's
+  version where the committed tree is the commit its `v<version>` tag names, and under the day's nightly
+  otherwise. It refuses a pack that names no bound or no reason, a bound the ledger does
   not name at or before this pack or that is earlier than the last pack's, a nightly that does not
   stand after the last nightly the ledger names in that order, a working tree with changes and a name
   that already has a file or a ledger line; it exports the committed tree (`git archive`)
@@ -121,7 +125,7 @@ testbed declaration, the Korean ledger the quick checks read, `CLAUDE.md`, and t
   bundle reads raises the bound to itself. A console attaches a bundle built on any release from its
   bound up to its own (`docs/console-bundles.md`, "The layer a bundle is built on").
 - **Packing runs inside the verb alone.** Packing first checks that the layer's version file names
-  the manifest's version, which only the verb writes, so `bun pm pack` in a checkout is refused. The
+  the manifest's version, which only the verb writes into the export it packs, so `bun pm pack` in a checkout is refused. The
   suite holds `releases/` and its ledger to each other, so a file the verb did not write fails it.
 - **The file holds** what the manifest's file list names: the layer's code, its stylesheet and
   fonts, the patches, the command, the MCP server, the bundle build, the catalogue module and its

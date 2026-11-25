@@ -11,7 +11,8 @@ import { compare, parse } from "semver";
 // committed tree once, from a scratch export, under the pack's version in `releases/`, and adds the
 // file's sha256 to the ledger beside it with the pack's bound: the oldest pack whose bundles still run
 // on it unchanged (`docs/console-bundles.md`, "The layer a bundle is built on"). The pack's version is
-// the set's release where the committed tree is that release's tagged commit, else the day's nightly.
+// the set's release where the committed tree is that release's tagged commit, else the day's nightly, read off the
+// tags alone.
 // It is handed the bound and the reason for it, and writes the bound and the packs from it up to this
 // one into the layer's version file it packs, which the shared module answers a console from.
 
@@ -64,6 +65,25 @@ export function leadsTo(released: string): string {
   throw new Refused(`${released} is no release the set makes; the package's version names a stable release, an alpha, a beta, a release candidate or a 0.1.0-rev revision.`);
 }
 
+/**
+ * The set's last release a commit reaches, read off the tags it reaches: the newest `v<version>` of major 1 or above
+ * that is a stable release, an alpha, a beta or a release candidate, an upstream's or any other tag counting for
+ * nothing; `0.0.0` before the set's first release, which main leads to `1.0.0` from.
+ */
+export function lastRelease(tags: string[]): string {
+  const releases = tags.flatMap((tag) => {
+    const read = parse(tag.trim().replace(/^v/, ""));
+    const kind = read?.prerelease[0];
+
+    if (read === null || !tag.trim().startsWith("v") || read.major < 1 || read.build.length > 0) return [];
+    if (kind !== undefined && kind !== "alpha" && kind !== "beta" && kind !== "rc") return [];
+
+    return [read.version];
+  });
+
+  return releases.sort(compare).at(-1) ?? "0.0.0";
+}
+
 /** The nightly a day's first pack is named for: the version main leads to, then the day. */
 export function nightly(released: string, day: string): string {
   return `${leadsTo(released)}-0.nightly.${day}`;
@@ -95,9 +115,9 @@ export function packOrder(left: string, right: string): number {
 }
 
 /**
- * The version the committed tree packs under: the package's version where the tree is that release's commit,
- * tagged `v<version>`, else the day's nightly, with `.<n>` from 2 for each later pack of the same day in either
- * nightly form.
+ * The version the committed tree packs under, from `declared`, the set's last release the tree reaches: that
+ * release where the tree is its commit, tagged `v<version>`, else the day's nightly, with `.<n>` from 2 for each
+ * later pack of the same day in either nightly form.
  */
 export function packVersion(declared: string, tags: string[], day: string, ledger: Ledger): string {
   if (tags.includes(`v${declared}`)) return declared;
@@ -245,7 +265,10 @@ async function release(root: string, args: string[]): Promise<string> {
 
     const manifestPath = join(tree, "package.json");
     const manifest = (await Bun.file(manifestPath).json()) as { version: string };
-    const declared = manifest.version;
+    // The version is read off the tags alone (bmo-chat's docs/conventions.md, "Versions"); the committed manifest's is
+    // a placeholder that never moves.
+    const placeholder = manifest.version;
+    const declared = lastRelease(run(["git", "tag", "--merged", "HEAD", "--list", "v*"], root).split("\n"));
     const ledgerPath = join(releases, LEDGER);
     const ledger = (await Bun.file(ledgerPath).json()) as Ledger;
     const tags = run(["git", "tag", "--points-at", "HEAD"], root).split("\n").map((tag) => tag.trim());
@@ -268,8 +291,8 @@ async function release(root: string, args: string[]): Promise<string> {
     const layerPath = join(tree, "shared", "layer.json");
     const layer = (await Bun.file(layerPath).json()) as { layer: string };
 
-    if (layer.layer !== sourceLayer(declared)) {
-      throw new Refused(`The layer's version file names ${layer.layer} where the package's version is ${declared}; it names ${sourceLayer(declared)} in the source.`);
+    if (layer.layer !== sourceLayer(placeholder)) {
+      throw new Refused(`The layer's version file names ${layer.layer} where the package's version is ${placeholder}; it names ${sourceLayer(placeholder)} in the source.`);
     }
 
     await Bun.write(layerPath, `${JSON.stringify({ ...layer, layer: version, bound, range: rangeFrom(ledger, bound, version) }, null, 2)}\n`);

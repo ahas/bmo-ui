@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { readdirSync } from "node:fs";
 
-import { LEDGER, THIS_PACK, boundAsked, boundRefusal, isNightly, leadsTo, nightly, nightlyRefusal, packOrder, packVersion, platformDay, presentForm, rangeFrom, released, releaseFile, sha256, sourceLayer, versionOf } from "../../scripts/release";
+import { LEDGER, THIS_PACK, boundAsked, boundRefusal, isNightly, lastRelease, leadsTo, nightly, nightlyRefusal, packOrder, packVersion, platformDay, presentForm, rangeFrom, released, releaseFile, sha256, sourceLayer, versionOf } from "../../scripts/release";
 import { LAYER_BOUND, LAYER_RANGE, LAYER_VERSION } from "../../shared/console-manifest";
 
 import type { Ledger } from "../../scripts/release";
@@ -24,6 +24,15 @@ const standing: Ledger = {
   "bmo-ui-1.0.0-rev.2.tgz": entry("1.0.0-rev.1"),
   "bmo-ui-1.0.0-rev.3.tgz": entry("1.0.0-rev.3")
 };
+
+describe("the set's last release a commit reaches", () => {
+  test("is the newest release tag of major 1 or above, an upstream's and any other counting for nothing", () => {
+    expect(lastRelease(["v1.0.0-beta.1", "v1.0.0-alpha.2", "other", ""])).toBe("1.0.0-beta.1");
+    expect(lastRelease(["v0.27.5-beta.3", "v2026.11.23-canary.455", "v0.10.0"])).toBe("0.0.0");
+    expect(lastRelease([])).toBe("0.0.0");
+    expect(leadsTo(lastRelease([]))).toBe("1.0.0");
+  });
+});
 
 describe("the packed files under releases/", () => {
   test("are each named in the ledger by their bytes' sha256, and the ledger names no other", async () => {
