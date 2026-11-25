@@ -83,9 +83,8 @@ testbed declaration, the Korean ledger the quick checks read, `CLAUDE.md`, and t
 
 - **One version for the whole repository,** and it is the set's: the layer stands at the version every
   unit of the set stands at, following semantic versioning over the boundary that `docs/boundary.md`
-  states. It is read off the git tags, never off a committed file (bmo-chat's `docs/conventions.md`,
-  「Versions」); the manifest's version and the source's layer version are a placeholder that never
-  moves.
+  states. It is read off the git tags, never off a committed file; the manifest's version and the source's
+  layer version are a placeholder that never moves.
 - **A version moves only at a set release,** the owner's word for the whole set, which tags the commit
   main stands at `v<version>` and commits nothing. An export, prop, wording key or token taken away or
   changed anywhere in the set makes the release a major one, an addition a minor one, and fixes alone a

@@ -265,8 +265,7 @@ async function release(root: string, args: string[]): Promise<string> {
 
     const manifestPath = join(tree, "package.json");
     const manifest = (await Bun.file(manifestPath).json()) as { version: string };
-    // The version is read off the tags alone (bmo-chat's docs/conventions.md, "Versions"); the committed manifest's is
-    // a placeholder that never moves.
+    // The version is read off the tags alone; the committed manifest's is a placeholder that never moves.
     const placeholder = manifest.version;
     const declared = lastRelease(run(["git", "tag", "--merged", "HEAD", "--list", "v*"], root).split("\n"));
     const ledgerPath = join(releases, LEDGER);
