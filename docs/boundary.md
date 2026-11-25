@@ -66,6 +66,7 @@ wording keys listed here are the ones the layer's list holds.
 | `MarqueeLine` | A line that slides when it is longer than its box. |
 | `MessageIsland` | The one pill every notice stands on. |
 | `MovingList` | A list whose items come, go and change places by position alone, along the axis its layout gives it. |
+| `NextPageFoot` | The foot of a list read a page at a time: the next page asked as it comes into view, the incoming rows' placeholder, a failed page's reason with its retry, nothing once no more is held. |
 | `NumberInput` | The number box, as wide as its values, with its two step buttons. |
 | `PaletteSwatch` | A palette's two grounds as dots, in one mode. |
 | `PropertyList` | A file's or a document's details as a name and value list. |
@@ -140,6 +141,7 @@ Each is named with everything it exports.
 | `modality` | `InputModality`, `MODALITY_ATTRIBUTE`, `modalityOfKey`, `watchInputModality` |
 | `monaco` | `languageOf`, `fenceLanguage`, `colourised`, `CodeView`, `openCodeView`, `SourceSelection`, `SourceView`, `openSourceView` |
 | `moving-list` | `unfoldItem`, `settleItem`, `foldItem`, `MOVING_LIST`, `STANDING_LIST` |
+| `next-pages` | `NextPagesOptions`, `NextPages`, `useNextPages` |
 | `numbers` | `countLocale`, `countText`, `FigureLine`, `COUNT_BADGE`, `figurePlaces`, `turnOf`, `progressText` |
 | `openings` | `useOpenings` |
 | `overlays` | `OVER_LAYERS`, `OFF_HISTORY`, `BESIDE_PAGE`, `standsAsLayer`, `isBackEscape`, `refuseStalePresses`, `refuseHandedBackFocus`, `focusHandedBack`, `focusTakenOnOpen`, `watchOverlays` |

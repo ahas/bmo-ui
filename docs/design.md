@@ -126,6 +126,26 @@ whole in `docs/boundary.md`; this document says what each is for and how the lay
   detached element's offset reads as nothing. The list-place module keeps each list's offset under
   the name the list goes under, for as long as the page is open, and puts it back on the return once
   rows enough stand to reach it, giving up after a few frames where the list never grows that tall.
+- **A list read a page at a time reads its next page as its end comes into view,** with nothing to press for
+  it. This is the console's one way to page a list; no list ends in a button that loads more.
+  - The foot of the list asks for the next page once it stands in view, measured against the rows that
+    have landed, a little ahead of the very end so the page is already coming as the last rows are read.
+    A page that lands and leaves the foot still in view is followed by the next at once, and the pages
+    read so are one wait. Nothing more is asked while another read of the same list goes.
+  - While a page is on its way, placeholders of its incoming rows stand at the list's end under a busy
+    status the screen names.
+  - A page that fails leaves every row already read where it stands. In its place stand the reason
+    and the one control that asks it again (`common.action.retry`), and no further page is asked
+    until that control is pressed.
+  - Once the source holds no more, nothing stands below the last row.
+  - A reader on the keyboard reaches the later pages the way a reader scrolling does: stepping through
+    the rows brings each into view, and the foot with them. The placeholder's busy status, the
+    failure as an alert and the retry as a button are heard by a screen reader.
+  - A list that stands above other content on the same page scrolls inside a bounded box of its own,
+    so its end can come into view and the content under it stays reachable.
+  - The next-pages module holds the paging, its failure and its retry, and `NextPageFoot` draws the
+    foot; inside a table the foot is one row across its columns. The screen supplies whether more is
+    held, how one more page is read, its words for a failed page and its placeholder's piece.
 - **A list that chooses many always offers the whole of them.** Wherever a list has a choosing state
   it carries one control that takes every row shown or gives the whole choice up, at every width and
   from the moment the state is entered — never folded into a menu.
