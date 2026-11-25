@@ -7,11 +7,11 @@
     <component :is="props.span === undefined ? 'div' : 'td'" :colspan="props.span" :class="props.span === undefined ? '' : 'p-0'">
       <ContentSkeleton v-if="pages.adding.value" :rows="props.rows" :list-class="props.listClass" :label="props.loadingLabel">
         <slot>
-          <div class="px-3 py-2"><SkeletonLine width="w-2/3" /></div>
+          <div class="py-2" :class="props.inset"><SkeletonLine width="w-2/3" /></div>
         </slot>
       </ContentSkeleton>
-      <div v-else-if="pages.failure.value !== null" role="alert" class="flex flex-wrap items-center gap-3 p-3" data-next-page-failed>
-        <p class="min-w-0 flex-1 text-sm break-words text-error">{{ failureText(pages.failure.value, props.failedWords) }}</p>
+      <div v-else-if="pages.failure.value !== null" role="alert" class="flex flex-wrap items-center gap-3 py-3" :class="props.inset" data-next-page-failed>
+        <p class="min-w-0 flex-1 text-sm break-words text-error">{{ failedText }}</p>
         <UButton size="sm" color="neutral" variant="subtle" icon="i-material-symbols-refresh" :label="$t('common.action.retry')" @click="pages.retry" />
       </div>
       <div v-if="props.more" ref="foot" aria-hidden="true" class="h-px" />
@@ -34,8 +34,9 @@ interface Props {
   // Reads one more page and adds it to the list; it throws where the page failed, and answers false where the
   // page did not land for a reason of the host's own, which ends the run without a failure.
   next: () => Promise<boolean | void>;
-  // The host's words for a page that failed, where what was thrown carries none of its own.
-  failedWords: string;
+  // The host's words for a page that failed: words that stand where what was thrown carries none of its own, or the
+  // host's own reading of what was thrown.
+  failedWords: string | ((error: unknown) => string);
   // Whether another read of the same list is going, which a next page waits behind.
   busy?: boolean;
   // The busy status's name while a page is on its way; the layer's own loading words where none is given.
@@ -47,9 +48,11 @@ interface Props {
   span?: number;
   // How far ahead of the end the foot counts as reached, as the intersection observer takes it.
   rootMargin?: string;
+  // The room the failure line and the default placeholder keep from the list's sides, as its rows keep it.
+  inset?: string;
 }
 
-const props = withDefaults(defineProps<Props>(), { busy: false, rows: 2, listClass: "flex flex-col", rootMargin: "200px" });
+const props = withDefaults(defineProps<Props>(), { busy: false, rows: 2, listClass: "flex flex-col", rootMargin: "200px", inset: "px-3" });
 
 const foot = useTemplateRef<HTMLElement>("foot");
 // A page's own read, so the foot is measured afresh against the rows each page brings.
@@ -69,5 +72,12 @@ const pages = useNextPages({
       reading.value = false;
     }
   }
+});
+
+// Why the last page failed, in the host's words.
+const failedText = computed(() => {
+  const failure = pages.failure.value;
+
+  return typeof props.failedWords === "function" ? props.failedWords(failure) : failureText(failure, props.failedWords);
 });
 </script>

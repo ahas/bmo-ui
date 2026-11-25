@@ -32,7 +32,8 @@ describe("what stands at the foot", () => {
 
   test("a failed page's reason as an alert, with the one control that asks it again", () => {
     expect(tagOf("data-next-page-failed")).toContain('role="alert"');
-    expect(template).toContain("failureText(pages.failure.value, props.failedWords)");
+    expect(source).toContain("failureText(failure, props.failedWords)");
+    expect(source).toContain("props.failedWords(failure)");
     expect(tagOf("common.action.retry")).toContain('@click="pages.retry"');
   });
 
