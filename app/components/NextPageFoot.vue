@@ -1,9 +1,15 @@
 <!-- The foot of a list read a page at a time (docs/design.md, 「Lists」). Standing at the list's end, it asks
      the host's next page as it comes into view, holds the incoming rows' placeholder while the page is on its way,
      says why a page failed with the one control that asks it again, and draws nothing once the source holds no
-     more. Inside a table it is one row across the given number of columns. -->
+     more. Inside a table it is one row across the given number of columns, parted from the rows above by the
+     table's line only while it holds a placeholder or a failure, so the measured foot alone draws no line. -->
 <template>
-  <component :is="props.span === undefined ? 'div' : 'tr'" v-if="props.more || pages.adding.value || pages.failure.value !== null" data-next-page-foot>
+  <component
+    :is="props.span === undefined ? 'div' : 'tr'"
+    v-if="props.more || pages.adding.value || pages.failure.value !== null"
+    :class="props.span !== undefined && (pages.adding.value || pages.failure.value !== null) ? 'border-t border-default' : ''"
+    data-next-page-foot
+  >
     <component :is="props.span === undefined ? 'div' : 'td'" :colspan="props.span" :class="props.span === undefined ? '' : 'p-0'">
       <ContentSkeleton v-if="pages.adding.value" :rows="props.rows" :list-class="props.listClass" :label="props.loadingLabel">
         <slot>

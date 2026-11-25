@@ -198,14 +198,15 @@ const tableUi = computed(() => {
     thead: "bg-elevated [&>tr]:border-b-0",
     th: TABLE_HEAD[dense ? "dense" : "own"],
     separator: TABLE_HEAD_LINE,
+    // The last row of data draws no line under it, a list's foot standing after it included (NextPageFoot).
     // A cell of a column held by hand is cut with an ellipsis, so the line is one the shared tooltip
     // layer finds and shows whole; until then the box scrolls sideways and cuts nothing.
     td: dense
       ? [`${TABLE_ROW_HEIGHT.dense} truncate px-2 py-1 align-top text-sm`, fixed.value ? "" : "max-w-64"].join(" ")
       : [`${TABLE_ROW_HEIGHT.own} p-0 align-top text-sm whitespace-nowrap`, fixed.value ? "truncate" : ""].join(" "),
     tr: dense
-      ? "border-b border-default/60 last:border-b-0 data-[selectable=true]:cursor-pointer data-[selectable=true]:hover:bg-elevated/50 data-[selectable=true]:active:bg-accented/50 focus-inset"
-      : "border-b border-default last:border-b-0 data-[selectable=true]:cursor-pointer data-[selectable=true]:hover:bg-elevated/50 data-[selectable=true]:active:bg-accented/50 focus-inset"
+      ? "border-b border-default/60 [&:not(:has(~tr:not([data-next-page-foot])))]:border-b-0 data-[selectable=true]:cursor-pointer data-[selectable=true]:hover:bg-elevated/50 data-[selectable=true]:active:bg-accented/50 focus-inset"
+      : "border-b border-default [&:not(:has(~tr:not([data-next-page-foot])))]:border-b-0 data-[selectable=true]:cursor-pointer data-[selectable=true]:hover:bg-elevated/50 data-[selectable=true]:active:bg-accented/50 focus-inset"
   };
 });
 

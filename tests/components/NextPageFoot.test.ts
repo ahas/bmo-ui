@@ -20,7 +20,7 @@ function tagOf(mark: string): string {
 
 describe("what stands at the foot", () => {
   test("nothing once no more is held, no page is on its way and none failed", () => {
-    expect(tagOf("data-next-page-foot")).toContain('v-if="props.more || pages.adding.value || pages.failure.value !== null"');
+    expect(template).toContain('v-if="props.more || pages.adding.value || pages.failure.value !== null"');
   });
 
   test("the incoming rows' placeholder while a page is on its way, under the screen's busy name", () => {
@@ -44,7 +44,8 @@ describe("what stands at the foot", () => {
     expect(foot).toContain('aria-hidden="true"');
   });
 
-  test("one row across the table's columns where a span is given, a block otherwise", () => {
+  test("one row across the table's columns where a span is given, a block otherwise, lined only while it holds something", () => {
+    expect(template).toContain("(pages.adding.value || pages.failure.value !== null) ? 'border-t border-default' : ''");
     expect(template).toContain(":is=\"props.span === undefined ? 'div' : 'tr'\"");
     expect(template).toContain(':colspan="props.span"');
   });

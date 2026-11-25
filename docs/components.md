@@ -1078,6 +1078,9 @@ component's.
 - **Rows may stand in labelled parts** (the table-sections module), each with a heading row; rows in
   no named part stand last.
 - **A row that can be chosen** is pressed by pointer or by Enter.
+- **Rows are parted by a line, and the last row of data draws none under it,** a list's foot standing
+  after it included (`NextPageFoot`, docs/design.md, 「Lists」): the foot draws the line above itself only
+  while it holds the incoming rows' placeholder or a failed page.
 - **It stands in one of three layouts:** `fill`, the whole section it is in, its header held to the
   section's top and its sideways scrollbar on the section's floor however few its rows; `own`, the
   default, its own height among other content; or `dense`, the close grid of a record browser.

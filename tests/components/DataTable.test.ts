@@ -82,6 +82,13 @@ describe("a table of rows to press or widen", () => {
     expect(table.match(/data-\[selectable=true\]:active:bg-accented\/50/g)?.length).toBe(2);
   });
 
+  // The last row of data draws no line under it in every layout, a list's foot after it included, so the line never
+  // stands alone at the table's end.
+  test("draws no line under the last row of data, a list's foot after it included", () => {
+    expect(table.match(/\[&:not\(:has\(~tr:not\(\[data-next-page-foot\]\)\)\)\]:border-b-0/g)?.length).toBe(2);
+    expect(table).not.toContain("last:border-b-0");
+  });
+
   // A cell of the screen's own with a ceiling of its own gives it up once the widths are held, so a
   // column dragged wider shows more of its words; the cell is told which it is.
   test("tells every cell slot of the screen's own whether the widths are held", () => {
