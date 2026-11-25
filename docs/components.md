@@ -135,7 +135,10 @@ default; a screen supplies what it holds and what a press means there. Every exp
   together. The full path stands on hover.
 - **A tab is the row's whole height.** The row's bottom line is drawn over the tabs' last pixel rather
   than as a border under them, so a tab stands exactly as tall as the row — 36 pixels, 40 under a
-  finger. The same holds for the library's own tab rows (`TAB_ROW_UI`). A view switch and the actions
+  finger. The same holds for the library's own tab rows (`TAB_ROW_UI`), whose active line stands at the
+  row's bottom edge from the first frame: before the library's sliding line stands, as on a page drawn on
+  the server until it hydrates, the chosen tab draws the line itself, at that edge too, so nothing stands
+  below the row and it never scrolls vertically. A view switch and the actions
   at the row's right end are small buttons centred in the row, each group parted from the tabs by a
   line, its buttons 4 pixels apart and 4 pixels from the group's edges.
 - **A tab's menu under a finger.** A long press on a tab is a drag, so a finger opens a tab's menu by

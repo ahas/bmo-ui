@@ -13,7 +13,9 @@ import type { Browser, Page } from "playwright-core";
 // change (`docs/components.md`, "Tab bar and toolbar"): in a dialog opened with its tabs standing, then
 // with a tab put in front of the chosen one, then with that tab's name made longer, at a desktop's
 // width and at a phone's. The chosen tab moves each time and keeps its size, so nothing but the change
-// of the tabs around it can move the line. The page is built as the layer's custom elements are, from
+// of the tabs around it can move the line. And a screen's row of the same tabs, drawn as the layer draws
+// such a row, scrolls not at all vertically, its line at the row's bottom edge, both once the library's
+// sliding line stands and before, as a page drawn on the server stands until it hydrates. The page is built as the layer's custom elements are, from
 // the components that ship with the layer's patches applied, and driven by a real Chromium. Skipped
 // where the browser build is not on the machine.
 
@@ -58,7 +60,7 @@ afterAll(async () => {
   if (out !== "") rmSync(out, { recursive: true, force: true });
 });
 
-async function pageAt(width: number, height: number): Promise<Page> {
+async function pageAt(width: number, height: number, address = "/"): Promise<Page> {
   const context = await browser.newContext({ viewport: { width, height } });
   const page = await context.newPage();
 
@@ -70,8 +72,8 @@ async function pageAt(width: number, height: number): Promise<Page> {
 
     return route.fulfill({ status: 404, body: "" });
   });
-  await page.goto(`${ORIGIN}/`);
-  await page.waitForSelector("[data-open]");
+  await page.goto(`${ORIGIN}${address}`);
+  await page.waitForSelector(address === "/" ? "[data-open]" : "[data-row]");
 
   return page;
 }
@@ -136,6 +138,61 @@ describe.skipIf(!ready)("the active line of a row of tabs whose tabs change", ()
 
       expect(renamed.chosen.left).toBeGreaterThan(putInFront.chosen.left);
       expectUnderChosen(renamed);
+
+      await page.context().close();
+    });
+  }
+});
+
+interface RowDrawn {
+  scrollHeight: number;
+  clientHeight: number;
+  rowBottom: number;
+  lineBottom: number | null;
+}
+
+// The row of tabs as it is drawn: how far it scrolls vertically, and where the chosen tab's line stands
+// against the row's bottom edge, the sliding line where it stands and the chosen tab's own otherwise.
+async function rowDrawn(page: Page): Promise<RowDrawn> {
+  await page.evaluate(() => new Promise((drawn) => requestAnimationFrame(() => requestAnimationFrame(drawn))));
+
+  return page.$eval("[data-row]", (row) => {
+    const list = row.querySelector<HTMLElement>("[data-slot=list]")!;
+    const indicator = list.querySelector("[data-slot=indicator]");
+    const chosen = list.querySelector("[role=tab][data-state=active]")!;
+    const own = getComputedStyle(chosen, "::after");
+    const ownBottom = own.content === "none" ? null : chosen.getBoundingClientRect().bottom - Number.parseFloat(own.bottom);
+
+    return {
+      scrollHeight: list.scrollHeight,
+      clientHeight: list.clientHeight,
+      rowBottom: row.getBoundingClientRect().bottom,
+      lineBottom: indicator === null ? ownBottom : indicator.getBoundingClientRect().bottom
+    };
+  });
+}
+
+describe.skipIf(!ready)("a screen's row of tabs before its sliding line stands and after", () => {
+  for (const { name, width, height } of WIDTHS) {
+    test(`at ${name}'s width, the row never scrolls vertically and its line stands at the row's bottom edge`, async () => {
+      const page = await pageAt(width, height, "/?row");
+
+      await page.waitForSelector("[data-row] [data-slot=indicator]");
+
+      const settled = await rowDrawn(page);
+
+      expect(settled.scrollHeight).toBeLessThanOrEqual(settled.clientHeight);
+      expect(Math.abs(settled.lineBottom! - settled.rowBottom)).toBeLessThanOrEqual(SUBPIXEL);
+
+      // The row as a page drawn on the server shows it until it hydrates: no sliding line yet, the chosen tab
+      // drawing its own.
+      await page.$eval("[data-row] [data-slot=indicator]", (indicator) => indicator.remove());
+
+      const unhydrated = await rowDrawn(page);
+
+      expect(unhydrated.lineBottom, "the chosen tab draws its own line").not.toBeNull();
+      expect(unhydrated.scrollHeight, "the row scrolls vertically").toBeLessThanOrEqual(unhydrated.clientHeight);
+      expect(Math.abs(unhydrated.lineBottom! - unhydrated.rowBottom)).toBeLessThanOrEqual(SUBPIXEL);
 
       await page.context().close();
     });

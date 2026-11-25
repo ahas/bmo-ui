@@ -6,12 +6,15 @@ import UButton from "@nuxt/ui/components/Button.vue";
 import UModal from "@nuxt/ui/components/Modal.vue";
 import UTabs from "@nuxt/ui/components/Tabs.vue";
 
+import { TAB_ROW_LINE, TAB_ROW_UI } from "../../app/domain/tabs";
 import sheet from "./tabs-indicator-harness.css?inline";
 
 // A row of the library's tabs whose tabs change while one stays chosen (`docs/components.md`, "Tab
 // bar and toolbar"): a dialog opened with three tabs and the middle one chosen, a tab put in front of
 // them once it stands open, as a part of the dialog's data that lands late brings one, and that tab's
 // name then made longer. The chosen tab moves with each and keeps its size; the line under it follows.
+// Opened with `?row`, the page holds a screen's row of the same tabs instead, one row's height, drawn as
+// the layer draws such a row.
 
 interface Tab {
   label: string;
@@ -53,7 +56,26 @@ const style = document.createElement("style");
 style.textContent = sheet;
 document.head.append(style);
 
-createApp(Page).use(ui).mount("#page");
+// A screen's row of the library's tabs, as a screen lays it under the title bar.
+const Row = defineComponent(
+  () => () =>
+    h(UApp, null, () =>
+      h("div", { class: `flex h-9 ${TAB_ROW_LINE}`, "data-row": "" }, [
+        h(UTabs, {
+          items: tabs.value,
+          modelValue: chosen.value,
+          "onUpdate:modelValue": (value: string | number) => (chosen.value = String(value)),
+          content: false,
+          variant: "link",
+          ui: TAB_ROW_UI
+        })
+      ])
+    )
+);
+
+createApp(new URLSearchParams(location.search).has("row") ? Row : Page)
+  .use(ui)
+  .mount("#page");
 
 // A tab put in front of the others, the chosen one kept.
 async function putInFront(label: string): Promise<void> {

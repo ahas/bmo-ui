@@ -6,12 +6,15 @@
 // toolbar"). The row that holds it has a fixed height and no padding above or below, and the tabs
 // take that whole height, so nothing squeezes them into scrolling. The row draws its own bottom line;
 // the tabs draw none, and the active line stands at the row's bottom edge. A row wider than its place
-// scrolls sideways.
+// scrolls sideways. Until the library's sliding line stands, as on a page drawn on the server before it
+// hydrates, the chosen tab draws the line itself, which the library places for a list padded on every
+// side, a few pixels below the tab; in this row, which keeps no padding, it stands at the bottom edge
+// as well, since a line below the row would make the row scroll vertically.
 export const TAB_ROW_UI = {
   root: "h-full min-w-0",
   list: "h-full p-0 border-b-0 overflow-x-auto [scrollbar-width:none]",
   indicator: "bottom-0",
-  trigger: "h-full shrink-0"
+  trigger: "h-full shrink-0 in-[[data-slot=list]:not(:has([data-slot=indicator]))]:data-[state=active]:after:bottom-0"
 };
 
 // The bottom line of a row of tabs, drawn over the row's last pixel rather than as a border under
