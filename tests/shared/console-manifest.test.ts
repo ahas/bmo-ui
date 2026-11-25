@@ -18,7 +18,8 @@ import {
   sectionFor,
   shareHead,
   shareHeadPath,
-  shareRead
+  shareRead,
+  titleFor
 } from "../../shared/console-manifest";
 
 // The console plugin contract's manifest (`docs/console-bundles.md`, "The manifest").
@@ -56,6 +57,7 @@ describe("a service's manifest", () => {
       role: "member",
       sidebarSection: "application",
       sidebarSections: {},
+      sidebarTitles: {},
       formerScreenPaths: [],
       apiPrefix: "/",
       ownerKey: false,
@@ -112,6 +114,16 @@ describe("a service's manifest", () => {
     expect(sectionFor(consoleManifest(answered), "administrator")).toBe("application");
     expect(faultsOf({ ...answered, sidebarSections: { owner: "account" } })).toContain("sidebarSections");
     expect(faultsOf({ ...answered, sidebarSections: { member: "settings" } })).toContain("sidebarSections");
+  });
+
+  test("names its entry by the key named for the role a reader holds, else by its title", () => {
+    const read = consoleManifest({ ...answered, sidebarTitles: { member: "notes.title.member" } });
+
+    expect(titleFor(read, "member")).toBe("notes.title.member");
+    expect(titleFor(read, "administrator")).toBe("notes.title.screen");
+    expect(titleFor(consoleManifest(answered), "member")).toBe("notes.title.screen");
+    expect(faultsOf({ ...answered, sidebarTitles: { owner: "notes.title.member" } })).toContain("sidebarTitles");
+    expect(faultsOf({ ...answered, sidebarTitles: { member: "other.title" } })).toContain("sidebarTitles: keys under the bundle's namespace");
   });
 
   test("is refused naming each field at fault", () => {
@@ -295,7 +307,7 @@ describe("the manifest's JSON Schema", () => {
     expect(CONSOLE_MANIFEST_SCHEMA.required).toEqual(["name", "title", "icon", "screenPath", "serviceName", "layer", "bundle", "words", "role"]);
     expect(CONSOLE_MANIFEST_SCHEMA.additionalProperties).toBe(false);
     expect(Object.keys(CONSOLE_MANIFEST_SCHEMA.properties as object).toSorted()).toEqual(
-      [...Object.keys(answered), "formerScreenPaths", "stylesheet", "apiPrefix", "ownerKey", "events", "websocket", "pushKinds", "pushPlaces", "pushReaders", "sidebarUnread", "sidebarSection", "sidebarSections", "calls", "relays", "shareReads", "shareHead"].toSorted()
+      [...Object.keys(answered), "formerScreenPaths", "stylesheet", "apiPrefix", "ownerKey", "events", "websocket", "pushKinds", "pushPlaces", "pushReaders", "sidebarUnread", "sidebarSection", "sidebarSections", "sidebarTitles", "calls", "relays", "shareReads", "shareHead"].toSorted()
     );
     expect((CONSOLE_MANIFEST_SCHEMA.properties as Record<string, { enum?: unknown }>).role!.enum).toEqual(["administrator", "member"]);
     expect((CONSOLE_MANIFEST_SCHEMA.properties as Record<string, unknown>).sidebarSection).toMatchObject({

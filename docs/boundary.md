@@ -216,7 +216,7 @@ Each is named with everything it exports.
 | `files` | `FileConflict` |
 | `code-language` | `codeLanguage` |
 | `screen-mode` | `DocumentScheme`, `DEFAULT_SCHEME`, `SCHEME_COOKIE`, `isDocumentScheme` |
-| `console-manifest` | `CONSOLE_MANIFEST_ROUTE`, `OWNER_KEY_HEADER`, `OWNER_ROLE_HEADER`, `CONSOLE_ROLES`, `ConsoleRole`, `CONSOLE_SIDEBAR_SECTIONS`, `ConsoleSidebarSection`, `RELAY_METHODS`, `RelayMethod`, `LAYER_VERSION`, `LAYER_BOUND`, `LAYER_RANGE`, `CONSOLE_SHARED_LIBRARIES`, `ConsoleManifest`, `CONSOLE_MANIFEST_SCHEMA`, `consoleManifest`, `onThisLayer`, `roleAllows`, `sectionFor`, `screensCall`, `relaysRoute`, `shareRead`, `ShareHead`, `SHARE_HEAD_LANGUAGE_QUERY`, `shareHeadPath`, `shareHead`, `noticePlace`, `NoticeReaders`, `noticeReaders`, `movedScreenAddress`, `ConsoleWords`, `ConsoleBundleModule` |
+| `console-manifest` | `CONSOLE_MANIFEST_ROUTE`, `OWNER_KEY_HEADER`, `OWNER_ROLE_HEADER`, `CONSOLE_ROLES`, `ConsoleRole`, `CONSOLE_SIDEBAR_SECTIONS`, `ConsoleSidebarSection`, `RELAY_METHODS`, `RelayMethod`, `LAYER_VERSION`, `LAYER_BOUND`, `LAYER_RANGE`, `CONSOLE_SHARED_LIBRARIES`, `ConsoleManifest`, `CONSOLE_MANIFEST_SCHEMA`, `consoleManifest`, `onThisLayer`, `roleAllows`, `sectionFor`, `titleFor`, `screensCall`, `relaysRoute`, `shareRead`, `ShareHead`, `SHARE_HEAD_LANGUAGE_QUERY`, `shareHeadPath`, `shareHead`, `noticePlace`, `NoticeReaders`, `noticeReaders`, `movedScreenAddress`, `ConsoleWords`, `ConsoleBundleModule` |
 
 - **`search` folds letter case in the locale each call is handed,** the runtime's own where none is.
   It reads no app configuration, so it runs alike in a browser and on a server; a host searching in

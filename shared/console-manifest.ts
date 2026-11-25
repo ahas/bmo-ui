@@ -146,6 +146,10 @@ const manifest = z
       .partialRecord(z.enum(CONSOLE_ROLES), z.enum(CONSOLE_SIDEBAR_SECTIONS))
       .default({})
       .describe("The section the entry stands in for a reader by the role they hold, where it is not the sidebarSection: each key a role, each value a section."),
+    sidebarTitles: z
+      .partialRecord(z.enum(CONSOLE_ROLES), z.string().min(1))
+      .default({})
+      .describe("The key, in the bundle's words, the entry is named by for a reader by the role they hold, where it is not the title: each key a role, each value a key under the bundle's namespace."),
     ownerKey: z.boolean().default(false).describe("Whether every call the screens make needs the reader's owner key."),
     events: z.boolean().default(false).describe("Whether the screens read the service's event stream."),
     websocket: z.boolean().default(false).describe("Whether the screens open a WebSocket to the service."),
@@ -225,6 +229,10 @@ const manifest = z
   })
   .strict()
   .refine((one) => one.title.startsWith(`${one.name}.`), { path: ["title"], message: "a key under the bundle's namespace" })
+  .refine((one) => Object.values(one.sidebarTitles).every((title) => title.startsWith(`${one.name}.`)), {
+    path: ["sidebarTitles"],
+    message: "keys under the bundle's namespace"
+  })
   .refine((one) => !one.calls.includes(one.serviceName), { path: ["calls"], message: "another service than the bundle's own" })
   .refine((one) => new Set(one.calls).size === one.calls.length, { path: ["calls"], message: "each service named once" })
   .refine((one) => new Set(one.relays.map((route) => `${route.method} ${route.path}`)).size === one.relays.length, {
@@ -291,6 +299,12 @@ export function roleAllows(held: ConsoleRole, needed: ConsoleRole): boolean {
 // its sidebar section.
 export function sectionFor(manifest: ConsoleManifest, held: ConsoleRole): ConsoleSidebarSection {
   return manifest.sidebarSections[held] ?? manifest.sidebarSection;
+}
+
+// The key a bundle's entry is named by for a reader holding a role: the key the manifest names for that role, else its
+// title.
+export function titleFor(manifest: ConsoleManifest, held: ConsoleRole): string {
+  return manifest.sidebarTitles[held] ?? manifest.title;
 }
 
 // Whether a bundle's screens call a service: their own, or one their manifest names under `calls`.

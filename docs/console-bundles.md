@@ -78,6 +78,7 @@ none of them a dot or two standing for a folder.
 | `role` | The least role a reader holds to open the screen: `administrator` or `member`. | yes |
 | `sidebarSection` | The section of a console's sidebar the bundle's entry stands in: `administration`, among the services an administrator runs the system with, `application`, among the applications a reader works in, or `account`, in the reader's own menu, among what concerns the reader's own account and their use of the console ("How a bundle mounts", the sidebar section). | no, `application` |
 | `sidebarSections` | The section the entry stands in for a reader by the role they hold, where it is not `sidebarSection`: each key a role, each value a section ("How a bundle mounts", the sidebar section). | no, none |
+| `sidebarTitles` | The key, in the bundle's words, of the name the entry is given for a reader by the role they hold, where it is not `title`: each key a role, each value a key under the bundle's namespace ("How a bundle mounts", the sidebar section). | no, none |
 | `ownerKey` | Whether every call the screens make needs the reader's owner key. | no, false |
 | `events` | Whether the screens read the service's event stream through the console. | no, false |
 | `websocket` | Whether the screens open a WebSocket to the service through the console. | no, false |
@@ -289,6 +290,10 @@ on any release from that bound up to its own.
     never one it allows — the entry stands there for that reader instead; the shared module's `sectionFor`
     answers it. So one screen whose face differs by role, a sender's road for a member and an inbox for an
     administrator, stands where each reader looks for it, and a reader meets one entry of it only.
+  - **A name by role.** Where `sidebarTitles` names a key for the role a reader holds — the role itself, never one
+    it allows — the entry, and the title bar over the screen, are named by that key for that reader instead of
+    `title`; the shared module's `titleFor` answers it. So the same screen is named in the word each reader uses
+    for it: what a member asks of the maker under one name, the inbox the administrator answers under another.
 - **The sidebar count.** Where a manifest names a `sidebarUnread`, a console reads the count for the
   reader whose sidebar it draws, with its own credential and that reader's owner key and role, and draws
   a positive count on the bundle's sidebar entry. It reads the count again as it chooses; one that did
@@ -467,7 +472,8 @@ under `calls`, and its screens hand the module texts and a language.
   reader"): read for the reader, handed to them alone, named in a namespace no service's manifest stands in,
   and relayed on their behalf alone.
 - **It attaches each bundle by its manifest alone:** an entry under its title and icon leading to its
-  screen path, for the readers its role allows; a relay of its service under the relay base, for the
+  screen path, for the readers its role allows, named and placed for each reader's role where the manifest names a
+  title or a section by role; a relay of its service under the relay base, for the
   service's API prefix, the routes under `relays`, its module and its stylesheet; the stream and the
   WebSocket where the manifest asks for them; the bundle's words; and its notice kinds.
 - **It relays a bundle's calls** to the services named under `calls` on each called service's own
