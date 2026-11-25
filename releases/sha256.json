@@ -403,5 +403,10 @@
     "sha256": "e558df94169424c1257ac23b17a1871388b8564f71511cc24813a9ae3a3ae14c",
     "bound": "0.1.0-rev.23",
     "why": "The layer brings the next-pages module and NextPageFoot, the foot of a list read a page at a time with a failed page's retry; an addition that changes no export a bundle reads, so the bound stays."
+  },
+  "bmo-ui-1.1.0-0.nightly.20261125.2.tgz": {
+    "sha256": "2bd780d58c8d2b154b92d2ca5ce089cf6db1f7723ec64879c5ad5fcf80efb606",
+    "bound": "0.1.0-rev.23",
+    "why": "NextPageFoot takes the host's own reading of a failed page and the inset its rows keep; an addition that changes no export a bundle reads, so the bound stays."
   }
 }
