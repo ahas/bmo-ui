@@ -408,5 +408,10 @@
     "sha256": "2bd780d58c8d2b154b92d2ca5ce089cf6db1f7723ec64879c5ad5fcf80efb606",
     "bound": "0.1.0-rev.23",
     "why": "NextPageFoot takes the host's own reading of a failed page and the inset its rows keep; an addition that changes no export a bundle reads, so the bound stays."
+  },
+  "bmo-ui-1.1.0-0.nightly.20261125.3.tgz": {
+    "sha256": "6caf74daee96c1813ddbd5aa3a594e0bac37557438a7b15ed527a20c20516c80",
+    "bound": "0.1.0-rev.23",
+    "why": "A table's last row of data draws no line under it while a list's foot follows, and the foot lines itself only while it holds something; a styling fix that changes no export, so the bound stays."
   }
 }
