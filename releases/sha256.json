@@ -428,5 +428,10 @@
     "sha256": "79bfd32aaeec09c1c5ec9a1f791177706e34a339a75a2b2a86cdca2771582969",
     "bound": "0.1.0-rev.23",
     "why": "A moving list's first page fades in and its items slide within the list, and the interface draws in Pretendard carried whole; additions that change no export a bundle reads, so the bound stays."
+  },
+  "bmo-ui-1.1.0-0.nightly.20261128.2.tgz": {
+    "sha256": "dceb9f38e492416e08aaeed48753a0fda8ed843dd938507471fbc56f2ea0ff33",
+    "bound": "0.1.0-rev.23",
+    "why": "The bundle build carries the console theme copy as consoleTheme, and the layer's stylesheet declares Pretendard's faces itself; additions that change no export a bundle reads, so the bound stays."
   }
 }
