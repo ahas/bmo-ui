@@ -11,10 +11,14 @@ const stylesheet = new URL("../../app/assets/css/main.css", import.meta.url);
 const css = await Bun.file(stylesheet).text();
 const sheet = postcss.parse(css);
 
+// The stylesheet's own faces and those of the sheet it imports for Pretendard.
+const pretendard = postcss.parse(await Bun.file(new URL("../../app/assets/css/pretendard.css", import.meta.url)).text());
 const faces: AtRule[] = [];
-sheet.walkAtRules("font-face", (face) => {
-  faces.push(face);
-});
+for (const declaring of [sheet, pretendard]) {
+  declaring.walkAtRules("font-face", (face) => {
+    faces.push(face);
+  });
+}
 
 // The value of one declaration inside a rule, as written.
 function field(rule: Container, name: string): string {
@@ -45,8 +49,9 @@ function stack(name: string, rule: Container = rootTheme!): string[] {
   return postcss.list.comma(field(rule, name));
 }
 
+// A face's family as the stacks write it, in double quotes whichever quotes its declaration used.
 function familyOf(face: AtRule): string {
-  return field(face, "font-family");
+  return `"${field(face, "font-family").replace(/^['"]|['"]$/g, "")}"`;
 }
 
 function facesOf(family: string): AtRule[] {
@@ -65,8 +70,8 @@ function filesOf(face: AtRule): string[] {
 }
 
 describe("the interface typeface", () => {
-  test("is Apple SD Gothic Neo, with Pretendard behind it, ahead of the faces a system already has", () => {
-    expect(stack("--font-sans").slice(0, 2)).toEqual(['"Apple SD Gothic Neo"', '"Pretendard"']);
+  test("is Pretendard, with Apple SD Gothic Neo behind it, ahead of the faces a system already has", () => {
+    expect(stack("--font-sans").slice(0, 3)).toEqual(['"Pretendard Variable"', '"Pretendard"', '"Apple SD Gothic Neo"']);
     expect(stack("--font-sans")).toContain("sans-serif");
   });
 
@@ -75,7 +80,23 @@ describe("the interface typeface", () => {
     expect(facesOf('"Apple SD Gothic Neo"')).toEqual([]);
   });
 
-  test("carries Pretendard at the four weights the interface asks for and no others", () => {
+  // Whole, as one variable face over every weight, split into files by range of letters, each file the layer
+  // carries and each face naming the letters its file holds.
+  test("carries Pretendard whole, a variable face over every weight in files by range of letters", async () => {
+    const pretendardFaces = facesOf('"Pretendard Variable"');
+
+    expect(pretendardFaces.length).toBeGreaterThan(50);
+    expect(new Set(pretendardFaces.map((face) => field(face, "font-weight")))).toEqual(new Set(["45 920"]));
+    expect(pretendardFaces.every((face) => field(face, "unicode-range") !== "")).toBe(true);
+
+    for (const file of pretendardFaces.flatMap(filesOf)) {
+      expect(await Bun.file(new URL(file, new URL("../../app/assets/css/", import.meta.url))).exists(), file).toBe(true);
+    }
+  });
+
+  // Its static cut stands right behind it at the four weights the interface asks for, for the letters the variable
+  // face's subsets leave out.
+  test("carries Pretendard's static cut at the four weights the interface asks for and no others", () => {
     expect(facesOf('"Pretendard"').map((face) => field(face, "font-weight"))).toEqual(["400", "500", "600", "700"]);
   });
 
@@ -106,7 +127,7 @@ describe("the fixed-width typeface", () => {
   });
 
   test("with the interface's own faces right behind it", () => {
-    expect(stack("--font-mono").slice(1, 3)).toEqual(['"Apple SD Gothic Neo"', '"Pretendard"']);
+    expect(stack("--font-mono").slice(1, 4)).toEqual(['"Pretendard Variable"', '"Pretendard"', '"Apple SD Gothic Neo"']);
   });
 
   test("and the faces a machine already has behind both, so a machine with neither still reads", () => {
@@ -168,10 +189,13 @@ describe("the font files", () => {
     expect(css).not.toContain("://");
   });
 
-  test("stay small enough to hand over on a first visit", () => {
-    const size = files.reduce((sum, file) => sum + Bun.file(new URL(file, stylesheet)).size, 0);
+  // A page fetches only the files whose letters it draws, so each file stays small enough to hand over on a first
+  // visit, and all of them together stay within what the layer is carried with.
+  test("stay small enough to hand over on a first visit, each by itself", () => {
+    const sizes = files.map((file) => Bun.file(new URL(file, stylesheet)).size);
 
-    expect(size).toBeLessThan(1_000_000);
+    expect(Math.max(...sizes)).toBeLessThan(200_000);
+    expect(sizes.reduce((sum, size) => sum + size, 0)).toBeLessThan(4_000_000);
   });
 
   test("each have their typeface's licence beside them", async () => {

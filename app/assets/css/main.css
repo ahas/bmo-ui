@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "@nuxt/ui";
+@import "./pretendard.css";
 
 /* How wide a central panel's content stands before it stops growing; it is centred in whatever is
    left over (`docs/design.md`, "Width"). Every screen's body is laid out in a container, so the
@@ -67,10 +68,10 @@
   border-radius: 9999px;
 }
 
-/* Pretendard, Copyright (c) 2021 Kil Hyung-jin, SIL Open Font License 1.1, its licence beside the
-   files (`docs/design.md`, "Fonts"). It stands behind the interface's face for the letters that
-   face lacks — most accented Latin, the middle dot, the minus sign, the narrow spaces — and its
-   files carry those alone, so a letter they lack goes straight to the faces behind. */
+/* Pretendard's static cut, Copyright (c) 2021 Kil Hyung-jin, SIL Open Font License 1.1, its licence
+   beside the files (`docs/design.md`, "Fonts"). It stands right behind the variable face for the letters
+   the variable face's subsets leave out — the minus sign and the narrow spaces among them — and its files
+   carry the letters Apple SD Gothic Neo lacks alone, so a letter they lack goes on to the faces behind. */
 
 @font-face {
   font-family: "Pretendard";
@@ -140,18 +141,17 @@
   --default-transition-timing-function: var(--bmo-ease-move);
 
   --font-sans:
-    "Apple SD Gothic Neo", "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, "Segoe UI", Roboto,
+    "Pretendard Variable", "Pretendard", "Apple SD Gothic Neo", -apple-system, BlinkMacSystemFont, system-ui, "Segoe UI", Roboto,
     "Helvetica Neue", "Noto Sans KR", "Malgun Gothic", "Apple Color Emoji", "Segoe UI Emoji",
     sans-serif;
 
   /* The fixed-width face, and behind it the interface's own. No monospace face has Hangul, so a
      Hangul word in a fixed-width place would otherwise fall past the whole stack onto whatever the
-     reader's machine happens to have. The interface's face standing second catches it, with
-     Pretendard behind it for the letters that face lacks, so a line of code with a Hangul comment
-     in it is one face for the code and the interface's face for the words. The system stack stays
-     behind them, for a machine that has none of them yet. */
+     reader's machine happens to have. The interface's face standing second catches it, so a line of
+     code with a Hangul comment in it is one face for the code and the interface's face for the words.
+     The system stack stays behind them, for a page whose fonts have not arrived yet. */
   --font-mono:
-    "CaskaydiaCove NFM", "Apple SD Gothic Neo", "Pretendard", ui-monospace, SFMono-Regular, Menlo,
+    "CaskaydiaCove NFM", "Pretendard Variable", "Pretendard", "Apple SD Gothic Neo", ui-monospace, SFMono-Regular, Menlo,
     Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
@@ -237,22 +237,22 @@
   :root:lang(ja) {
     --font-sans:
       "Hiragino Sans", "Hiragino Kaku Gothic ProN", -apple-system, BlinkMacSystemFont, system-ui, "Segoe UI",
-      Roboto, "Helvetica Neue", "Yu Gothic UI", "Meiryo", "Noto Sans JP", "Noto Sans CJK JP", "Pretendard",
+      Roboto, "Helvetica Neue", "Yu Gothic UI", "Meiryo", "Noto Sans JP", "Noto Sans CJK JP", "Pretendard Variable",
       "Apple Color Emoji", "Segoe UI Emoji", sans-serif;
     --font-mono:
       "CaskaydiaCove NFM", "Hiragino Sans", "Yu Gothic UI", "Meiryo", "Noto Sans JP", "Noto Sans CJK JP",
-      "Pretendard", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New",
+      "Pretendard Variable", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New",
       monospace;
   }
 
   :root:lang(zh) {
     --font-sans:
       "PingFang SC", -apple-system, BlinkMacSystemFont, system-ui, "Segoe UI", Roboto, "Helvetica Neue",
-      "Microsoft YaHei UI", "Microsoft YaHei", "Noto Sans SC", "Noto Sans CJK SC", "Pretendard",
+      "Microsoft YaHei UI", "Microsoft YaHei", "Noto Sans SC", "Noto Sans CJK SC", "Pretendard Variable",
       "Apple Color Emoji", "Segoe UI Emoji", sans-serif;
     --font-mono:
       "CaskaydiaCove NFM", "PingFang SC", "Microsoft YaHei UI", "Microsoft YaHei", "Noto Sans SC",
-      "Noto Sans CJK SC", "Pretendard", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+      "Noto Sans CJK SC", "Pretendard Variable", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
       "Liberation Mono", "Courier New", monospace;
   }
 }

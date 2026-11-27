@@ -32,6 +32,10 @@ const HARNESS_ICONS = [
 
 export default defineConfig({
   root: here("../.."),
+  // The interface's whole face would travel in the script too, some megabytes of it, which slows the page a
+  // press is measured on past what it is built to read; the harness draws its words in the faces behind it,
+  // so every file of the variable face is an empty one here.
+  resolve: { alias: [{ find: /^.*\/pretendard-variable\/[^/]+\.woff2$/, replacement: here("./no-face.woff2") }] },
   // The script runs in the browser alone: what Nuxt states of the side a file runs on is stated here.
   define: { "import.meta.client": "true", "import.meta.server": "false", "import.meta.dev": "false", "process.env.NODE_ENV": JSON.stringify("production") },
   plugins: [

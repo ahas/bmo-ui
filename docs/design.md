@@ -327,16 +327,16 @@ whole in `docs/boundary.md`; this document says what each is for and how the lay
     lurches. The icon-styles plugin has those styles put in behind the others instead. They sit in a
     cascade layer and match with no weight of their own, so where they stand changes nothing they
     draw.
-- **The interface's stack names Apple SD Gothic Neo first, then Pretendard, then the system's sans
-  serif.** Hangul and Latin then come from one family on one line.
-  - The layer carries no Apple SD Gothic Neo face: it is under no open licence. A host that carries
-    the face declares it under that family name, and the layer's stack takes it; otherwise a
-    machine's own installed copy answers.
-  - **Behind it stands Pretendard, for what Apple SD Gothic Neo lacks.** The layer carries Pretendard
-    in the four weights the screens use — 400, 500, 600 and 700 — each cut to exactly the letters
-    that face lacks: most accented Latin, the middle dot, the minus sign and the narrow spaces,
-    around 33KB a weight. Its files hold those letters alone, so a letter they lack goes straight
-    to the faces behind.
+- **The interface's stack names Pretendard first, its variable face and then its static cut, then Apple SD
+  Gothic Neo, then the system's sans serif,** so every machine draws the interface in one face, Hangul and Latin from one family on one line.
+  - **The layer carries Pretendard whole,** as its variable face across every weight, split by the
+    package's own dynamic subset into files by range of letters: a page fetches only the files whose
+    letters it draws, around 3MB for all of them and a small part of that for a page of Korean.
+  - **Right behind it stands Pretendard's static cut,** for the letters the variable face's subsets leave
+    out, the minus sign and the narrow spaces among them: the four weights the screens use, 400, 500, 600
+    and 700, each cut to the letters Apple SD Gothic Neo lacks, around 33KB a weight.
+  - Apple SD Gothic Neo stands behind both; the layer carries none of it, since it is under no open
+    licence, so a machine's own installed copy answers.
   - Should a face arrive late, letters stand first in the font behind and are swapped in place when
     it arrives.
 - **A page in Japanese or Chinese names its own language's faces where the Korean ones stand.** A
@@ -344,7 +344,7 @@ whole in `docs/boundary.md`; this document says what each is for and how the lay
   page but one whose root names Japanese or Chinese as its language. Such a page reads Hiragino Sans
   first for Japanese and PingFang SC first for Chinese, then the system's own faces, then its
   language's faces on Windows and Linux (Yu Gothic UI, Meiryo and Noto Sans JP; Microsoft YaHei and
-  Noto Sans SC), with Pretendard and the system's sans serif behind, and names no Korean face. The
+  Noto Sans SC), with Pretendard Variable and the system's sans serif behind, and names no Korean face. The
   fixed-width stack names the same faces of its language right behind CaskaydiaCove. The layer
   carries none of these faces.
 - **Words kept whole stay whole in Korean alone.** A place that keeps a word from breaking inside it —

@@ -415,9 +415,9 @@ Every token is a custom property stated by the layer's stylesheet on the root un
 - **Focus:** `--bmo-focus`, primary's 600 in the light mode and its 400 in the dark; `--bmo-focus-width`
   2px; `--bmo-focus-gap` 2px. The stylesheet colours every element's outline with `--bmo-focus`, at
   rest as on focus and over every class, so an outline on a screen is the focus ring alone.
-- **Type:** `--text-xs` is 0.875rem. `--font-sans` is Apple SD Gothic Neo, Pretendard, then the
-  system's sans serif; `--font-mono` is CaskaydiaCove NFM, Apple SD Gothic Neo, Pretendard, then the
-  system's monospace. On a root whose language is Japanese or Chinese both stacks name that
+- **Type:** `--text-xs` is 0.875rem. `--font-sans` is Pretendard Variable, Pretendard, Apple SD Gothic Neo,
+  then the system's sans serif; `--font-mono` is CaskaydiaCove NFM, Pretendard Variable, Pretendard, Apple
+  SD Gothic Neo, then the system's monospace. On a root whose language is Japanese or Chinese both stacks name that
   language's faces in place of the Korean ones (`docs/design.md`, "Fonts"), and `break-keep` breaks
   words as that language's rules allow.
 - **Radius:** the library's `--ui-radius`, 4px, the base of the four corner tiers.
@@ -456,11 +456,12 @@ Every token is a custom property stated by the layer's stylesheet on the root un
 
 ## Fonts
 
-- **Carried:** Pretendard in 400, 500, 600 and 700, each cut to the letters Apple SD Gothic Neo
-  lacks; CaskaydiaCove NFM in one weight, cut to letters, digits, punctuation, arrows and
-  box-drawing; and each face's licence beside it.
-- **Not carried:** Apple SD Gothic Neo. The stacks name it first, so a host that carries the face
-  declares it under that family name.
+- **Carried:** Pretendard Variable whole, every weight, in the package's dynamic subset of files by range
+  of letters, which `pretendard.css` declares and the stylesheet imports; Pretendard's static cut in 400,
+  500, 600 and 700, each cut to the letters Apple SD Gothic Neo lacks; CaskaydiaCove NFM in one weight,
+  cut to letters, digits, punctuation, arrows and box-drawing; and each face's licence beside it.
+- **Not carried:** Apple SD Gothic Neo. The stacks name it behind Pretendard, so a machine's own copy
+  answers for a letter Pretendard lacks.
 
 ## The library's overrides
 

@@ -6,21 +6,38 @@ import { BROWSER_HOOK_MS, touchReady } from "./touch";
 import type { Browser, Page } from "playwright-core";
 
 // The faces the layer carries, as the browser draws them (`docs/design.md`, "Fonts"). Each file is
-// handed to a page as it ships, and what the browser lays out with it is read back. Pretendard's
-// files hold only the letters the interface's first face lacks, so a letter it carries is drawn by
-// it whatever stands behind it, and one it lacks is drawn by the face behind. Every text is drawn at
-// geometric precision, as the layer draws its tabular figures: the browser hints as it comes, which
-// on Linux rounds each glyph's advance on its own.
+// handed to a page as it ships, and what the browser lays out with it is read back. Pretendard is the
+// interface's face whole, one variable face over every weight in files by range of letters, so Hangul,
+// Latin and the marks between them are all drawn by it whatever stands behind it. Every text is drawn at
+// geometric precision, as the layer draws its tabular figures: the browser hints as it comes, which on
+// Linux rounds each glyph's advance on its own.
 
 const WEIGHTS = { Regular: 400, Medium: 500, SemiBold: 600, Bold: 700 } as const;
 
-// Letters Pretendard's files carry: an accented Latin letter, the middle dot and the minus sign.
-const CARRIED = "é·−";
+// Letters the interface draws: Hangul, written as escapes, an accented Latin letter, the middle dot, the minus
+// sign and Latin letters and digits.
+const CARRIED = "\uAC00\uB098\uB2E4\u00E9\u00B7\u2212Aa0";
 
 async function face(family: string, file: string, weight: number): Promise<string> {
   const bytes = await Bun.file(new URL(`../../app/assets/fonts/${file}`, import.meta.url)).bytes();
 
   return `@font-face { font-family: "${family}"; font-weight: ${weight}; src: url(data:font/woff2;base64,${Buffer.from(bytes).toString("base64")}) format("woff2"); }`;
+}
+
+// The layer's Pretendard sheet as it ships, every file it names put in its place as data and its family
+// named "Interface".
+async function pretendardFaces(): Promise<string> {
+  const sheet = await Bun.file(new URL("../../app/assets/css/pretendard.css", import.meta.url)).text();
+  const files = [...new Set([...sheet.matchAll(/url\(([^)]+)\)/g)].map((found) => found[1]!))];
+  let faces = sheet.replaceAll("'Pretendard Variable'", '"Interface"');
+
+  for (const file of files) {
+    const bytes = await Bun.file(new URL(file, new URL("../../app/assets/css/", import.meta.url))).bytes();
+
+    faces = faces.replaceAll(`url(${file})`, `url(data:font/woff2;base64,${Buffer.from(bytes).toString("base64")})`);
+  }
+
+  return faces;
 }
 
 const ready = touchReady();
@@ -35,7 +52,8 @@ beforeAll(async () => {
   }
 
   const faces = await Promise.all([
-    ...Object.entries(WEIGHTS).map(([name, weight]) => face("Interface", `Pretendard-${name}.gap.woff2`, weight)),
+    pretendardFaces(),
+    ...Object.entries(WEIGHTS).map(([name, weight]) => face("Gap", `Pretendard-${name}.gap.woff2`, weight)),
     face("Fixed", "CaskaydiaCoveNFM-Regular.subset.woff2", 400)
   ]);
 
@@ -46,9 +64,9 @@ beforeAll(async () => {
     async ({ weights, carried }) =>
       Object.fromEntries(
         await Promise.all(
-          [...weights.map((weight) => `${weight} 16px Interface`), "400 16px Fixed"].map(async (font) => [
+          [...weights.flatMap((weight) => [`${weight} 16px Interface`, `${weight} 16px Gap`]), "400 16px Fixed"].map(async (font) => [
             font,
-            (await document.fonts.load(font, `${carried}0A`)).map((one) => one.status)
+            [...new Set((await document.fonts.load(font, carried)).map((one) => one.status))]
           ])
         )
       ),
@@ -82,24 +100,18 @@ function measured(font: string, texts: string[]): Promise<{ widths: number[]; li
 
 describe.skipIf(!ready)("Pretendard", () => {
   for (const [name, weight] of Object.entries(WEIGHTS)) {
-    test(`${name} loads from its file`, () => {
+    test(`${name} loads from the files the letters ask for`, () => {
       expect(loaded[`${weight} 16px Interface`]).toEqual(["loaded"]);
     });
 
-    test(`${name} draws the letters it carries, whatever stands behind it`, async () => {
+    test(`${name} draws Hangul, Latin and the marks between them, its static cut right behind it, whatever stands behind both`, async () => {
       const [overFixed, overSerif] = await Promise.all([
-        measured(`${weight} 100px Interface, Fixed`, [CARRIED]),
-        measured(`${weight} 100px Interface, serif`, [CARRIED])
+        measured(`${weight} 100px Interface, Gap, Fixed`, [CARRIED]),
+        measured(`${weight} 100px Interface, Gap, serif`, [CARRIED])
       ]);
 
       expect(overFixed.widths[0]).toBeGreaterThan(0);
       expect(overFixed.widths[0]).toBeCloseTo(overSerif.widths[0] ?? 0, 2);
-    });
-
-    test(`${name} leaves the letters and digits it lacks to the face behind`, async () => {
-      const [over, behind] = await Promise.all([measured(`${weight} 100px Interface, Fixed`, ["0A0A"]), measured("400 100px Fixed", ["0A0A"])]);
-
-      expect(over.widths[0]).toBeCloseTo(behind.widths[0] ?? 0, 2);
     });
 
     // A bold word in a line asks for no more height than the words around it.
