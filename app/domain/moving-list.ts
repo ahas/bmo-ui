@@ -109,14 +109,31 @@ function foldOf(item: HTMLElement): { axis: Axis; fold: Fold } {
 }
 
 // Whether an item came as part of the list filling or lengthening: every item after it came with it,
-// as the first page read into an empty list and the next page put at its end do. The items coming in
-// one change all carry the group's enter class by the time the first of them is handed here.
+// as the first page read into an empty list and the next page put at its end do, an item on its way out
+// counting for none. The items coming in one change all carry the group's enter class, or the mark the
+// hook left on the ones it already let stand, by the time each of them is handed here.
 export function cameWithTheRest(item: Element): boolean {
   for (let after = item.nextElementSibling; after !== null; after = after.nextElementSibling) {
-    if (!after.classList.contains("bmo-list-enter-active")) return false;
+    if (!cameNow(after) && !leaving(after)) return false;
   }
 
   return true;
+}
+
+// The mark an item that came with the rest keeps until the next frame: the group hands the items of one change to
+// its hook one by one, the last first, and a sibling already let stand still counts as coming with it.
+const CAME = "bmo-list-came";
+
+// Whether an item comes in this very change: still carrying the group's enter class, or already let stand or set
+// fading in by the hook a moment before.
+function cameNow(item: Element): boolean {
+  return item.classList.contains("bmo-list-enter-active") || item.classList.contains(CAME) || item.classList.contains("bmo-list-arrive");
+}
+
+// Whether an item is on its way out of the list: it stands in it only while it folds, so an item coming beside it
+// is judged as though it were gone, as a list read afresh in place of what it held is a first page.
+function leaving(item: Element): boolean {
+  return item.classList.contains("bmo-list-leave-active");
 }
 
 // Called with the item just put in at its full size: it starts from nothing and grows back to that.
@@ -137,17 +154,124 @@ export function unfoldItem(element: Element): void {
   item.style[axis.size] = `${size}px`;
 }
 
+// The most steps the first page's items wait one after another before the rest fade in together.
+const ARRIVE_STEPS = 8;
+
+// Whether an item is the first page read into a list that held none: every item before it fades in as part
+// of the same page, or is still coming with it. Where the steps count from is its place among them.
+function arrivalStep(item: Element): number | null {
+  let step = 0;
+
+  for (let before = item.previousElementSibling; before !== null; before = before.previousElementSibling) {
+    if (leaving(before)) continue;
+
+    if (!cameNow(before)) return null;
+
+    step += 1;
+  }
+
+  return step;
+}
+
 // Called with the item just put in a list read a page at a time (docs/design.md, "Motion"): one that came
-// with the rest, as a page filling or lengthening the list, stands where it lands with no movement, and
-// any other unfolds. A standing item is left at its own size and stops reading as coming at once, so a
-// change right after it judges it as standing.
+// with the rest, as a page filling or lengthening the list, stands where it lands with no movement, the first
+// page read into an empty list fading in from its top item down, and any other unfolds. A standing item is left
+// at its own size and stops reading as coming at once, so a change right after it judges it as standing.
 export function standOrUnfoldItem(element: Element): void {
   if (cameWithTheRest(element)) {
+    const step = arrivalStep(element);
+
     element.classList.remove("bmo-list-enter-from", "bmo-list-enter-active", "bmo-list-enter-to");
+    element.classList.add(CAME);
+    requestAnimationFrame(() => element.classList.remove(CAME));
+
+    if (step !== null) {
+      const item = element as HTMLElement;
+
+      item.style.setProperty("--bmo-list-arrive-step", String(Math.min(step, ARRIVE_STEPS)));
+      item.classList.add("bmo-list-arrive");
+      item.addEventListener(
+        "animationend",
+        () => {
+          item.classList.remove("bmo-list-arrive");
+          item.style.removeProperty("--bmo-list-arrive-step");
+        },
+        { once: true }
+      );
+    }
+
     return;
   }
 
   unfoldItem(element);
+}
+
+// Where each item of a list stands within the list's own box, so a list the page moves as a whole moves none of
+// its items.
+function placesIn(list: Element): Map<Element, { x: number; y: number }> {
+  const box = list.getBoundingClientRect();
+
+  return new Map(
+    Array.from(list.children).map((item) => {
+      const at = item.getBoundingClientRect();
+
+      return [item, { x: at.left - box.left, y: at.top - box.top }];
+    })
+  );
+}
+
+// An item that stayed slid from where it stood in its list to where it stands now: it is put back where it
+// was with no transition running, then let go under the list's move class.
+function slide(item: HTMLElement, dx: number, dy: number): void {
+  item.style.transition = "none";
+  item.style.transform = `translate(${dx}px, ${dy}px)`;
+  void item.offsetHeight;
+  item.style.transition = "";
+  item.classList.add("bmo-list-move");
+  item.style.transform = "";
+
+  const done = (event: TransitionEvent): void => {
+    if (event.target !== item || event.propertyName !== "transform") return;
+
+    item.removeEventListener("transitionend", done);
+    item.classList.remove("bmo-list-move");
+  };
+
+  item.addEventListener("transitionend", done);
+}
+
+/**
+ * The slides of a moving list's items, judged by where each stands within the list rather than on the page
+ * (docs/design.md, "Motion"): read where they stand before a change with `before`, and slide the ones that stayed
+ * and changed place with `after`. An item coming or going is the enter and leave hooks' and slides here never.
+ */
+export function listSlides(list: () => Element | null): { before: () => void; after: () => void } {
+  let places = new Map<Element, { x: number; y: number }>();
+
+  return {
+    before: () => {
+      const element = list();
+
+      places = element === null ? new Map() : placesIn(element);
+    },
+    after: () => {
+      const element = list();
+
+      if (element === null) return;
+
+      for (const [item, now] of placesIn(element)) {
+        const was = places.get(item);
+        const moving = item.classList.contains("bmo-list-enter-active") || item.classList.contains("bmo-list-leave-active");
+
+        if (was === undefined || moving) continue;
+
+        const dx = was.x - now.x;
+        const dy = was.y - now.y;
+
+        if (dx !== 0 || dy !== 0) slide(item as HTMLElement, dx, dy);
+      }
+    }
+  };
 }
 
 // Called once it has unfolded: it is left to its own size again, on either axis.
@@ -172,6 +296,10 @@ export function foldItem(element: Element): void {
 // hands it to its own group by default, and a list the component library draws itself is handed it
 // where the library takes a transition group's props for its list.
 export const MOVING_LIST = { name: "bmo-list", onEnter: standOrUnfoldItem, onAfterEnter: settleItem, onLeave: foldItem } as const satisfies TransitionGroupProps;
+
+// The move class `MovingList` hands its group in place of the list's own, one no stylesheet moves, so the group
+// slides nothing by where its items stand on the page and `listSlides` slides them by where they stand in the list.
+export const NO_PAGE_MOVES = "bmo-list-unmoved";
 
 // What the same transition group is handed to move a list whose every item is an arrival of its own:
 // every item that comes unfolds, one put at its end included.

@@ -83,7 +83,7 @@ describe("the tokens", () => {
   });
 
   test("narrow to one group, and refuse a group none is in", () => {
-    expect(Object.keys(tokens("motion").tokens)).toEqual(["--bmo-motion-quick", "--bmo-motion-pop", "--bmo-motion-unfold"].toSorted());
+    expect(Object.keys(tokens("motion").tokens)).toEqual(["--bmo-motion-quick", "--bmo-motion-pop", "--bmo-motion-stagger", "--bmo-motion-unfold"].toSorted());
     expect(refusal(() => tokens("shadow"))).toBe("not-found");
   });
 });

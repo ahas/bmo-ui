@@ -141,7 +141,8 @@ Each is named with everything it exports.
 | `marquee` | `MARQUEE_SLACK_PX`, `MARQUEE_SPEED_PX_PER_SECOND`, `MARQUEE_TRAVEL_SHARE`, `MARQUEE_MIN_SECONDS`, `MarqueeVars`, `MarqueeMotion`, `marqueeDistance`, `marqueeSeconds`, `marqueeVars`, `useMarquee` |
 | `modality` | `InputModality`, `MODALITY_ATTRIBUTE`, `modalityOfKey`, `watchInputModality` |
 | `monaco` | `languageOf`, `fenceLanguage`, `colourised`, `CodeView`, `openCodeView`, `SourceSelection`, `SourceView`, `openSourceView` |
-| `moving-list` | `unfoldItem`, `standOrUnfoldItem`, `settleItem`, `cameWithTheRest`, `foldItem`, `MOVING_LIST`, `UNFOLDING_LIST`, `STANDING_LIST` |
+| `moving-list` | `unfoldItem`, `standOrUnfoldItem`, `settleItem`, `cameWithTheRest`, `foldItem`, `listSlides`, `MOVING_LIST`, `UNFOLDING_LIST`, `STANDING_LIST`, `NO_PAGE_MOVES` |
+| `moving-list-group` | `MovingListGroup` |
 | `next-pages` | `NextPagesOptions`, `NextPages`, `useNextPages` |
 | `numbers` | `countLocale`, `countText`, `FigureLine`, `COUNT_BADGE`, `figurePlaces`, `turnOf`, `progressText` |
 | `openings` | `useOpenings` |
@@ -407,7 +408,7 @@ Every token is a custom property stated by the layer's stylesheet on the root un
 - **Create room:** `--bmo-create-room`, the room the create button floating on a phone takes from a
   list's foot, its height, its gap from the edge and `--bmo-safe-bottom` together; nought on a wide
   screen.
-- **Motion:** `--bmo-motion-quick` 150ms, `--bmo-motion-pop` 200ms, `--bmo-motion-unfold` 320ms;
+- **Motion:** `--bmo-motion-quick` 150ms, `--bmo-motion-pop` 200ms, `--bmo-motion-stagger` 40ms, `--bmo-motion-unfold` 320ms;
   `--bmo-ease-enter` `cubic-bezier(0.2, 0.8, 0.2, 1)`, `--bmo-ease-exit` `cubic-bezier(0.4, 0, 1, 1)`,
   `--bmo-ease-move` `cubic-bezier(0.4, 0, 0.2, 1)`. Tailwind's default transition is `quick` and
   `move`.

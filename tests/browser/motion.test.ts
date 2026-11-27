@@ -195,15 +195,17 @@ describe.skipIf(!ready)("a moving list filled or lengthened", () => {
     }
   });
 
-  test("stands a whole page read into an empty list at once", async () => {
+  test("stands a whole page read into an empty list where it lands, fading it in from its top item down", async () => {
     await frames({ items: [] });
     const seen = await frames({ items: ["p", "q", "r"] });
-
-    nothingFades(seen);
+    const half = (key: string): number => course(seen, key).findIndex((one) => one.opacity > 0.5);
 
     for (const key of ["p", "q", "r"]) {
       expect(new Set(course(seen, key).map((one) => one.height)), key).toEqual(new Set([40]));
     }
+
+    expect(half("p")).toBeLessThanOrEqual(half("q"));
+    expect(half("p")).toBeLessThan(half("r"));
   });
 
   test("still unfolds an item that comes before the ones standing", async () => {

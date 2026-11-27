@@ -221,6 +221,7 @@
   --bmo-motion-quick: 150ms;
   --bmo-motion-pop: 200ms;
   --bmo-motion-unfold: 320ms;
+  --bmo-motion-stagger: 40ms;
   --bmo-ease-enter: cubic-bezier(0.2, 0.8, 0.2, 1);
   --bmo-ease-exit: cubic-bezier(0.4, 0, 1, 1);
   --bmo-ease-move: cubic-bezier(0.4, 0, 0.2, 1);
@@ -303,6 +304,19 @@
     padding var(--bmo-motion-unfold) var(--bmo-ease-move),
     border-width var(--bmo-motion-unfold) var(--bmo-ease-move),
     margin var(--bmo-motion-unfold) var(--bmo-ease-move);
+}
+
+/* The first page read into an empty moving list: each item fades in where it stands, the top one first and each
+   next one a step after it, the steps stopping at the eighth so a long page is not waited on (see MovingList). */
+@keyframes bmo-list-arrive {
+  from {
+    opacity: 0;
+  }
+}
+
+.bmo-list-arrive {
+  animation: bmo-list-arrive var(--bmo-motion-unfold) var(--bmo-ease-enter) both;
+  animation-delay: calc(var(--bmo-motion-stagger) * var(--bmo-list-arrive-step, 0));
 }
 
 /* A tab's panel (see TabSlide): the old one leaves to one side while the new one comes in from the
@@ -593,6 +607,11 @@
   ::before,
   ::after {
     transition-duration: 0s !important;
+  }
+
+  /* The first page of a moving list stands at once. */
+  .bmo-list-arrive {
+    animation: none;
   }
 
   /* A region folding open stands at its full height at once and only fades, as a dialog does. */

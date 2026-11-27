@@ -2068,7 +2068,7 @@
       "slots": [
         {
           "name": "default",
-          "type": "{}"
+          "type": "any"
         }
       ],
       "events": [],
@@ -3020,16 +3020,16 @@
           "type": "[]"
         },
         {
+          "name": "ended",
+          "type": "[video: string | number, seconds: number]"
+        },
+        {
           "name": "leaving",
           "type": "[video: string | number, seconds: number]"
         },
         {
           "name": "update:track",
           "type": "[value: number | null]"
-        },
-        {
-          "name": "ended",
-          "type": "[video: string | number, seconds: number]"
         }
       ],
       "example": "<div class=\"flex flex-col gap-4\">\n  <div class=\"aspect-video w-full max-w-3xl\">\n    <VideoPlayer v-model:track=\"track\" :video=\"12\" src=\"https://example.com/videos/walk.mp4\" title=\"walk.mp4\" :tracks=\"tracks\" next=\"harbour.mp4\" @position=\"(video, seconds) => kept.set(video, seconds)\" />\n  </div>\n  <div class=\"w-fit max-w-80 overflow-hidden rounded-lg bg-elevated\">\n    <VideoPlayer size=\"still\" src=\"https://example.com/videos/harbour.mp4\" title=\"harbour.mp4\" :shape=\"{ width: 1280, height: 720 }\" />\n  </div>\n</div>"
@@ -3154,6 +3154,12 @@
       "group": "motion",
       "light": "150ms",
       "dark": "150ms",
+      "source": "layer"
+    },
+    "--bmo-motion-stagger": {
+      "group": "motion",
+      "light": "40ms",
+      "dark": "40ms",
       "source": "layer"
     },
     "--bmo-motion-unfold": {

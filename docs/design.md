@@ -199,8 +199,9 @@ whole in `docs/boundary.md`; this document says what each is for and how the lay
 ## Motion
 
 - **A fade is for a thing that comes and goes on its own over the screen** — the message pill's
-  words, a popover, a menu, a dialog and its shade, a tooltip — and for nothing else. An item of a
-  list never fades, and neither does the content of a page, a panel or a tab as it is replaced.
+  words, a popover, a menu, a dialog and its shade, a tooltip — and for the first page read into an
+  empty moving list, and for nothing else. Any other item of a list never fades, and neither does the
+  content of a page, a panel or a tab as it is replaced.
 - **One screen moves along one axis at a time.** A fade never runs on the same screen as a slide, a
   scroll or items changing places, and nothing slides sideways while something beside it moves up or
   down. The parts of one change of mode are one movement, whatever way each goes: they start in the
@@ -214,13 +215,14 @@ whole in `docs/boundary.md`; this document says what each is for and how the lay
   - A sheet or a drawer slides in from its edge.
   - Content is never laid out again while its box opens: it stands at its final width from the first
     frame and the box hides what lies past its edge.
-- **One set of lengths and easings,** six tokens on the root, and every movement the layer draws or
+- **One set of lengths and easings,** seven tokens on the root, and every movement the layer draws or
   retimes names one of them rather than a number of its own.
 
   | Token | Value | For |
   | --- | --- | --- |
   | `--bmo-motion-quick` | 150ms | A thing changing state where it stands — a colour, a mark turning, a tab's marker, a figure's characters turning — and a menu, a list or a tooltip out of its control. Felt, never waited on. |
   | `--bmo-motion-pop` | 200ms | A dialog out of its control and its shade; a sheet sliding in. The shortest that still shows where it came from. |
+  | `--bmo-motion-stagger` | 40ms | The step between one item of a list's first page fading in and the next. |
   | `--bmo-motion-unfold` | 320ms | A box changing size — the pill moving to its next shape, a region folding open, a list item unfolding or folding — list items sliding to new places, and a tab's panel sliding sideways. |
   | `--bmo-ease-enter` | `cubic-bezier(0.2, 0.8, 0.2, 1)` | Arriving: fast, then settling, so it can be read before it stops. |
   | `--bmo-ease-exit` | `cubic-bezier(0.4, 0, 1, 1)` | Leaving: slow where the eye already is, then gone. |
@@ -236,7 +238,9 @@ whole in `docs/boundary.md`; this document says what each is for and how the lay
   - It moves along its own axis, which its layout says: a flex row, forward or reversed, lays its
     items out sideways and moves them sideways; every other list is a column and moves them up and
     down.
-  - The items that stay slide to their new places. An item that comes unfolds from nothing where it
+  - The items that stay slide to their new places within the list, judged by where each stands in
+    the list's own box: a list the page moves as a whole, a head or a skeleton above it changing size
+    in the same change, slides none of its items. An item that comes unfolds from nothing where it
     lands, one that goes folds to nothing where it stood: its size along the axis, its padding and
     its border on that axis's two sides. The items around it close up as it does, so nothing jumps
     at the end: an item with one before it gives back the list's gap before it and sets its own
@@ -247,7 +251,11 @@ whole in `docs/boundary.md`; this document says what each is for and how the lay
     list filled or lengthened stands at once: items that come with nothing but other new items after
     them — the first page read into a list that held none, the next page an endless scroll or a
     load-more button puts at its end — stand where they land with no movement, filling the place the
-    skeleton held, so the layout never moves as a list is read. Only an item that comes before or
+    skeleton held, so the layout never moves as a list is read. The first page read into a list that
+    held none fades in where it stands, its top item first and each next one `stagger` after the one
+    before, the steps stopping at the eighth so the rest fade in together; each fades at `unfold`,
+    eased by `enter`. A page put at the end of items already standing stands at once. A reader who
+    asked for less movement sees the first page stand at once too. Only an item that comes before or
     between items already standing unfolds: one a filter, a search, an arrival or a reorder puts
     among them.
   - A list whose every item is an arrival of its own, never a page read in, unfolds every item that
