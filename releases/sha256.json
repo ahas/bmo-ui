@@ -418,5 +418,10 @@
     "sha256": "2ffce9e333cf1a053e3610c050a06858aa0208d4f23c5909cc8dae99ffae0475",
     "bound": "0.1.0-rev.23",
     "why": "A manifest may name its entry's title by reader role (sidebarTitles), answered by titleFor, and NextPageFoot gains its catalogue example; an addition that changes no export a bundle reads, so the bound stays."
+  },
+  "bmo-ui-1.1.0-0.nightly.20261127.tgz": {
+    "sha256": "4b85b9106560fc17dddc108added3716681892b14ba2caaba7765a5589583001",
+    "bound": "0.1.0-rev.23",
+    "why": "A moving list filled or lengthened stands at once; a motion fix that changes no export, so the bound stays."
   }
 }
