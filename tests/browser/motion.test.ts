@@ -177,6 +177,45 @@ describe.skipIf(!ready)("a moving list", () => {
   });
 });
 
+describe.skipIf(!ready)("a moving list filled or lengthened", () => {
+  test("stands the items put at its end where they land, with no movement, and the ones before them stay", async () => {
+    const before = (await frames({ items: ["e", "a", "c", "x"] })).at(-1)!.boxes;
+    const seen = await frames({ items: ["e", "a", "c", "x", "f", "g"] });
+
+    nothingFades(seen);
+
+    // The two put at the end stand at their full height from the first frame they are drawn in.
+    for (const key of ["f", "g"]) {
+      expect(new Set(course(seen, key).map((one) => one.height)), key).toEqual(new Set([40]));
+    }
+
+    // Nothing already standing moves.
+    for (const key of ["e", "a", "c", "x"]) {
+      expect(new Set(course(seen, key).map((one) => one.top)), key).toEqual(new Set([before[key]!.top]));
+    }
+  });
+
+  test("stands a whole page read into an empty list at once", async () => {
+    await frames({ items: [] });
+    const seen = await frames({ items: ["p", "q", "r"] });
+
+    nothingFades(seen);
+
+    for (const key of ["p", "q", "r"]) {
+      expect(new Set(course(seen, key).map((one) => one.height)), key).toEqual(new Set([40]));
+    }
+  });
+
+  test("still unfolds an item that comes before the ones standing", async () => {
+    const seen = await frames({ items: ["n", "p", "q", "r"] });
+    const coming = course(seen, "n").map((one) => one.height);
+
+    expect(coming[0]).toBeLessThan(40);
+    expect(new Set(coming).size).toBeGreaterThan(3);
+    expect(coming.at(-1)).toBe(40);
+  });
+});
+
 describe.skipIf(!ready)("a tab's panel", () => {
   // Both panels sideways alone, in one direction, side by side with nothing between and nothing over.
   function slides(seen: Seen[], from: string, to: string, way: 1 | -1): void {

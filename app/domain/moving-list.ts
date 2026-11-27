@@ -108,11 +108,34 @@ function foldOf(item: HTMLElement): { axis: Axis; fold: Fold } {
   return { axis, fold: folded(axis, item, gap) };
 }
 
+// Whether an item came as part of the list filling or lengthening: every item after it came with it,
+// as the first page read into an empty list and the next page put at its end do. Such an item stands
+// where it lands with no movement (docs/design.md, "Motion"); only one that came before or between
+// items already standing unfolds. The items coming in one change all carry the group's enter class by
+// the time the first of them is handed here.
+export function cameWithTheRest(item: Element): boolean {
+  for (let after = item.nextElementSibling; after !== null; after = after.nextElementSibling) {
+    if (!after.classList.contains("bmo-list-enter-active")) return false;
+  }
+
+  return true;
+}
+
 // Called with the item just put in at its full size: it starts from nothing and grows back to that.
 // It is put at nothing with no transition running, since a padding sent to nothing and straight back
 // would only reverse a movement just begun, which the browser cuts as short as that movement had run.
+// It takes one argument alone: a hook naming a second would have Vue wait on that callback rather than on the
+// stylesheet's own transition ending.
 export function unfoldItem(element: Element): void {
   const item = element as HTMLElement;
+
+  // A list filled or lengthened stands at once: the item is left at its own size, so nothing moves, and it
+  // stops reading as coming at once, so a change right after it judges it as standing.
+  if (cameWithTheRest(item)) {
+    item.classList.remove("bmo-list-enter-from", "bmo-list-enter-active", "bmo-list-enter-to");
+    return;
+  }
+
   const { axis, fold } = foldOf(item);
   const size = axis.measure(item);
 
