@@ -11,14 +11,20 @@ const stylesheet = new URL("../../app/assets/css/main.css", import.meta.url);
 const css = await Bun.file(stylesheet).text();
 const sheet = postcss.parse(css);
 
-// The stylesheet's own faces and those of the sheet it imports for Pretendard.
-const pretendard = postcss.parse(await Bun.file(new URL("../../app/assets/css/pretendard.css", import.meta.url)).text());
+// The stylesheet's own faces, Pretendard's among them, declared in the stylesheet itself so a host that copies the
+// one file carries every face it names.
 const faces: AtRule[] = [];
-for (const declaring of [sheet, pretendard]) {
-  declaring.walkAtRules("font-face", (face) => {
-    faces.push(face);
+sheet.walkAtRules("font-face", (face) => {
+  faces.push(face);
+});
+
+test("the stylesheet imports no sheet of its own by a relative path", () => {
+  const relative: string[] = [];
+  sheet.walkAtRules("import", (rule) => {
+    if (rule.params.replace(/^['"]|['"]$/g, "").startsWith(".")) relative.push(rule.params);
   });
-}
+  expect(relative).toEqual([]);
+});
 
 // The value of one declaration inside a rule, as written.
 function field(rule: Container, name: string): string {

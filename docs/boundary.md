@@ -457,7 +457,7 @@ Every token is a custom property stated by the layer's stylesheet on the root un
 ## Fonts
 
 - **Carried:** Pretendard Variable whole, every weight, in the package's dynamic subset of files by range
-  of letters, which `pretendard.css` declares and the stylesheet imports; Pretendard's static cut in 400,
+  of letters, declared in the stylesheet itself, so a host that copies the one file carries every face; Pretendard's static cut in 400,
   500, 600 and 700, each cut to the letters Apple SD Gothic Neo lacks; CaskaydiaCove NFM in one weight,
   cut to letters, digits, punctuation, arrows and box-drawing; and each face's licence beside it.
 - **Not carried:** Apple SD Gothic Neo. The stacks name it behind Pretendard, so a machine's own copy

@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { chromium } from "playwright-core";
+import postcss from "postcss";
 
 import { BROWSER_HOOK_MS, touchReady } from "./touch";
 
@@ -24,10 +25,15 @@ async function face(family: string, file: string, weight: number): Promise<strin
   return `@font-face { font-family: "${family}"; font-weight: ${weight}; src: url(data:font/woff2;base64,${Buffer.from(bytes).toString("base64")}) format("woff2"); }`;
 }
 
-// The layer's Pretendard sheet as it ships, every file it names put in its place as data and its family
-// named "Interface".
+// The layer's Pretendard faces as its stylesheet ships them, every file they name put in its place as data and
+// their family named "Interface".
 async function pretendardFaces(): Promise<string> {
-  const sheet = await Bun.file(new URL("../../app/assets/css/pretendard.css", import.meta.url)).text();
+  const declared = postcss.parse(await Bun.file(new URL("../../app/assets/css/main.css", import.meta.url)).text());
+  const variable: string[] = [];
+  declared.walkAtRules("font-face", (face) => {
+    if (face.toString().includes("Pretendard Variable")) variable.push(face.toString());
+  });
+  const sheet = variable.join("\n");
   const files = [...new Set([...sheet.matchAll(/url\(([^)]+)\)/g)].map((found) => found[1]!))];
   let faces = sheet.replaceAll("'Pretendard Variable'", '"Interface"');
 
