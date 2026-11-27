@@ -284,6 +284,7 @@ loads it from the installed package under Node, which reads no TypeScript there.
 | Module | Exports |
 | --- | --- |
 | `console-bundle` | `consoleBundle` |
+| `console-theme` | `consoleTheme` |
 
 `consoleBundle` is a Vite plugin, imported by path from the package's `bundle/` folder. It takes
 `name`, the bundle's name in kebab-case as its manifest names it, which is its words' namespace, and
@@ -306,6 +307,18 @@ of two parts or more joined by dots, is read as a key by its first part:
   fault; any other string is not read as a key.
 
 A locale's tree holding anything beside the bundle's namespace at its root is a fault as well.
+
+`consoleTheme` is a Vite plugin, imported by path from the package's `bundle/` folder, that a bundle's
+stylesheet reads the layer's theme through. It takes `buildDir`, Nuxt's build folder where `nuxi prepare`
+writes the component library's theme, `.nuxt` under the build's root where left out, and refuses one that
+is not a path. When the build is configured it copies the layer's stylesheet, the component library's
+stylesheet and that generated theme into the folder `console-theme` inside the build folder, each with its
+`@source` rules dropped: the layer's import of Tailwind CSS scans no sources, its import of the library
+names the library's copy, the library's import of the generated theme names that copy, and every other
+relative address, of an import or a `url()`, names the file beside the stylesheet it was read from. It
+names the layer's copy by the import `#console-theme`, which a bundle's stylesheet references, so the
+bundle's stylesheet carries the utilities of its own screens alone on the layer's theme, variants and
+tokens.
 
 ## The harness plugin
 

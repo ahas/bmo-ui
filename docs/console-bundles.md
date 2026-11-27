@@ -36,7 +36,9 @@ which service translates and how it lists their screens. A service supplies its 
   its manifest ("The layer a bundle is built on").
 - **Its stylesheet** is the styles and utility classes its screens use beyond the layer's own, built
   on the layer's tokens and answered at the path the manifest names, where the bundle has one. The
-  layer's stylesheet and tokens are the console's copy.
+  layer's stylesheet and tokens are the console's copy: the bundle's stylesheet references the layer's
+  theme through the bundle build's theme plugin (`docs/boundary.md`, "The bundle build") and carries
+  none of it.
 - **Its words** are one JSON object answered at the path the manifest names: each locale's tree under
   the locale's code, every key under the bundle's namespace. Like the manifest, they are answered to
   the console's own credential with no owner key and no role.
