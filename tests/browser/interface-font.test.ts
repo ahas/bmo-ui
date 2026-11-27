@@ -130,7 +130,7 @@ describe.skipIf(!ready)("Pretendard", () => {
   });
 });
 
-const FIXED_TEXTS = [..."0123456789AWmi.é"].map((one) => one.repeat(4));
+const FIXED_TEXTS = [..."0123456789AWmi.\u00e9"].map((one) => one.repeat(4));
 
 describe.skipIf(!ready)("CaskaydiaCove", () => {
   test("loads from its file", () => {

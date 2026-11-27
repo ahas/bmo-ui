@@ -2,5 +2,6 @@
   "tests/browser/choice.test.ts": 5,
   "tests/browser/code-copy.test.ts": 1,
   "tests/browser/diagram.test.ts": 3,
+  "tests/browser/interface-font.test.ts": 1,
   "tests/domain/prompt.test.ts": 11
 }

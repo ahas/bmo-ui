@@ -86,6 +86,23 @@ async function session(reducedMotion: "reduce" | "no-preference"): Promise<{ con
   await page.goto(`${ORIGIN}/`);
   // The box is held to its content's size once the page's first frame is laid out.
   await page.waitForFunction(() => document.querySelector<HTMLElement>("[data-box=box]")?.style.width !== "");
+  // The first frame may be laid out in the faces behind the interface's own, which swaps in once it
+  // has loaded; the words then measure narrower and the box moves to them at the unfold length. A
+  // change is made on a page at rest, so the fonts are waited for, then the frames that lay the swap
+  // out and hand the box its new size, then every movement that set going.
+  await page.evaluate(async () => {
+    const frame = (): Promise<void> => new Promise((done) => requestAnimationFrame(() => done()));
+    const page = document.querySelector("[data-page]")!;
+
+    await document.fonts.ready;
+    await frame();
+    await frame();
+
+    // A movement taken over by another ends cancelled, and the one that took it over is waited for next.
+    for (let round = 0; round < 10 && page.getAnimations({ subtree: true }).length > 0; round++) {
+      await Promise.allSettled(page.getAnimations({ subtree: true }).map((animation) => animation.finished));
+    }
+  });
 
   return { context, page };
 }
