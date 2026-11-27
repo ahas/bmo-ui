@@ -244,8 +244,9 @@ whole in `docs/boundary.md`; this document says what each is for and how the lay
     leading margin of the item after it. A gap and an overlap drawn as a negative margin close up
     the same way. What an item shows is laid out at its full size throughout and only clipped.
   - A list filled or lengthened stands at once. Items that come with nothing but other new items after
-    them — the first page read into a list that held none, the next page an endless scroll or a 더 보기
-    puts at its end — stand where they land with no movement, filling the place the skeleton held, so
+    them — the first page read into a list that held none, the next page an endless scroll or a
+    load-more button puts at its end — stand where they land with no movement, filling the place the
+    skeleton held, so
     the layout never moves as a list is read. Only an item that comes before or between items already
     standing unfolds: one a filter, a search, an arrival or a reorder puts among them.
   - Every item moves at once, at `unfold`, eased by `move`: no item waits for the one before it.

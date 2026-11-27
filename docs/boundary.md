@@ -141,7 +141,7 @@ Each is named with everything it exports.
 | `marquee` | `MARQUEE_SLACK_PX`, `MARQUEE_SPEED_PX_PER_SECOND`, `MARQUEE_TRAVEL_SHARE`, `MARQUEE_MIN_SECONDS`, `MarqueeVars`, `MarqueeMotion`, `marqueeDistance`, `marqueeSeconds`, `marqueeVars`, `useMarquee` |
 | `modality` | `InputModality`, `MODALITY_ATTRIBUTE`, `modalityOfKey`, `watchInputModality` |
 | `monaco` | `languageOf`, `fenceLanguage`, `colourised`, `CodeView`, `openCodeView`, `SourceSelection`, `SourceView`, `openSourceView` |
-| `moving-list` | `unfoldItem`, `settleItem`, `foldItem`, `MOVING_LIST`, `STANDING_LIST` |
+| `moving-list` | `unfoldItem`, `settleItem`, `cameWithTheRest`, `foldItem`, `MOVING_LIST`, `STANDING_LIST` |
 | `next-pages` | `NextPagesOptions`, `NextPages`, `useNextPages` |
 | `numbers` | `countLocale`, `countText`, `FigureLine`, `COUNT_BADGE`, `figurePlaces`, `turnOf`, `progressText` |
 | `openings` | `useOpenings` |
