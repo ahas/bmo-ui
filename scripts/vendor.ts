@@ -12,13 +12,15 @@ import type { JSONPath } from "jsonc-parser";
 import type { Ledger } from "./release";
 
 // The vendor verb (the README, "Version"): it moves every host manifest under the checkouts it is
-// handed onto one release. The checkouts are the caller's; the verb knows no host and finds the
-// manifests by reading them. Everything it refuses, it refuses before changing a file.
+// handed onto one release and stages what it wrote in each checkout's git index. The checkouts are the
+// caller's; the verb knows no host and finds the manifests by reading them. Everything it refuses, it
+// refuses before changing a file.
 
 const PACKAGE = "bmo-ui";
 const FILE_SPEC = "file:";
 const LOCKFILE = "bun.lock";
 const MANIFEST = "package.json";
+const GIT = "git";
 
 // The fields a dependency the host installs stands in; a peer pin is raised beside them, never read as one.
 const DEPENDENCY_FIELDS = ["dependencies", "devDependencies", "optionalDependencies"] as const;
@@ -185,6 +187,71 @@ function moved(host: HostManifest, release: Release): string {
   return values.reduce((text, [path, value]) => applyEdits(text, modify(text, path, value, {})), host.text);
 }
 
+/** The dependencies of a manifest that name another release than the one it is moved onto. */
+function movingOf(host: HostManifest, release: Release): Vendored[] {
+  return host.vendored.filter((dependency) => dependency.version !== release.version);
+}
+
+/** Every packed file the move copies into a checkout: the release's file beside each old file a manifest moves off. */
+function copiesOf(hosts: HostManifest[], release: Release): string[] {
+  return [...new Set(hosts.flatMap((host) => movingOf(host, release).map((dependency) => join(dirname(dependency.path), release.file))))];
+}
+
+interface Ran {
+  exitCode: number;
+  stdout: string;
+  stderr: string;
+}
+
+function git(checkout: string, args: string[]): Ran {
+  const done = Bun.spawnSync([GIT, ...args], { cwd: checkout, stdout: "pipe", stderr: "pipe" });
+
+  return { exitCode: done.exitCode, stdout: done.stdout.toString(), stderr: done.stderr.toString() };
+}
+
+/**
+ * Refuses a checkout git holds no work tree for, and a packed file the move would copy that git ignores there: the
+ * verb stages what it writes, so the commit made after it carries the new file, and either would leave the file out.
+ */
+function stageable(checkout: string, hosts: HostManifest[], release: Release): void {
+  const tree = git(checkout, ["rev-parse", "--is-inside-work-tree"]);
+
+  if (tree.exitCode !== 0 || tree.stdout.trim() !== "true") {
+    throw new Refused(`${checkout} is no git work tree; the verb stages the files it writes there, so the commit carries the new packed file.`);
+  }
+
+  const copies = copiesOf(hosts, release).map((path) => relative(checkout, path));
+
+  if (copies.length === 0) return;
+
+  const ignored = git(checkout, ["check-ignore", "--", ...copies]);
+
+  if (ignored.exitCode === 0) {
+    throw new Refused(`git ignores ${ignored.stdout.trim().split("\n").join(", ")} in ${checkout}; a packed file the host installs is committed beside its manifest.`);
+  }
+
+  if (ignored.exitCode !== 1) throw new Refused(`\`git check-ignore\` failed in ${checkout}:\n${ignored.stderr}`);
+}
+
+/** Stages in a checkout's git index the files the move wrote and the removal of the files it took away, and says so. */
+function stage(checkout: string, written: string[], removed: string[]): string {
+  const named = (paths: string[]) => paths.map((path) => relative(checkout, path));
+  const steps = [
+    ["add", "--", ...named(written)],
+    ...(removed.length === 0 ? [] : [["rm", "--cached", "--ignore-unmatch", "--quiet", "--", ...named(removed)]])
+  ];
+
+  for (const step of steps) {
+    const done = git(checkout, step);
+
+    if (done.exitCode !== 0) throw new Refused(`\`git ${step.join(" ")}\` failed in ${checkout}, after its manifests were moved:\n${done.stderr}`);
+  }
+
+  const removal = removed.length === 0 ? "" : `, and the removal of ${named(removed).join(", ")}`;
+
+  return `  staged in git: ${named(written).join(", ")}${removal}`;
+}
+
 /** The folder whose lockfile records a manifest: its own or the nearest above it inside the checkout, or null. */
 async function lockfileFolder(checkout: string, manifest: string): Promise<string | null> {
   for (let folder = dirname(manifest); folder === checkout || inside(checkout, folder); folder = dirname(folder)) {
@@ -202,15 +269,16 @@ function writeLockfile(folder: string): void {
   }
 }
 
-/** Moves one checkout's manifests onto a release and says, per manifest, what changed. */
+/** Moves one checkout's manifests onto a release, stages what it wrote, and says, per manifest, what changed. */
 async function vendorCheckout(checkout: string, hosts: HostManifest[], release: Release): Promise<string[]> {
   const lines: string[] = [];
+  const written = new Set<string>();
   const lockfiles = new Set<string>();
   const stale = new Set<string>();
   const named = (path: string) => relative(checkout, path);
 
   for (const host of hosts) {
-    const moving: HostManifest = { ...host, vendored: host.vendored.filter((dependency) => dependency.version !== release.version) };
+    const moving: HostManifest = { ...host, vendored: movingOf(host, release) };
 
     if (moving.vendored.length === 0) {
       lines.push(`  ${named(host.path)}: already on ${release.version}, left as it stands`);
@@ -228,10 +296,12 @@ async function vendorCheckout(checkout: string, hosts: HostManifest[], release: 
         throw new Refused(`${copy} does not match the sha256 the ledger names after copying; nothing else of ${named(host.path)} was changed.`);
       }
 
+      written.add(copy);
       said.push(`copied ${named(copy)}, its sha256 matching the ledger`);
     }
 
     await Bun.write(host.path, moved(moving, release));
+    written.add(host.path);
 
     const fields = [...new Set(moving.vendored.map((dependency) => dependency.field))];
     const from = [...new Set(moving.vendored.map((dependency) => dependency.version))];
@@ -256,19 +326,26 @@ async function vendorCheckout(checkout: string, hosts: HostManifest[], release: 
   }
 
   for (const path of stale) await rm(path, { force: true });
-  for (const folder of lockfiles) writeLockfile(folder);
 
-  return [checkout, ...lines];
+  for (const folder of lockfiles) {
+    writeLockfile(folder);
+    written.add(join(folder, LOCKFILE));
+  }
+
+  return written.size === 0 ? [checkout, ...lines] : [checkout, ...lines, stage(checkout, [...written], [...stale])];
 }
 
 /**
- * Puts a release into every manifest under the checkouts that vendors the layer, and says what it changed. It refuses
- * a version that is not released and a checkout holding no such manifest before it changes anything, and commits nothing.
+ * Puts a release into every manifest under the checkouts that vendors the layer, stages what it wrote in each
+ * checkout's git index, and says what it changed and staged. It refuses a version that is not released, a checkout
+ * holding no such manifest and one whose git would leave the new file out before it changes anything, and commits nothing.
  */
 export async function vendor(releases: string, version: string, checkouts: string[]): Promise<string> {
   const release = await releaseOf(releases, version);
   const planned = await Promise.all(checkouts.map(async (checkout) => ({ checkout: resolve(checkout), hosts: await hostManifests(resolve(checkout)) })));
   const said: string[] = [];
+
+  for (const { checkout, hosts } of planned) stageable(checkout, hosts, release);
 
   for (const { checkout, hosts } of planned) said.push(...(await vendorCheckout(checkout, hosts, release)));
 

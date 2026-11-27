@@ -16,7 +16,8 @@ wording keys listed here are the ones the layer's list holds.
   that file; it never packs the layer from its source (the README, "Version"). The manifest's
   `bmo-ui` dependency is a file dependency on that file inside the host's checkout, and the vendor
   verb moves every such dependency under the checkouts it is handed onto another release, copying
-  the file, checking it against the ledger, removing the old one and writing the lockfile again.
+  the file, checking it against the ledger, removing the old one, writing the lockfile again and
+  staging all of it in the checkout's git index, so the new file is never left out of the commit.
 - **The host extends the layer** from its Nuxt configuration. The layer brings Nuxt UI as its module,
   its stylesheet, fonts and overrides, its components, its page plugins and its head.
 - **Components are registered by name** through the layer, and a host uses them as its own.

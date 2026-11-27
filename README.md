@@ -145,12 +145,15 @@ testbed declaration, the Korean ledger the quick checks read, `CLAUDE.md`, and t
   layout its repository gave it (an array on one line stays on one line), removes the old file, and
   writes the lockfile again with the package manager's lockfile-only install where a `bun.lock` stands
   beside the manifest or in a folder above it inside the checkout. A manifest that already names the
-  version is left as it stands. It prints, under each checkout, what it changed in each manifest, and
-  commits nothing: the job that runs it commits in each repository.
+  version is left as it stands. Every checkout is a git work tree, and the verb stages in its index
+  every file it wrote, the new packed file, the manifest and the lockfile, together with the removal
+  of the old packed file, so the commit carries the new file whether it is made from the index or
+  with every tracked change. It prints, under each checkout, what it changed in each manifest and
+  what it staged, and commits nothing: the job that runs it commits in each repository.
   Before changing anything it refuses a version with no packed file or no ledger line, a file whose
   bytes do not match the ledger, a checkout path that is not absolute or not a folder, a checkout
-  holding no manifest that vendors the layer, and a vendored file lying outside its checkout, naming
-  each.
+  holding no manifest that vendors the layer, a vendored file lying outside its checkout, a checkout
+  that is no git work tree, and a new packed file git would ignore there, naming each.
 - A path dependency on a checkout serves a repository's own work and tests while a change
   waits for a release; the layer it installs names its version marked `+source`, so no console
   takes a bundle built on it.

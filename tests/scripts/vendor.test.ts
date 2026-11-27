@@ -1,5 +1,5 @@
 import { afterAll, afterEach, beforeAll, describe, expect, test } from "bun:test";
-import { mkdir, mkdtemp, rm } from "node:fs/promises";
+import { mkdir, mkdtemp, realpath, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 
@@ -21,6 +21,8 @@ beforeAll(async () => {
   // Bun keeps every tarball it reads in its cache; this file's cache is its own and goes with it.
   cache = await mkdtemp(join(tmpdir(), "bmo-ui-vendor-cache-"));
   process.env.BUN_INSTALL_CACHE_DIR = cache;
+  // A folder made under the temporary folder is a git work tree only where a test makes it one.
+  process.env.GIT_CEILING_DIRECTORIES = await realpath(tmpdir());
 });
 
 afterEach(async () => {
@@ -30,6 +32,7 @@ afterEach(async () => {
 
 afterAll(async () => {
   delete process.env.BUN_INSTALL_CACHE_DIR;
+  delete process.env.GIT_CEILING_DIRECTORIES;
   await rm(cache, { recursive: true, force: true });
 });
 
@@ -37,6 +40,30 @@ function run(command: string[], cwd: string): void {
   const done = Bun.spawnSync(command, { cwd, stdout: "pipe", stderr: "pipe" });
 
   if (!done.success) throw new Error(`${command.join(" ")} failed: ${done.stderr.toString()}`);
+}
+
+function git(args: string[], cwd: string): string {
+  const done = Bun.spawnSync(["git", ...args], { cwd, stdout: "pipe", stderr: "pipe" });
+
+  if (!done.success) throw new Error(`git ${args.join(" ")} failed: ${done.stderr.toString()}`);
+
+  return done.stdout.toString();
+}
+
+/** A checkout under the scratch folder: a git work tree, as every host checkout is. */
+async function checkoutAt(name: string): Promise<string> {
+  const checkout = join(scratch, name);
+
+  await mkdir(checkout, { recursive: true });
+  git(["init", "--quiet"], checkout);
+
+  return checkout;
+}
+
+/** Commits everything a checkout holds, so what the verb stages afterwards reads against it. */
+function commitAll(checkout: string): void {
+  git(["add", "--all"], checkout);
+  git(["-c", "user.name=tester", "-c", "user.email=dev@ahas.io", "-c", "commit.gpgsign=false", "commit", "--quiet", "--no-verify", "--message", "Host"], checkout);
 }
 
 /** A packed file of the layer at a version, holding its manifest alone. */
@@ -98,7 +125,7 @@ describe("the vendor verb", () => {
     scratch = await mkdtemp(join(tmpdir(), "bmo-ui-vendor-"));
 
     const releases = await releasesOf(FROM, TO);
-    const checkout = join(scratch, "checkout");
+    const checkout = await checkoutAt("checkout");
     const app = await host(checkout, ".", { name: "first-app", private: true, dependencies: { "bmo-ui": `file:vendor/${releaseFile(FROM)}` } }, FROM);
     const panel = await host(
       checkout,
@@ -127,7 +154,26 @@ describe("the vendor verb", () => {
     expect(said.split("\n")).toEqual([
       checkout,
       `  package.json: ${FROM} to ${TO} in dependencies; copied vendor/${releaseFile(TO)}, its sha256 matching the ledger; removed vendor/${releaseFile(FROM)}; wrote bun.lock again`,
-      `  tools/panel/package.json: ${FROM} to ${TO} in devDependencies; copied tools/panel/vendor/${releaseFile(TO)}, its sha256 matching the ledger; removed tools/panel/vendor/${releaseFile(FROM)}; wrote tools/panel/bun.lock again`
+      `  tools/panel/package.json: ${FROM} to ${TO} in devDependencies; copied tools/panel/vendor/${releaseFile(TO)}, its sha256 matching the ledger; removed tools/panel/vendor/${releaseFile(FROM)}; wrote tools/panel/bun.lock again`,
+      `  staged in git: vendor/${releaseFile(TO)}, package.json, tools/panel/vendor/${releaseFile(TO)}, tools/panel/package.json, bun.lock, tools/panel/bun.lock, and the removal of vendor/${releaseFile(FROM)}, tools/panel/vendor/${releaseFile(FROM)}`
+    ]);
+  });
+
+  test("stages the new packed file, the manifest, the lockfile and the old file's removal, leaving nothing unstaged", async () => {
+    scratch = await mkdtemp(join(tmpdir(), "bmo-ui-vendor-"));
+
+    const releases = await releasesOf(FROM, TO);
+    const checkout = await checkoutAt("checkout");
+
+    await host(checkout, ".", { name: "first-app", private: true, dependencies: { "bmo-ui": `file:vendor/${releaseFile(FROM)}` } }, FROM);
+    commitAll(checkout);
+    await vendor(releases, TO, [checkout]);
+
+    expect(git(["status", "--porcelain", "--no-renames", "--untracked-files=all"], checkout).trimEnd().split("\n")).toEqual([
+      "M  bun.lock",
+      "M  package.json",
+      `D  vendor/${releaseFile(FROM)}`,
+      `A  vendor/${releaseFile(TO)}`
     ]);
   });
 
@@ -135,7 +181,7 @@ describe("the vendor verb", () => {
     scratch = await mkdtemp(join(tmpdir(), "bmo-ui-vendor-"));
 
     const releases = await releasesOf(FROM, TO);
-    const checkout = join(scratch, "checkout");
+    const checkout = await checkoutAt("checkout");
     const app = await host(checkout, ".", { name: "first-app", private: true, dependencies: { "bmo-ui": `file:vendor/${releaseFile(FROM)}` } }, FROM);
     const laidOut = (version: string) =>
       `{\n  "name": "first-app",\n  "private": true,\n  "files": ["app", "docs"],\n  "peerDependencies": { "bmo-ui": "${version}" },\n  "dependencies": {\n    "bmo-ui": "file:vendor/${releaseFile(version)}"\n  }\n}\n`;
@@ -150,7 +196,7 @@ describe("the vendor verb", () => {
     scratch = await mkdtemp(join(tmpdir(), "bmo-ui-vendor-"));
 
     const releases = await releasesOf(FROM, TO);
-    const checkout = join(scratch, "checkout");
+    const checkout = await checkoutAt("checkout");
     const app = await host(checkout, ".", { name: "first-app", private: true, dependencies: { "bmo-ui": `file:vendor/${releaseFile(TO)}` } }, TO);
     const before = { manifest: await Bun.file(app).text(), lockfile: await Bun.file(join(checkout, "bun.lock")).text() };
 
@@ -162,7 +208,7 @@ describe("the vendor verb", () => {
     scratch = await mkdtemp(join(tmpdir(), "bmo-ui-vendor-"));
 
     const releases = await releasesOf(FROM, TO);
-    const checkout = join(scratch, "checkout");
+    const checkout = await checkoutAt("checkout");
     const app = await host(checkout, ".", { name: "first-app", private: true, dependencies: { "bmo-ui": `file:vendor/${releaseFile(FROM)}` } }, FROM);
     const before = await Bun.file(app).text();
     const bare = join(scratch, "bare");
@@ -182,7 +228,7 @@ describe("the vendor verb", () => {
     scratch = await mkdtemp(join(tmpdir(), "bmo-ui-vendor-"));
 
     const releases = await releasesOf(FROM, TO);
-    const checkout = join(scratch, "checkout");
+    const checkout = await checkoutAt("checkout");
     const app = await host(checkout, ".", { name: "first-app", private: true, dependencies: { "bmo-ui": `file:vendor/${releaseFile(FROM)}` } }, FROM);
     const before = await Bun.file(app).text();
 
@@ -191,6 +237,25 @@ describe("the vendor verb", () => {
     expect(await refusal(vendor(releases, TO, [checkout]))).toContain(`${releaseFile(TO)} does not match the sha256 the ledger names`);
     expect(await Bun.file(app).text()).toBe(before);
     expect(await Bun.file(join(checkout, "vendor", releaseFile(TO))).exists()).toBe(false);
+  });
+
+  test("refuses a checkout that is no git work tree, and a new packed file git ignores, changing nothing", async () => {
+    scratch = await mkdtemp(join(tmpdir(), "bmo-ui-vendor-"));
+
+    const releases = await releasesOf(FROM, TO);
+    const plain = join(scratch, "plain");
+    const ignoring = await checkoutAt("ignoring");
+    const manifest = { name: "first-app", private: true, dependencies: { "bmo-ui": `file:vendor/${releaseFile(FROM)}` } };
+    const apps = [await host(plain, ".", manifest, FROM), await host(ignoring, ".", manifest, FROM)];
+    const before = await Promise.all(apps.map((app) => Bun.file(app).text()));
+
+    await Bun.write(join(ignoring, ".gitignore"), "*.tgz\n");
+
+    expect(await refusal(vendor(releases, TO, [plain]))).toStartWith(`${plain} is no git work tree`);
+    expect(await refusal(vendor(releases, TO, [ignoring]))).toStartWith(`git ignores vendor/${releaseFile(TO)} in ${ignoring}`);
+    expect(await Promise.all(apps.map((app) => Bun.file(app).text()))).toEqual(before);
+
+    for (const checkout of [plain, ignoring]) expect(await Bun.file(join(checkout, "vendor", releaseFile(TO))).exists()).toBe(false);
   });
 
   test("is handed a version and absolute checkout paths, and refuses anything else", () => {
