@@ -2050,13 +2050,19 @@
     {
       "name": "MovingList",
       "kind": "component",
-      "line": "A list whose items come, go and change places by position alone, along the axis its layout gives it.",
+      "line": "A list whose items come, go and change places by position alone, along the axis its layout gives it, standing a page read in at its end at once unless it says its filling unfolds.",
       "props": [
         {
           "name": "tag",
           "type": "string | undefined",
           "required": false,
           "default": "\"ul\""
+        },
+        {
+          "name": "filling",
+          "type": "\"stands\" | \"unfolds\" | undefined",
+          "required": false,
+          "default": "\"stands\""
         }
       ],
       "slots": [
