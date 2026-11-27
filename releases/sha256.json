@@ -423,5 +423,10 @@
     "sha256": "4b85b9106560fc17dddc108added3716681892b14ba2caaba7765a5589583001",
     "bound": "0.1.0-rev.23",
     "why": "A moving list filled or lengthened stands at once; a motion fix that changes no export, so the bound stays."
+  },
+  "bmo-ui-1.1.0-0.nightly.20261128.tgz": {
+    "sha256": "79bfd32aaeec09c1c5ec9a1f791177706e34a339a75a2b2a86cdca2771582969",
+    "bound": "0.1.0-rev.23",
+    "why": "A moving list's first page fades in and its items slide within the list, and the interface draws in Pretendard carried whole; additions that change no export a bundle reads, so the bound stays."
   }
 }
