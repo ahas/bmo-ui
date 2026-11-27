@@ -40,6 +40,12 @@ default; a screen supplies what it holds and what a press means there. Every exp
 - **A list whose items come, go and change places while it is read is a `MovingList`,** each item
   keyed by its own lasting id. How it moves is the Motion section of `docs/design.md`; the
   moving-list module holds it.
+- **The list chooses how it fills.** By default it is a list read a page at a time: items put at its
+  end with nothing standing after them, a page read in or the next one, stand at once, and only an
+  item put before or between items already standing unfolds. A list whose every item is an arrival
+  of its own says its filling unfolds, and then every item that comes unfolds, one put at its end
+  included. The moving-list module's `MOVING_LIST` is the first and `UNFOLDING_LIST` the second, for
+  a list the component library draws itself.
 - **Its axis is its own layout's.** A list laid out as a flex row, forward or reversed, folds and
   unfolds its items' width, inline padding and inline border, and its items close up over the
   list's gap or the overlap its items' negative margins draw. Every other list folds and unfolds its
@@ -52,7 +58,9 @@ default; a screen supplies what it holds and what a press means there. Every exp
 ## Avatar groups
 
 - **A row of faces is an `AvatarGroup`,** the library's own avatars overlapping in one moving list
-  along its row, so a face coming, going or changing place moves as a list item does.
+  along its row, so a face coming, going or changing place moves as a list item does. Every face is
+  an arrival of its own, so the list's filling unfolds: a face put at the row's end unfolds there
+  too.
   - It is handed its faces, each with its own lasting id and the props the library's avatar takes,
     and draws them in that order, the first standing over the one after it.
   - Every face is drawn at the group's size, one of the library's avatar sizes, and each overlaps

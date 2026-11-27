@@ -4,9 +4,10 @@
      face's ring as its own padding and ground, and the face inside stands at its full size, laid
      out as a flex item rather than on a line of text, so the item is no taller than the face and
      its ring and the face keeps the row's vertical centre whatever line height it inherits. Past a
-     most, one more avatar counts the rest, held in an unfolding box of its own. -->
+     most, one more avatar counts the rest, held in an unfolding box of its own. Every face is an
+     arrival of its own, so one put at the row's end unfolds there, and the cap with it. -->
 <template>
-  <MovingList :class="['isolate inline-flex items-center', frame.row]">
+  <MovingList filling="unfolds" :class="['isolate inline-flex items-center', frame.row]">
     <li
       v-for="(face, at) in shown"
       :key="face.id"

@@ -109,10 +109,8 @@ function foldOf(item: HTMLElement): { axis: Axis; fold: Fold } {
 }
 
 // Whether an item came as part of the list filling or lengthening: every item after it came with it,
-// as the first page read into an empty list and the next page put at its end do. Such an item stands
-// where it lands with no movement (docs/design.md, "Motion"); only one that came before or between
-// items already standing unfolds. The items coming in one change all carry the group's enter class by
-// the time the first of them is handed here.
+// as the first page read into an empty list and the next page put at its end do. The items coming in
+// one change all carry the group's enter class by the time the first of them is handed here.
 export function cameWithTheRest(item: Element): boolean {
   for (let after = item.nextElementSibling; after !== null; after = after.nextElementSibling) {
     if (!after.classList.contains("bmo-list-enter-active")) return false;
@@ -128,14 +126,6 @@ export function cameWithTheRest(item: Element): boolean {
 // stylesheet's own transition ending.
 export function unfoldItem(element: Element): void {
   const item = element as HTMLElement;
-
-  // A list filled or lengthened stands at once: the item is left at its own size, so nothing moves, and it
-  // stops reading as coming at once, so a change right after it judges it as standing.
-  if (cameWithTheRest(item)) {
-    item.classList.remove("bmo-list-enter-from", "bmo-list-enter-active", "bmo-list-enter-to");
-    return;
-  }
-
   const { axis, fold } = foldOf(item);
   const size = axis.measure(item);
 
@@ -145,6 +135,19 @@ export function unfoldItem(element: Element): void {
   item.style.transition = "";
   Object.assign(item.style, standing(axis));
   item.style[axis.size] = `${size}px`;
+}
+
+// Called with the item just put in a list read a page at a time (docs/design.md, "Motion"): one that came
+// with the rest, as a page filling or lengthening the list, stands where it lands with no movement, and
+// any other unfolds. A standing item is left at its own size and stops reading as coming at once, so a
+// change right after it judges it as standing.
+export function standOrUnfoldItem(element: Element): void {
+  if (cameWithTheRest(element)) {
+    element.classList.remove("bmo-list-enter-from", "bmo-list-enter-active", "bmo-list-enter-to");
+    return;
+  }
+
+  unfoldItem(element);
 }
 
 // Called once it has unfolded: it is left to its own size again, on either axis.
@@ -164,10 +167,15 @@ export function foldItem(element: Element): void {
   Object.assign(item.style, fold);
 }
 
-// What a transition group is handed to move as a moving list: the list's stylesheet name and the
-// three hooks. `MovingList` hands it to its own group, and a list the component library draws itself
-// is handed it where the library takes a transition group's props for its list.
-export const MOVING_LIST = { name: "bmo-list", onEnter: unfoldItem, onAfterEnter: settleItem, onLeave: foldItem } as const satisfies TransitionGroupProps;
+// What a transition group is handed to move as a moving list read a page at a time: the list's
+// stylesheet name and the three hooks, a page filling or lengthening it standing at once. `MovingList`
+// hands it to its own group by default, and a list the component library draws itself is handed it
+// where the library takes a transition group's props for its list.
+export const MOVING_LIST = { name: "bmo-list", onEnter: standOrUnfoldItem, onAfterEnter: settleItem, onLeave: foldItem } as const satisfies TransitionGroupProps;
+
+// What the same transition group is handed to move a list whose every item is an arrival of its own:
+// every item that comes unfolds, one put at its end included.
+export const UNFOLDING_LIST = { ...MOVING_LIST, onEnter: unfoldItem } as const satisfies TransitionGroupProps;
 
 // What the same transition group is handed while its list is to change at once: a name no stylesheet
 // moves, and no hooks, so its items come, go and change places with no movement while it stays drawn.

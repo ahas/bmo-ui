@@ -66,7 +66,7 @@ wording keys listed here are the ones the layer's list holds.
 | `MarkupButtonTip` | The one layer that names any button carrying `data-tooltip`, one a host writes as markup or the library draws inside a component of its own, in the shared tooltip. |
 | `MarqueeLine` | A line that slides when it is longer than its box. |
 | `MessageIsland` | The one pill every notice stands on. |
-| `MovingList` | A list whose items come, go and change places by position alone, along the axis its layout gives it. |
+| `MovingList` | A list whose items come, go and change places by position alone, along the axis its layout gives it, standing a page read in at its end at once unless it says its filling unfolds. |
 | `NextPageFoot` | The foot of a list read a page at a time: the next page asked as it comes into view, the incoming rows' placeholder, a failed page's reason with its retry, nothing once no more is held. |
 | `NumberInput` | The number box, as wide as its values, with its two step buttons. |
 | `PaletteSwatch` | A palette's two grounds as dots, in one mode. |
@@ -141,7 +141,7 @@ Each is named with everything it exports.
 | `marquee` | `MARQUEE_SLACK_PX`, `MARQUEE_SPEED_PX_PER_SECOND`, `MARQUEE_TRAVEL_SHARE`, `MARQUEE_MIN_SECONDS`, `MarqueeVars`, `MarqueeMotion`, `marqueeDistance`, `marqueeSeconds`, `marqueeVars`, `useMarquee` |
 | `modality` | `InputModality`, `MODALITY_ATTRIBUTE`, `modalityOfKey`, `watchInputModality` |
 | `monaco` | `languageOf`, `fenceLanguage`, `colourised`, `CodeView`, `openCodeView`, `SourceSelection`, `SourceView`, `openSourceView` |
-| `moving-list` | `unfoldItem`, `settleItem`, `cameWithTheRest`, `foldItem`, `MOVING_LIST`, `STANDING_LIST` |
+| `moving-list` | `unfoldItem`, `standOrUnfoldItem`, `settleItem`, `cameWithTheRest`, `foldItem`, `MOVING_LIST`, `UNFOLDING_LIST`, `STANDING_LIST` |
 | `next-pages` | `NextPagesOptions`, `NextPages`, `useNextPages` |
 | `numbers` | `countLocale`, `countText`, `FigureLine`, `COUNT_BADGE`, `figurePlaces`, `turnOf`, `progressText` |
 | `openings` | `useOpenings` |

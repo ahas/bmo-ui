@@ -243,12 +243,16 @@ whole in `docs/boundary.md`; this document says what each is for and how the lay
     margins on the axis aside, and an item standing first gives back the gap after it and the
     leading margin of the item after it. A gap and an overlap drawn as a negative margin close up
     the same way. What an item shows is laid out at its full size throughout and only clipped.
-  - A list filled or lengthened stands at once. Items that come with nothing but other new items after
+  - How a list fills is the list's own choice, and a list read a page at a time is the default. Such a
+    list filled or lengthened stands at once: items that come with nothing but other new items after
     them — the first page read into a list that held none, the next page an endless scroll or a
     load-more button puts at its end — stand where they land with no movement, filling the place the
-    skeleton held, so
-    the layout never moves as a list is read. Only an item that comes before or between items already
-    standing unfolds: one a filter, a search, an arrival or a reorder puts among them.
+    skeleton held, so the layout never moves as a list is read. Only an item that comes before or
+    between items already standing unfolds: one a filter, a search, an arrival or a reorder puts
+    among them.
+  - A list whose every item is an arrival of its own, never a page read in, unfolds every item that
+    comes, one put at its end included. A row of faces is one: a face joining it, and the cap the
+    first face past the most brings, unfold where they land.
   - Every item moves at once, at `unfold`, eased by `move`: no item waits for the one before it.
   - Items are keyed by their own lasting id, never by position.
   - A list a search narrows is one too. The one select's choices (`ChoiceSelect`) slide, fold and

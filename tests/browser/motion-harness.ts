@@ -1,6 +1,6 @@
 import { createApp, defineComponent, h, ref, Transition, TransitionGroup } from "vue";
 
-import { foldItem, settleItem, unfoldItem } from "../../app/domain/moving-list";
+import { MOVING_LIST } from "../../app/domain/moving-list";
 import { useSlideDirection } from "../../app/domain/tab-slide";
 
 // A moving list and a tab's panel, wired the way MovingList and TabSlide wire them, and nothing else
@@ -56,10 +56,7 @@ export function mountMotion(box: HTMLElement, options: { items: string[]; tab: {
             TransitionGroup,
             {
               tag: "ul",
-              name: "bmo-list",
-              onEnter: unfoldItem,
-              onAfterEnter: settleItem,
-              onLeave: foldItem,
+              ...MOVING_LIST,
               style: `display:flex;flex-direction:column;gap:4px;margin:0;padding:0;list-style:none;width:${PANEL_WIDTH}px`
             },
             {
