@@ -591,6 +591,5 @@ Every token is a custom property stated by the layer's stylesheet on the root un
   the files were released. Every packed file there is named in it, and it names no other. A bound is
   a version the ledger names at or before its own file, never earlier than the bound of the file
   before it.
-- **The packed files under the earlier numbering** stay under `releases/` by their own names:
-  `bmo-ui-0.2.0.tgz` holds revision `0.1.0-rev.1` and `bmo-ui-0.3.0.tgz` holds revision
-  `0.1.0-rev.2`, each under its earlier number. The base `0.1.0` has no packed file.
+- **The packed files under the earlier numbering** stay under `releases/` by their own names,
+  `bmo-ui-0.2.0.tgz` and `bmo-ui-0.3.0.tgz`.
