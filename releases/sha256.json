@@ -433,5 +433,10 @@
     "sha256": "dceb9f38e492416e08aaeed48753a0fda8ed843dd938507471fbc56f2ea0ff33",
     "bound": "0.1.0-rev.23",
     "why": "The bundle build carries the console theme copy as consoleTheme, and the layer's stylesheet declares Pretendard's faces itself; additions that change no export a bundle reads, so the bound stays."
+  },
+  "bmo-ui-1.1.0-0.nightly.20261128.3.tgz": {
+    "sha256": "00d8121f77d1a52ea424b139f13bccbf97629e3eff002e94cba92987885df6e6",
+    "bound": "0.1.0-rev.23",
+    "why": "Adds what a bundle uses and what a release offers, and attaches a bundle by them; takes nothing away"
   }
 }
