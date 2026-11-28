@@ -2075,6 +2075,41 @@
       "example": "<MovingList class=\"flex flex-col\">\n  <li v-for=\"item in items\" :key=\"item.id\" class=\"px-3 py-2\">{{ item.name }}</li>\n</MovingList>"
     },
     {
+      "name": "SortableList",
+      "kind": "component",
+      "line": "A list a person puts in order by each item's drag handle, by pointer, finger or keys, the lifted item following the pointer and the others sliding to make room, each move answered from where to where.",
+      "props": [
+        {
+          "name": "items",
+          "type": "T[]",
+          "required": true
+        },
+        {
+          "name": "itemKey",
+          "type": "(item: T) => string | number",
+          "required": true
+        },
+        {
+          "name": "itemLabel",
+          "type": "(item: T) => string",
+          "required": true
+        }
+      ],
+      "slots": [
+        {
+          "name": "item",
+          "type": "{ item: T; index: number; }"
+        }
+      ],
+      "events": [
+        {
+          "name": "move",
+          "type": "[from: number, to: number]"
+        }
+      ],
+      "example": "<SortableList :items=\"items\" :item-key=\"(item) => item.id\" :item-label=\"(item) => item.name\" @move=\"move\">\n  <template #item=\"{ item }\">\n    <p class=\"px-2 py-2 text-sm\">{{ item.name }}</p>\n  </template>\n</SortableList>"
+    },
+    {
       "name": "NextPageFoot",
       "kind": "component",
       "line": "The foot of a list read a page at a time: the next page asked as it comes into view, the incoming rows' placeholder, a failed page's reason with its retry, nothing once no more is held.",
@@ -2774,12 +2809,12 @@
           "type": "[ids: string[]]"
         },
         {
-          "name": "update:active",
-          "type": "[id: string]"
-        },
-        {
           "name": "move",
           "type": "[from: number, to: number]"
+        },
+        {
+          "name": "update:active",
+          "type": "[id: string]"
         },
         {
           "name": "pin",

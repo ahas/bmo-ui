@@ -17,7 +17,7 @@
       <div class="flex min-w-0 items-center gap-1">
         <button
           type="button"
-          class="flex size-8 shrink-0 cursor-grab touch-none items-center justify-center rounded-md text-muted hover:text-highlighted focus-visible:outline-2 focus-visible:outline-primary active:cursor-grabbing"
+          class="flex size-8 shrink-0 cursor-grab touch-none items-center justify-center rounded-md text-muted hover:text-highlighted active:cursor-grabbing"
           :aria-label="$t('common.aria.move_named', { name: props.itemLabel(item) })"
           :aria-pressed="carried?.from === index && carried.by === 'keys'"
           data-sortable-handle
