@@ -438,5 +438,10 @@
     "sha256": "00d8121f77d1a52ea424b139f13bccbf97629e3eff002e94cba92987885df6e6",
     "bound": "0.1.0-rev.23",
     "why": "Adds what a bundle uses and what a release offers, and attaches a bundle by them; takes nothing away"
+  },
+  "bmo-ui-1.1.0-0.nightly.20261128.4.tgz": {
+    "sha256": "492238cf345bce4b71caaa59b9a5da1e5a206bb90eff14cdea3736acd0700bbb",
+    "bound": "0.1.0-rev.23",
+    "why": "It adds SortableList and five wording keys; nothing a bundle built on an earlier pack reads changed."
   }
 }
