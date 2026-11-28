@@ -55,6 +55,27 @@ default; a screen supplies what it holds and what a press means there. Every exp
   clipped, so an item holding a picture, a face or a fixed box keeps that box's own size and the
   item around it changes.
 
+## Sortable lists
+
+- **A list a person puts in order is a `SortableList`,** each item keyed by its own lasting id and carried by the
+  drag handle at its left; the list says nothing of what an order means and only answers each move, from where
+  to where, for its host to save.
+- **Picking an item up.** A mouse or a pen picks it up once a press on its handle has travelled a few pixels, so a
+  press let go where it went down moves nothing; a finger picks it up by a long press on the handle, so a finger
+  passing over the list still scrolls it. The item lifts — a shadow under it, a touch larger — and follows the
+  pointer, its own place left behind as an empty gap of its height.
+- **The others make room.** While the pointer travels, the items it passes slide all at once, the same length,
+  each as far as the lifted item is tall, so the gap stands where the item would land; nothing jumps.
+- **Letting go.** Let go over the list, the item settles into the gap and the move is answered. Let go outside
+  the list, or Escape pressed while it is carried, and it flies back to its own place and nothing is answered.
+- **Reaching the edge.** Carried to the top or bottom edge of the box that scrolls the list, the list scrolls with
+  it, faster the nearer the edge.
+- **The keyboard.** With its handle focused, Space or Enter picks an item up, the up and down arrows move it a
+  place at a time with the others sliding as they do for the pointer, Space or Enter sets it down and Escape puts
+  it back; each step is said to a reader of the screen.
+- **Still motion.** Where the person asks for less motion, nothing slides or flies: the items stand in their new
+  places at once.
+
 ## Avatar groups
 
 - **A row of faces is an `AvatarGroup`,** the library's own avatars overlapping in one moving list

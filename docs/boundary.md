@@ -67,6 +67,7 @@ wording keys listed here are the ones the layer's list holds.
 | `MarqueeLine` | A line that slides when it is longer than its box. |
 | `MessageIsland` | The one pill every notice stands on. |
 | `MovingList` | A list whose items come, go and change places by position alone, along the axis its layout gives it, standing a page read in at its end at once unless it says its filling unfolds. |
+| `SortableList` | A list a person puts in order by each item's drag handle, by pointer, finger or keys, the lifted item following the pointer and the others sliding to make room, each move answered from where to where. |
 | `NextPageFoot` | The foot of a list read a page at a time: the next page asked as it comes into view, the incoming rows' placeholder, a failed page's reason with its retry, nothing once no more is held. |
 | `NumberInput` | The number box, as wide as its values, with its two step buttons. |
 | `PaletteSwatch` | A palette's two grounds as dots, in one mode. |
@@ -342,7 +343,7 @@ What a coding harness takes the layer through (`docs/harness.md`).
 
 ## Wording keys
 
-The layer reads these 161 keys and no others. The `wording-keys` shared module lists them, the one
+The layer reads these 166 keys and no others. The `wording-keys` shared module lists them, the one
 list a host's pack is held to. Placeholders are named after each key.
 
 - **`common.action`:** `add_choice` `{value}`, `cancel`, `choose_all`, `choose_none`, `close`, `close_all_tabs`,
@@ -354,7 +355,7 @@ list a host's pack is held to. Placeholders are named after each key.
   `unpin`, `unshare`, `zoom_in`, `zoom_out`.
 - **`common.aria`:** `close_named` `{name}`, `column_width` `{name}`, `decrease`, `download_named`
   `{name}`, `holds_chosen`, `image_zoom` `{title}`, `increase`, `member_permission` `{name}`,
-  `more_notices` `{n}`,
+  `more_notices` `{n}`, `move_named` `{name}`,
   `others_count` `{n}`, `pinned_named` `{name}`, `play_named` `{name}`, `player_named` `{name}`, `search_named` `{name}`, `share_address`,
   `speed_named` `{speed}`, `window_move`, `window_resize`.
 - **`common.error`:** `choices_find_failed`, `editor_failed`, `link_copy_failed`, `member_change_failed`,
@@ -374,7 +375,8 @@ list a host's pack is held to. Placeholders are named after each key.
   `preview_badge`, `preview_field`, `preview_link`, `preview_meta`, `preview_note`, and the error
   page's lines: `no_permission`, `page_failed`, `page_not_found`, `unreachable`.
 - **`common.placeholder`:** `member_search`, `search`.
-- **`common.status`:** `brightness` `{n}`, `copied`, `loading`, `members_loading`, `muted`,
+- **`common.status`:** `brightness` `{n}`, `copied`, `item_moved` `{name}` `{place}` `{count}`, `item_picked`
+  `{name}`, `item_put_back` `{name}`, `item_set_down` `{name}` `{place}`, `loading`, `members_loading`, `muted`,
   `next_in` `{n}`, `no_choices`, `no_match`, `no_members`, `picture_loading`, `share_loading`, `speed` `{speed}`, `subtitles_off`,
   `subtitles_on` `{name}`, `turned` `{degrees}`, `unmuted`, `video_loading`, `volume` `{n}`,
   `went_back` `{n}`, `went_forward` `{n}`.
