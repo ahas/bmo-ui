@@ -81,7 +81,8 @@ describe("a bundle built with the layer's plugin", () => {
   test("writes the layer it was built on beside the module", () => {
     const written = output.find((one): one is Rollup.OutputAsset => one.type === "asset" && one.fileName === "layer.json")!;
 
-    expect(JSON.parse(String(written.source))).toEqual({ layer: LAYER_VERSION });
+    // What of the layer the bundle uses stands beside it: the one module of the layer its routes import whole.
+    expect(JSON.parse(String(written.source))).toEqual({ layer: LAYER_VERSION, uses: { "bmo-ui/part": ["*"] } });
   });
 
   test("refuses screens asking for words neither the bundle's words nor the layer answer, and words beside the namespace", async () => {

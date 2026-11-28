@@ -205,8 +205,27 @@ export function consoleBundle(options) {
         this.error(`The bundle's screens ask for words a console would show raw (docs/console-bundles.md, "How a bundle mounts"):\n${faults.map((one) => `  ${one}`).join("\n")}`);
       }
     },
-    generateBundle() {
-      this.emitFile({ type: "asset", fileName: LAYER_FILE, source: `${JSON.stringify({ layer: layer.layer })}\n` });
+    // The layer named, and what of it the bundle uses: each module of the layer its chunks import, with the names
+    // they import of it, so a console reads whether its own layer offers them (docs/console-bundles.md, "A bundle
+    // the console attaches").
+    generateBundle(_options, bundle) {
+      const uses = {};
+
+      for (const chunk of Object.values(bundle)) {
+        if (chunk.type !== "chunk") continue;
+
+        // Every module of the layer the chunk imports, with the names it binds of it; one it binds none of by name,
+        // a namespace or a module run for its own sake, asks only that the module stands.
+        for (const id of chunk.imports ?? []) {
+          if (id !== "bmo-ui" && !id.startsWith("bmo-ui/")) continue;
+
+          const names = chunk.importedBindings?.[id] ?? [];
+
+          uses[id] = [...new Set([...(uses[id] ?? []), ...(names.length > 0 ? names : ["*"])])].sort();
+        }
+      }
+
+      this.emitFile({ type: "asset", fileName: LAYER_FILE, source: `${JSON.stringify({ layer: layer.layer, uses })}\n` });
     }
   };
 }

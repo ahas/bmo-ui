@@ -31,6 +31,34 @@ export function packable(layer: string, version: string): boolean {
 /** The time zone the platform's days are counted in, which names a nightly's day. */
 export const PLATFORM_TIME_ZONE = "Asia/Seoul";
 
+/**
+ * What a pack offers a bundle, module by module (`docs/console-bundles.md`, "A bundle the console attaches"): each
+ * module under `app/` and `shared/` by the specifier a bundle imports it with, `bmo-ui/<path>` with a script's
+ * ending left off and a component's kept, and the names it exports, as Bun's own transpiler reads a script's and a
+ * component's default alone.
+ */
+export async function offersOf(tree: string): Promise<Record<string, string[]>> {
+  const offers: Record<string, string[]> = {};
+  const transpiler = new Bun.Transpiler({ loader: "ts" });
+
+  for (const folder of ["app", "shared"]) {
+    for await (const path of new Bun.Glob(`${folder}/**/*.{ts,js,vue}`).scan({ cwd: tree })) {
+      if (path.endsWith(".d.ts")) continue;
+
+      if (path.endsWith(".vue")) {
+        offers[`bmo-ui/${path}`] = ["default"];
+        continue;
+      }
+
+      const exported = transpiler.scan(await Bun.file(join(tree, path)).text()).exports;
+
+      offers[`bmo-ui/${path.replace(/\.(ts|js)$/, "")}`] = [...exported].sort();
+    }
+  }
+
+  return offers;
+}
+
 /** The bound word that names the pack being made, whose version the caller cannot know before the verb runs. */
 export const THIS_PACK = "this";
 
@@ -294,7 +322,10 @@ async function release(root: string, args: string[]): Promise<string> {
       throw new Refused(`The layer's version file names ${layer.layer} where the package's version is ${placeholder}; it names ${sourceLayer(placeholder)} in the source.`);
     }
 
-    await Bun.write(layerPath, `${JSON.stringify({ ...layer, layer: version, bound, range: rangeFrom(ledger, bound, version) }, null, 2)}\n`);
+    await Bun.write(
+      layerPath,
+      `${JSON.stringify({ ...layer, layer: version, bound, range: rangeFrom(ledger, bound, version), offers: await offersOf(tree) }, null, 2)}\n`
+    );
     runShown(["bun", "install", "--frozen-lockfile"], tree);
     // The pack's own version stands in the export alone, where the manifest and the version file it packs both
     // name it; the committed tree keeps the last release's.

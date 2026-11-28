@@ -132,10 +132,16 @@ on any release from that bound up to its own.
   to itself, in the order they were released. The shared module answers the console's own version,
   its bound and those releases (`docs/boundary.md`, `console-manifest`), so a console knows them
   without unpacking anything or reading the ledger.
-- **A console attaches a bundle built inside its range.** A manifest whose `layer` is one of the
-  releases the console's layer names, from its bound up to its own, attaches. One built on a release
-  older than the bound, on a release newer than the console's or on a layer taken from its source is
-  left out as a manifest that does not read is: no menu entry, no relay and no notices. The console
+- **A console attaches a bundle it can run.** A manifest whose `layer` is one of the releases the
+  console's layer names, from its bound up to its own, attaches. So does one built on any other release
+  whose manifest says what of the layer it uses, `layerUses`, every piece of which the console's release
+  offers: the bundle build writes, beside the layer's version, each module of the layer the bundle's
+  chunks import with the names they import of it, and the release verb writes into the release's version
+  file every module the release holds with the names it exports, `offers`. A bundle one release newer
+  than the console, which reaches for nothing the console's release lacks, so stands on it. One built on a
+  release older than the bound, or newer, that says nothing of what it uses or reaches for a piece the
+  console's release does not offer, or on a layer taken from its source, is left out as a manifest that
+  does not read is: no menu entry, no relay and no notices. The console
   records why, naming the manifest's layer, its own and its bound, where its administrator reads what
   it left out, so a bundle missing from the menu is explained there.
 - **Why a range and no further.** A bundle imports the layer's components and modules, and the
@@ -143,7 +149,8 @@ on any release from that bound up to its own.
   release that only adds leaves all of those where the bundle found them, so a bundle built on any
   release from the bound up runs unchanged. One older than the bound may reach for what the console's
   release took away or changed, and would fail while a reader uses the screen, after its manifest read
-  clean; one newer than the console's may reach for what the console's release does not have yet.
+  clean; one newer than the console's may reach for what the console's release does not have yet, which
+  its uses say, so a newer bundle is judged by what it uses rather than by its version.
 - **The range is a list, never an order.** Which releases stand inside it is the list the release
   names, never an order read off the version strings, since the layer's earlier numbering does not
   sort with its later one, and a nightly packed before a patch release sorts after it.

@@ -10,6 +10,7 @@ import {
   consoleManifest,
   movedScreenAddress,
   noticePlace,
+  missingUses,
   noticeReaders,
   onThisLayer,
   relaysRoute,
@@ -294,6 +295,22 @@ describe("the layer a manifest names", () => {
     expect(onThisLayer(consoleManifest({ ...answered, layer: `${LAYER_VERSION}.1` }))).toBe(false);
   });
 
+  test("attaches a bundle built outside the range where the release offers every piece it uses, and names what it lacks", () => {
+    const range = ["1.0.0-rev.3"];
+    const offers = { "bmo-ui/app/domain/island": ["island", "mount"], "bmo-ui/app/components/Card.vue": ["default"] };
+    const newer = (layerUses?: Record<string, string[]>) => consoleManifest({ ...answered, layer: "1.0.0-rev.4", layerUses });
+
+    expect(onThisLayer(newer({ "bmo-ui/app/domain/island": ["island"], "bmo-ui/app/components/Card.vue": ["default"] }), range, offers)).toBe(true);
+    expect(onThisLayer(newer({ "bmo-ui/app/domain/island": ["*"] }), range, offers)).toBe(true);
+    expect(onThisLayer(newer(), range, offers)).toBe(false);
+    expect(onThisLayer(newer({ "bmo-ui/app/domain/island": ["island"] }), range, {})).toBe(false);
+
+    const lacking = newer({ "bmo-ui/app/domain/island": ["island", "unmount"], "bmo-ui/app/domain/new": ["x"] });
+
+    expect(onThisLayer(lacking, range, offers)).toBe(false);
+    expect(missingUses(lacking, offers)).toEqual(["bmo-ui/app/domain/island#unmount", "bmo-ui/app/domain/new"]);
+  });
+
   test("attaches a bundle built on any release of a release's range, and none outside it", () => {
     const range = ["1.0.0-rev.3", "1.0.0-rev.4", "1.0.0-rev.5"];
 
@@ -307,7 +324,7 @@ describe("the manifest's JSON Schema", () => {
     expect(CONSOLE_MANIFEST_SCHEMA.required).toEqual(["name", "title", "icon", "screenPath", "serviceName", "layer", "bundle", "words", "role"]);
     expect(CONSOLE_MANIFEST_SCHEMA.additionalProperties).toBe(false);
     expect(Object.keys(CONSOLE_MANIFEST_SCHEMA.properties as object).toSorted()).toEqual(
-      [...Object.keys(answered), "formerScreenPaths", "stylesheet", "apiPrefix", "ownerKey", "events", "websocket", "pushKinds", "pushPlaces", "pushReaders", "sidebarUnread", "sidebarSection", "sidebarSections", "sidebarTitles", "calls", "relays", "shareReads", "shareHead"].toSorted()
+      [...Object.keys(answered), "formerScreenPaths", "layerUses", "stylesheet", "apiPrefix", "ownerKey", "events", "websocket", "pushKinds", "pushPlaces", "pushReaders", "sidebarUnread", "sidebarSection", "sidebarSections", "sidebarTitles", "calls", "relays", "shareReads", "shareHead"].toSorted()
     );
     expect((CONSOLE_MANIFEST_SCHEMA.properties as Record<string, { enum?: unknown }>).role!.enum).toEqual(["administrator", "member"]);
     expect((CONSOLE_MANIFEST_SCHEMA.properties as Record<string, unknown>).sidebarSection).toMatchObject({

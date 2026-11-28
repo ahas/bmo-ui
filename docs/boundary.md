@@ -218,7 +218,7 @@ Each is named with everything it exports.
 | `files` | `FileConflict` |
 | `code-language` | `codeLanguage` |
 | `screen-mode` | `DocumentScheme`, `DEFAULT_SCHEME`, `SCHEME_COOKIE`, `isDocumentScheme` |
-| `console-manifest` | `CONSOLE_MANIFEST_ROUTE`, `OWNER_KEY_HEADER`, `OWNER_ROLE_HEADER`, `CONSOLE_ROLES`, `ConsoleRole`, `CONSOLE_SIDEBAR_SECTIONS`, `ConsoleSidebarSection`, `RELAY_METHODS`, `RelayMethod`, `LAYER_VERSION`, `LAYER_BOUND`, `LAYER_RANGE`, `CONSOLE_SHARED_LIBRARIES`, `ConsoleManifest`, `CONSOLE_MANIFEST_SCHEMA`, `consoleManifest`, `onThisLayer`, `roleAllows`, `sectionFor`, `titleFor`, `screensCall`, `relaysRoute`, `shareRead`, `ShareHead`, `SHARE_HEAD_LANGUAGE_QUERY`, `shareHeadPath`, `shareHead`, `noticePlace`, `NoticeReaders`, `noticeReaders`, `movedScreenAddress`, `ConsoleWords`, `ConsoleBundleModule` |
+| `console-manifest` | `CONSOLE_MANIFEST_ROUTE`, `OWNER_KEY_HEADER`, `OWNER_ROLE_HEADER`, `CONSOLE_ROLES`, `ConsoleRole`, `CONSOLE_SIDEBAR_SECTIONS`, `ConsoleSidebarSection`, `RELAY_METHODS`, `RelayMethod`, `LAYER_VERSION`, `LAYER_BOUND`, `LAYER_RANGE`, `CONSOLE_SHARED_LIBRARIES`, `ConsoleManifest`, `CONSOLE_MANIFEST_SCHEMA`, `consoleManifest`, `onThisLayer`, `missingUses`, `LAYER_OFFERS`, `roleAllows`, `sectionFor`, `titleFor`, `screensCall`, `relaysRoute`, `shareRead`, `ShareHead`, `SHARE_HEAD_LANGUAGE_QUERY`, `shareHeadPath`, `shareHead`, `noticePlace`, `NoticeReaders`, `noticeReaders`, `movedScreenAddress`, `ConsoleWords`, `ConsoleBundleModule` |
 
 - **`search` folds letter case in the locale each call is handed,** the runtime's own where none is.
   It reads no app configuration, so it runs alike in a browser and on a server; a host searching in
@@ -241,6 +241,10 @@ Each is named with everything it exports.
   version into the file it packs; read from the layer's source, it is the package manifest's version
   marked `+source`, which names no release. Both are read from `shared/layer.json`, which the bundle
   build reads too.
+- **`LAYER_OFFERS` is what that release offers a bundle,** each module by the specifier a bundle imports it with
+  and the names it exports, as the release verb wrote them; a layer read from its source offers nothing. **`onThisLayer`**
+  attaches a bundle built inside the range, or one whose `layerUses` that release offers whole, and **`missingUses`**
+  names each piece a bundle uses that it does not (`docs/console-bundles.md`, "A console attaches a bundle it can run").
 - **`LAYER_BOUND` and `LAYER_RANGE` are that release's bound and the releases a console on it
   attaches** (`docs/console-bundles.md`, "The layer a bundle is built on"): the oldest release whose
   bundles still run on it unchanged, and every release from that bound up to it, in the order they

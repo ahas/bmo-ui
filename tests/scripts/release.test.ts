@@ -1,7 +1,9 @@
 import { describe, expect, test } from "bun:test";
-import { readdirSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readdirSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 
-import { LEDGER, THIS_PACK, boundAsked, boundRefusal, isNightly, lastRelease, leadsTo, nightly, nightlyRefusal, packOrder, packVersion, platformDay, presentForm, rangeFrom, released, releaseFile, sha256, sourceLayer, versionOf } from "../../scripts/release";
+import { LEDGER, THIS_PACK, boundAsked, boundRefusal, isNightly, lastRelease, leadsTo, nightly, nightlyRefusal, offersOf, packOrder, packVersion, platformDay, presentForm, rangeFrom, released, releaseFile, sha256, sourceLayer, versionOf } from "../../scripts/release";
 import { LAYER_BOUND, LAYER_RANGE, LAYER_VERSION } from "../../shared/console-manifest";
 
 import type { Ledger } from "../../scripts/release";
@@ -183,5 +185,27 @@ describe("the layer read from its source", () => {
 
     expect(packing.exitCode).toBe(1);
     expect(packing.stderr.toString()).toContain("bun run release");
+  });
+});
+
+describe("what a pack offers a bundle", () => {
+  test("names each module by the specifier a bundle imports it with, and the names it exports", async () => {
+    const tree = mkdtempSync(join(tmpdir(), "offers-"));
+
+    try {
+      mkdirSync(join(tree, "app", "domain"), { recursive: true });
+      mkdirSync(join(tree, "app", "components"), { recursive: true });
+      mkdirSync(join(tree, "shared"), { recursive: true });
+      writeFileSync(join(tree, "app", "domain", "island.ts"), "export function mount() {}\nexport const island = 1;\nexport type Hidden = string;\n");
+      writeFileSync(join(tree, "app", "components", "Card.vue"), "<template><div /></template>\n");
+      writeFileSync(join(tree, "shared", "words.d.ts"), "export declare const words: string;\n");
+
+      expect(await offersOf(tree)).toEqual({
+        "bmo-ui/app/domain/island": ["island", "mount"],
+        "bmo-ui/app/components/Card.vue": ["default"]
+      });
+    } finally {
+      rmSync(tree, { recursive: true, force: true });
+    }
   });
 });

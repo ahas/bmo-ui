@@ -38,8 +38,10 @@ export type RelayMethod = (typeof RELAY_METHODS)[number];
 // from it up, which the release verb writes there. A checkout's file names its version alone.
 interface LayerFile {
   layer: string;
+  layerUses?: Record<string, string[]>;
   bound?: string;
   range?: string[];
+  offers?: Record<string, string[]>;
   sharedLibraries: string[];
 }
 
@@ -55,6 +57,10 @@ export const LAYER_VERSION: string = layerFile.layer;
 // A layer taken from its source is its own bound and attaches its own bundles alone.
 export const LAYER_BOUND: string = layerFile.bound ?? layerFile.layer;
 export const LAYER_RANGE: readonly string[] = layerFile.range ?? [layerFile.layer];
+
+// What that release offers a bundle, module by module, with the names each exports, as its release verb wrote them;
+// none for a layer taken from its source.
+export const LAYER_OFFERS: Readonly<Record<string, readonly string[]>> = layerFile.offers ?? {};
 
 // The libraries a bundle leaves unbundled and finds as its console's copy, each by its package's path.
 export const CONSOLE_SHARED_LIBRARIES: readonly string[] = layerFile.sharedLibraries;
@@ -133,6 +139,10 @@ const manifest = z
       .describe("The paths the bundle's screens stood under before; a console answers every address under one as moved to the screen path."),
     serviceName: z.string().regex(KEBAB, "a name in kebab-case").describe("The service's name, which the console relays it under; never people, the name the console answers the company's members under itself."),
     layer: z.string().min(1, "the layer's version the bundle build wrote").describe("The version of the layer the bundle was built on, as the bundle build wrote it."),
+    layerUses: z
+      .record(z.string(), z.array(z.string()))
+      .optional()
+      .describe("What of the layer the bundle uses, as the bundle build wrote it: each module it imports, with the names it imports of it."),
     bundle: apiPath("The path of the service's API the bundle's module is answered at."),
     stylesheet: apiPath("The path of the service's API the bundle's stylesheet is answered at.").optional(),
     words: apiPath("The path of the service's API the bundle's words are answered at."),
@@ -284,10 +294,30 @@ export function consoleManifest(value: unknown): ConsoleManifest {
   throw new Error(`The console manifest does not keep the contract: ${faults.join("; ")}`);
 }
 
-// Whether a bundle was built on a release inside the range of the layer this module is part of, the one a
-// console attaches it by; a range is handed in where another release's is read.
-export function onThisLayer(manifest: ConsoleManifest, range: readonly string[] = LAYER_RANGE): boolean {
-  return range.includes(manifest.layer);
+// What a bundle uses of the layer that the offers do not hold, each as `<module>` or `<module>#<name>`; a namespace
+// import asks only that its module stands.
+export function missingUses(manifest: ConsoleManifest, offers: Readonly<Record<string, readonly string[]>> = LAYER_OFFERS): string[] {
+  return Object.entries(manifest.layerUses ?? {}).flatMap(([module, names]) => {
+    const offered = offers[module];
+
+    if (offered === undefined) return [module];
+
+    return names.filter((name) => name !== "*" && !offered.includes(name)).map((name) => `${module}#${name}`);
+  });
+}
+
+// Whether a console on the layer this module is part of attaches a bundle (`docs/console-bundles.md`, "A console
+// attaches a bundle it can run"): one built on a release inside its range, or one built on any other that says what
+// of the layer it uses, every piece of which this release offers. A range and offers are handed in where another
+// release's are read.
+export function onThisLayer(
+  manifest: ConsoleManifest,
+  range: readonly string[] = LAYER_RANGE,
+  offers: Readonly<Record<string, readonly string[]>> = LAYER_OFFERS
+): boolean {
+  if (range.includes(manifest.layer)) return true;
+
+  return manifest.layerUses !== undefined && Object.keys(offers).length > 0 && missingUses(manifest, offers).length === 0;
 }
 
 // Whether a reader holding one role may open a screen needing another.
